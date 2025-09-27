@@ -14,6 +14,12 @@ class EppController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function create()
+{
+    return view('epp.create');
+}
+
+
     public function store(Request $request)
 {
     $request->validate([

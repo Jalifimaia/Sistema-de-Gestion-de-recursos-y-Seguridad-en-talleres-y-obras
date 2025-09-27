@@ -19,7 +19,9 @@
 
     <!-- Acciones -->
     <div class="d-flex flex-wrap gap-2 mb-3">
-      <button class="btn btn-primary">Agregar Elemento</button>
+      <!--<button class="btn btn-primary">Agregar Elemento</button>-->
+      <a href="{{ route('epps.create') }}" class="btn btn-primary">Agregar Elemento</a>
+
       <button class="btn btn-secondary">Exportar</button>
       <input type="text" class="form-control w-auto" placeholder="Buscar por nombre o serie...">
     </div>
@@ -29,44 +31,33 @@
     <!-- Tabla de inventario -->
     <div class="table-responsive">
       <table class="table table-bordered table-hover align-middle">
-        <thead class="table-light">
-          <tr>
+    <thead class="table-light">
+        <tr>
             <th>ID</th>
             <th>Nombre</th>
-            <th>Serie</th>
-            <th>Estado</th>
-            <th>Asignado a</th>
-            <th>Ubicación</th>
-            <th>Valor</th>
+            <th>Descripción</th>
             <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-    @foreach ($epps as $epp)
-    <tr>
-        <td>{{ $epp->id }}</td>
-        <td>{{ $epp->nombre }}</td>
-        <td>
-            <span class="badge {{ $epp->estado == 'Disponible' ? 'bg-success' : ($epp->estado == 'Prestada' ? 'bg-warning text-dark' : 'bg-danger') }}">
-                {{ $epp->estado ?? 'Disponible' }}
-            </span>
-        </td>
-        <td>{{ $epp->asignado_a ?? 'No asignada' }}</td>
-        <td>{{ $epp->ubicacion ?? '-' }}</td>
-        <td>${{ number_format($epp->precio ?? 0, 0, ',', '.') }}</td>
-        <td>
-            <a href="{{ route('epps.edit', $epp->id) }}" class="btn btn-sm btn-primary">Editar</a>
-            <form action="{{ route('epps.destroy', $epp->id) }}" method="POST" class="d-inline">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este EPP?')">Eliminar</button>
-            </form>
-        </td>
-    </tr>
-    @endforeach
-</tbody>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($epps as $epp)
+        <tr>
+            <td>{{ $epp->id }}</td>
+            <td>{{ $epp->nombre }}</td>
+            <td>{{ $epp->descripcion }}</td>
+            <td>
+                <a href="{{ route('epps.edit', $epp->id) }}" class="btn btn-sm btn-primary">Editar</a>
+                <form action="{{ route('epps.destroy', $epp->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este EPP?')">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
 
-      </table>
     </div>
 
   </div>

@@ -5,7 +5,7 @@ use App\Http\Controllers\HerramientaController;
 use App\Http\Controllers\EppController;
 
 Route::get('/inventario', [EppController::class, 'index'])->name('inventario.index');
-
+Route::resource('epps', EppController::class);
 
 Route::get('/', function () {
     return view('welcome');
