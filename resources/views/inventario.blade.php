@@ -42,72 +42,30 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>T001</td>
-            <td>Taladro Eléctrico<br><small class="text-muted">Herramientas Eléctricas</small></td>
-            <td>TD-2024-001</td>
-            <td><span class="badge bg-success">Disponible</span></td>
-            <td>No asignada</td>
-            <td>Almacén A-1</td>
-            <td>$25.000</td>
-            <td>
-              <button class="btn btn-sm btn-primary">Editar</button>
-              <button class="btn btn-sm btn-danger">Eliminar</button>
-            </td>
-          </tr>
-          <tr>
-            <td>T002</td>
-            <td>Amoladora Angular<br><small class="text-muted">Herramientas Eléctricas</small></td>
-            <td>AM-2024-002</td>
-            <td><span class="badge bg-warning text-dark">Prestada</span></td>
-            <td>Carlos Mendez</td>
-            <td>Sector B</td>
-            <td>$18.000</td>
-            <td>
-              <button class="btn btn-sm btn-primary">Editar</button>
-              <button class="btn btn-sm btn-danger">Eliminar</button>
-            </td>
-          </tr>
-          <tr>
-            <td>T003</td>
-            <td>Martillo Neumático<br><small class="text-muted">Herramientas Neumáticas</small></td>
-            <td>MN-2023-015</td>
-            <td><span class="badge bg-danger">En Reparación</span></td>
-            <td>No asignada</td>
-            <td>Taller de Reparación</td>
-            <td>$45.000</td>
-            <td>
-              <button class="btn btn-sm btn-primary">Editar</button>
-              <button class="btn btn-sm btn-danger">Eliminar</button>
-            </td>
-          </tr>
-          <tr>
-            <td>T004</td>
-            <td>Soldadora MIG<br><small class="text-muted">Equipos de Soldadura</small></td>
-            <td>SM-2024-003</td>
-            <td><span class="badge bg-success">Disponible</span></td>
-            <td>No asignada</td>
-            <td>Almacén B-2</td>
-            <td>$85.000</td>
-            <td>
-              <button class="btn btn-sm btn-primary">Editar</button>
-              <button class="btn btn-sm btn-danger">Eliminar</button>
-            </td>
-          </tr>
-          <tr>
-            <td>T005</td>
-            <td>Compresor de Aire<br><small class="text-muted">Equipos Auxiliares</small></td>
-            <td>CA-2023-008</td>
-            <td><span class="badge bg-warning text-dark">Prestada</span></td>
-            <td>Ana García</td>
-            <td>Sector C</td>
-            <td>$32.000</td>
-            <td>
-              <button class="btn btn-sm btn-primary">Editar</button>
-              <button class="btn btn-sm btn-danger">Eliminar</button>
-            </td>
-          </tr>
-        </tbody>
+    @foreach ($epps as $epp)
+    <tr>
+        <td>{{ $epp->id }}</td>
+        <td>{{ $epp->nombre }}</td>
+        <td>
+            <span class="badge {{ $epp->estado == 'Disponible' ? 'bg-success' : ($epp->estado == 'Prestada' ? 'bg-warning text-dark' : 'bg-danger') }}">
+                {{ $epp->estado ?? 'Disponible' }}
+            </span>
+        </td>
+        <td>{{ $epp->asignado_a ?? 'No asignada' }}</td>
+        <td>{{ $epp->ubicacion ?? '-' }}</td>
+        <td>${{ number_format($epp->precio ?? 0, 0, ',', '.') }}</td>
+        <td>
+            <a href="{{ route('epps.edit', $epp->id) }}" class="btn btn-sm btn-primary">Editar</a>
+            <form action="{{ route('epps.destroy', $epp->id) }}" method="POST" class="d-inline">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este EPP?')">Eliminar</button>
+            </form>
+        </td>
+    </tr>
+    @endforeach
+</tbody>
+
       </table>
     </div>
 

@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HerramientaController;
+use App\Http\Controllers\EppController;
+
+Route::get('/inventario', [EppController::class, 'index'])->name('inventario.index');
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -35,6 +39,6 @@ Route::get('/usuarios', function () {
     return view('usuarios');
 });
 
-Route::get('/inventario', function () {
+/*Route::get('/inventario', function () {
     return view('inventario');
-});
+});*/
