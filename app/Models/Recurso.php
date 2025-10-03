@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * Class Recurso
+ *
+ * @property $id
+ * @property $id_categoria
+ * @property $id_estado
+ * @property $id_incidente_detalle
+ * @property $id_usuario_creacion
+ * @property $id_usuario_modificacion
+ * @property $nombre
+ * @property $descripcion
+ * @property $costo_unitario
+ * @property $fecha_creacion
+ * @property $fecha_modificacion
+ *
+ * @property Estado $estado
+ * @property Categoria $categoria
+ * @property IncidenteDetalle $incidenteDetalle
+ * @property Usuario $usuario
+ * @property Usuario $usuario
+ * @property DetallePrestamo[] $detallePrestamos
+ * @property Incidente[] $incidentes
+ * @property SerieRecurso[] $serieRecursos
+ * @package App
+ * @mixin \Illuminate\Database\Eloquent\Builder
+ */
+class Recurso extends Model
+{
+    
+    protected $perPage = 20;
+    protected $table = 'recurso';
+
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = ['id_categoria', 'id_estado', 'id_incidente_detalle', 'id_usuario_creacion', 'id_usuario_modificacion', 'nombre', 'descripcion', 'costo_unitario', 'fecha_creacion', 'fecha_modificacion'];
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function estado()
+    {
+        return $this->belongsTo(\App\Models\Estado::class, 'id_estado', 'id');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function categoria()
+{
+    return $this->belongsTo(\App\Models\Categoria::class, 'id_categoria', 'id');
+}
+
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function incidenteDetalle()
+    {
+        return $this->belongsTo(\App\Models\IncidenteDetalle::class, 'id_incidente_detalle', 'id');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function usuarioCreacion()
+    {
+        return $this->belongsTo(\App\Models\Usuario::class, 'id_usuario_creacion', 'usuario_creacion');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function usuarioModificacion()
+    {
+        return $this->belongsTo(\App\Models\Usuario::class, 'id_usuario_modificacion', 'usuario_modificacion');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function detallePrestamos()
+    {
+        return $this->hasMany(\App\Models\DetallePrestamo::class, 'id', 'id_recurso');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function incidentes()
+    {
+        return $this->hasMany(\App\Models\Incidente::class, 'id', 'id_recurso');
+    }
+    
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function serieRecursos()
+    {
+        return $this->hasMany(SerieRecurso::class, 'id_recurso');
+    }
+
+    
+}

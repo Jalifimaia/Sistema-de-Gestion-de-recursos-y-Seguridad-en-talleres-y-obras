@@ -11,6 +11,7 @@
   <div class="container py-4">
     <header class="d-flex justify-content-between align-items-start mb-4">
       <div>
+        <p>Bienvenida, {{ auth()->user()->name }} (Rol: {{ auth()->user()->rol->nombre_rol }})</p>
         <h1 class="h3 mb-1">Bienvenido, Juan</h1>
         <p class="text-muted mb-0">Resumen del estado actual del taller</p>
       </div>

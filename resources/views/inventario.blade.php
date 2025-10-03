@@ -20,7 +20,7 @@
     <!-- Acciones -->
     <div class="d-flex flex-wrap gap-2 mb-3">
       <!--<button class="btn btn-primary">Agregar Elemento</button>-->
-      <a href="{{ route('epps.create') }}" class="btn btn-primary">Agregar Elemento</a>
+      <a href="{{ route('recursos.create') }}" class="btn btn-primary">Agregar Elemento</a>
 
       <button class="btn btn-secondary">Exportar</button>
       <input type="text" class="form-control w-auto" placeholder="Buscar por nombre o serie...">
@@ -35,24 +35,41 @@
         <tr>
             <th>ID</th>
             <th>Nombre</th>
+            <th>Serie</th>
+            <th>Categoría</th>
             <th>Descripción</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach ($epps as $epp)
+        @foreach ($recursos as $recurso)
         <tr>
-            <td>{{ $epp->id }}</td>
-            <td>{{ $epp->nombre }}</td>
-            <td>{{ $epp->descripcion }}</td>
+            <td>{{ $recurso->id }}</td>
+            <td>{{ $recurso->nombre }}</td>
             <td>
-                <a href="{{ route('epps.edit', $epp->id) }}" class="btn btn-sm btn-primary">Editar</a>
-                <form action="{{ route('epps.destroy', $epp->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este EPP?')">Eliminar</button>
-                </form>
+              @forelse ($recurso->serieRecursos as $serie)
+                <span class="badge bg-info text-dark">{{ $serie->codigo_serie }}</span>
+              @empty
+                <span class="text-muted">Sin series</span>
+              @endforelse
             </td>
+
+            <td>{{ $recurso->categoria->nombre_categoria ?? 'Sin categoría' }}</td>
+            <td>{{ $recurso->descripcion }}</td>
+            <td>
+              <a href="{{ route('recursos.edit', $recurso->id) }}" class="btn btn-sm btn-primary">Editar</a>
+
+              <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" class="d-inline">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este EPP?')">Eliminar</button>
+              </form>
+
+              <a href="{{ route('serie_recurso.create', $recurso->id) }}" class="btn btn-sm btn-info">
+                Agregar Serie
+              </a>
+            </td>
+
         </tr>
         @endforeach
     </tbody>

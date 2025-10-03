@@ -14,12 +14,12 @@
                         <span class="card-title">{{ __('Create') }} Epp</span>
                     </div>
                     <div class="card-body bg-white">
-                        <form action="{{ route('epps.store') }}" method="POST">
-    @csrf
-    <input type="text" name="nombre" placeholder="Nombre" required>
-    <textarea name="descripcion" placeholder="Descripción" required></textarea>
-    <button type="submit" class="btn btn-success">Guardar</button>
-</form>
+                        <form action="{{ route('recursos.store') }}" method="POST">
+                            @csrf
+                            <input type="text" name="nombre" placeholder="Nombre" required>
+                            <textarea name="descripcion" placeholder="Descripción" required></textarea>
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </form>
 
                     </div>
                 </div>

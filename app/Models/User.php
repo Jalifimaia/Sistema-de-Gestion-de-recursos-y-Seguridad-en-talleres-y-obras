@@ -17,11 +17,20 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    protected $table = 'usuario'; // Laravel buscará esta tabla en lugar de 'users'
+//public $timestamps = true;
+
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    'name',
+    'email',
+    'password',
+    'id_rol',
+    'usuario_creacion',
+    'usuario_modificacion',
+    'ultimo_acceso',
+];
+
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -39,10 +48,54 @@ class User extends Authenticatable
      * @return array<string, string>
      */
     protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'ultimo_acceso' => 'datetime', // ← esto es lo que faltaba
+    ];
+}
+
+
+    public function rol()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Rol::class, 'id_rol');
     }
+
+    public function incidentesCreados()
+    {
+        return $this->hasMany(Incidente::class, 'usuario_creacion', 'id');
+    }
+
+    public function incidentesModificados()
+    {
+        return $this->hasMany(Incidente::class, 'usuario_modificacion', 'id');
+    }
+
+    public function prestamos()
+    {
+        return $this->hasMany(Prestamo::class, 'id_usuario', 'id');
+    }
+
+    public function prestamosCreados()
+    {
+        return $this->hasMany(Prestamo::class, 'usuario_creacion', 'id');
+    }
+
+    public function prestamosModificados()
+    {
+        return $this->hasMany(Prestamo::class, 'usuario_modificacion', 'id');
+    }
+
+    public function recursosCreados()
+    {
+        return $this->hasMany(Recurso::class, 'usuario_creacion', 'id');
+    }
+
+    public function recursosModificados()
+    {
+        return $this->hasMany(Recurso::class, 'usuario_modificacion', 'id');
+    }
+
+
 }

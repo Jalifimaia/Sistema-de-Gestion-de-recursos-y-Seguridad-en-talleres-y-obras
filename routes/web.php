@@ -1,14 +1,14 @@
 <?php
 
+require __DIR__.'/auth.php';
+use App\Models\Recurso;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HerramientaController;
-use App\Http\Controllers\EppController;
-
-Route::get('/inventario', [EppController::class, 'index'])->name('inventario.index');
-Route::resource('epps', EppController::class);
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RecursoController;
+use App\Http\Controllers\SerieRecursoController;
 
 Route::get('/', function () {
-    return view('welcome');
+   return view('welcome');
 });
 
 Route::get('/inicio2', function () {
@@ -19,8 +19,8 @@ Route::get('/herramientas', function () {
     return view('herramientas');
 });
 
+Route::resource('usuarios', UserController::class);
 
-Route::get('/herramientas', [HerramientaController::class, 'index']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -35,10 +35,18 @@ Route::get('/reportes', function () {
     return view('reportes');
 });
 
-Route::get('/usuarios', function () {
-    return view('usuarios');
+Route::middleware(['auth'])->group(function () {
+    Route::resource('usuarios', UserController::class);
+    Route::resource('recursos', RecursoController::class);
+    Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
 });
 
-/*Route::get('/inventario', function () {
-    return view('inventario');
-});*/
+
+Route::get('/test', function () {
+    return 'Laravel funciona correctamente';
+});
+
+Route::get('recursos/{id}/series/create', [SerieRecursoController::class, 'create'])->name('serie_recurso.create');
+Route::post('recursos/{id}/series', [SerieRecursoController::class, 'store'])->name('serie_recurso.store');
+
+
