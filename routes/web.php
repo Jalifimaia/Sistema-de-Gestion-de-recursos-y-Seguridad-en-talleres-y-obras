@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RecursoController;
 use App\Http\Controllers\SerieRecursoController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
    return view('welcome');
@@ -49,4 +50,4 @@ Route::get('/test', function () {
 Route::get('recursos/{id}/series/create', [SerieRecursoController::class, 'create'])->name('serie_recurso.create');
 Route::post('recursos/{id}/series', [SerieRecursoController::class, 'store'])->name('serie_recurso.store');
 
-
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

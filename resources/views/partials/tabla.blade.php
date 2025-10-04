@@ -3,6 +3,7 @@
     <thead class="table-light">
       <tr>
         <th>Nombre</th>
+        <th>Estado</th>
         <th>Email</th>
         <th>Rol</th>
         <th>Creado por</th>
@@ -16,6 +17,7 @@
       @foreach ($usuarios as $usuario)
         <tr>
           <td>{{ $usuario->name }}</td>
+          <td>{{ optional($usuario->estado)->nombre }}</td>
           <td>{{ $usuario->email }}</td>
           <td>{{ $usuario->rol->nombre_rol ?? 'Sin rol' }}</td>
           <td>{{ $usuario->usuario_creacion ?? '—' }}</td>

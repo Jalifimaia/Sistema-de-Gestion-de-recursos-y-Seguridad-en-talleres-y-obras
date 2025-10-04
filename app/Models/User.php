@@ -28,6 +28,7 @@ class User extends Authenticatable
     'usuario_creacion',
     'usuario_modificacion',
     'ultimo_acceso',
+    'id_estado'
 ];
 
 
@@ -61,6 +62,12 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Rol::class, 'id_rol');
     }
+    public function estado()
+{
+    return $this->belongsTo(EstadoUsuario::class, 'id_estado');
+}
+
+
 
     public function incidentesCreados()
     {

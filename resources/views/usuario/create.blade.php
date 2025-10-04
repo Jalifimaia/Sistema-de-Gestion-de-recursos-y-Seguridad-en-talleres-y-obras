@@ -51,6 +51,16 @@
                         </select>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="id_estado">Estado</label>
+                        <select name="id_estado" class="form-select" required>
+                            @foreach ($estados as $estado)
+                                <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
                     <button type="submit" class="btn btn-success">Crear</button>
                 </form>
             </div>

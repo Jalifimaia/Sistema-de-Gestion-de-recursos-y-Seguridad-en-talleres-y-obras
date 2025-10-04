@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Http\Controllers\EstadoUsuarioController;
+use App\Models\EstadoUsuario;
+
 
 class UserController extends Controller
 {
@@ -36,8 +39,9 @@ class UserController extends Controller
 {
     $usuario = new User();
     $roles = Rol::all();
+    $estados = EstadoUsuario::all(); // ← esta línea es clave
 
-    return view('usuario.create', compact('usuario', 'roles'));
+    return view('usuario.create', compact('usuario', 'roles', 'estados'));
 }
 
 

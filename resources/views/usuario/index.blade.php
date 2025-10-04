@@ -14,25 +14,6 @@
     <div class="col-md-3">
       <div class="card text-center">
         <div class="card-body">
-          <h6 class="card-title">Nuevo Usuario</h6>
-          <p class="card-text">Total Usuarios</p>
-          <h3>5</h3>
-          <small class="text-success">+1 este mes</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card text-center">
-        <div class="card-body">
-          <h6 class="card-title">Usuarios Activos</h6>
-          <h3>4</h3>
-          <small class="text-muted">80% del total</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card text-center">
-        <div class="card-body">
           <h6 class="card-title">Administradores</h6>
           <h3>1</h3>
           <small class="text-muted">Acceso completo</small>

@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\User;
 use App\Models\Rol;
+use App\Models\EstadoUsuario;
+
 
 class UserTabs extends Component
 {
@@ -18,7 +20,7 @@ class UserTabs extends Component
 
     public function render()
     {
-        $usuarios = User::with('rol')
+        $usuarios = User::with('rol', 'estado')
             ->where(function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
             ->orWhere('email', 'like', '%' . $this->search . '%');
