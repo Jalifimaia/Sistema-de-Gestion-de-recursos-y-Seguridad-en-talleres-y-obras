@@ -26,33 +26,28 @@ class RecursoController extends Controller
 }
 
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): View
+    public function store(RecursoRequest $request)
 {
-    $recurso = new Recurso();
-    $categorias = Categoria::all(); // o Categoria si lo renombraste
-    $estados = Estado::all();
+    \Log::info('Datos recibidos:', $request->all());
 
-    return view('recurso.create', compact('recurso', 'categorias', 'estados'));
+    $validated = $request->validated();
+
+    Recurso::create([
+        'id_estado' => $validated['id_estado'],
+        'id_subcategoria' => $validated['id_subcategoria'],
+        'nombre' => $validated['nombre'],
+        'descripcion' => $validated['descripcion'] ?? null,
+        'costo_unitario' => $validated['costo_unitario'],
+        'id_usuario_creacion' => auth()->id(),
+        'id_usuario_modificacion' => auth()->id(),
+        // No hace falta asignar fecha_creacion ni fecha_modificacion
+    ]);
+
+    return response()->json(['success' => true]);
 }
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(RecursoRequest $request): RedirectResponse
-{
-    $data = $request->validated();
-    $data['id_usuario_creacion'] = auth()->id();
-    $data['id_usuario_modificacion'] = auth()->id();
 
-    Recurso::create($data);
-
-    return Redirect::route('recursos.index')
-        ->with('success', 'Recurso creado correctamente.');
-}
 
 
 
@@ -95,4 +90,11 @@ class RecursoController extends Controller
         return Redirect::route('recursos.index')
             ->with('success', 'Recurso deleted successfully');
     }
+    public function create()
+{
+    $categorias = Categoria::all();
+    $estados = Estado::all();
+
+    return view('recurso.create', compact('categorias', 'estados'));
+}
 }

@@ -32,9 +32,10 @@ class Categoria extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function recursos()
-    {
-        return $this->hasMany(\App\Models\Recurso::class, 'id', 'id_categoria');
-    }
+    public function subcategorias()
+{
+    return $this->hasMany(Subcategoria::class, 'categoria_id');
+}
+
     
 }

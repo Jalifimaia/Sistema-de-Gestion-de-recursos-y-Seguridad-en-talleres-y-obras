@@ -22,13 +22,12 @@ class RecursoRequest extends FormRequest
     public function rules(): array
 {
     return [
-        'id_categoria' => 'required|exists:categoria,id',
+        'id_subcategoria' => 'required|exists:subcategoria,id',
         'id_estado' => 'required|exists:estado,id',
         'nombre' => 'required|string|max:255',
         'descripcion' => 'nullable|string|max:1000',
         'costo_unitario' => 'nullable|numeric|min:0',
 
-        // estos campos los manejás en el controlador, no en el formulario
         'id_usuario_creacion' => 'nullable',
         'id_usuario_modificacion' => 'nullable',
         'id_incidente_detalle' => 'nullable',
@@ -36,5 +35,6 @@ class RecursoRequest extends FormRequest
         'fecha_modificacion' => 'nullable|date',
     ];
 }
+
 
 }

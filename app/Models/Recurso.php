@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Recurso
  *
  * @property $id
- * @property $id_categoria
+ *  * @property-read Categoria $categoria
  * @property $id_estado
  * @property $id_incidente_detalle
  * @property $id_usuario_creacion
@@ -42,7 +44,7 @@ class Recurso extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['id_categoria', 'id_estado', 'id_incidente_detalle', 'id_usuario_creacion', 'id_usuario_modificacion', 'nombre', 'descripcion', 'costo_unitario', 'fecha_creacion', 'fecha_modificacion'];
+    protected $fillable = ['id_subcategoria','id_estado', 'id_incidente_detalle', 'id_usuario_creacion', 'id_usuario_modificacion', 'nombre', 'descripcion', 'costo_unitario', 'fecha_creacion', 'fecha_modificacion'];
 
 
     /**
@@ -56,9 +58,21 @@ class Recurso extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function categoria()
+    public function categoria(): HasOneThrough
 {
-    return $this->belongsTo(\App\Models\Categoria::class, 'id_categoria', 'id');
+    return $this->hasOneThrough(
+        \App\Models\Categoria::class,
+        \App\Models\Subcategoria::class,
+        'id',              // Subcategoria.id
+        'id',              // Categoria.id
+        'id_subcategoria', // Recurso.id_subcategoria
+        'categoria_id'     // Subcategoria.categoria_id
+    );
+}
+
+    public function subcategoria()
+{
+    return $this->belongsTo(Subcategoria::class, 'id_subcategoria');
 }
 
     
