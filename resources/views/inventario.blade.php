@@ -101,21 +101,23 @@
         return;
       }
 
-      // Calcular días restantes
+      // Calcular días restantes y mostrar solo la fecha (sin hora)
       const hoy = new Date();
       const fechaV = new Date(fechaVencimiento);
       const diffTime = fechaV - hoy;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // Formatear fecha a YYYY-MM-DD
+      const fechaSolo = fechaV.toISOString().slice(0, 10);
 
       let texto = '';
       if (estado === 'Vencido' || diffDays < 0) {
-        texto = `Vencido - ${fechaVencimiento}`;
+        texto = `Vencido - ${fechaSolo}`;
         badge.classList.add('bg-danger');
       } else if (estado === 'Por vencer' || diffDays <= 7) {
-        texto = `Por vencer - ${fechaVencimiento}`;
+        texto = `Por vencer - ${fechaSolo}`;
         badge.classList.add('bg-warning', 'text-dark');
       } else if (estado === 'Vigente') {
-        texto = `Vigente - ${fechaVencimiento}`;
+        texto = `Vigente - ${fechaSolo}`;
         badge.classList.add('bg-success');
       }
       badge.textContent = texto;
