@@ -48,11 +48,26 @@
             <td>{{ $recurso->nombre }}</td>
             <td>
               @forelse ($recurso->serieRecursos as $serie)
+                @php
+                    $hoy = \Carbon\Carbon::today();
+                    $vence = \Carbon\Carbon::parse($serie->fecha_vencimiento);
+                @endphp
+
                 <span class="badge bg-info text-dark">{{ $serie->codigo_serie }}</span>
+
+                @if($vence->isPast())
+                    <span class="badge bg-danger">Vencido</span>
+                @elseif($vence->diffInDays($hoy) < 30)
+                    <span class="badge bg-warning text-dark">Por vencer</span>
+                @else
+                    <span class="badge bg-success">Vigente</span>
+                @endif
+                <br>
               @empty
                 <span class="text-muted">Sin series</span>
               @endforelse
             </td>
+
 
             <td>{{ $recurso->categoria->nombre_categoria ?? 'Sin categoría' }}</td>
             <td>{{ $recurso->descripcion }}</td>
@@ -65,9 +80,10 @@
                 <button class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este EPP?')">Eliminar</button>
               </form>
 
-              <a href="{{ route('serie_recurso.create', $recurso->id) }}" class="btn btn-sm btn-info">
-                Agregar Serie
-              </a>
+              <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-info">
+    Agregar Serie
+</a>
+
             </td>
 
         </tr>

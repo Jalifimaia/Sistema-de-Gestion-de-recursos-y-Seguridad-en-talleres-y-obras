@@ -23,7 +23,6 @@ class RecursoRequest extends FormRequest
 {
     return [
         'id_subcategoria' => 'required|exists:subcategoria,id',
-        'id_estado' => 'required|exists:estado,id',
         'nombre' => 'required|string|max:255',
         'descripcion' => 'nullable|string|max:1000',
         'costo_unitario' => 'nullable|numeric|min:0',

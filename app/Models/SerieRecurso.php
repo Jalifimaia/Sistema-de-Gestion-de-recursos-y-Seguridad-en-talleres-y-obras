@@ -14,10 +14,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property $talle
  * @property $fecha_adquisicion
  * @property $fecha_vencimiento
+ * @property $id_estado
  *
  * @property Recurso $recurso
  * @property IncidenteDetalle $incidenteDetalle
  * @property DetallePrestamo[] $detallePrestamos
+ * @property Estado $estado
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
@@ -33,7 +35,7 @@ class SerieRecurso extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['id_recurso', 'id_incidente_detalle', 'nro_serie', 'talle', 'fecha_adquisicion', 'fecha_vencimiento'];
+    protected $fillable = ['id_recurso', 'id_incidente_detalle', 'nro_serie', 'talle', 'fecha_adquisicion', 'fecha_vencimiento', 'id_estado'];
 
 
     /**
@@ -51,6 +53,11 @@ class SerieRecurso extends Model
     public function incidenteDetalle()
     {
         return $this->belongsTo(\App\Models\IncidenteDetalle::class, 'id_incidente_detalle', 'id');
+    }
+
+    public function estado()
+    {
+        return $this->belongsTo(\App\Models\Estado::class, 'id_estado', 'id');
     }
     
     /**

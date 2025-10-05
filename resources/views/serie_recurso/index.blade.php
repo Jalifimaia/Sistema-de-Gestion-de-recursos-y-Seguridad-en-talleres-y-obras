@@ -17,7 +17,7 @@
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('serie_recursos.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('serie_recurso.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -59,9 +59,9 @@
 										<td >{{ $serieRecurso->fecha_vencimiento }}</td>
 
                                             <td>
-                                                <form action="{{ route('serie_recursos.destroy', $serieRecurso->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('serie_recursos.show', $serieRecurso->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('serie_recursos.edit', $serieRecurso->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('serie_recurso.destroy', $serieRecurso->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('serie_recurso.show', $serieRecurso->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('serie_recurso.edit', $serieRecurso->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>

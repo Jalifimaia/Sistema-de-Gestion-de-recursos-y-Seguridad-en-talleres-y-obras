@@ -33,7 +33,6 @@ class RecursoController extends Controller
     $validated = $request->validated();
 
     Recurso::create([
-        'id_estado' => $validated['id_estado'],
         'id_subcategoria' => $validated['id_subcategoria'],
         'nombre' => $validated['nombre'],
         'descripcion' => $validated['descripcion'] ?? null,
@@ -66,11 +65,13 @@ class RecursoController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit($id): View
-    {
-        $recurso = Recurso::find($id);
+{
+    $recurso = Recurso::find($id);
+    $categorias = Categoria::all();
 
-        return view('recurso.edit', compact('recurso'));
-    }
+    return view('recurso.create', compact('recurso', 'categorias'));
+}
+
 
     /**
      * Update the specified resource in storage.
@@ -79,7 +80,7 @@ class RecursoController extends Controller
     {
         $recurso->update($request->validated());
 
-        return Redirect::route('recursos.index')
+        return Redirect::route('inventario')
             ->with('success', 'Recurso updated successfully');
     }
 
@@ -87,14 +88,13 @@ class RecursoController extends Controller
     {
         Recurso::find($id)->delete();
 
-        return Redirect::route('recursos.index')
+        return Redirect::route('inventario')
             ->with('success', 'Recurso deleted successfully');
     }
     public function create()
 {
     $categorias = Categoria::all();
-    $estados = Estado::all();
 
-    return view('recurso.create', compact('categorias', 'estados'));
+    return view('recurso.create', compact('categorias'));
 }
 }

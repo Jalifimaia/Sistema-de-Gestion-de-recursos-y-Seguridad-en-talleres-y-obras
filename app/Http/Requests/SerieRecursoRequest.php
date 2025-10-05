@@ -24,9 +24,10 @@ class SerieRecursoRequest extends FormRequest
         return [
 			'id_recurso' => 'required',
 			'id_incidente_detalle' => 'required',
-			'nro_serie' => 'required|string',
+			'nro_serie' => 'required|unique:serie_recurso,nro_serie',
 			'fecha_adquisicion' => 'required',
 			'fecha_vencimiento' => 'required',
+            'id_estado' => 'required,'
         ];
     }
 }

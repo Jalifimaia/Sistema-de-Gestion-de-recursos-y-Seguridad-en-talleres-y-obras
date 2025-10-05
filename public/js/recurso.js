@@ -38,10 +38,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const payload = {
             id_subcategoria: subcategoriaSelect.value,
             nombre: document.getElementById('nombre').value,
-            serie: document.getElementById('serie').value,
             descripcion: document.getElementById('descripcion').value,
             costo_unitario: document.getElementById('costo_unitario').value,
-            id_estado: document.getElementById('estado').value,
         };
 
         fetch('/recursos', {

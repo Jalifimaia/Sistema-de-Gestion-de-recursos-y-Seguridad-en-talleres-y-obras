@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 05-10-2025 a las 07:34:12
+-- Tiempo de generación: 05-10-2025 a las 20:07:24
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -267,7 +267,6 @@ CREATE TABLE `prestamo` (
 
 CREATE TABLE `recurso` (
   `id` int(11) UNSIGNED NOT NULL,
-  `id_estado` int(10) UNSIGNED NOT NULL,
   `id_incidente_detalle` int(10) UNSIGNED DEFAULT NULL,
   `id_usuario_creacion` int(10) UNSIGNED NOT NULL,
   `id_usuario_modificacion` int(10) UNSIGNED NOT NULL,
@@ -285,10 +284,10 @@ CREATE TABLE `recurso` (
 -- Volcado de datos para la tabla `recurso`
 --
 
-INSERT INTO `recurso` (`id`, `id_estado`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `nombre`, `descripcion`, `costo_unitario`, `fecha_creacion`, `fecha_modificacion`, `created_at`, `updated_at`, `id_subcategoria`) VALUES
-(3, 1, NULL, 5, 5, 'Chaleco Marca Pirulo', 'vhhghjgjhghjghjgjgj', 56000.00, '2025-10-05 02:09:09', '2025-10-05 02:09:09', '2025-10-05 05:09:09', '2025-10-05 05:09:09', 2),
-(4, 1, NULL, 5, 5, 'Chaleco Marca Pepito', 'qqqqqqqqqq', 52000.00, '2025-10-05 02:09:53', '2025-10-05 02:09:53', '2025-10-05 05:09:53', '2025-10-05 05:09:53', 2),
-(5, 1, NULL, 5, 5, 'Casco  123', 'Casco Amarillo', 20000.00, '2025-10-05 02:30:11', '2025-10-05 02:30:11', '2025-10-05 05:30:11', '2025-10-05 05:30:11', 4);
+INSERT INTO `recurso` (`id`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `nombre`, `descripcion`, `costo_unitario`, `fecha_creacion`, `fecha_modificacion`, `created_at`, `updated_at`, `id_subcategoria`) VALUES
+(4, NULL, 5, 5, 'Chaleco Marca Pepito', 'qqqqqqqqqq', 52000.00, '2025-10-05 02:09:53', '2025-10-05 02:09:53', '2025-10-05 05:09:53', '2025-10-05 05:09:53', 2),
+(5, NULL, 5, 5, 'Casco  123', 'Casco Amarillo', 20000.00, '2025-10-05 02:30:11', '2025-10-05 02:30:11', '2025-10-05 05:30:11', '2025-10-05 05:30:11', 4),
+(6, NULL, 5, 5, 'Taladro XP', 'jkjkjkjkk', 20000.00, '2025-10-05 14:59:54', '2025-10-05 14:59:54', '2025-10-05 17:59:54', '2025-10-05 17:59:54', 6);
 
 -- --------------------------------------------------------
 
@@ -325,8 +324,21 @@ CREATE TABLE `serie_recurso` (
   `fecha_adquisicion` datetime NOT NULL,
   `fecha_vencimiento` datetime NOT NULL,
   `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL
+  `updated_at` datetime DEFAULT NULL,
+  `id_estado` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `serie_recurso`
+--
+
+INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_incidente_detalle`, `nro_serie`, `talle`, `fecha_adquisicion`, `fecha_vencimiento`, `created_at`, `updated_at`, `id_estado`) VALUES
+(4, 4, NULL, '78YT', 40, '2025-10-05 00:00:00', '2025-10-31 00:00:00', '2025-10-05 15:49:01', '2025-10-05 15:49:01', 1),
+(5, 6, NULL, 'XP-001', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 1),
+(6, 6, NULL, 'XP-002', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 1),
+(7, 6, NULL, 'XP-003', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 1),
+(8, 6, NULL, 'XP-004', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 1),
+(9, 6, NULL, 'XP-005', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 1);
 
 -- --------------------------------------------------------
 
@@ -377,7 +389,9 @@ INSERT INTO `subcategoria` (`id`, `nombre`, `categoria_id`) VALUES
 (1, 'Martillo', 2),
 (2, 'Chaleco', 1),
 (3, 'Test', 1),
-(4, 'Casco', 1);
+(4, 'Casco', 1),
+(5, 'Arnes', 1),
+(6, 'Taladro', 2);
 
 -- --------------------------------------------------------
 
@@ -431,7 +445,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`, `updated_at`, `usuario_creacion`, `usuario_modificacion`, `ultimo_acceso`, `id_estado`, `fecha_nacimiento`, `dni`, `telefono`, `nro_legajo`, `auth_key`, `access_token`) VALUES
-(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-05 00:30:50', NULL, NULL, '2025-10-05 00:30:50', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-05 16:37:55', NULL, NULL, '2025-10-05 16:37:55', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-03 21:42:12', 5, 5, '2025-10-03 21:42:12', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (7, 3, 'trabajador', 'traba@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-03 21:44:20', 5, 5, '2025-10-03 21:44:20', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-04 01:49:47', 5, 5, '2025-10-04 01:49:47', 3, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -563,7 +577,6 @@ ALTER TABLE `prestamo`
 --
 ALTER TABLE `recurso`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_estado` (`id_estado`),
   ADD KEY `id_incidente_detalle` (`id_incidente_detalle`),
   ADD KEY `id_usuario_creacion` (`id_usuario_creacion`),
   ADD KEY `id_usuario_modificacion` (`id_usuario_modificacion`),
@@ -581,7 +594,8 @@ ALTER TABLE `rol`
 ALTER TABLE `serie_recurso`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_recurso` (`id_recurso`),
-  ADD KEY `id_incidente_detalle` (`id_incidente_detalle`);
+  ADD KEY `id_incidente_detalle` (`id_incidente_detalle`),
+  ADD KEY `index_estado` (`id_estado`);
 
 --
 -- Indices de la tabla `sessions`
@@ -665,13 +679,13 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT de la tabla `recurso`
 --
 ALTER TABLE `recurso`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `serie_recurso`
 --
 ALTER TABLE `serie_recurso`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `stock`
@@ -683,7 +697,7 @@ ALTER TABLE `stock`
 -- AUTO_INCREMENT de la tabla `subcategoria`
 --
 ALTER TABLE `subcategoria`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `users`
@@ -743,7 +757,6 @@ ALTER TABLE `prestamo`
 --
 ALTER TABLE `recurso`
   ADD CONSTRAINT `fk_subcategoria` FOREIGN KEY (`id_subcategoria`) REFERENCES `subcategoria` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `recurso_ibfk_1` FOREIGN KEY (`id_estado`) REFERENCES `estado` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `recurso_ibfk_3` FOREIGN KEY (`id_incidente_detalle`) REFERENCES `incidente_detalle` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `recurso_ibfk_4` FOREIGN KEY (`id_usuario_creacion`) REFERENCES `usuario` (`usuario_creacion`) ON UPDATE CASCADE,
   ADD CONSTRAINT `recurso_ibfk_5` FOREIGN KEY (`id_usuario_modificacion`) REFERENCES `usuario` (`usuario_modificacion`) ON UPDATE CASCADE;
@@ -752,6 +765,7 @@ ALTER TABLE `recurso`
 -- Filtros para la tabla `serie_recurso`
 --
 ALTER TABLE `serie_recurso`
+  ADD CONSTRAINT `fk_serie_estado` FOREIGN KEY (`id_estado`) REFERENCES `estado` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `serie_recurso_ibfk_1` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `serie_recurso_ibfk_2` FOREIGN KEY (`id_incidente_detalle`) REFERENCES `incidente_detalle` (`id`) ON UPDATE CASCADE;
 

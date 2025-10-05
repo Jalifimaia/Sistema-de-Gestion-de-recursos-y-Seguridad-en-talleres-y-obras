@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property $id
  *  * @property-read Categoria $categoria
- * @property $id_estado
  * @property $id_incidente_detalle
  * @property $id_usuario_creacion
  * @property $id_usuario_modificacion
@@ -21,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property $fecha_creacion
  * @property $fecha_modificacion
  *
- * @property Estado $estado
  * @property Categoria $categoria
  * @property IncidenteDetalle $incidenteDetalle
  * @property Usuario $usuario
@@ -44,16 +42,12 @@ class Recurso extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['id_subcategoria','id_estado', 'id_incidente_detalle', 'id_usuario_creacion', 'id_usuario_modificacion', 'nombre', 'descripcion', 'costo_unitario', 'fecha_creacion', 'fecha_modificacion'];
+    protected $fillable = ['id_subcategoria','id_incidente_detalle', 'id_usuario_creacion', 'id_usuario_modificacion', 'nombre', 'descripcion', 'costo_unitario', 'fecha_creacion', 'fecha_modificacion'];
 
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function estado()
-    {
-        return $this->belongsTo(\App\Models\Estado::class, 'id_estado', 'id');
-    }
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
