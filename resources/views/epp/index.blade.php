@@ -13,11 +13,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
 
                             <span id="card_title">
-                                {{ __('Epps') }}
+                                {{ __('Recursos') }}
                             </span>
 
                              <div class="float-right">
-                                <a href="{{ route('epps.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
+                                <a href="{{ route('recursos.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
                                   {{ __('Create New') }}
                                 </a>
                               </div>
@@ -41,15 +41,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($epps as $epp)
+                                    @foreach ($recursos as $recurso)
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
 
                                             <td>
-                                                <form action="{{ route('epps.destroy', $epp->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('epps.show', $epp->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('epps.edit', $epp->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
+                                                <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST">
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('recursos.show', $recurso->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
+                                                    <a class="btn btn-sm btn-success" href="{{ route('recursos.edit', $recurso->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Edit') }}</a>
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Delete') }}</button>
@@ -62,7 +62,7 @@
                         </div>
                     </div>
                 </div>
-                {!! $epps->withQueryString()->links() !!}
+                {!! $recursos->withQueryString()->links() !!}
             </div>
         </div>
     </div>
