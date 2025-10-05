@@ -51,10 +51,11 @@
                     @php
                       $hoy = \Carbon\Carbon::today();
                       $vence = \Carbon\Carbon::parse($serie->fecha_vencimiento);
-                      $estado = $vence->isPast() ? 'Vencido' : ($vence->diffInDays($hoy) < 30 ? 'Por vencer' : 'Vigente');
+                      $dias_restantes = $vence->diffInDays($hoy, false);
+                      $estado = $vence->isPast() ? 'Vencido' : ($dias_restantes <= 7 ? 'Por vencer' : 'Vigente');
                       $codigo = $serie->nro_serie ?? '';
                     @endphp
-                    <option value="{{ $estado }}" data-serie="{{ $serie->nro_serie }}">
+                    <option value="{{ $estado }}" data-serie="{{ $serie->nro_serie }}" data-fecha-vencimiento="{{ $serie->fecha_vencimiento }}">
                       {{ $serie->nro_serie }}
                     </option>
                   @endforeach
@@ -88,21 +89,36 @@
 
   <script>
     function mostrarEstado(select) {
+      const selectedOption = select.options[select.selectedIndex];
       const estado = select.value;
+      const fechaVencimiento = selectedOption.getAttribute('data-fecha-vencimiento');
       const badge = select.parentElement.querySelector('.estado-vencimiento');
 
-      badge.textContent = estado;
       badge.className = 'badge estado-vencimiento'; // Reset classes
 
-      if (estado === 'Vencido') {
+      if (!estado || !fechaVencimiento) {
+        badge.textContent = '';
+        return;
+      }
+
+      // Calcular días restantes
+      const hoy = new Date();
+      const fechaV = new Date(fechaVencimiento);
+      const diffTime = fechaV - hoy;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      let texto = '';
+      if (estado === 'Vencido' || diffDays < 0) {
+        texto = `Vencido - ${fechaVencimiento}`;
         badge.classList.add('bg-danger');
-      } else if (estado === 'Por vencer') {
+      } else if (estado === 'Por vencer' || diffDays <= 7) {
+        texto = `Por vencer - ${fechaVencimiento}`;
         badge.classList.add('bg-warning', 'text-dark');
       } else if (estado === 'Vigente') {
+        texto = `Vigente - ${fechaVencimiento}`;
         badge.classList.add('bg-success');
-      } else {
-        badge.textContent = '';
       }
+      badge.textContent = texto;
     }
   </script>
 </body>
