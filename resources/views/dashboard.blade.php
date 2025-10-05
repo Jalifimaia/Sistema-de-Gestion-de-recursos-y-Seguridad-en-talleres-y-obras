@@ -11,6 +11,7 @@
   <div class="container py-4">
     <header class="d-flex justify-content-between align-items-start mb-4">
       <div>
+        <p>Bienvenida, {{ auth()->user()->name }} (Rol: {{ auth()->user()->rol->nombre_rol }})</p>
         <h1 class="h3 mb-1">Bienvenido, Juan</h1>
         <p class="text-muted mb-0">Resumen del estado actual del taller</p>
       </div>
@@ -19,15 +20,10 @@
 
     {{-- Estadísticas --}}
     <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <div class="card text-center shadow-sm">
-          <div class="card-body">
-            <h2 class="fw-bold">24</h2>
-            <p class="mb-0">Trabajadores Activos</p>
-            <small class="text-success">+2 desde ayer</small>
-          </div>
-        </div>
-      </div>
+
+      <h2 class="fw-bold">{{ $usuariosActivos }}</h2>
+      <p class="mb-0">Trabajadores Activos</p>
+
       <div class="col-md-3">
         <div class="card text-center shadow-sm">
           <div class="card-body">
