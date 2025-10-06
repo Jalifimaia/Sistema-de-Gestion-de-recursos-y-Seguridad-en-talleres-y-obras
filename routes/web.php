@@ -17,7 +17,22 @@ Route::get('/inicio2', fn() => view('inicio2'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
-Route::get('/reportes', fn() => view('reportes'));
+Route::get('/reportes', function () {
+    // Generar recomendaciones en el servidor como fallback inicial
+    $recomendaciones = [];
+    try {
+        $service = new \App\Services\RecomendacionService();
+        $recomendaciones = $service->generar();
+    } catch (\Throwable $e) {
+        // no bloquear la vista si falla
+        logger()->error('Error generando recomendaciones al renderizar /reportes: ' . $e->getMessage(), ['exception' => $e]);
+    }
+    return view('reportes', compact('recomendaciones'));
+});
+// Ruta pública alternativa que redirige al endpoint API (evita 404 por auth/session)
+Route::get('/recomendaciones-publica', fn() => redirect('/api/recomendaciones'));
+// Ruta directa que expone el endpoint API también desde web (evita 404 si api.php no fue recargado o hay caché)
+Route::get('/api/recomendaciones', [\App\Http\Controllers\RecomendacionController::class, 'index']);
 Route::get('/test', fn() => 'Laravel funciona correctamente');
 
 // Rutas protegidas por autenticación
@@ -25,6 +40,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('usuarios', UserController::class);
     Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
     Route::resource('recursos', RecursoController::class);
+
+    // Recomendaciones IA (reglas simples)
+    Route::get('/recomendaciones', [\App\Http\Controllers\RecomendacionController::class, 'index'])->name('recomendaciones');
 
     // ✅ Ruta personalizada para agregar serie con recurso
     Route::get('/serie_recurso/create/{id}', [SerieRecursoController::class, 'createConRecurso'])->name('serie_recurso.createConRecurso');
