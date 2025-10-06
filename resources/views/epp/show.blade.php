@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ $epp->name ?? __('Show') . " " . __('Epp') }}
+    {{ $recurso->name ?? __('Show') . " " . __('Epp') }}
 @endsection
 
 @section('content')
@@ -14,7 +14,7 @@
                             <span class="card-title">{{ __('Show') }} Epp</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('epps.index') }}"> {{ __('Back') }}</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('recursos.index') }}"> {{ __('Back') }}</a>
                         </div>
                     </div>
 
