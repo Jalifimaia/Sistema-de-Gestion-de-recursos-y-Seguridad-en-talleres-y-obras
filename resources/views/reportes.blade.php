@@ -73,6 +73,60 @@
     </div>
 
   <div class="row g-4">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Recomendaciones (IA)</h5>
+          <p class="text-muted">Consejos automáticos generados por reglas: vencimientos, inventario y predicciones.</p>
+          <div id="recomendacionesContainer" class="d-flex flex-column gap-2">
+            @if(isset($recomendaciones) && count($recomendaciones) > 0)
+              @foreach($recomendaciones as $r)
+                <div class="card p-2 {{ $r['nivel'] == 'danger' ? 'border-danger' : ($r['nivel'] == 'warning' ? 'border-warning' : 'border-info') }}">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <strong>{{ $r['titulo'] }}</strong>
+                      <div class="small text-muted">{{ $r['mensaje'] }}</div>
+                    </div>
+                  </div>
+
+                  {{-- Formatos específicos según tipo de recomendación --}}
+                  @if(isset($r['detalles']) && is_array($r['detalles']) && isset($r['titulo']) && str_contains(strtolower($r['titulo']), 'vencim'))
+                    <div class="table-responsive mt-2">
+                      <table class="table table-sm">
+                        <thead><tr><th>Recurso</th><th>Serie</th><th>Vencimiento</th></tr></thead>
+                        <tbody>
+                        @foreach($r['detalles'] as $d)
+                          <tr>
+                            <td>{{ $d['recurso'] ?? '-' }}</td>
+                            <td>{{ $d['nro_serie'] ?? '-' }}</td>
+                            <td>{{ isset($d['fecha_vencimiento']) ? \Carbon\Carbon::parse($d['fecha_vencimiento'])->format('d/m/Y') : '-' }}</td>
+                          </tr>
+                        @endforeach
+                        </tbody>
+                      </table>
+                    </div>
+                  @elseif(isset($r['detalles']) && is_array($r['detalles']) && isset($r['titulo']) && str_contains(strtolower($r['titulo']), 'inventario'))
+                    <ul class="list-group list-group-flush mt-2">
+                      @foreach($r['detalles'] as $d)
+                        <li class="list-group-item p-1">{{ $d['nombre'] ?? 'Recurso' }} — <strong>{{ $d['cantidad_series'] ?? 0 }}</strong> series</li>
+                      @endforeach
+                    </ul>
+                  @elseif(isset($r['detalles']))
+                    <ul class="mt-2 small">
+                      @foreach($r['detalles'] as $k => $v)
+                        <li>{{ is_scalar($v) ? $k . ': ' . $v : json_encode($v) }}</li>
+                      @endforeach
+                    </ul>
+                  @endif
+                </div>
+              @endforeach
+            @else
+              <div class="text-muted">Cargando recomendaciones...</div>
+            @endif
+          </div>
+        </div>
+      </div>
+    </div>
   <div class="col-md-6">
     <div class="card p-3">
       <h5 class="mb-3">Evolución del Inventario</h5>
@@ -105,6 +159,106 @@
   </div>
 
   <script>
+    // --- Recomendaciones IA: fetch a /recomendaciones ---
+    async function cargarRecomendaciones() {
+      const container = document.getElementById('recomendacionesContainer');
+      container.innerHTML = '<div class="text-muted">Cargando recomendaciones...</div>';
+      try {
+  const res = await fetch("{{ url('/api/recomendaciones') }}");
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!data.ok) {
+          container.innerHTML = '<div class="text-danger">' + (data.message || 'Respuesta inválida del servidor') + '</div>';
+          return;
+        }
+
+        const read = JSON.parse(localStorage.getItem('recomendaciones_leidas') || '[]');
+
+        if (!data.recomendaciones || data.recomendaciones.length === 0) {
+          container.innerHTML = '<div class="text-success">No hay recomendaciones por ahora.</div>';
+          return;
+        }
+
+        container.innerHTML = '';
+        data.recomendaciones.forEach((r, idx) => {
+          const id = r.titulo + '_' + idx;
+          const leida = read.includes(id);
+          const nivelClass = r.nivel === 'danger' ? 'border-danger' : (r.nivel === 'warning' ? 'border-warning' : 'border-info');
+
+          const card = document.createElement('div');
+          card.className = 'card p-2 ' + nivelClass;
+          const header = document.createElement('div');
+          header.className = 'd-flex justify-content-between align-items-start';
+          header.innerHTML = `
+            <div>
+              <strong>${r.titulo}</strong>
+              <div class="small text-muted">${r.mensaje}</div>
+            </div>
+            <div class="text-end">
+              <button class="btn btn-sm btn-outline-secondary me-2" data-id="${id}">${leida ? 'Marcada' : 'Marcar leída'}</button>
+            </div>
+          `;
+          card.appendChild(header);
+
+          // detalles: formato según tipo
+          if (r.detalles && Array.isArray(r.detalles) && r.titulo.toLowerCase().includes('vencim')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-responsive mt-2';
+            const table = document.createElement('table');
+            table.className = 'table table-sm';
+            table.innerHTML = '<thead><tr><th>Recurso</th><th>Serie</th><th>Vencimiento</th></tr></thead>';
+            const tbody = document.createElement('tbody');
+            r.detalles.forEach(d => {
+              const tr = document.createElement('tr');
+              const fecha = d.fecha_vencimiento ? new Date(d.fecha_vencimiento).toLocaleDateString() : '-';
+              tr.innerHTML = `<td>${d.recurso || '-'}</td><td>${d.nro_serie || '-'}</td><td>${fecha}</td>`;
+              tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            wrapper.appendChild(table);
+            card.appendChild(wrapper);
+          } else if (r.detalles && Array.isArray(r.detalles) && r.titulo.toLowerCase().includes('inventario')) {
+            const ul = document.createElement('ul');
+            ul.className = 'list-group list-group-flush mt-2';
+            r.detalles.forEach(d => {
+              const li = document.createElement('li');
+              li.className = 'list-group-item p-1';
+              li.textContent = `${d.nombre || 'Recurso'} — ${d.cantidad_series || 0} series`;
+              ul.appendChild(li);
+            });
+            card.appendChild(ul);
+          } else if (r.detalles) {
+            const ul = document.createElement('ul');
+            ul.className = 'mt-2 small';
+            Object.keys(r.detalles).forEach(k => {
+              const li = document.createElement('li');
+              const v = r.detalles[k];
+              li.textContent = typeof v === 'object' ? `${k}: ${JSON.stringify(v)}` : `${k}: ${v}`;
+              ul.appendChild(li);
+            });
+            card.appendChild(ul);
+          }
+
+          container.appendChild(card);
+
+          const btn = card.querySelector('button');
+          btn.addEventListener('click', () => {
+            const arr = JSON.parse(localStorage.getItem('recomendaciones_leidas') || '[]');
+            if (!arr.includes(id)) arr.push(id);
+            localStorage.setItem('recomendaciones_leidas', JSON.stringify(arr));
+            btn.textContent = 'Marcada';
+            btn.disabled = true;
+          });
+        });
+      } catch (e) {
+        container.innerHTML = '<div class="text-danger">Error cargando recomendaciones: ' + e.message + '</div>';
+      }
+    }
+
+    // cargar al inicio y cada 5 minutos
+    cargarRecomendaciones();
+    setInterval(cargarRecomendaciones, 1000 * 60 * 5);
+
     // Evolución del Inventario
     const inventarioCtx = document.getElementById('inventarioChart');
     new Chart(inventarioCtx, {
