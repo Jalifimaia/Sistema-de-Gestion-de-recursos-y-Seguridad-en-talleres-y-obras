@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Recurso;
+use App\Models\IncidenteDetalle;
+use App\Models\EstadoIncidente;
 use App\Models\Incidente;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\IncidenteRequest;
+use App\Http\Requests\EstadoIncidenteRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
@@ -14,41 +18,66 @@ class IncidenteController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
-    {
-        $incidentes = Incidente::paginate();
 
-        return view('incidente.index', compact('incidentes'))
-            ->with('i', ($request->input('page', 1) - 1) * $incidentes->perPage());
-    }
+    
+    public function index()
+{
+    $incidentes = Incidente::orderByDesc('fecha_creacion')->paginate(10);
+
+    return view('incidente.index', compact('incidentes'));
+}
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create(): View
-    {
-        $incidente = new Incidente();
+{
+    $recursos = Recurso::all();
+    $estados = EstadoIncidente::all();
+    return view('incidente.create', compact('recursos', 'estados'));
+}
 
-        return view('incidente.create', compact('incidente'));
-    }
+
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(IncidenteRequest $request): RedirectResponse
-    {
-        Incidente::create($request->validated());
-
-        return Redirect::route('incidentes.index')
-            ->with('success', 'Incidente created successfully.');
+{
+    if (auth()->user()->rol !== 'supervisor') {
+        return redirect()->back()->with('error', 'Solo el supervisor puede registrar incidentes.');
     }
+
+    $data = $request->validated();
+    $data['id_usuario_creacion'] = auth()->id();
+    $data['id_usuario_modificacion'] = auth()->id();
+    $data['fecha_creacion'] = now();
+    $data['fecha_modificacion'] = now();
+
+    $incidente = Incidente::create($data);
+
+    // Crear el detalle del incidente
+    IncidenteDetalle::create([
+        'id_incidente' => $incidente->id,
+        'descripcion' => $request->detalle_descripcion,
+        // Si usás series o recursos específicos, podés agregar más campos acá
+    ]);
+
+    return Redirect::route('incidente.index')
+        ->with('success', 'Incidente registrado correctamente.');
+}
+
+
+
 
     /**
      * Display the specified resource.
      */
     public function show($id): View
     {
-        $incidente = Incidente::find($id);
+        $incidente = Incidente::findOrFail($id);
+
 
         return view('incidente.show', compact('incidente'));
     }
@@ -57,28 +86,34 @@ class IncidenteController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit($id): View
-    {
-        $incidente = Incidente::find($id);
+{
+    $incidente = Incidente::findOrFail($id);
+    return view('incidente.edit', compact('incidente'));
+}
 
-        return view('incidente.edit', compact('incidente'));
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(IncidenteRequest $request, Incidente $incidente): RedirectResponse
     {
-        $incidente->update($request->validated());
+        $data = $request->validated();
+        $data['id_usuario_modificacion'] = auth()->id();
+        $data['fecha_modificacion'] = now();
 
-        return Redirect::route('incidentes.index')
+        $incidente->update($data);
+
+
+        return Redirect::route('incidente.index')
             ->with('success', 'Incidente updated successfully');
     }
 
     public function destroy($id): RedirectResponse
     {
-        Incidente::find($id)->delete();
+        Incidente::findOrFail($id)->delete();
 
-        return Redirect::route('incidentes.index')
+
+        return Redirect::route('incidente.index')
             ->with('success', 'Incidente deleted successfully');
     }
 }

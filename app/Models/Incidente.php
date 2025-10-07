@@ -22,11 +22,13 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property Recurso $recurso
  * @property IncidenteDetalle $incidenteDetalle
- * @property Usuario $usuario
- * @property Usuario $usuario
+ * @property Usuario $usuarioC
+ * @property Usuario $usuarioM
  * @property IncidenteDetalle[] $incidenteDetalles
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
+
+ * 
  */
 class Incidente extends Model
 {
@@ -39,6 +41,8 @@ class Incidente extends Model
      * @var array<int, string>
      */
     protected $fillable = ['id_recurso', 'id_supervisor', 'id_incidente_detalle', 'id_usuario_creacion', 'id_usuario_modificacion', 'descripcion', 'fecha_incidente', 'fecha_creacion', 'fecha_modificacion', 'fecha_cierre_incidente', 'resolucion'];
+    protected $table = 'incidente';
+    public $timestamps = false;
 
 
     /**
@@ -48,7 +52,13 @@ class Incidente extends Model
     {
         return $this->belongsTo(\App\Models\Recurso::class, 'id_recurso', 'id');
     }
+
     
+    public function estadoIncidente()
+{
+    return $this->belongsTo(EstadoIncidente::class, 'id_estado_incidente');
+}
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -60,19 +70,21 @@ class Incidente extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function usuario()
-    {
-        return $this->belongsTo(\App\Models\Usuario::class, 'id_usuario_creacion', 'usuario_creacion');
-    }
-    
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function usuario()
-    {
-        return $this->belongsTo(\App\Models\Usuario::class, 'id_usuario_modificacion', 'usuario_modificacion');
-    }
-    
+    public function usuarioC()
+{
+    return $this->belongsTo(\App\Models\Usuario::class, 'id_usuario_creacion', 'id');
+}
+
+public function usuarioM()
+{
+    return $this->belongsTo(\App\Models\Usuario::class, 'id_usuario_modificacion', 'id');
+}
+
+    public function supervisor()
+{
+    return $this->belongsTo(User::class, 'id_supervisor');
+}
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -81,4 +93,8 @@ class Incidente extends Model
         return $this->hasMany(\App\Models\IncidenteDetalle::class, 'id', 'id_incidente');
     }
     
+    public function detalle()
+{
+    return $this->hasOne(IncidenteDetalle::class, 'id_incidente');
+}
 }

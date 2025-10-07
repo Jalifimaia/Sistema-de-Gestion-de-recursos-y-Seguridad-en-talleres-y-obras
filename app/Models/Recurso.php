@@ -102,6 +102,14 @@ class Recurso extends Model
         return $this->hasMany(\App\Models\DetallePrestamo::class, 'id', 'id_recurso');
     }
     
+    public function estaDaniado(): bool
+{
+    return $this->incidentes()
+        ->where('descripcion', 'like', '%dañado%')
+        ->exists();
+}
+
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

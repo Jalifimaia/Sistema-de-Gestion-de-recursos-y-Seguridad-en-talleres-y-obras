@@ -20,6 +20,13 @@
     <a class="nav-link {{ request()->is('usuarios') ? 'active' : '' }}" href="{{ url('usuarios') }}">Usuarios</a>
   </li>
 
+  <li class="nav-item">
+    <a class="nav-link {{ request()->is('incidente*') ? 'active' : '' }}" href="{{ route('incidente.index') }}">
+        <i class="bi bi-exclamation-triangle-fill"></i> Incidentes
+    </a>
+</li>
+
+
   @auth
   <li class="nav-item ms-auto">
     <form method="POST" action="{{ route('logout') }}">
