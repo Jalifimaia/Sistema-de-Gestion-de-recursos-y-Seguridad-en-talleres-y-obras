@@ -14,13 +14,15 @@ class PrestamoController extends Controller
             ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
             ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
             ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
+            ->join('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
             ->select(
                 'prestamo.id',
+                'usuario.name as operario',
+                'recurso.nombre as recurso',
+                'serie_recurso.nro_serie',
                 'prestamo.fecha_prestamo',
                 'prestamo.fecha_devolucion',
-                'prestamo.estado',
-                'recurso.nombre as recurso',
-                'serie_recurso.nro_serie'
+                'prestamo.estado'
             )
             ->orderByDesc('prestamo.id')
             ->get();
@@ -37,7 +39,8 @@ class PrestamoController extends Controller
             ->select('serie_recurso.id', 'serie_recurso.nro_serie', 'recurso.nombre as recurso')
             ->get();
 
-        return view('prestamo.create', compact('series'));
+        $estadosPrestamo = DB::table('estado_prestamo')->get();
+        return view('prestamo.create', compact('series', 'estadosPrestamo'));
     }
 
     public function store(PrestamoRequest $request)
@@ -66,6 +69,7 @@ class PrestamoController extends Controller
                 'id_prestamo' => $id_prestamo,
                 'id_serie' => $validated['id_serie'],
                 'id_recurso' => $serie->id_recurso,
+                'id_estado_prestamo' => $validated['id_estado_prestamo'],
             ]);
 
             // actualizar estado de la serie a "Prestado"

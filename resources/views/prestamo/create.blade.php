@@ -37,15 +37,15 @@
       </select>
     </div>
 
-    <select name="estado_prestamo" required>
-  <?php
-    $query = "SELECT id, nombre FROM estado_prestamo";
-    $result = mysqli_query($conn, $query);
-    while ($row = mysqli_fetch_assoc($result)) {
-      echo "<option value='{$row['id']}'>{$row['nombre']}</option>";
-    }
-  ?>
-</select>
+    <div class="mb-3">
+      <label for="id_estado_prestamo" class="form-label">Estado del Préstamo</label>
+      <select name="id_estado_prestamo" id="id_estado_prestamo" class="form-select" required>
+        <option value="">Seleccione estado</option>
+        @foreach($estadosPrestamo as $estado)
+          <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
+        @endforeach
+      </select>
+    </div>
 
 
     <button type="submit" class="btn btn-primary">Guardar</button>
