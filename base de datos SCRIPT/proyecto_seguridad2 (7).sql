@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 05-10-2025 a las 20:07:24
+-- Tiempo de generación: 07-10-2025 a las 21:23:13
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -74,8 +74,17 @@ CREATE TABLE `detalle_prestamo` (
   `id` int(10) UNSIGNED NOT NULL,
   `id_prestamo` int(10) UNSIGNED NOT NULL,
   `id_serie` int(10) UNSIGNED NOT NULL,
-  `id_recurso` int(10) UNSIGNED NOT NULL
+  `id_recurso` int(10) UNSIGNED NOT NULL,
+  `id_estado_prestamo` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_prestamo`
+--
+
+INSERT INTO `detalle_prestamo` (`id`, `id_prestamo`, `id_serie`, `id_recurso`, `id_estado_prestamo`) VALUES
+(1, 2, 4, 4, 2),
+(3, 4, 4, 4, 2);
 
 -- --------------------------------------------------------
 
@@ -100,6 +109,53 @@ INSERT INTO `estado` (`id`, `nombre_estado`, `descripcion_estado`) VALUES
 (4, 'Devuelto', ''),
 (5, 'Dañado', ''),
 (6, 'En Reparación', '');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estado_incidente`
+--
+
+CREATE TABLE `estado_incidente` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nombre_estado` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `estado_incidente`
+--
+
+INSERT INTO `estado_incidente` (`id`, `nombre_estado`) VALUES
+(2, 'En revisión'),
+(6, 'Escalado'),
+(4, 'Falso / descartado'),
+(1, 'Reportado'),
+(5, 'Resuelto'),
+(3, 'Validado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estado_prestamo`
+--
+
+CREATE TABLE `estado_prestamo` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nombre` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `estado_prestamo`
+--
+
+INSERT INTO `estado_prestamo` (`id`, `nombre`) VALUES
+(1, 'Pendiente'),
+(2, 'Activo'),
+(3, 'Devuelto'),
+(4, 'Vencido'),
+(5, 'Cancelado'),
+(6, 'En revisión'),
+(7, 'Rechazado');
 
 -- --------------------------------------------------------
 
@@ -147,7 +203,7 @@ CREATE TABLE `incidente` (
   `id` int(10) UNSIGNED NOT NULL,
   `id_recurso` int(10) UNSIGNED NOT NULL,
   `id_supervisor` int(10) UNSIGNED NOT NULL,
-  `id_incidente_detalle` int(10) UNSIGNED NOT NULL,
+  `id_incidente_detalle` int(10) UNSIGNED DEFAULT NULL,
   `id_usuario_creacion` int(10) UNSIGNED NOT NULL,
   `id_usuario_modificacion` int(10) UNSIGNED NOT NULL,
   `descripcion` varchar(250) DEFAULT NULL,
@@ -155,8 +211,16 @@ CREATE TABLE `incidente` (
   `fecha_creacion` datetime NOT NULL,
   `fecha_modificacion` datetime NOT NULL,
   `fecha_cierre_incidente` datetime NOT NULL,
-  `resolucion` varchar(250) DEFAULT NULL
+  `resolucion` varchar(250) DEFAULT NULL,
+  `id_estado_incidente` int(10) UNSIGNED NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `incidente`
+--
+
+INSERT INTO `incidente` (`id`, `id_recurso`, `id_supervisor`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `descripcion`, `fecha_incidente`, `fecha_creacion`, `fecha_modificacion`, `fecha_cierre_incidente`, `resolucion`, `id_estado_incidente`) VALUES
+(0, 6, 6, 0, 5, 5, 'Se quemó el cable del taladro', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', 'No hay', 1);
 
 -- --------------------------------------------------------
 
@@ -166,10 +230,17 @@ CREATE TABLE `incidente` (
 
 CREATE TABLE `incidente_detalle` (
   `id` int(10) UNSIGNED NOT NULL,
-  `id_incidente` int(10) UNSIGNED NOT NULL,
+  `id_incidente` int(10) UNSIGNED DEFAULT NULL,
   `id_serie` int(10) UNSIGNED NOT NULL,
   `descripcion` varchar(140) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `incidente_detalle`
+--
+
+INSERT INTO `incidente_detalle` (`id`, `id_incidente`, `id_serie`, `descripcion`) VALUES
+(0, 0, 5, 'Corte de cable por sobrecalentamiento');
 
 -- --------------------------------------------------------
 
@@ -258,6 +329,16 @@ CREATE TABLE `prestamo` (
   `fecha_creacion` datetime NOT NULL,
   `fecha_modificacion` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `prestamo`
+--
+
+INSERT INTO `prestamo` (`id`, `id_usuario`, `id_usuario_creacion`, `id_usuario_modificacion`, `fecha_prestamo`, `fecha_devolucion`, `estado`, `fecha_creacion`, `fecha_modificacion`) VALUES
+(1, 7, 6, 6, '2025-10-06 23:51:37', NULL, 1, '2025-10-06 23:51:37', '2025-10-06 23:51:37'),
+(2, 7, 6, 6, '2025-10-07 00:12:55', NULL, 1, '2025-10-07 00:12:55', '2025-10-07 00:12:55'),
+(3, 7, 6, 6, '2025-10-07 16:04:18', NULL, 1, '2025-10-07 16:04:18', '2025-10-07 16:04:18'),
+(4, 7, 6, 6, '2025-10-07 16:20:12', NULL, 1, '2025-10-07 16:20:12', '2025-10-07 16:20:12');
 
 -- --------------------------------------------------------
 
@@ -445,7 +526,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`, `updated_at`, `usuario_creacion`, `usuario_modificacion`, `ultimo_acceso`, `id_estado`, `fecha_nacimiento`, `dni`, `telefono`, `nro_legajo`, `auth_key`, `access_token`) VALUES
-(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-05 16:37:55', NULL, NULL, '2025-10-05 16:37:55', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-07 18:09:18', NULL, NULL, '2025-10-07 18:09:18', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-03 21:42:12', 5, 5, '2025-10-03 21:42:12', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (7, 3, 'trabajador', 'traba@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-03 21:44:20', 5, 5, '2025-10-03 21:44:20', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-04 01:49:47', 5, 5, '2025-10-04 01:49:47', 3, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -498,12 +579,26 @@ ALTER TABLE `detalle_prestamo`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_prestamo` (`id_prestamo`),
   ADD KEY `id_serie` (`id_serie`),
-  ADD KEY `id_recurso` (`id_recurso`);
+  ADD KEY `id_recurso` (`id_recurso`),
+  ADD KEY `fk_detalle_estado_prestamo` (`id_estado_prestamo`);
 
 --
 -- Indices de la tabla `estado`
 --
 ALTER TABLE `estado`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `estado_incidente`
+--
+ALTER TABLE `estado_incidente`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre_estado` (`nombre_estado`);
+
+--
+-- Indices de la tabla `estado_prestamo`
+--
+ALTER TABLE `estado_prestamo`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -652,6 +747,24 @@ ALTER TABLE `usuario_recurso`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `detalle_prestamo`
+--
+ALTER TABLE `detalle_prestamo`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `estado_incidente`
+--
+ALTER TABLE `estado_incidente`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `estado_prestamo`
+--
+ALTER TABLE `estado_prestamo`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
 -- AUTO_INCREMENT de la tabla `estado_usuario`
 --
 ALTER TABLE `estado_usuario`
@@ -674,6 +787,12 @@ ALTER TABLE `jobs`
 --
 ALTER TABLE `migrations`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de la tabla `prestamo`
+--
+ALTER TABLE `prestamo`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `recurso`
@@ -727,7 +846,8 @@ ALTER TABLE `usuario_recurso`
 ALTER TABLE `detalle_prestamo`
   ADD CONSTRAINT `detalle_prestamo_ibfk_1` FOREIGN KEY (`id_prestamo`) REFERENCES `prestamo` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `detalle_prestamo_ibfk_2` FOREIGN KEY (`id_serie`) REFERENCES `serie_recurso` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `detalle_prestamo_ibfk_3` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `detalle_prestamo_ibfk_3` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_detalle_estado_prestamo` FOREIGN KEY (`id_estado_prestamo`) REFERENCES `estado_prestamo` (`id`);
 
 --
 -- Filtros para la tabla `incidente`
@@ -748,9 +868,8 @@ ALTER TABLE `incidente_detalle`
 -- Filtros para la tabla `prestamo`
 --
 ALTER TABLE `prestamo`
-  ADD CONSTRAINT `prestamo_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `prestamo_ibfk_2` FOREIGN KEY (`id_usuario_creacion`) REFERENCES `usuario` (`usuario_creacion`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `prestamo_ibfk_3` FOREIGN KEY (`id_usuario_modificacion`) REFERENCES `usuario` (`usuario_modificacion`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_prestamo_usuario_creacion` FOREIGN KEY (`id_usuario_creacion`) REFERENCES `usuario` (`id`),
+  ADD CONSTRAINT `fk_prestamo_usuario_modificacion` FOREIGN KEY (`id_usuario_modificacion`) REFERENCES `usuario` (`id`);
 
 --
 -- Filtros para la tabla `recurso`

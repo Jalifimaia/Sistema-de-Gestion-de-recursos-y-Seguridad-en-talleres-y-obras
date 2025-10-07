@@ -32,6 +32,10 @@
                                     <strong>Id Recurso:</strong>
                                     {{ $detallePrestamo->id_recurso }}
                                 </div>
+                                <div class="form-group mb-2 mb20">
+                                    <strong>Estado Préstamo:</strong>
+                                    {{ $detallePrestamo->estadoPrestamo?->nombre }}
+                                </div>
 
                     </div>
                 </div>

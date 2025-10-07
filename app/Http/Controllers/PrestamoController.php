@@ -2,83 +2,86 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Prestamo;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use App\Http\Requests\PrestamoRequest;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PrestamoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): View
+    public function index()
     {
-        $prestamos = Prestamo::paginate();
+        $prestamos = DB::table('prestamo')
+            ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
+            ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
+            ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
+            ->join('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
+            ->select(
+                'prestamo.id',
+                'usuario.name as operario',
+                'recurso.nombre as recurso',
+                'serie_recurso.nro_serie',
+                'prestamo.fecha_prestamo',
+                'prestamo.fecha_devolucion',
+                'prestamo.estado'
+            )
+            ->orderByDesc('prestamo.id')
+            ->get();
 
-        return view('prestamo.index', compact('prestamos'))
-            ->with('i', ($request->input('page', 1) - 1) * $prestamos->perPage());
+        return view('prestamo.index', compact('prestamos'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): View
+    public function create()
     {
-        $prestamo = new Prestamo();
+        $series = DB::table('serie_recurso')
+            ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
+            ->join('estado', 'serie_recurso.id_estado', '=', 'estado.id')
+            ->where('estado.nombre_estado', '=', 'Disponible')
+            ->select('serie_recurso.id', 'serie_recurso.nro_serie', 'recurso.nombre as recurso')
+            ->get();
 
-        return view('prestamo.create', compact('prestamo'));
+        $estadosPrestamo = DB::table('estado_prestamo')->get();
+        return view('prestamo.create', compact('series', 'estadosPrestamo'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(PrestamoRequest $request): RedirectResponse
+    public function store(PrestamoRequest $request)
     {
-        Prestamo::create($request->validated());
+        $validated = $request->validated();
 
-        return Redirect::route('prestamos.index')
-            ->with('success', 'Prestamo created successfully.');
-    }
+        DB::beginTransaction();
+        try {
+            // insertar en prestamo
+            $id_prestamo = DB::table('prestamo')->insertGetId([
+                'id_usuario' => auth()->id() ?? 5, // usuario actual o admin por defecto
+                'id_usuario_creacion' => auth()->id() ?? 5,
+                'id_usuario_modificacion' => auth()->id() ?? 5,
+                'fecha_prestamo' => $validated['fecha_prestamo'],
+                'fecha_devolucion' => $validated['fecha_devolucion'],
+                'estado' => $validated['estado'],
+                'fecha_creacion' => Carbon::now(),
+                'fecha_modificacion' => Carbon::now(),
+            ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id): View
-    {
-        $prestamo = Prestamo::find($id);
+            // obtener el recurso correspondiente a la serie
+            $serie = DB::table('serie_recurso')->where('id', $validated['id_serie'])->first();
 
-        return view('prestamo.show', compact('prestamo'));
-    }
+            // insertar detalle del préstamo
+            DB::table('detalle_prestamo')->insert([
+                'id_prestamo' => $id_prestamo,
+                'id_serie' => $validated['id_serie'],
+                'id_recurso' => $serie->id_recurso,
+                'id_estado_prestamo' => $validated['id_estado_prestamo'],
+            ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id): View
-    {
-        $prestamo = Prestamo::find($id);
+            // actualizar estado de la serie a "Prestado"
+            DB::table('serie_recurso')
+                ->where('id', $validated['id_serie'])
+                ->update(['id_estado' => 3]);
 
-        return view('prestamo.edit', compact('prestamo'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(PrestamoRequest $request, Prestamo $prestamo): RedirectResponse
-    {
-        $prestamo->update($request->validated());
-
-        return Redirect::route('prestamos.index')
-            ->with('success', 'Prestamo updated successfully');
-    }
-
-    public function destroy($id): RedirectResponse
-    {
-        Prestamo::find($id)->delete();
-
-        return Redirect::route('prestamos.index')
-            ->with('success', 'Prestamo deleted successfully');
+            DB::commit();
+                return redirect()->route('prestamos.index')->with('success', 'Préstamo registrado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 }

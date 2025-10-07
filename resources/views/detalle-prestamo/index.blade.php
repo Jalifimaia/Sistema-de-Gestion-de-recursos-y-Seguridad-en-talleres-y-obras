@@ -35,11 +35,10 @@
                                 <thead class="thead">
                                     <tr>
                                         <th>No</th>
-                                        
-									<th >Id Prestamo</th>
-									<th >Id Serie</th>
-									<th >Id Recurso</th>
-
+                                        <th>Id Prestamo</th>
+                                        <th>Id Serie</th>
+                                        <th>Id Recurso</th>
+                                        <th>Estado Préstamo</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -47,11 +46,10 @@
                                     @foreach ($detallePrestamos as $detallePrestamo)
                                         <tr>
                                             <td>{{ ++$i }}</td>
-                                            
-										<td >{{ $detallePrestamo->id_prestamo }}</td>
-										<td >{{ $detallePrestamo->id_serie }}</td>
-										<td >{{ $detallePrestamo->id_recurso }}</td>
-
+                                            <td>{{ $detallePrestamo->id_prestamo }}</td>
+                                            <td>{{ $detallePrestamo->id_serie }}</td>
+                                            <td>{{ $detallePrestamo->id_recurso }}</td>
+                                            <td>{{ $detallePrestamo->estadoPrestamo?->nombre }}</td>
                                             <td>
                                                 <form action="{{ route('detalle-prestamos.destroy', $detallePrestamo->id) }}" method="POST">
                                                     <a class="btn btn-sm btn-primary " href="{{ route('detalle-prestamos.show', $detallePrestamo->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Show') }}</a>
