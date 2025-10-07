@@ -43,3 +43,6 @@ Route::post('/api/subcategorias', [SubcategoriaController::class, 'store']);
 
 // Dashboard real
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+use App\Http\Controllers\PrestamoController;
+
+Route::resource('prestamos', PrestamoController::class);

@@ -26,6 +26,13 @@
     </a>
 </li>
 
+<li class="nav-item">
+  <a class="nav-link {{ request()->is('prestamos*') ? 'active' : '' }}" href="{{ route('prestamos.index') }}">
+      <i class="bi bi-box-arrow-down"></i> Préstamos
+  </a>
+</li>
+
+
 
   @auth
   <li class="nav-item ms-auto">
