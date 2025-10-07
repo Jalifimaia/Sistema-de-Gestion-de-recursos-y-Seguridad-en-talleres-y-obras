@@ -21,47 +21,20 @@ use Illuminate\Database\Eloquent\Model;
  */
 class IncidenteDetalle extends Model
 {
-    
+    protected $table = 'incidente_detalle';
     protected $perPage = 20;
+    public $timestamps = false;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = ['id_incidente', 'id_serie', 'descripcion'];
+    protected $fillable = ['id_incidente', 'id_serie_recurso', 'descripcion'];
 
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
     public function incidente()
     {
-        return $this->belongsTo(\App\Models\Incidente::class, 'id_incidente', 'id');
+        return $this->belongsTo(Incidente::class, 'id_incidente');
     }
-    
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function incidentes()
+
+    public function serieRecurso()
     {
-        return $this->hasMany(\App\Models\Incidente::class, 'id', 'id_incidente_detalle');
+        return $this->belongsTo(SerieRecurso::class, 'id_serie_recurso');
     }
-    
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function recursos()
-    {
-        return $this->hasMany(\App\Models\Recurso::class, 'id', 'id_incidente_detalle');
-    }
-    
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function serieRecursos()
-    {
-        return $this->hasMany(\App\Models\SerieRecurso::class, 'id', 'id_incidente_detalle');
-    }
-    
 }
+
