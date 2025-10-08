@@ -61,5 +61,22 @@ Route::post('/api/subcategorias', [SubcategoriaController::class, 'store']);
 // Dashboard real
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+// prestamos
+Route::get('/api/recursos/{subcategoriaId}', function ($subcategoriaId) {
+    return DB::table('recurso')
+        ->where('id_subcategoria', $subcategoriaId)
+        ->select('id', 'nombre')
+        ->get();
+});
+
+Route::get('/api/series/{recursoId}', function ($recursoId) {
+    return DB::table('serie_recurso')
+        ->where('id_recurso', $recursoId)
+        ->where('id_estado', 1) // 1 = Disponible
+        ->select('id', 'nro_serie')
+        ->get();
+});
+
+
 // Autenticación
 require __DIR__.'/auth.php';

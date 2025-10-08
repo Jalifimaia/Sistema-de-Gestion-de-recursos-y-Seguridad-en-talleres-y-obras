@@ -19,6 +19,7 @@
         <th>Fecha Préstamo</th>
         <th>Fecha Devolución</th>
         <th>Estado</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -31,6 +32,11 @@
         <td>{{ $p->fecha_prestamo }}</td>
         <td>{{ $p->fecha_devolucion ?? 'Pendiente' }}</td>
         <td>{{ $p->estado }}</td>
+        <td>
+          <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-sm btn-warning">
+            <i class="bi bi-pencil-square"></i> Editar
+          </a>
+        </td>
       </tr>
       @endforeach
     </tbody>
