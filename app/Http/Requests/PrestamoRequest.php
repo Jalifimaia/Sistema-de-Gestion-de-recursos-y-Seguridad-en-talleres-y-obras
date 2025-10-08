@@ -12,13 +12,13 @@ class PrestamoRequest extends FormRequest
     }
 
     public function rules(): array
-    {
-        return [
-            'fecha_prestamo'   => 'required|date',
-            'fecha_devolucion' => 'nullable|date',
-            'estado'           => 'required|integer',
-            'id_serie'         => 'required|integer|exists:serie_recurso,id',
-            'id_estado_prestamo' => 'required|integer|exists:estado_prestamo,id',
-        ];
-    }
+{
+    return [
+        'fecha_prestamo'   => ['required', 'date'],
+        'fecha_devolucion' => ['nullable', 'date'],
+        'series'           => ['required', 'array'],
+        'series.*'         => ['integer', 'exists:serie_recurso,id'],
+    ];
+}
+
 }

@@ -26,7 +26,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Prestamo extends Model
 {
-    
+    protected $table = 'prestamo';
+    protected $casts = [
+    'fecha_prestamo' => 'datetime',
+    'fecha_devolucion' => 'datetime',
+];
+
+
     protected $perPage = 20;
 
     /**
@@ -65,8 +71,9 @@ class Prestamo extends Model
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function detallePrestamos()
-    {
-        return $this->hasMany(\App\Models\DetallePrestamo::class, 'id', 'id_prestamo');
-    }
+{
+    return $this->hasMany(\App\Models\DetallePrestamo::class, 'id_prestamo', 'id');
+}
+
     
 }
