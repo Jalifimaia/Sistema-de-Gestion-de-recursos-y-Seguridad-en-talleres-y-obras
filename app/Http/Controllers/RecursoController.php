@@ -68,8 +68,16 @@ class RecursoController extends Controller
 {
     $recurso = Recurso::find($id);
     $categorias = Categoria::all();
+    $subcategorias = [];
 
-    return view('recurso.create', compact('recurso', 'categorias'));
+    if ($recurso && $recurso->id_subcategoria) {
+        $subcategoria = \App\Models\Subcategoria::find($recurso->id_subcategoria);
+        if ($subcategoria) {
+            $subcategorias = \App\Models\Subcategoria::where('categoria_id', $subcategoria->categoria_id)->get();
+        }
+    }
+
+    return view('recurso.create', compact('recurso', 'categorias', 'subcategorias'));
 }
 
 
