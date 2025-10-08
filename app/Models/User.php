@@ -21,15 +21,21 @@ class User extends Authenticatable
 //public $timestamps = true;
 
     protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'id_rol',
-    'usuario_creacion',
-    'usuario_modificacion',
-    'ultimo_acceso',
-    'id_estado'
-];
+        'name',
+        'email',
+        'password',
+        'id_rol',
+        'usuario_creacion',
+        'usuario_modificacion',
+        'ultimo_acceso',
+        'id_estado',
+        'fecha_nacimiento',
+        'dni',
+        'telefono',
+        'nro_legajo',
+        'auth_key',
+        'access_token',
+    ];
 
 
 
