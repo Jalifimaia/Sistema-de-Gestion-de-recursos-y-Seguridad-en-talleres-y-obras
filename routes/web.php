@@ -37,21 +37,6 @@ Route::post('/incidente', [IncidenteController::class, 'store'])->name('incident
 
 // ✅ Vista dinámica para registrar incidente
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/test-incidente2', function () {
-    return view('test_incidente2');
-});
-
-Route::post('/test-incidente2', [App\Http\Controllers\IncidenteController::class, 'storeTest2'])->name('incidente.storeTest2');
-
-
-Route::get('/test-incidente', function () {
-    return view('test_incidente');
-});
-
-Route::post('/test-incidente', [App\Http\Controllers\IncidenteController::class, 'storeTest'])->name('incidente.storeTest');
-
-
     Route::get('/supervisor/registrar-incidente', [IncidenteController::class, 'create'])->name('incidente.create');
     Route::post('/supervisor/registrar-incidente', [IncidenteController::class, 'store'])->name('incidente.store');
 
