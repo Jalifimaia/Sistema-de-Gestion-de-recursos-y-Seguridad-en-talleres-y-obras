@@ -38,8 +38,6 @@ class PrestamoController extends Controller
         ->get();
 
 
-        return view('prestamo.index', compact('prestamos'));
-    }
 
     public function update(PrestamoRequest $request, $id)
 {

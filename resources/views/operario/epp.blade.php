@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Panel de Operario — Juan Pérez (OP-001)</title>
+    <title>Panel del trabajador — Juan Pérez (OP-001)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   </head>
   <body class="bg-light">
@@ -11,7 +11,7 @@
       <div class="container">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <h1 class="h4 mb-0">Panel de Operario</h1>
+            <h1 class="h4 mb-0">Panel del trabajador</h1>
             <div class="text-muted small">Juan Pérez — ID: <strong>OP-001</strong></div>
           </div>
           <div class="text-end">
@@ -26,16 +26,16 @@
       <section class="mb-4">
         <div class="row g-2">
           <div class="col-auto">
-            <button class="btn btn-primary">Solicitar</button>
+            <a href="{{ url('/operario/solicitar') }}" class="btn {{ request()->is('operario/solicitar') ? 'btn-primary' : 'btn-outline-primary' }}">Solicitar</a>
           </div>
           <div class="col-auto">
-            <button class="btn btn-outline-primary">Mis Herramientas</button>
+            <a href="{{ url('/operario/mis-herramientas') }}" class="btn {{ request()->is('operario/mis-herramientas') ? 'btn-primary' : 'btn-outline-secondary' }}">Mis Herramientas</a>
           </div>
           <div class="col-auto">
-            <button class="btn btn-outline-secondary">Mi EPP</button>
+            <a href="{{ url('/operario/epp') }}" class="btn {{ request()->is('operario/epp') ? 'btn-primary' : 'btn-outline-secondary' }}">Mi EPP</a>
           </div>
           <div class="col-auto">
-            <button class="btn btn-outline-danger">Devolver</button>
+            <a href="{{ url('/operario/devolver') }}" class="btn {{ request()->is('operario/devolver') ? 'btn-primary' : 'btn-outline-primary' }}">Devolver</a>
           </div>
         </div>
       </section>
