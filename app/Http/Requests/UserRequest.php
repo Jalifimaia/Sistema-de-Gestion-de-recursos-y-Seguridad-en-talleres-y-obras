@@ -26,6 +26,12 @@ class UserRequest extends FormRequest
         'email' => 'required|email|max:255',
         'id_rol' => 'required|exists:rol,id',
         'id_estado' => 'required|exists:estado_usuario,id',
+        'fecha_nacimiento' => 'nullable|date',
+        'dni' => 'nullable|string|max:15',
+        'telefono' => 'nullable|string|max:30',
+        'nro_legajo' => 'nullable|integer',
+        'auth_key' => 'nullable|string|max:255',
+        'access_token' => 'nullable|string|max:255',
     ];
 
     if ($this->isMethod('post')) {

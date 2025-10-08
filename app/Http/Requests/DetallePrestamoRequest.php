@@ -22,9 +22,10 @@ class DetallePrestamoRequest extends FormRequest
     public function rules(): array
     {
         return [
-			'id_prestamo' => 'required',
-			'id_serie' => 'required',
-			'id_recurso' => 'required',
+            'id_prestamo' => 'required|integer|exists:prestamo,id',
+            'id_serie' => 'required|integer|exists:serie_recurso,id',
+            'id_recurso' => 'required|integer|exists:recurso,id',
+                'id_estado_prestamo' => 'required|integer|exists:estado_prestamo,id', // Ensure this line is included
         ];
     }
 }
