@@ -165,7 +165,7 @@ class PrestamoController extends Controller
                     ->where('id', $idSerie)
                     ->update(['id_estado' => 3]);
             }
-
+//aaaa
             DB::commit();
             return Redirect::route('prestamos.index')->with('success', 'Préstamo registrado correctamente.');
         } catch (\Exception $e) {
