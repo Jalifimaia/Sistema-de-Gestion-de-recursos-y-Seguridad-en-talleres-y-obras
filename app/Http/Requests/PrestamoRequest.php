@@ -18,6 +18,7 @@ class PrestamoRequest extends FormRequest
             'fecha_devolucion' => 'nullable|date',
             'estado'           => 'required|integer',
             'id_serie'         => 'required|integer|exists:serie_recurso,id',
+            'id_estado_prestamo' => 'required|integer|exists:estado_prestamo,id',
         ];
     }
 }
