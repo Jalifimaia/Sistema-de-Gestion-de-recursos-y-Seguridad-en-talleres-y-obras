@@ -15,27 +15,29 @@ class PrestamoController extends Controller
     /**
      * Muestra la lista de préstamos registrados.
      */
-    public function index(): View
-    {
-        $prestamos = DB::table('prestamo')
-            ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
-            ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
-            ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
-            ->join('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
-            ->select(
-                'prestamo.id',
-                'usuario.name as operario',
-                'recurso.nombre as recurso',
-                'serie_recurso.nro_serie',
-                'prestamo.fecha_prestamo',
-                'prestamo.fecha_devolucion',
-                'prestamo.estado'
-            )
-            ->orderByDesc('prestamo.id')
-            ->get();
+ public function index(): View
+{
+    $prestamos = DB::table('prestamo')
+        ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
+        ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
+        ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
+        ->join('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
+        ->join('estado_prestamo', 'detalle_prestamo.id_estado_prestamo', '=', 'estado_prestamo.id')
+        ->select(
+            'prestamo.id',
+            'usuario.name as operario',
+            'recurso.nombre as recurso',
+            'serie_recurso.nro_serie',
+            'prestamo.fecha_prestamo',
+            'prestamo.fecha_devolucion',
+            'estado_prestamo.nombre as estado'
+        )
+        ->orderByDesc('prestamo.id')
+        ->get();
 
-        return view('prestamo.index', compact('prestamos'));
-    }
+    return view('prestamo.index', compact('prestamos'));
+}
+
 
     /**
      * Muestra el formulario para registrar un nuevo préstamo.
