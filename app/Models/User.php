@@ -21,15 +21,21 @@ class User extends Authenticatable
 //public $timestamps = true;
 
     protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'id_rol',
-    'usuario_creacion',
-    'usuario_modificacion',
-    'ultimo_acceso',
-    'id_estado'
-];
+        'name',
+        'email',
+        'password',
+        'id_rol',
+        'usuario_creacion',
+        'usuario_modificacion',
+        'ultimo_acceso',
+        'id_estado',
+        'fecha_nacimiento',
+        'dni',
+        'telefono',
+        'nro_legajo',
+        'auth_key',
+        'access_token',
+    ];
 
 
 
@@ -69,15 +75,17 @@ class User extends Authenticatable
 
 
 
-    public function incidentesCreados()
-    {
-        return $this->hasMany(Incidente::class, 'usuario_creacion', 'id');
-    }
+   public function incidentesCreados()
+{
+    return $this->hasMany(Incidente::class, 'id_usuario_creacion', 'id'); // ✅ correcto
+}
 
-    public function incidentesModificados()
-    {
-        return $this->hasMany(Incidente::class, 'usuario_modificacion', 'id');
-    }
+
+public function incidentesModificados()
+{
+    return $this->hasMany(Incidente::class, 'id_usuario_modificacion', 'id'); // ✅ correcto
+}
+
 
     public function prestamos()
     {
@@ -94,15 +102,18 @@ class User extends Authenticatable
         return $this->hasMany(Prestamo::class, 'usuario_modificacion', 'id');
     }
 
-    public function recursosCreados()
-    {
-        return $this->hasMany(Recurso::class, 'usuario_creacion', 'id');
-    }
+  public function recursosCreados()
+{
+    return $this->hasMany(Recurso::class, 'id_usuario_creacion', 'id'); // ✅ correcto
+}
 
-    public function recursosModificados()
-    {
-        return $this->hasMany(Recurso::class, 'usuario_modificacion', 'id');
-    }
+
+public function recursosModificados()
+{
+    return $this->hasMany(Recurso::class, 'id_usuario_modificacion', 'id');
+}
+
+
 
 
 }
