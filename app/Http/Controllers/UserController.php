@@ -82,18 +82,19 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id): View
+public function edit($id): View
 {
     $usuario = User::findOrFail($id);
-    $roles = Rol::all(); // ← esta línea es clave
+    $roles = Rol::all();
+    $estados = EstadoUsuario::all(); // ← esta línea es necesaria
 
-    // (opcional) proteger edición solo para admins
     if (auth()->user()->rol->nombre_rol !== 'Administrador') {
         abort(403, 'No tenés permiso para editar usuarios');
     }
 
-    return view('usuario.edit', compact('usuario', 'roles'));
+    return view('usuario.edit', compact('usuario', 'roles', 'estados'));
 }
+
 
 
 
@@ -107,6 +108,13 @@ class UserController extends Controller
 
     $data = $request->validated();
 
+    // Hashear password si se envía
+    if (!empty($data['password'])) {
+        $data['password'] = bcrypt($data['password']);
+    } else {
+        unset($data['password']);
+    }
+
     // Registrar quién lo modificó (solo si está autenticado)
     $data['usuario_modificacion'] = auth()->id();
 
@@ -117,11 +125,25 @@ class UserController extends Controller
 
 
 
-    public function destroy($id): RedirectResponse
-    {
-        User::find($id)->delete();
+public function destroy($id): RedirectResponse
+{
+    $usuario = User::findOrFail($id);
 
+    if (
+        $usuario->recursosCreados()->exists() ||
+        $usuario->recursosModificados()->exists() ||
+        $usuario->incidentesCreados()->exists() ||
+        $usuario->incidentesModificados()->exists()
+    ) {
         return Redirect::route('usuarios.index')
-            ->with('success', 'Usuario deleted successfully');
+            ->with('error', 'No se puede eliminar el usuario porque tiene recursos o incidentes asociados.');
     }
+
+    $usuario->delete();
+
+    return Redirect::route('usuarios.index')
+        ->with('success', 'Usuario eliminado correctamente.');
+}
+
+
 }

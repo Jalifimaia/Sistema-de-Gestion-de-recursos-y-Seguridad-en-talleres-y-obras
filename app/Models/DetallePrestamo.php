@@ -11,10 +11,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property $id_prestamo
  * @property $id_serie
  * @property $id_recurso
+ * @property $id_estado_prestamo
  *
  * @property Prestamo $prestamo
  * @property SerieRecurso $serieRecurso
  * @property Recurso $recurso
+ * @property EstadoPrestamo $estadoPrestamo
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
@@ -28,7 +30,14 @@ class DetallePrestamo extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['id_prestamo', 'id_serie', 'id_recurso'];
+    protected $fillable = ['id_prestamo', 'id_serie', 'id_recurso', 'id_estado_prestamo'];
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function estadoPrestamo()
+    {
+        return $this->belongsTo(\App\Models\EstadoPrestamo::class, 'id_estado_prestamo', 'id');
+    }
 
 
     /**

@@ -39,6 +39,34 @@
                             </select>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="id_estado" class="form-label">Estado</label>
+                            <select name="id_estado" class="form-select">
+                                @foreach ($estados as $estado)
+                                    <option value="{{ $estado->id }}" {{ $usuario->id_estado == $estado->id ? 'selected' : '' }}>
+                                        {{ $estado->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                            <input type="date" name="fecha_nacimiento" class="form-control" value="{{ old('fecha_nacimiento', $usuario->fecha_nacimiento ? date('Y-m-d', strtotime($usuario->fecha_nacimiento)) : '') }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dni" class="form-label">DNI</label>
+                            <input type="text" name="dni" class="form-control" value="{{ old('dni', $usuario->dni) }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="text" name="telefono" class="form-control" value="{{ old('telefono', $usuario->telefono) }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="nro_legajo" class="form-label">Nro Legajo</label>
+                            <input type="text" name="nro_legajo" class="form-control" value="{{ old('nro_legajo', $usuario->nro_legajo) }}">
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Guardar cambios</button>
                         </form>
 
