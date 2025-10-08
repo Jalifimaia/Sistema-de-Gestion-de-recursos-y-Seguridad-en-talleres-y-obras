@@ -75,15 +75,17 @@ class User extends Authenticatable
 
 
 
-    public function incidentesCreados()
-    {
-        return $this->hasMany(Incidente::class, 'usuario_creacion', 'id');
-    }
+   public function incidentesCreados()
+{
+    return $this->hasMany(Incidente::class, 'id_usuario_creacion', 'id'); // ✅ correcto
+}
 
-    public function incidentesModificados()
-    {
-        return $this->hasMany(Incidente::class, 'usuario_modificacion', 'id');
-    }
+
+public function incidentesModificados()
+{
+    return $this->hasMany(Incidente::class, 'id_usuario_modificacion', 'id'); // ✅ correcto
+}
+
 
     public function prestamos()
     {
@@ -100,15 +102,18 @@ class User extends Authenticatable
         return $this->hasMany(Prestamo::class, 'usuario_modificacion', 'id');
     }
 
-    public function recursosCreados()
-    {
-        return $this->hasMany(Recurso::class, 'usuario_creacion', 'id');
-    }
+  public function recursosCreados()
+{
+    return $this->hasMany(Recurso::class, 'id_usuario_creacion', 'id'); // ✅ correcto
+}
 
-    public function recursosModificados()
-    {
-        return $this->hasMany(Recurso::class, 'usuario_modificacion', 'id');
-    }
+
+public function recursosModificados()
+{
+    return $this->hasMany(Recurso::class, 'id_usuario_modificacion', 'id');
+}
+
+
 
 
 }

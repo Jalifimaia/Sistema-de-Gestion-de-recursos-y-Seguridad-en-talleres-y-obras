@@ -125,11 +125,25 @@ public function edit($id): View
 
 
 
-    public function destroy($id): RedirectResponse
-    {
-        User::find($id)->delete();
+public function destroy($id): RedirectResponse
+{
+    $usuario = User::findOrFail($id);
 
+    if (
+        $usuario->recursosCreados()->exists() ||
+        $usuario->recursosModificados()->exists() ||
+        $usuario->incidentesCreados()->exists() ||
+        $usuario->incidentesModificados()->exists()
+    ) {
         return Redirect::route('usuarios.index')
-            ->with('success', 'Usuario deleted successfully');
+            ->with('error', 'No se puede eliminar el usuario porque tiene recursos o incidentes asociados.');
     }
+
+    $usuario->delete();
+
+    return Redirect::route('usuarios.index')
+        ->with('success', 'Usuario eliminado correctamente.');
+}
+
+
 }
