@@ -4,23 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PrestamoRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
 use Carbon\Carbon;
 
 class PrestamoController extends Controller
 {
-    public function index()
+    /**
+     * Muestra la lista de préstamos registrados.
+     */
+    public function index(): View
     {
         $prestamos = DB::table('prestamo')
             ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
             ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
             ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
+            ->join('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
             ->select(
                 'prestamo.id',
+                'usuario.name as operario',
+                'recurso.nombre as recurso',
+                'serie_recurso.nro_serie',
                 'prestamo.fecha_prestamo',
                 'prestamo.fecha_devolucion',
-                'prestamo.estado',
-                'recurso.nombre as recurso',
-                'serie_recurso.nro_serie'
+                'prestamo.estado'
             )
             ->orderByDesc('prestamo.id')
             ->get();
@@ -28,7 +37,10 @@ class PrestamoController extends Controller
         return view('prestamo.index', compact('prestamos'));
     }
 
-    public function create()
+    /**
+     * Muestra el formulario para registrar un nuevo préstamo.
+     */
+    public function create(): View
     {
         $series = DB::table('serie_recurso')
             ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
@@ -37,20 +49,31 @@ class PrestamoController extends Controller
             ->select('serie_recurso.id', 'serie_recurso.nro_serie', 'recurso.nombre as recurso')
             ->get();
 
-        return view('prestamo.create', compact('series'));
+        $estadosPrestamo = DB::table('estado_prestamo')->get();
+
+        return view('prestamo.create', compact('series', 'estadosPrestamo'));
     }
 
+    /**
+     * Guarda un nuevo préstamo en la base de datos.
+     */
     public function store(PrestamoRequest $request)
     {
         $validated = $request->validated();
 
+        // Validar que el usuario esté autenticado
+        $usuarioId = Auth::id();
+        if (!$usuarioId) {
+            return back()->withErrors(['error' => 'Debe iniciar sesión para registrar un préstamo.']);
+        }
+
         DB::beginTransaction();
         try {
-            // insertar en prestamo
-            $id_prestamo = DB::table('prestamo')->insertGetId([
-                'id_usuario' => auth()->id() ?? 5, // usuario actual o admin por defecto
-                'id_usuario_creacion' => auth()->id() ?? 5,
-                'id_usuario_modificacion' => auth()->id() ?? 5,
+            // Insertar en la tabla prestamo
+            $idPrestamo = DB::table('prestamo')->insertGetId([
+                'id_usuario' => $usuarioId,
+                'id_usuario_creacion' => $usuarioId,
+                'id_usuario_modificacion' => $usuarioId,
                 'fecha_prestamo' => $validated['fecha_prestamo'],
                 'fecha_devolucion' => $validated['fecha_devolucion'],
                 'estado' => $validated['estado'],
@@ -58,26 +81,31 @@ class PrestamoController extends Controller
                 'fecha_modificacion' => Carbon::now(),
             ]);
 
-            // obtener el recurso correspondiente a la serie
+            // Obtener el recurso vinculado a la serie
             $serie = DB::table('serie_recurso')->where('id', $validated['id_serie'])->first();
+            if (!$serie) {
+                throw new \Exception('La serie seleccionada no existe.');
+            }
 
-            // insertar detalle del préstamo
+            // Insertar en detalle_prestamo
             DB::table('detalle_prestamo')->insert([
-                'id_prestamo' => $id_prestamo,
+                'id_prestamo' => $idPrestamo,
                 'id_serie' => $validated['id_serie'],
                 'id_recurso' => $serie->id_recurso,
+                'id_estado_prestamo' => $validated['id_estado_prestamo'],
             ]);
 
-            // actualizar estado de la serie a "Prestado"
+            // Actualizar estado de la serie a "Prestado" (id_estado = 3)
             DB::table('serie_recurso')
                 ->where('id', $validated['id_serie'])
                 ->update(['id_estado' => 3]);
 
             DB::commit();
-                return redirect()->route('prestamos.index')->with('success', 'Préstamo registrado correctamente.');
+            return Redirect::route('prestamos.index')->with('success', 'Préstamo registrado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => $e->getMessage()]);
+            Log::error('Error al registrar préstamo: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'No se pudo registrar el préstamo. ' . $e->getMessage()]);
         }
     }
 }
