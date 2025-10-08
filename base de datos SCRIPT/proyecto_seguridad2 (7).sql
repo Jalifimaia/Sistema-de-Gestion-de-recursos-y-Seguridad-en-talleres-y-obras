@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-10-2025 a las 04:50:45
+-- Tiempo de generación: 08-10-2025 a las 08:21:34
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -85,12 +85,7 @@ CREATE TABLE `detalle_prestamo` (
 INSERT INTO `detalle_prestamo` (`id`, `id_prestamo`, `id_serie`, `id_recurso`, `id_estado_prestamo`) VALUES
 (1, 2, 4, 4, 2),
 (3, 4, 4, 4, 2),
-(4, 6, 6, 6, 5),
-(5, 7, 8, 6, 2),
-(6, 8, 7, 6, 7),
-(7, 9, 5, 6, 2),
-(8, 10, 4, 4, 4),
-(9, 11, 9, 6, 4);
+(4, 6, 6, 6, 5);
 
 -- --------------------------------------------------------
 
@@ -214,9 +209,9 @@ CREATE TABLE `incidente` (
   `id_usuario_modificacion` int(10) UNSIGNED DEFAULT NULL,
   `descripcion` varchar(250) DEFAULT NULL,
   `fecha_incidente` datetime NOT NULL,
-  `fecha_creacion` datetime NOT NULL,
-  `fecha_modificacion` datetime NOT NULL,
-  `fecha_cierre_incidente` datetime NOT NULL,
+  `fecha_creacion` datetime DEFAULT current_timestamp(),
+  `fecha_modificacion` datetime DEFAULT current_timestamp(),
+  `fecha_cierre_incidente` datetime DEFAULT NULL,
   `resolucion` varchar(250) DEFAULT NULL,
   `id_estado_incidente` int(10) UNSIGNED NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
@@ -226,7 +221,11 @@ CREATE TABLE `incidente` (
 --
 
 INSERT INTO `incidente` (`id`, `id_recurso`, `id_supervisor`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `descripcion`, `fecha_incidente`, `fecha_creacion`, `fecha_modificacion`, `fecha_cierre_incidente`, `resolucion`, `id_estado_incidente`) VALUES
-(0, 6, 6, 0, 5, 5, 'Se quemó el cable del taladro', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', 'No hay', 1);
+(1, 6, 6, 0, 5, 5, 'Cable del taladro quemado por sobrecarga', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', 'Se reemplazó el cable dañado', 5),
+(2, 6, 5, NULL, 5, 5, 'Taladro no enciende al conectar', '2025-10-08 04:11:49', '2025-10-08 04:11:49', '2025-10-08 04:11:49', NULL, 'Pendiente diagnóstico', 1),
+(4, 4, 5, NULL, 5, 5, 'Chaleco con costura lateral abierta', '2025-10-17 01:33:00', '2025-10-08 04:36:18', '2025-10-08 04:36:18', '2025-10-22 01:33:00', 'Reparación realizada por proveedor', 5),
+(5, 6, 5, NULL, 5, 5, 'Taladro sin potencia al perforar', '2025-10-17 01:40:00', '2025-10-08 04:40:15', '2025-10-08 04:40:15', NULL, 'Revisión técnica programada', 2),
+(7, 4, 5, NULL, NULL, NULL, 'Chaleco con desgaste en material reflectante', '2025-10-30 02:04:00', '2025-10-08 02:11:33', '2025-10-08 02:11:33', NULL, 'En espera de revisión técnica', 2);
 
 -- --------------------------------------------------------
 
@@ -304,7 +303,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (2, '0001_01_01_000001_create_cache_table', 1),
 (3, '0001_01_01_000002_create_jobs_table', 1),
 (4, '2025_10_02_161535_add_campos_personalizados_to_users_table', 1),
-(5, '2025_10_02_212636_add_ultimo_acceso_to_users_table', 1);
+(5, '2025_10_02_212636_add_ultimo_acceso_to_users_table', 1),
+(6, '2025_10_03_020124_remove_fecha_columns_from_recurso_table', 2);
 
 -- --------------------------------------------------------
 
@@ -345,12 +345,7 @@ INSERT INTO `prestamo` (`id`, `id_usuario`, `id_usuario_creacion`, `id_usuario_m
 (2, 7, 6, 6, '2025-10-07 00:12:55', NULL, 1, '2025-10-07 00:12:55', '2025-10-07 00:12:55'),
 (3, 7, 6, 6, '2025-10-07 16:04:18', NULL, 1, '2025-10-07 16:04:18', '2025-10-07 16:04:18'),
 (4, 7, 6, 6, '2025-10-07 16:20:12', NULL, 1, '2025-10-07 16:20:12', '2025-10-07 16:20:12'),
-(6, 5, 5, 5, '2025-10-03 00:00:00', '2025-10-15 00:00:00', 4, '2025-10-08 02:42:26', '2025-10-08 02:42:26'),
-(7, 5, 5, 5, '2025-10-16 00:00:00', '2025-10-21 00:00:00', 4, '2025-10-08 02:42:46', '2025-10-08 02:42:46'),
-(8, 5, 5, 5, '2025-10-02 00:00:00', '2025-10-09 00:00:00', 4, '2025-10-08 02:43:42', '2025-10-08 02:43:42'),
-(9, 5, 5, 5, '2025-10-01 00:00:00', '2025-10-02 00:00:00', 3, '2025-10-08 02:44:21', '2025-10-08 02:44:21'),
-(10, 5, 5, 5, '2025-10-09 00:00:00', '2025-10-25 00:00:00', 4, '2025-10-08 02:44:47', '2025-10-08 02:44:47'),
-(11, 5, 5, 5, '2025-10-30 00:00:00', '2025-12-18 00:00:00', 3, '2025-10-08 02:45:32', '2025-10-08 02:45:32');
+(6, 5, 5, 5, '2025-10-03 00:00:00', '2025-10-15 00:00:00', 4, '2025-10-08 02:42:26', '2025-10-08 02:42:26');
 
 -- --------------------------------------------------------
 
@@ -366,8 +361,6 @@ CREATE TABLE `recurso` (
   `nombre` varchar(60) NOT NULL,
   `descripcion` varchar(250) DEFAULT NULL,
   `costo_unitario` float(10,2) NOT NULL,
-  `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
-  `fecha_modificacion` datetime NOT NULL DEFAULT current_timestamp(),
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `id_subcategoria` int(11) UNSIGNED NOT NULL
@@ -377,10 +370,12 @@ CREATE TABLE `recurso` (
 -- Volcado de datos para la tabla `recurso`
 --
 
-INSERT INTO `recurso` (`id`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `nombre`, `descripcion`, `costo_unitario`, `fecha_creacion`, `fecha_modificacion`, `created_at`, `updated_at`, `id_subcategoria`) VALUES
-(4, NULL, 5, 5, 'Chaleco Marca Pepito', 'qqqqqqqqqq', 52000.00, '2025-10-05 02:09:53', '2025-10-05 02:09:53', '2025-10-05 05:09:53', '2025-10-05 05:09:53', 2),
-(5, NULL, 5, 5, 'Casco  123', 'Casco Amarillo', 20000.00, '2025-10-05 02:30:11', '2025-10-05 02:30:11', '2025-10-05 05:30:11', '2025-10-05 05:30:11', 4),
-(6, NULL, 5, 5, 'Taladro XP', 'jkjkjkjkk', 20000.00, '2025-10-05 14:59:54', '2025-10-05 14:59:54', '2025-10-05 17:59:54', '2025-10-05 17:59:54', 6);
+INSERT INTO `recurso` (`id`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `nombre`, `descripcion`, `costo_unitario`, `created_at`, `updated_at`, `id_subcategoria`) VALUES
+(4, NULL, 5, 5, 'Chaleco Marca Pepito', 'Chaleco naranja', 52000.00, '2025-10-05 05:09:53', '2025-10-05 05:09:53', 2),
+(5, NULL, 5, 5, 'Casco  123', 'Casco Amarillo', 20000.00, '2025-10-05 05:30:11', '2025-10-05 05:30:11', 4),
+(6, NULL, 5, 5, 'Taladro XP', 'Taladro rojo', 20000.00, '2025-10-05 17:59:54', '2025-10-05 17:59:54', 6),
+(7, NULL, 5, 5, 'Taladro XP', 'Acero', 20000.00, '2025-10-08 03:06:55', '2025-10-08 03:06:55', 6),
+(8, NULL, 5, 5, 'Stanley', 'Azul, acero', 30000.00, '2025-10-08 03:08:01', '2025-10-08 03:08:01', 1);
 
 -- --------------------------------------------------------
 
@@ -431,7 +426,10 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_incidente_detalle`, `nro_se
 (6, 6, NULL, 'XP-002', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
 (7, 6, NULL, 'XP-003', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
 (8, 6, NULL, 'XP-004', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
-(9, 6, NULL, 'XP-005', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3);
+(9, 6, NULL, 'XP-005', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
+(10, 8, NULL, 'GT001', NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 1),
+(11, 8, NULL, 'GT002', NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 1),
+(12, 8, NULL, 'GT003', NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 1);
 
 -- --------------------------------------------------------
 
@@ -538,7 +536,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`, `updated_at`, `usuario_creacion`, `usuario_modificacion`, `ultimo_acceso`, `id_estado`, `fecha_nacimiento`, `dni`, `telefono`, `nro_legajo`, `auth_key`, `access_token`) VALUES
-(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-08 02:14:05', NULL, NULL, '2025-10-08 02:14:05', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-08 04:10:09', NULL, NULL, '2025-10-08 04:10:09', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-03 21:42:12', 5, 5, '2025-10-03 21:42:12', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (7, 3, 'trabajador', 'traba@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-03 21:44:20', 5, 5, '2025-10-03 21:44:20', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-04 01:49:47', 5, 5, '2025-10-04 01:49:47', 3, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -789,6 +787,12 @@ ALTER TABLE `failed_jobs`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `incidente`
+--
+ALTER TABLE `incidente`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
 -- AUTO_INCREMENT de la tabla `jobs`
 --
 ALTER TABLE `jobs`
@@ -798,7 +802,7 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT de la tabla `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `prestamo`
@@ -810,13 +814,13 @@ ALTER TABLE `prestamo`
 -- AUTO_INCREMENT de la tabla `recurso`
 --
 ALTER TABLE `recurso`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `serie_recurso`
 --
 ALTER TABLE `serie_recurso`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `stock`
