@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-10-2025 a las 08:21:34
+-- Tiempo de generación: 08-10-2025 a las 18:15:57
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -85,7 +85,8 @@ CREATE TABLE `detalle_prestamo` (
 INSERT INTO `detalle_prestamo` (`id`, `id_prestamo`, `id_serie`, `id_recurso`, `id_estado_prestamo`) VALUES
 (1, 2, 4, 4, 2),
 (3, 4, 4, 4, 2),
-(4, 6, 6, 6, 5);
+(4, 6, 6, 6, 5),
+(10, 12, 10, 8, 5);
 
 -- --------------------------------------------------------
 
@@ -245,7 +246,7 @@ CREATE TABLE `incidente_detalle` (
 --
 
 INSERT INTO `incidente_detalle` (`id`, `id_incidente`, `id_serie`, `descripcion`) VALUES
-(0, 0, 5, 'Corte de cable por sobrecalentamiento');
+(0, 1, 5, 'Corte de cable por sobrecalentamiento');
 
 -- --------------------------------------------------------
 
@@ -345,7 +346,8 @@ INSERT INTO `prestamo` (`id`, `id_usuario`, `id_usuario_creacion`, `id_usuario_m
 (2, 7, 6, 6, '2025-10-07 00:12:55', NULL, 1, '2025-10-07 00:12:55', '2025-10-07 00:12:55'),
 (3, 7, 6, 6, '2025-10-07 16:04:18', NULL, 1, '2025-10-07 16:04:18', '2025-10-07 16:04:18'),
 (4, 7, 6, 6, '2025-10-07 16:20:12', NULL, 1, '2025-10-07 16:20:12', '2025-10-07 16:20:12'),
-(6, 5, 5, 5, '2025-10-03 00:00:00', '2025-10-15 00:00:00', 4, '2025-10-08 02:42:26', '2025-10-08 02:42:26');
+(6, 5, 5, 5, '2025-10-03 00:00:00', '2025-10-15 00:00:00', 4, '2025-10-08 02:42:26', '2025-10-08 02:42:26'),
+(12, 5, 5, 5, '2025-10-08 00:00:00', '2025-10-16 00:00:00', 3, '2025-10-08 16:14:45', '2025-10-08 16:14:45');
 
 -- --------------------------------------------------------
 
@@ -427,7 +429,7 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_incidente_detalle`, `nro_se
 (7, 6, NULL, 'XP-003', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
 (8, 6, NULL, 'XP-004', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
 (9, 6, NULL, 'XP-005', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
-(10, 8, NULL, 'GT001', NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 1),
+(10, 8, NULL, 'GT001', NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 3),
 (11, 8, NULL, 'GT002', NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 1),
 (12, 8, NULL, 'GT003', NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 1);
 
@@ -536,7 +538,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`, `updated_at`, `usuario_creacion`, `usuario_modificacion`, `ultimo_acceso`, `id_estado`, `fecha_nacimiento`, `dni`, `telefono`, `nro_legajo`, `auth_key`, `access_token`) VALUES
-(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-08 04:10:09', NULL, NULL, '2025-10-08 04:10:09', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-08 16:14:20', NULL, NULL, '2025-10-08 16:14:20', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-03 21:42:12', 5, 5, '2025-10-03 21:42:12', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (7, 3, 'trabajador', 'traba@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-03 21:44:20', 5, 5, '2025-10-03 21:44:20', 1, NULL, NULL, NULL, NULL, NULL, NULL),
 (8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-04 01:49:47', 5, 5, '2025-10-04 01:49:47', 3, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -760,7 +762,7 @@ ALTER TABLE `usuario_recurso`
 -- AUTO_INCREMENT de la tabla `detalle_prestamo`
 --
 ALTER TABLE `detalle_prestamo`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `estado_incidente`
@@ -808,7 +810,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT de la tabla `prestamo`
 --
 ALTER TABLE `prestamo`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `recurso`
@@ -875,48 +877,11 @@ ALTER TABLE `incidente`
   ADD CONSTRAINT `incidente_ibfk_2` FOREIGN KEY (`id_incidente_detalle`) REFERENCES `incidente_detalle` (`id`) ON UPDATE CASCADE;
 
 --
--- Filtros para la tabla `incidente_detalle`
---
-ALTER TABLE `incidente_detalle`
-  ADD CONSTRAINT `incidente_detalle_ibfk_1` FOREIGN KEY (`id_incidente`) REFERENCES `incidente` (`id`) ON UPDATE CASCADE;
-
---
 -- Filtros para la tabla `prestamo`
 --
 ALTER TABLE `prestamo`
   ADD CONSTRAINT `fk_prestamo_usuario_creacion` FOREIGN KEY (`id_usuario_creacion`) REFERENCES `usuario` (`id`),
   ADD CONSTRAINT `fk_prestamo_usuario_modificacion` FOREIGN KEY (`id_usuario_modificacion`) REFERENCES `usuario` (`id`);
-
---
--- Filtros para la tabla `recurso`
---
-ALTER TABLE `recurso`
-  ADD CONSTRAINT `fk_recurso_usuario_creacion` FOREIGN KEY (`id_usuario_creacion`) REFERENCES `usuario` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_recurso_usuario_modificacion` FOREIGN KEY (`id_usuario_modificacion`) REFERENCES `usuario` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_subcategoria` FOREIGN KEY (`id_subcategoria`) REFERENCES `subcategoria` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `recurso_ibfk_3` FOREIGN KEY (`id_incidente_detalle`) REFERENCES `incidente_detalle` (`id`) ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `serie_recurso`
---
-ALTER TABLE `serie_recurso`
-  ADD CONSTRAINT `fk_serie_estado` FOREIGN KEY (`id_estado`) REFERENCES `estado` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `serie_recurso_ibfk_1` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `serie_recurso_ibfk_2` FOREIGN KEY (`id_incidente_detalle`) REFERENCES `incidente_detalle` (`id`) ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `subcategoria`
---
-ALTER TABLE `subcategoria`
-  ADD CONSTRAINT `fk_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `categoria` (`id`) ON UPDATE CASCADE;
-
---
--- Filtros para la tabla `usuario`
---
-ALTER TABLE `usuario`
-  ADD CONSTRAINT `fk_estado` FOREIGN KEY (`id_estado`) REFERENCES `estado_usuario` (`id`) ON DELETE NO ACTION,
-  ADD CONSTRAINT `fk_usuario_creacion` FOREIGN KEY (`usuario_creacion`) REFERENCES `usuario` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `fk_usuario_modificacion` FOREIGN KEY (`usuario_modificacion`) REFERENCES `usuario` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
