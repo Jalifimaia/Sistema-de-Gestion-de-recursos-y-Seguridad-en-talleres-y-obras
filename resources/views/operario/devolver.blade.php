@@ -9,17 +9,25 @@
   <body class="bg-light">
     <main class="container py-4">
       <header class="mb-4">
-        <h1 class="h4 mb-1">Panel de Operario</h1>
+        <h1 class="h4 mb-1">Panel del trabajador</h1>
         <div class="text-muted small">Juan Pérez — ID: <strong>OP-001</strong></div>
         <div class="small text-muted">Turno: <strong>Mañana</strong> | Hora: <strong>09:30 AM</strong></div>
       </header>
 
       <section class="mb-4">
         <div class="row g-2">
-          <div class="col-auto"><button class="btn btn-outline-primary">Solicitar</button></div>
-          <div class="col-auto"><button class="btn btn-outline-secondary">Mis Herramientas</button></div>
-          <div class="col-auto"><button class="btn btn-outline-secondary">Mi EPP</button></div>
-          <div class="col-auto"><button class="btn btn-primary">Devolver</button></div>
+          <div class="col-auto">
+            <a href="{{ url('/operario/solicitar') }}" class="btn {{ request()->is('operario/solicitar') ? 'btn-primary' : 'btn-outline-primary' }}">Solicitar</a>
+          </div>
+          <div class="col-auto">
+            <a href="{{ url('/operario/mis-herramientas') }}" class="btn {{ request()->is('operario/mis-herramientas') ? 'btn-primary' : 'btn-outline-secondary' }}">Mis Herramientas</a>
+          </div>
+          <div class="col-auto">
+            <a href="{{ url('/operario/epp') }}" class="btn {{ request()->is('operario/epp') ? 'btn-primary' : 'btn-outline-secondary' }}">Mi EPP</a>
+          </div>
+          <div class="col-auto">
+            <a href="{{ url('/operario/devolver') }}" class="btn {{ request()->is('operario/devolver') ? 'btn-primary' : 'btn-outline-primary' }}">Devolver</a>
+          </div>
         </div>
       </section>
 

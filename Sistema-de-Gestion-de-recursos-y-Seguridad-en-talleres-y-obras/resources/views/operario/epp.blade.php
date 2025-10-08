@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Panel de Operario — Juan Pérez (OP-001)</title>
+    <title>Panel del trabajador — Juan Pérez (OP-001)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   </head>
   <body class="bg-light">
@@ -11,7 +11,7 @@
       <div class="container">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <h1 class="h4 mb-0">Panel de Operario</h1>
+            <h1 class="h4 mb-0">Panel del trabajador</h1>
             <div class="text-muted small">Juan Pérez — ID: <strong>OP-001</strong></div>
           </div>
           <div class="text-end">
