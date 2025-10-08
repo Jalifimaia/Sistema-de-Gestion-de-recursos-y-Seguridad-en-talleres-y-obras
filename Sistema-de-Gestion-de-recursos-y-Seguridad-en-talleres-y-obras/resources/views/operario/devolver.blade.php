@@ -9,7 +9,7 @@
   <body class="bg-light">
     <main class="container py-4">
       <header class="mb-4">
-        <h1 class="h4 mb-1">Panel de Operario</h1>
+        <h1 class="h4 mb-1">Panel del trabajador</h1>
         <div class="text-muted small">Juan Pérez — ID: <strong>OP-001</strong></div>
         <div class="small text-muted">Turno: <strong>Mañana</strong> | Hora: <strong>09:30 AM</strong></div>
       </header>

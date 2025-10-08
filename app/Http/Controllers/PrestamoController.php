@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\Prestamo;
 use Carbon\Carbon;
 
 class PrestamoController extends Controller
@@ -22,6 +23,7 @@ class PrestamoController extends Controller
             ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
             ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
             ->join('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
+            ->join('estado_prestamo', 'detalle_prestamo.id_estado_prestamo', '=', 'estado_prestamo.id')
             ->select(
                 'prestamo.id',
                 'usuario.name as operario',
@@ -29,7 +31,7 @@ class PrestamoController extends Controller
                 'serie_recurso.nro_serie',
                 'prestamo.fecha_prestamo',
                 'prestamo.fecha_devolucion',
-                'prestamo.estado'
+                'estado_prestamo.nombre as estado'
             )
             ->orderByDesc('prestamo.id')
             ->get();
@@ -37,68 +39,132 @@ class PrestamoController extends Controller
         return view('prestamo.index', compact('prestamos'));
     }
 
-    /**
-     * Muestra el formulario para registrar un nuevo préstamo.
-     */
-    public function create(): View
+    public function update(PrestamoRequest $request, $id)
     {
-        $series = DB::table('serie_recurso')
-            ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
-            ->join('estado', 'serie_recurso.id_estado', '=', 'estado.id')
-            ->where('estado.nombre_estado', '=', 'Disponible')
-            ->select('serie_recurso.id', 'serie_recurso.nro_serie', 'recurso.nombre as recurso')
-            ->get();
+        $request->validate([
+            'fecha_prestamo' => 'required|date',
+            'fecha_devolucion' => 'nullable|date|after_or_equal:fecha_prestamo',
+            'series' => 'nullable|array',
+            'series.*' => 'integer|exists:serie_recurso,id',
+        ]);
 
-        $estadosPrestamo = DB::table('estado_prestamo')->get();
+        DB::beginTransaction();
+        try {
+            DB::table('prestamo')->where('id', $id)->update([
+                'fecha_prestamo' => $request->fecha_prestamo,
+                'fecha_devolucion' => $request->fecha_devolucion,
+                'estado' => $request->estado,
+                'fecha_modificacion' => now(),
+                'id_usuario_modificacion' => Auth::id(),
+            ]);
 
-        return view('prestamo.create', compact('series', 'estadosPrestamo'));
+            if ($request->filled('series')) {
+                foreach ($request->series as $idSerie) {
+                    $serie = DB::table('serie_recurso')->where('id', $idSerie)->first();
+
+                    $yaPrestada = DB::table('detalle_prestamo')
+                        ->where('id_serie', $idSerie)
+                        ->where('id_estado_prestamo', 2)
+                        ->exists();
+
+                    if (!$serie || $serie->id_estado != 1 || $yaPrestada) {
+                        throw new \Exception("La serie $idSerie no está disponible o ya está prestada.");
+                    }
+
+                    DB::table('detalle_prestamo')->insert([
+                        'id_prestamo' => $id,
+                        'id_serie' => $idSerie,
+                        'id_recurso' => $serie->id_recurso,
+                        'id_estado_prestamo' => 2,
+                    ]);
+
+                    DB::table('serie_recurso')->where('id', $idSerie)->update(['id_estado' => 3]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('prestamos.index')->with('success', 'Préstamo actualizado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al actualizar préstamo: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'No se pudo actualizar el préstamo. ' . $e->getMessage()]);
+        }
     }
 
-    /**
-     * Guarda un nuevo préstamo en la base de datos.
-     */
+    public function edit($id): View
+    {
+        $prestamo = Prestamo::with([
+            'detallePrestamos.serieRecurso.recurso.subcategoria.categoria',
+            'detallePrestamos.estadoPrestamo'
+        ])->findOrFail($id);
+
+        $categorias = DB::table('categoria')->get();
+        $detalles = [];
+
+        foreach ($prestamo->detallePrestamos as $d) {
+            $detalles[] = [
+                'categoria_id' => optional($d->serieRecurso->recurso->subcategoria->categoria)->id,
+                'subcategoria_id' => optional($d->serieRecurso->recurso->subcategoria)->id,
+                'recurso_id' => optional($d->serieRecurso->recurso)->id,
+                'serie_id' => optional($d->serieRecurso)->id,
+                'serie_nro' => optional($d->serieRecurso)->nro_serie,
+                'recurso_nombre' => optional($d->serieRecurso->recurso)->nombre,
+            ];
+        }
+
+        return view('prestamo.edit', compact('prestamo', 'categorias', 'detalles'));
+    }
+
+    public function create(): View
+    {
+        $categorias = DB::table('categoria')->get();
+        return view('prestamo.create', compact('categorias'));
+    }
+
     public function store(PrestamoRequest $request)
     {
         $validated = $request->validated();
-
-        // Validar que el usuario esté autenticado
         $usuarioId = Auth::id();
+
         if (!$usuarioId) {
             return back()->withErrors(['error' => 'Debe iniciar sesión para registrar un préstamo.']);
         }
 
         DB::beginTransaction();
         try {
-            // Insertar en la tabla prestamo
             $idPrestamo = DB::table('prestamo')->insertGetId([
                 'id_usuario' => $usuarioId,
                 'id_usuario_creacion' => $usuarioId,
                 'id_usuario_modificacion' => $usuarioId,
                 'fecha_prestamo' => $validated['fecha_prestamo'],
                 'fecha_devolucion' => $validated['fecha_devolucion'],
-                'estado' => $validated['estado'],
+                'estado' => 2,
                 'fecha_creacion' => Carbon::now(),
                 'fecha_modificacion' => Carbon::now(),
             ]);
 
-            // Obtener el recurso vinculado a la serie
-            $serie = DB::table('serie_recurso')->where('id', $validated['id_serie'])->first();
-            if (!$serie) {
-                throw new \Exception('La serie seleccionada no existe.');
+            foreach ($validated['series'] as $idSerie) {
+                $serie = DB::table('serie_recurso')->where('id', $idSerie)->first();
+
+                if (!$serie) {
+                    throw new \Exception("La serie con ID $idSerie no existe.");
+                }
+
+                if ($serie->id_estado != 1) {
+                    throw new \Exception("La serie $serie->nro_serie no está disponible.");
+                }
+
+                DB::table('detalle_prestamo')->insert([
+                    'id_prestamo' => $idPrestamo,
+                    'id_serie' => $idSerie,
+                    'id_recurso' => $serie->id_recurso,
+                    'id_estado_prestamo' => 2,
+                ]);
+
+                DB::table('serie_recurso')
+                    ->where('id', $idSerie)
+                    ->update(['id_estado' => 3]);
             }
-
-            // Insertar en detalle_prestamo
-            DB::table('detalle_prestamo')->insert([
-                'id_prestamo' => $idPrestamo,
-                'id_serie' => $validated['id_serie'],
-                'id_recurso' => $serie->id_recurso,
-                'id_estado_prestamo' => $validated['id_estado_prestamo'],
-            ]);
-
-            // Actualizar estado de la serie a "Prestado" (id_estado = 3)
-            DB::table('serie_recurso')
-                ->where('id', $validated['id_serie'])
-                ->update(['id_estado' => 3]);
 
             DB::commit();
             return Redirect::route('prestamos.index')->with('success', 'Préstamo registrado correctamente.');

@@ -1,55 +1,93 @@
 @extends('layouts.app')
 
+@section('template_title')
+  Registrar Préstamo
+@endsection
+
 @section('content')
-<div class="container">
-  <h3>Registrar Préstamo</h3>
-
-  <form method="POST" action="{{ route('prestamos.store') }}">
-    @csrf
-
-    <div class="mb-3">
-      <label for="fecha_prestamo" class="form-label">Fecha de Préstamo</label>
-      <input type="date" name="fecha_prestamo" id="fecha_prestamo" class="form-control" required>
+<div class="container py-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white text-center">
+      <h4 class="mb-0">Registrar Préstamo</h4>
     </div>
+    <div class="card-body bg-white">
+      <form method="POST" action="{{ route('prestamos.store') }}">
+        @csrf
 
-    <div class="mb-3">
-      <label for="fecha_devolucion" class="form-label">Fecha de Devolución (opcional)</label>
-      <input type="date" name="fecha_devolucion" id="fecha_devolucion" class="form-control">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="fecha_prestamo" class="form-label">Fecha de Préstamo</label>
+            <input type="date" name="fecha_prestamo" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label for="fecha_devolucion" class="form-label">Fecha de Devolución (opcional)</label>
+            <input type="date" name="fecha_devolucion" class="form-control">
+          </div>
+        </div>
+
+        <input type="hidden" name="estado" value="2"> {{-- Activo --}}
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="categoria" class="form-label">Categoría</label>
+            <select id="categoria" class="form-select" required>
+              <option selected disabled>Seleccione una categoría</option>
+              @foreach($categorias as $cat)
+                <option value="{{ $cat->id }}">{{ $cat->nombre_categoria }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="subcategoria" class="form-label">Subcategoría</label>
+            <select id="subcategoria" class="form-select" required>
+              <option selected disabled>Seleccione una subcategoría</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="recurso" class="form-label">Recurso</label>
+            <select id="recurso" class="form-select" required>
+              <option selected disabled>Seleccione un recurso</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-10">
+            <label for="serie" class="form-label">Serie del Recurso</label>
+            <select id="serie" class="form-select" required>
+              <option selected disabled>Seleccione una serie</option>
+            </select>
+          </div>
+          <div class="col-md-2 text-end">
+            <button type="button" class="btn btn-success w-100 mt-4" id="agregar">Agregar</button>
+          </div>
+        </div>
+
+        <hr>
+        <h5>Recursos a prestar</h5>
+        <table class="table table-bordered text-center" id="tablaPrestamos">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Recurso</th>
+              <th>Serie</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="text-end mt-3">
+          <button type="submit" class="btn btn-primary">Guardar Préstamo</button>
+        </div>
+      </form>
     </div>
-
-    <div class="mb-3">
-      <label for="estado" class="form-label">Estado</label>
-      <select name="estado" id="estado" class="form-select" required>
-        <option value="3">Prestado</option>
-        <option value="4">Devuelto</option>
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label for="id_serie" class="form-label">Serie de Recurso</label>
-      <select name="id_serie" id="id_serie" class="form-select" required>
-        <option value="">Seleccione una serie</option>
-        @foreach($series as $serie)
-          <option value="{{ $serie->id }}">
-            {{ $serie->recurso }} - Serie {{ $serie->nro_serie }}
-          </option>
-        @endforeach
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label for="id_estado_prestamo" class="form-label">Estado del Préstamo</label>
-      <select name="id_estado_prestamo" id="id_estado_prestamo" class="form-select" required>
-        <option value="">Seleccione estado</option>
-        @foreach($estadosPrestamo as $estado)
-          <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
-        @endforeach
-      </select>
-    </div>
-
-
-    <button type="submit" class="btn btn-primary">Guardar</button>
-    <a href="{{ route('prestamos.index') }}" class="btn btn-secondary">Cancelar</a>
-  </form>
+  </div>
 </div>
+
+@section('scripts')
+  <script src="{{ asset('js/prestamo.js') }}"></script>
+@endsection
+
+
 @endsection
