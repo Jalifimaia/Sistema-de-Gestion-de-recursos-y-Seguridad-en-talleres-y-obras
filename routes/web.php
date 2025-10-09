@@ -20,7 +20,7 @@ Route::get('/controlEPP', fn() => view('controlEPP'));
 
 // Vistas para el rol Operario (estáticas por ahora)
 Route::get('/operario/solicitar', fn() => view('operario.solicitar'));
-Route::get('/operario/mis-herramientas', fn() => view('operario.mis_herramientas'));
+Route::get('/operario/mis-herramientas', [App\Http\Controllers\OperarioHerramientaController::class, 'index']);
 Route::get('/operario/devolver', fn() => view('operario.devolver'));
 Route::get('/operario/epp', fn() => view('operario.epp'));
 
