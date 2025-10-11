@@ -17,7 +17,6 @@ Route::get('/inicio2', fn() => view('inicio2'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
-Route::get('/reportes', fn() => view('reportes'));
 Route::get('/test', fn() => 'Laravel funciona correctamente');
 
 // Vistas para el rol Operario (estáticas por ahora)
@@ -29,7 +28,6 @@ Route::get('/operario/epp', fn() => view('operario.epp'));
 // Vistas para el rol Supervisor (estáticas por ahora)
 Route::get('/supervisor/control-herramientas', fn() => view('supervisor.control_herramientas'));
 Route::get('/supervisor/registrar-incidente', fn() => view('supervisor.registrar_incidente'));
-Route::get('/supervisor/reportes', fn() => view('supervisor.reportes'));
 Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp'));
 
 // Rutas protegidas por autenticación

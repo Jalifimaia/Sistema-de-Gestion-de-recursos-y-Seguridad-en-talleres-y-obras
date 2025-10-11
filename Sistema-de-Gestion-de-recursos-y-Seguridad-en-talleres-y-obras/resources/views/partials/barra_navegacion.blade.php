@@ -12,9 +12,7 @@
     <a class="nav-link {{ request()->is('controlEPP') ? 'active' : '' }}" href="{{ url('controlEPP') }}">ControlEPP</a>
   </li>
 
-  <li class="nav-item">
-    <a class="nav-link {{ request()->is('reportes') ? 'active' : '' }}" href="{{ url('reportes') }}">Reportes</a>
-  </li>
+
 
   <li class="nav-item">
     <a class="nav-link {{ request()->is('usuarios') ? 'active' : '' }}" href="{{ url('usuarios') }}">Usuarios</a>
