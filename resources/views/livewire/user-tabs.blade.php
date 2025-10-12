@@ -1,10 +1,8 @@
 <div>
   <!-- Buscador -->
   <div class="mb-4">
-    <input type="text" class="form-control" placeholder="Buscar por nombre o email..." wire:model.live.debounce.300ms="search">
+    <input type="text" class="form-control" placeholder="Buscar por nombre, email, estado o rol..." wire:model.live.debounce.300ms="search">
     <p class="text-muted">Buscando: <strong>{{ $search }}</strong></p>
-
-    
   </div>
 
   <!-- Tabs -->
