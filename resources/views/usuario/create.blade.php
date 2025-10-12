@@ -62,6 +62,8 @@
 
 
                     <button type="submit" class="btn btn-success">Crear</button>
+                    <a href="{{ url()->previous() }}" class="btn btn-secondary">Volver atrás</a>
+
                 </form>
             </div>
         </div>
