@@ -13,10 +13,11 @@ use App\Models\Subcategoria;
 
 // Rutas públicas
 Route::get('/', fn() => view('welcome'));
-Route::get('/inicio2', fn() => view('inicio2'));
+//Route::get('/inicio2', fn() => view('inicio2'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
+Route::get('/reportes', fn() => view('supervisor.reportes'));
 
 // Vistas para el rol Operario (estáticas por ahora)
 Route::get('/operario/solicitar', fn() => view('operario.solicitar'));
@@ -26,8 +27,8 @@ Route::get('/operario/epp', fn() => view('operario.epp'));
 
 // Vistas para el rol Supervisor (estáticas y dinámicas)
 Route::get('/supervisor/control-herramientas', fn() => view('supervisor.control_herramientas'));
-Route::get('/supervisor/reportes', fn() => view('supervisor.reportes'));
 Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp'));
+
 
 //incidente-2-david
 Route::get('/incidente', [IncidenteController::class, 'index'])->name('incidente.index');
@@ -37,21 +38,6 @@ Route::post('/incidente', [IncidenteController::class, 'store'])->name('incident
 
 // ✅ Vista dinámica para registrar incidente
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/test-incidente2', function () {
-    return view('test_incidente2');
-});
-
-Route::post('/test-incidente2', [App\Http\Controllers\IncidenteController::class, 'storeTest2'])->name('incidente.storeTest2');
-
-
-Route::get('/test-incidente', function () {
-    return view('test_incidente');
-});
-
-Route::post('/test-incidente', [App\Http\Controllers\IncidenteController::class, 'storeTest'])->name('incidente.storeTest');
-
-
     Route::get('/supervisor/registrar-incidente', [IncidenteController::class, 'create'])->name('incidente.create');
     Route::post('/supervisor/registrar-incidente', [IncidenteController::class, 'store'])->name('incidente.store');
 
@@ -75,6 +61,23 @@ Route::post('/api/subcategorias', [SubcategoriaController::class, 'store']);
 
 // Dashboard real
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+// prestamos
+Route::get('/api/recursos/{subcategoriaId}', function ($subcategoriaId) {
+    return DB::table('recurso')
+        ->where('id_subcategoria', $subcategoriaId)
+        ->select('id', 'nombre')
+        ->get();
+});
+
+Route::get('/api/series/{recursoId}', function ($recursoId) {
+    return DB::table('serie_recurso')
+        ->where('id_recurso', $recursoId)
+        ->where('id_estado', 1) // 1 = Disponible
+        ->select('id', 'nro_serie')
+        ->get();
+});
+
 
 // Autenticación
 require __DIR__.'/auth.php';

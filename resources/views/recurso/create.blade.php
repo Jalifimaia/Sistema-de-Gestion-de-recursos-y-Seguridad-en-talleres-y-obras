@@ -17,7 +17,7 @@
                 <option value="">Seleccione una categoría</option>
                 @foreach($categorias as $categoria)
                     <option value="{{ $categoria->id }}"
-                        {{ old('categoria_id', $recurso->categoria_id ?? '') == $categoria->id ? 'selected' : '' }}>
+                        {{ old('categoria_id', isset($recurso) && isset($recurso->id_subcategoria) ? (\App\Models\Subcategoria::find($recurso->id_subcategoria)->categoria_id ?? '') : '') == $categoria->id ? 'selected' : '' }}>
                         {{ $categoria->nombre_categoria }}
                     </option>
                 @endforeach
@@ -29,7 +29,14 @@
             <label for="subcategoria" class="form-label">Subcategoría</label>
             <select id="subcategoria" name="subcategoria_id" class="form-select" {{ isset($recurso) ? '' : 'disabled' }}>
                 <option value="">Seleccione una subcategoría</option>
-                {{-- Las opciones se cargan dinámicamente vía JS --}}
+                @if(isset($subcategorias))
+                    @foreach($subcategorias as $subcategoria)
+                        <option value="{{ $subcategoria->id }}"
+                            {{ old('subcategoria_id', $recurso->id_subcategoria ?? '') == $subcategoria->id ? 'selected' : '' }}>
+                            {{ $subcategoria->nombre }}
+                        </option>
+                    @endforeach
+                @endif
             </select>
 
             <div class="col-md-6 mt-3">

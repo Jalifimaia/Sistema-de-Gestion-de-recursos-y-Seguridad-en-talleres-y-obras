@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Panel de Operario - SafeWork</title>
+    <title>Panel del trabajador - SafeWork</title>
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   </head>
@@ -11,7 +11,7 @@
     <header class="bg-light border-bottom mb-4">
       <div class="container py-3 d-flex justify-content-between align-items-center">
         <div>
-          <h4 class="mb-0">Panel de Operario</h4>
+          <h4 class="mb-0">Panel del trabajador</h4>
           <small class="text-muted">SafeWork - Sistema de Gestión de Recursos y Seguridad</small>
         </div>
         <div class="text-end">
@@ -23,10 +23,10 @@
 
     <main class="container">
       <div class="mb-3 d-flex gap-2">
-        <a class="btn btn-primary" href="#">Solicitar</a>
-        <a class="btn btn-outline-secondary" href="#">Mis Herramientas</a>
-        <a class="btn btn-outline-secondary" href="#">Mi EPP</a>
-        <a class="btn btn-outline-danger" href="#">Devolver</a>
+        <a href="{{ url('/operario/solicitar') }}" class="btn {{ request()->is('operario/solicitar') ? 'btn-primary' : 'btn-outline-primary' }}">Solicitar</a>
+        <a href="{{ url('/operario/mis-herramientas') }}" class="btn {{ request()->is('operario/mis-herramientas') ? 'btn-primary' : 'btn-outline-secondary' }}">Mis Herramientas</a>
+        <a href="{{ url('/operario/epp') }}" class="btn {{ request()->is('operario/epp') ? 'btn-primary' : 'btn-outline-secondary' }}">Mi EPP</a>
+        <a href="{{ url('/operario/devolver') }}" class="btn {{ request()->is('operario/devolver') ? 'btn-primary' : 'btn-outline-primary' }}">Devolver</a>
       </div>
 
       <section>

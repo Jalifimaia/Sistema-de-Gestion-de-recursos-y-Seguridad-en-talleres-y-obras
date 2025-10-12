@@ -6,4 +6,5 @@
     <a class="btn btn-outline-primary {{ request()->is('supervisor/registrar-incidente') ? 'active' : '' }}" href="{{ url('supervisor/registrar-incidente') }}">Registrar Incidente</a>
 
     <a class="btn btn-outline-primary {{ request()->is('supervisor/reportes') ? 'active' : '' }}" href="{{ url('supervisor/reportes') }}">Reportes</a>
+
     </div> 
