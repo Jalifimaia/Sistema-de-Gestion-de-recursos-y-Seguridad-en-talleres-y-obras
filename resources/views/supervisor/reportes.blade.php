@@ -8,9 +8,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-light">
-    @include('partials.barra_navegacion')
 
   <div class="container py-4">
+    @extends('layouts.app')
     <h1 class="mb-3">Reportes y Auditorías</h1>
     <p class="text-muted">Análisis de datos y cumplimiento normativo</p>
 
