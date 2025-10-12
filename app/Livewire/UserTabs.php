@@ -11,6 +11,8 @@ class UserTabs extends Component
 {
     public $tab = 'todos';
     public $search = '';
+    protected $listeners = ['usuarioActualizado' => '$refresh'];
+
 
     public function setTab($tab)
     {
@@ -39,4 +41,20 @@ class UserTabs extends Component
             'roles' => $roles,
         ]);
     }
+
+public function darDeBaja($usuarioId)
+{
+    $usuario = User::find($usuarioId);
+
+    if ($usuario) {
+        $usuario->id_estado = 2;
+        $usuario->save();
+    }
+
+    // Forzar re-render del componente
+    $this->render(); // opcional si usás propiedades computadas
+}
+
+
+
 }
