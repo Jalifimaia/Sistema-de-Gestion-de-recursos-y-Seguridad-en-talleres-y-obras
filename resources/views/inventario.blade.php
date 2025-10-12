@@ -8,9 +8,10 @@
   @livewireStyles
 </head>
 <body class="bg-light">
-  @include('partials.barra_navegacion')
+  
 
   <div class="container my-4">
+  @extends('layouts.app')
 
     <!-- Título -->
     <div class="mb-4">
