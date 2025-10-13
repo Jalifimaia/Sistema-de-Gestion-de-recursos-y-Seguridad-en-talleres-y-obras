@@ -21,7 +21,7 @@
         <div class="col-md-12">
             <div class="card card-default">
                 <div class="card-header">
-                    <span class="card-title">{{ __('Update') }} Usuario</span>
+                    <span class="card-title">Editar Usuario</span>
                 </div>
 
                 <div class="card-body bg-white">
