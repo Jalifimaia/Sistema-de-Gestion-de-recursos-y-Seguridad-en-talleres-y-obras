@@ -16,17 +16,19 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
-    {
-        $usuarios = User::with('rol')->get();
-        $roles = Rol::with('usuarios')->get();
+  public function index(): \Illuminate\View\View
+{
+    $usuarios = \App\Models\User::with(['rol', 'estado'])->get();
+    $roles = \App\Models\Rol::all();
+    $estados = \App\Models\EstadoUsuario::all();
 
-        $ultimoUsuarioActivo = User::whereNotNull('ultimo_acceso')
-            ->orderByDesc('ultimo_acceso')
-            ->first();
+    $ultimoUsuarioActivo = \App\Models\User::whereNotNull('ultimo_acceso')
+        ->orderByDesc('ultimo_acceso')
+        ->first();
 
-        return view('usuario.index', compact('usuarios', 'roles', 'ultimoUsuarioActivo'));
-    }
+    return view('usuario.index', compact('usuarios', 'roles', 'estados', 'ultimoUsuarioActivo'));
+}
+
 
     /**
      * Show the form for creating a new resource.
