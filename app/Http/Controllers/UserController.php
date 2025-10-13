@@ -43,22 +43,29 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UserRequest $request): RedirectResponse
-    {
-        $data = $request->validated();
+public function store(UserRequest $request): RedirectResponse
+{
+    $data = $request->validated();
 
-        if (!empty($data['password'])) {
-            $data['password'] = bcrypt($data['password']);
-        }
-
-        $data['usuario_creacion'] = auth()->id();
-        $data['usuario_modificacion'] = auth()->id();
-        $data['ultimo_acceso'] = now();
-
-        User::create($data);
-
-        return Redirect::route('usuarios.index')->with('success', 'Usuario creado correctamente.');
+    if (!empty($data['password'])) {
+        $data['password'] = bcrypt($data['password']);
     }
+
+    $data['usuario_creacion'] = auth()->id();
+    $data['usuario_modificacion'] = auth()->id();
+    $data['ultimo_acceso'] = now();
+
+    // Estado por defecto: Stand by
+    $estadoStandBy = EstadoUsuario::where('nombre', 'stand by')->first();
+    if ($estadoStandBy) {
+        $data['id_estado'] = $estadoStandBy->id;
+    }
+
+    User::create($data);
+
+    return Redirect::route('usuarios.index')->with('success', 'Usuario creado correctamente.');
+}
+
 
     /**
      * Display the specified resource.
@@ -89,24 +96,48 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserRequest $request, $id): RedirectResponse
-    {
+    
+public function update(UserRequest $request, $id): RedirectResponse
+{
+    try {
+        // Buscar usuario
         $usuario = User::findOrFail($id);
 
+        // Validar datos
         $data = $request->validated();
 
-        if (!empty($data['password'])) {
+        // Manejo de contraseña:
+        // - Si password_confirmation está vacío → ignorar cualquier valor en password
+        // - Si ambos vienen llenos → actualizar con bcrypt
+        // - Si ambos vacíos → no tocar la contraseña
+        if (empty($data['password_confirmation'])) {
+            unset($data['password'], $data['password_confirmation']);
+        } elseif (!empty($data['password'])) {
             $data['password'] = bcrypt($data['password']);
         } else {
-            unset($data['password']);
+            unset($data['password'], $data['password_confirmation']);
         }
 
+        // Registrar quién modificó
         $data['usuario_modificacion'] = auth()->id();
 
+        // Actualizar usuario
         $usuario->update($data);
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente');
+        return redirect()
+            ->route('usuarios.index')
+            ->with('success', 'Usuario actualizado correctamente');
+
+    } catch (\Exception $e) {
+        \Log::error('Error al actualizar usuario: ' . $e->getMessage());
+
+        return redirect()
+            ->back()
+            ->withInput()
+            ->with('error', 'Error al actualizar: ' . $e->getMessage());
     }
+}
+
 
     /**
      * Remove the specified resource from storage.

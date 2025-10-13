@@ -19,25 +19,26 @@ class UserRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+  public function rules(): array
 {
+    $id = $this->route('usuario');
+
     $rules = [
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
+        'name'   => 'required|string|max:255',
+        'email'  => 'required|email|max:255|unique:usuario,email,' . $id,
         'id_rol' => 'required|exists:rol,id',
-        'id_estado' => 'required|exists:estado_usuario,id',
-        'fecha_nacimiento' => 'nullable|date',
-        'dni' => 'nullable|string|max:15',
-        'telefono' => 'nullable|string|max:30',
-        'nro_legajo' => 'nullable|integer',
+        'dni'    => 'required|string|max:15|unique:usuario,dni,' . $id,
         'auth_key' => 'nullable|string|max:255',
         'access_token' => 'nullable|string|max:255',
     ];
 
     if ($this->isMethod('post')) {
+        // En creación, siempre obligatoria
         $rules['password'] = 'required|string|min:6|confirmed';
     } else {
-        $rules['password'] = 'nullable|string|min:6|confirmed';
+        // En edición, solo validar si se envía password o confirmación
+        $rules['password'] = 'nullable|string|min:6';
+        $rules['password_confirmation'] = 'nullable|string|min:6';
     }
 
     return $rules;
