@@ -7,8 +7,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-   @include('partials.barra_navegacion')
+
+
   <div class="container py-4">
+        @extends('layouts.app')
     <h1 class="mb-3">Control de EPP y Seguridad</h1>
     <p class="text-muted">Gestión de equipos de protección personal y checklist de seguridad</p>
 

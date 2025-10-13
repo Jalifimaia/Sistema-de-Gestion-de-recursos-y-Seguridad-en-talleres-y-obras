@@ -8,22 +8,53 @@
   @livewireStyles
 </head>
 <body class="bg-light">
-  @include('partials.barra_navegacion')
+  
 
   <div class="container my-4">
+  @extends('layouts.app')
 
     <!-- Título -->
-    <div class="mb-4">
-      <h2>Gestión de Inventario</h2>
-      <p class="text-muted">Control de herramientas y equipos de protección personal</p>
+  <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+    <div>
+      <h2 class="mb-0">Gestión de Inventario</h2>
+      <p class="text-muted mb-0">Control de herramientas y equipos de protección personal</p>
     </div>
+    <div class="d-flex gap-3">
+      <div class="card text-center shadow-sm" style="width: 10rem;">
+        <div class="card-body p-2">
+          <h5 class="fw-bold text-success mb-1">96%</h5>
+          <small class="d-block">EPP Entregados</small>
+          <small class="text-muted">23 de 24</small>
+        </div>
+      </div>
+      <div class="card text-center shadow-sm" style="width: 10rem;">
+        <div class="card-body p-2">
+          <h5 class="fw-bold text-danger mb-1">3</h5>
+          <small class="d-block">Alertas Activas</small>
+          <small class="text-muted">Requieren atención</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
     <!-- Acciones -->
     <div class="d-flex flex-wrap gap-2 mb-3">
       <a href="{{ route('recursos.create') }}" class="btn btn-primary">Agregar Elemento</a>
-      <button class="btn btn-secondary">Exportar</button>
-      <input type="text" class="form-control w-auto" placeholder="Buscar por nombre o serie...">
+      <input type="text" id="buscador" class="form-control w-auto" placeholder="Buscar por nombre o serie...">
     </div>
+
+    <!-- Filtro por categoría y estado -->
+    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+      <label class="form-label mb-0">Filtrar por:</label>
+      <select id="filtroInventario" class="form-select w-auto">
+        <option value="todos">Todos</option>
+        <option value="herramienta">Herramientas</option>
+        <option value="epp">EPP</option>
+        <option value="reparacion">En reparación</option>
+      </select>
+    </div>
+
 
     <!-- Tabla de inventario -->
     <div class="table-responsive">
@@ -52,9 +83,13 @@
                       $hoy = \Carbon\Carbon::today();
                       $vence = \Carbon\Carbon::parse($serie->fecha_vencimiento);
                       $dias_restantes = $vence->diffInDays($hoy, false);
-                      $estado = $vence->isPast() ? 'Vencido' : ($dias_restantes <= 7 ? 'Por vencer' : 'Vigente');
-                      $codigo = $serie->nro_serie ?? '';
+
+                      $estado = match ($serie->id_estado) {
+                          4 => 'Reparación',
+                          default => $vence->isPast() ? 'Vencido' : ($dias_restantes <= 7 ? 'Por vencer' : 'Vigente'),
+                      };
                     @endphp
+
                     <option value="{{ $estado }}" data-serie="{{ $serie->nro_serie }}" data-fecha-vencimiento="{{ $serie->fecha_vencimiento }}">
                       {{ $serie->nro_serie }}
                     </option>
@@ -86,42 +121,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   @livewireScripts
+  <script src="{{ asset('js/filtroBusqueda.js') }}"></script>
 
-  <script>
-    function mostrarEstado(select) {
-      const selectedOption = select.options[select.selectedIndex];
-      const estado = select.value;
-      const fechaVencimiento = selectedOption.getAttribute('data-fecha-vencimiento');
-      const badge = select.parentElement.querySelector('.estado-vencimiento');
-
-      badge.className = 'badge estado-vencimiento'; // Reset classes
-
-      if (!estado || !fechaVencimiento) {
-        badge.textContent = '';
-        return;
-      }
-
-      // Calcular días restantes y mostrar solo la fecha (sin hora)
-      const hoy = new Date();
-      const fechaV = new Date(fechaVencimiento);
-      const diffTime = fechaV - hoy;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      // Formatear fecha a YYYY-MM-DD
-      const fechaSolo = fechaV.toISOString().slice(0, 10);
-
-      let texto = '';
-      if (estado === 'Vencido' || diffDays < 0) {
-        texto = `Vencido - ${fechaSolo}`;
-        badge.classList.add('bg-danger');
-      } else if (estado === 'Por vencer' || diffDays <= 7) {
-        texto = `Por vencer - ${fechaSolo}`;
-        badge.classList.add('bg-warning', 'text-dark');
-      } else if (estado === 'Vigente') {
-        texto = `Vigente - ${fechaSolo}`;
-        badge.classList.add('bg-success');
-      }
-      badge.textContent = texto;
-    }
-  </script>
 </body>
 </html>

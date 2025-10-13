@@ -13,10 +13,11 @@ use App\Models\Subcategoria;
 
 // Rutas públicas
 Route::get('/', fn() => view('welcome'));
-Route::get('/inicio2', fn() => view('inicio2'));
+//Route::get('/inicio2', fn() => view('inicio2'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
+Route::get('/reportes', fn() => view('supervisor.reportes'));
 
 // Vistas para el rol Operario (estáticas por ahora)
 Route::get('/operario/solicitar', fn() => view('operario.solicitar'));
@@ -26,8 +27,8 @@ Route::get('/operario/epp', fn() => view('operario.epp'));
 
 // Vistas para el rol Supervisor (estáticas y dinámicas)
 Route::get('/supervisor/control-herramientas', fn() => view('supervisor.control_herramientas'));
-Route::get('/supervisor/reportes', fn() => view('supervisor.reportes'));
 Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp'));
+
 
 //incidente-2-david
 Route::get('/incidente', [IncidenteController::class, 'index'])->name('incidente.index');

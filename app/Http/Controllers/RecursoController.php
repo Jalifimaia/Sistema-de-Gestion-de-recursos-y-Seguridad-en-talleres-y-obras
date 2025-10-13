@@ -77,7 +77,7 @@ class RecursoController extends Controller
         }
     }
 
-    return view('recurso.create', compact('recurso', 'categorias', 'subcategorias'));
+    return view('recurso.edit', compact('recurso', 'categorias', 'subcategorias'));
 }
 
 
