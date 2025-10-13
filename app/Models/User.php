@@ -113,6 +113,15 @@ public function recursosModificados()
     return $this->hasMany(Recurso::class, 'id_usuario_modificacion', 'id');
 }
 
+public function creador()
+{
+    return $this->belongsTo(User::class, 'usuario_creacion');
+}
+
+public function modificador()
+{
+    return $this->belongsTo(User::class, 'usuario_modificacion');
+}
 
 
 
