@@ -25,10 +25,11 @@
         </div>
 
 
-        <div class="mb-3">
-            <label for="talle" class="form-label">Talle (opcional)</label>
-            <input type="text" name="talle" class="form-control">
+        <div id="campoTalle" class="mb-3">
+        <label for="talle" class="form-label" >Talle </label>
+        <input type="text" name="talle" id="talle" class="form-control" placeholder="Ej: M, L, XL">
         </div>
+
 
         <div class="mb-3">
             <label for="fecha_adquisicion" class="form-label">Fecha de Adquisición</label>
@@ -36,7 +37,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento</label>
+            <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento (opcional)</label>
             <input type="date" name="fecha_vencimiento" class="form-control">
         </div>
 
@@ -53,4 +54,9 @@
         <a href="{{ route('inventario') }}" class="btn btn-secondary">Volver</a>
     </form>
 </div>
+<script>
+  const categoriaRecurso = "{{ strtolower($recurso->categoria->nombre_categoria ?? '') }}";
+</script>
+<script src="{{ asset('js/serieRecurso.js') }}"></script>
+
 @endsection
