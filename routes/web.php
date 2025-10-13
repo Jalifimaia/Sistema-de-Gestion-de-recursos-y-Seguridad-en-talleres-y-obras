@@ -29,6 +29,10 @@ Route::get('/operario/epp', fn() => view('operario.epp'));
 Route::get('/supervisor/control-herramientas', fn() => view('supervisor.control_herramientas'));
 Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp'));
 
+//opciones de cambio de estado de la edicion de usuarios
+Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
+Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');
+
 
 //incidente-2-david
 Route::get('/incidente', [IncidenteController::class, 'index'])->name('incidente.index');

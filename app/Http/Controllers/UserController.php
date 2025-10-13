@@ -146,4 +146,38 @@ public function destroy($id): RedirectResponse
 }
 
 
+public function darDeBaja($id): RedirectResponse
+{
+    $usuario = User::findOrFail($id);
+    $estadoBaja = EstadoUsuario::where('nombre', 'Baja')->first();
+
+    if (!$estadoBaja) {
+        return redirect()->back()->with('error', 'No se encontró el estado "Baja".');
+    }
+
+    $usuario->id_estado = $estadoBaja->id;
+    $usuario->usuario_modificacion = auth()->id();
+    $usuario->save();
+
+    return redirect()->route('usuarios.edit', $usuario->id)->with('success', 'Usuario dado de baja correctamente.');
+}
+
+
+public function darDeAlta($id): RedirectResponse
+{
+    $usuario = User::findOrFail($id);
+    $estadoAlta = EstadoUsuario::where('nombre', 'Alta')->first();
+
+    if (!$estadoAlta) {
+        return redirect()->back()->with('error', 'No se encontró el estado "Alta".');
+    }
+
+    $usuario->id_estado = $estadoAlta->id;
+    $usuario->usuario_modificacion = auth()->id();
+    $usuario->save();
+
+    return redirect()->route('usuarios.edit', $usuario->id)->with('success', 'Usuario dado de alta correctamente.');
+}
+
+
 }
