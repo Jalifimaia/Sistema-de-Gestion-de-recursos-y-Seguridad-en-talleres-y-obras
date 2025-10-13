@@ -8,15 +8,12 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <link href="{{ asset('css/estilos.css') }}" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  @livewireScripts
-  <script src="{{ asset('js/filtroBusqueda.js') }}"></script>
-  <script src="{{ asset('js/formatoFecha.js') }}"></script>
   @livewireStyles
   @stack('styles')
 </head>
 
 <body class="d-flex">
+
   <!-- Sidebar -->
   <nav id="sidebar" class="sidebar d-flex flex-column text-white p-3 invisible no-transition">
     <div class="sidebar-header d-flex justify-content-between align-items-center mb-4">
@@ -39,7 +36,7 @@
       <li class="nav-item"><a href="{{ route('prestamos.index') }}" class="nav-link {{ Request::is('prestamos*') ? 'active' : '' }}"><i class="bi bi-journal-arrow-down me-2"></i> Préstamos</a></li>
     </ul>
 
-    <!-- Usuario con flechita alineada a la derecha -->
+    <!-- Usuario con dropdown -->
     <div class="border-top pt-3 mt-auto">
       <div class="dropdown w-100">
         <button class="btn btn-sm text-white d-flex align-items-center justify-content-between w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -53,20 +50,21 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end mt-2">
           <li>
+            <a href="{{ url('perfil') }}" class="dropdown-item">
+              <i class="bi bi-person me-2"></i> Ver perfil
+            </a>
+          </li>
+          <li>
             <form method="POST" action="{{ route('logout') }}">
               @csrf
               <button type="submit" class="dropdown-item text-danger">
                 <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
-              </button>
-              <button type="submit" class="dropdown-item text-danger">
-                <i class="bi bi-box-arrow-right me-2"></i> Ver perfil
               </button>
             </form>
           </li>
         </ul>
       </div>
     </div>
-
   </nav>
 
   <!-- Botón de apertura -->
@@ -79,11 +77,12 @@
     @yield('content')
   </main>
 
-
   @livewireScripts
   @stack('scripts')
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ asset('js/filtroBusqueda.js') }}"></script>
+  <script src="{{ asset('js/formatoFecha.js') }}"></script>
+
   <script>
     const toggleBtn = document.getElementById('toggleSidebar');
     const closeBtn = document.getElementById('closeSidebar');
