@@ -8,33 +8,63 @@
         @csrf
         @method('PUT')
 
-        <!-- Categoría (solo lectura) -->
-        <div class="mb-3">
-            <label class="form-label">Categoría</label>
-            <input type="text" class="form-control" 
-                   value="{{ $incidente->recurso->subcategoria->categoria->nombre_categoria ?? '' }}" 
-                   readonly>
+        <!-- 🧍 Trabajador -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">Datos del Trabajador</div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Trabajador</label>
+                        <input type="text" class="form-control" 
+                               value="{{ $incidente->trabajador?->name }}" readonly>
+                        <input type="hidden" name="id_trabajador" value="{{ $incidente->trabajador?->id }}">
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Subcategoría (solo lectura) -->
-        <div class="mb-3">
-            <label class="form-label">Subcategoría</label>
-            <input type="text" class="form-control" 
-                   value="{{ $incidente->recurso->subcategoria->nombre ?? '' }}" 
-                   readonly>
+        <!-- 🧰 Recursos asociados -->
+        <div id="recursos-container">
+            @foreach($incidente->recursos as $i => $recurso)
+            <div class="card mb-3 recurso-block">
+                <div class="card-header bg-success text-white">Recurso asociado</div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label>Categoría</label>
+                            <input type="text" class="form-control" 
+                                   value="{{ $recurso->subcategoria->categoria->nombre_categoria }}" readonly>
+                            <input type="hidden" name="recursos[{{ $i }}][id_categoria]" 
+                                   value="{{ $recurso->subcategoria->categoria->id }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label>Subcategoría</label>
+                            <input type="text" class="form-control" 
+                                   value="{{ $recurso->subcategoria->nombre }}" readonly>
+                            <input type="hidden" name="recursos[{{ $i }}][id_subcategoria]" 
+                                   value="{{ $recurso->subcategoria->id }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label>Recurso</label>
+                            <input type="text" class="form-control" 
+                                   value="{{ $recurso->nombre }}" readonly>
+                            <input type="hidden" name="recursos[{{ $i }}][id_recurso]" 
+                                   value="{{ $recurso->id }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label>Serie del recurso</label>
+                            <input type="text" class="form-control" 
+                                   value="{{ $recurso->serieRecursos->firstWhere('id', $recurso->pivot->id_serie_recurso)?->nro_serie }}" readonly>
+                            <input type="hidden" name="recursos[{{ $i }}][id_serie_recurso]" 
+                                   value="{{ $recurso->pivot->id_serie_recurso }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
         </div>
 
-        <!-- Recurso (solo lectura) -->
-        <div class="mb-3">
-            <label class="form-label">Recurso</label>
-            <input type="text" class="form-control" 
-                   value="{{ $incidente->recurso->nombre ?? '' }}" 
-                   readonly>
-        </div>
-
-        
-    
-        <!-- Estado del incidente (editable) -->
+        <!-- Estado del incidente -->
         <div class="mb-3">
             <label for="id_estado_incidente" class="form-label">Estado del incidente</label>
             <select name="id_estado_incidente" id="id_estado_incidente" class="form-select" required>
@@ -82,5 +112,4 @@
     alert("{{ session('success') }}");
 </script>
 @endif
-
 @endsection

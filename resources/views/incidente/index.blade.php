@@ -28,11 +28,33 @@
         @foreach($incidentes as $incidente)
         <tr>
             <td>{{ $incidente->id }}</td>
-           <td>{{ $incidente->trabajador?->name ?? '-' }}</td>
+            <td>{{ $incidente->trabajador?->name ?? '-' }}</td>
 
+            <!-- Categorías -->
+            <td>
+                @foreach($incidente->recursos as $recurso)
+                    {{ $recurso->subcategoria?->categoria?->nombre_categoria ?? '-' }}<br>
+                @endforeach
+            </td>
 
-            <td>{{ $incidente->recurso?->subcategoria?->categoria?->nombre_categoria ?? '-' }}</td>            <td>{{ $incidente->recurso?->subcategoria?->nombre ?? '-' }}</td>
-            <td>{{ $incidente->recurso?->nombre ?? '-' }}</td>
+            <!-- Subcategorías -->
+            <td>
+                @foreach($incidente->recursos as $recurso)
+                    {{ $recurso->subcategoria?->nombre ?? '-' }}<br>
+                @endforeach
+            </td>
+
+            <!-- Recursos -->
+            <td>
+                @foreach($incidente->recursos as $recurso)
+                    {{ $recurso->nombre ?? '-' }}
+                    @if($recurso->pivot?->id_serie_recurso)
+                        (Serie: {{ $recurso->pivot->id_serie_recurso }})
+                    @endif
+                    <br>
+                @endforeach
+            </td>
+
             <td>{{ $incidente->descripcion ?? '-' }}</td>
             <td>{{ $incidente->estadoIncidente?->nombre_estado ?? '-' }}</td>
             <td>{{ $incidente->resolucion ?? '-' }}</td>
@@ -44,8 +66,6 @@
         @endforeach
     </tbody>
 </table>
-
-
 
 </div>
 @endsection

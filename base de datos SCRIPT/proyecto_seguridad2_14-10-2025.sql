@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 13-10-2025 a las 02:05:23
+-- Tiempo de generación: 14-10-2025 a las 06:43:48
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -203,8 +203,10 @@ CREATE TABLE `failed_jobs` (
 
 CREATE TABLE `incidente` (
   `id` int(10) UNSIGNED NOT NULL,
-  `id_recurso` int(10) UNSIGNED NOT NULL,
+  `id_recurso` int(10) UNSIGNED DEFAULT NULL,
+  `id_serie_recurso` int(10) UNSIGNED DEFAULT NULL,
   `id_supervisor` int(10) UNSIGNED NOT NULL,
+  `id_trabajador` int(10) UNSIGNED DEFAULT NULL,
   `id_incidente_detalle` int(10) UNSIGNED DEFAULT NULL,
   `id_usuario_creacion` int(10) UNSIGNED DEFAULT NULL,
   `id_usuario_modificacion` int(10) UNSIGNED DEFAULT NULL,
@@ -221,11 +223,18 @@ CREATE TABLE `incidente` (
 -- Volcado de datos para la tabla `incidente`
 --
 
-INSERT INTO `incidente` (`id`, `id_recurso`, `id_supervisor`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `descripcion`, `fecha_incidente`, `fecha_creacion`, `fecha_modificacion`, `fecha_cierre_incidente`, `resolucion`, `id_estado_incidente`) VALUES
-(1, 6, 6, 0, 5, 5, 'Cable del taladro quemado por sobrecarga', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', 'Se reemplazó el cable dañado', 5),
-(2, 6, 5, NULL, 5, 5, 'Taladro no enciende al conectar', '2025-10-08 04:11:00', '2025-10-08 04:11:49', '2025-10-08 04:11:49', NULL, 'Se arreglo la termica', 1),
-(5, 6, 5, NULL, 5, 5, 'Taladro sin potencia al perforar', '2025-10-17 01:40:00', '2025-10-08 04:40:15', '2025-10-08 04:40:15', NULL, 'Revisión técnica programada', 2),
-(7, 4, 5, NULL, NULL, NULL, 'Chaleco con desgaste en material reflectante', '2025-10-30 02:04:00', '2025-10-08 02:11:33', '2025-10-08 02:11:33', NULL, 'En espera de revisión técnica', 2);
+INSERT INTO `incidente` (`id`, `id_recurso`, `id_serie_recurso`, `id_supervisor`, `id_trabajador`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `descripcion`, `fecha_incidente`, `fecha_creacion`, `fecha_modificacion`, `fecha_cierre_incidente`, `resolucion`, `id_estado_incidente`) VALUES
+(1, 6, NULL, 6, NULL, 0, 5, 5, 'Cable del taladro quemado por sobrecarga', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', 'Se reemplazó el cable dañado', 5),
+(2, 6, NULL, 5, NULL, NULL, 5, 5, 'Taladro no enciende al conectar', '2025-10-08 04:11:00', '2025-10-08 04:11:49', '2025-10-08 04:11:49', NULL, 'Se arreglo la termica', 1),
+(5, 6, NULL, 5, NULL, NULL, 5, 5, 'Taladro sin potencia al perforar', '2025-10-17 01:40:00', '2025-10-08 04:40:15', '2025-10-08 04:40:15', NULL, 'Revisión técnica programada', 2),
+(7, 4, NULL, 5, NULL, NULL, NULL, NULL, 'Chaleco con desgaste en material reflectante', '2025-10-30 02:04:00', '2025-10-08 02:11:33', '2025-10-08 02:11:33', NULL, 'En espera de revisión técnica', 2),
+(24, 9, NULL, 5, NULL, NULL, NULL, NULL, '.', '2025-10-18 01:02:00', '2025-10-14 01:03:47', '2025-10-14 01:03:47', NULL, NULL, 2),
+(25, 9, NULL, 5, NULL, NULL, NULL, NULL, '.', '2025-10-21 01:04:00', '2025-10-14 01:04:29', '2025-10-14 01:04:29', NULL, NULL, 2),
+(26, 10, 25, 5, 8, NULL, NULL, NULL, '.', '2025-10-23 01:10:00', '2025-10-14 01:13:39', '2025-10-14 01:13:39', NULL, NULL, 2),
+(27, 8, 10, 5, 14, NULL, NULL, NULL, '.', '2025-10-28 01:14:00', '2025-10-14 01:14:39', '2025-10-14 01:14:39', NULL, NULL, 2),
+(28, 8, 11, 5, 8, NULL, NULL, NULL, '.', '2025-10-16 01:22:00', '2025-10-14 01:22:43', '2025-10-14 01:22:43', NULL, NULL, 2),
+(29, NULL, NULL, 5, 8, NULL, NULL, NULL, '.', '2025-10-20 01:33:00', '2025-10-14 01:34:55', '2025-10-14 01:34:55', NULL, NULL, 2),
+(30, NULL, NULL, 5, 8, NULL, NULL, NULL, 'Se cayo', '2025-10-23 01:35:00', '2025-10-14 01:35:42', '2025-10-14 01:35:42', NULL, 'No hay', 1);
 
 -- --------------------------------------------------------
 
@@ -246,6 +255,32 @@ CREATE TABLE `incidente_detalle` (
 
 INSERT INTO `incidente_detalle` (`id`, `id_incidente`, `id_serie`, `descripcion`) VALUES
 (0, 1, 5, 'Corte de cable por sobrecalentamiento');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `incidente_recurso`
+--
+
+CREATE TABLE `incidente_recurso` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_incidente` int(10) UNSIGNED NOT NULL,
+  `id_recurso` int(10) UNSIGNED NOT NULL,
+  `id_serie_recurso` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `incidente_recurso`
+--
+
+INSERT INTO `incidente_recurso` (`id`, `id_incidente`, `id_recurso`, `id_serie_recurso`, `created_at`, `updated_at`) VALUES
+(1, 29, 8, 10, '2025-10-14 04:34:55', '2025-10-14 04:34:55'),
+(2, 29, 4, 4, '2025-10-14 04:34:55', '2025-10-14 04:34:55'),
+(6, 30, 4, 4, '2025-10-14 04:42:40', '2025-10-14 04:42:40'),
+(7, 30, 9, 14, '2025-10-14 04:42:40', '2025-10-14 04:42:40'),
+(8, 30, 8, 10, '2025-10-14 04:42:40', '2025-10-14 04:42:40');
 
 -- --------------------------------------------------------
 
@@ -553,16 +588,19 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`, `updated_at`, `usuario_creacion`, `usuario_modificacion`, `ultimo_acceso`, `id_estado`, `fecha_nacimiento`, `dni`, `telefono`, `nro_legajo`, `auth_key`, `access_token`) VALUES
-(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-12 23:52:44', NULL, NULL, '2025-10-12 23:52:44', 1, NULL, NULL, NULL, NULL, NULL, NULL),
-(6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-11 15:18:10', 5, 5, '2025-10-11 15:18:10', 1, NULL, NULL, NULL, NULL, NULL, NULL),
-(7, 3, 'trabajador', 'traba@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-03 21:44:20', 5, 5, '2025-10-03 21:44:20', 1, NULL, NULL, NULL, NULL, NULL, NULL),
-(8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-08 21:49:12', 5, 5, '2025-10-08 21:49:12', 3, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-14 03:48:10', NULL, NULL, '2025-10-14 03:48:10', 1, NULL, '8', NULL, NULL, NULL, NULL),
+(6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-13 18:29:09', 5, 5, '2025-10-11 15:18:10', 2, NULL, NULL, NULL, NULL, NULL, NULL),
+(7, 3, 'trabajador', 'trabajador@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-13 18:19:12', 5, 5, '2025-10-03 21:44:20', 1, NULL, NULL, NULL, NULL, NULL, NULL),
+(8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-13 21:14:17', 5, 5, '2025-10-08 21:49:12', 1, NULL, '1', NULL, NULL, NULL, NULL),
 (9, 3, 'Tuti', 'hola@gmail.com', '$2y$12$gsTfJ1SvZv23pMdPvMoPyevF1mU06rGVAXaXaH/mFLxGP7Jj3ltbO', '2025-10-04 02:04:56', '2025-10-12 23:06:57', 5, 5, '2025-10-04 02:04:56', 2, NULL, NULL, NULL, NULL, NULL, NULL),
-(10, 3, 'userprueba', 'user@gmail.com', '$2y$12$StRvDRhkkWWjZFSQgzmjcOueFq5mh2QXU5eV1RixsfqnScflf3vV.', '2025-10-04 02:07:02', '2025-10-12 23:09:23', 5, 5, '2025-10-04 02:07:02', 2, NULL, NULL, NULL, NULL, NULL, NULL),
+(10, 3, 'userprueba', 'user@gmail.com', '$2y$12$StRvDRhkkWWjZFSQgzmjcOueFq5mh2QXU5eV1RixsfqnScflf3vV.', '2025-10-04 02:07:02', '2025-10-13 18:43:35', 5, 5, '2025-10-04 02:07:02', 2, NULL, NULL, NULL, NULL, NULL, NULL),
 (11, 2, 'user2', 'user2@gmail.com', '$2y$12$SRAh1tdXbYlz8o64bcx/muoTzwWpW9fbaXBpDr4N7InI8fOamUHBi', '2025-10-04 02:08:49', '2025-10-04 02:08:49', 5, 5, '2025-10-04 02:08:49', 2, NULL, NULL, NULL, NULL, NULL, NULL),
-(12, 2, 'aaaa3', 'eee@gmail.com', '$2y$12$6PXfvfB4iNUZpnE.DV.gd.tgzhEEjO4zUjSx0KM8zpf6o.fYQ0Yem', '2025-10-04 02:09:24', '2025-10-12 23:11:35', 5, 5, '2025-10-04 02:09:24', 2, NULL, NULL, NULL, NULL, NULL, NULL),
-(13, 1, 'miki', 'miki@gmail.com', '$2y$12$34yPOTEHJiOkR/XO5H4q1eq1t9LHam0HyNt8T9kH65HuwrrwdF0Yu', '2025-10-04 02:13:01', '2025-10-04 02:13:01', 5, 5, '2025-10-04 02:13:01', 2, NULL, NULL, NULL, NULL, NULL, NULL),
-(14, 3, 'mimi', 'mimi@gmail.com', '$2y$12$AqMIKF5KyQt0EuMwAVYKtOfnog5xPuZi9pz1i.duy8X4REbhmzfza', '2025-10-04 02:15:12', '2025-10-04 02:15:12', 5, 5, '2025-10-04 02:15:12', 1, NULL, NULL, NULL, NULL, NULL, NULL);
+(12, 2, 'aaaa3', 'eee@gmail.com', '$2y$12$6PXfvfB4iNUZpnE.DV.gd.tgzhEEjO4zUjSx0KM8zpf6o.fYQ0Yem', '2025-10-04 02:09:24', '2025-10-13 18:31:44', 5, 5, '2025-10-04 02:09:24', 2, NULL, NULL, NULL, NULL, NULL, NULL),
+(13, 1, 'miki', 'miki@gmail.com', '$2y$12$34yPOTEHJiOkR/XO5H4q1eq1t9LHam0HyNt8T9kH65HuwrrwdF0Yu', '2025-10-04 02:13:01', '2025-10-13 18:55:55', 5, 5, '2025-10-04 02:13:01', 3, NULL, NULL, NULL, NULL, NULL, NULL),
+(14, 3, 'mimi', 'mimi@gmail.com', '$2y$12$AqMIKF5KyQt0EuMwAVYKtOfnog5xPuZi9pz1i.duy8X4REbhmzfza', '2025-10-04 02:15:12', '2025-10-13 21:14:32', 5, 5, '2025-10-04 02:15:12', 1, NULL, '3', NULL, NULL, NULL, NULL),
+(19, 1, 'test13-10', 'test13@empresa.com', '$2y$12$yOiNgGpcZYCJ.gRcjqxKeuKQbncs.ydJIh2EXBlSNHO0AbogJvmr.', '2025-10-13 19:49:08', '2025-10-13 22:56:25', 5, 5, '2025-10-13 19:49:08', 2, NULL, '55555', NULL, NULL, NULL, NULL),
+(20, 2, 'test15', 'test15@empresa.com', '$2y$12$eljJDNiHnzO5ubrXtoZOsekSgNUICJC00GrK8tyEmUE0S2DxD93k2', '2025-10-13 19:50:06', '2025-10-13 22:42:54', 5, 5, '2025-10-13 19:50:06', 2, NULL, '345345', NULL, NULL, NULL, NULL),
+(21, 2, 'gestion8', 'gestion66@empresa.com', '$2y$12$doXQ8vbMZSPWEXgsz8G/G.AkfQ/Xpq.oof09wyHZdjvzQLaGTy.0i', '2025-10-13 20:10:36', '2025-10-13 22:40:32', 5, 5, '2025-10-13 20:10:36', 2, NULL, '3273', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -650,7 +688,9 @@ ALTER TABLE `incidente`
   ADD KEY `id_supervisor` (`id_supervisor`),
   ADD KEY `id_incidente_detalle` (`id_incidente_detalle`),
   ADD KEY `id_usuario_creacion` (`id_usuario_creacion`),
-  ADD KEY `id_usuario_modificacion` (`id_usuario_modificacion`);
+  ADD KEY `id_usuario_modificacion` (`id_usuario_modificacion`),
+  ADD KEY `fk_incidente_trabajador` (`id_trabajador`),
+  ADD KEY `fk_incidente_serie` (`id_serie_recurso`);
 
 --
 -- Indices de la tabla `incidente_detalle`
@@ -659,6 +699,15 @@ ALTER TABLE `incidente_detalle`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_incidente` (`id_incidente`),
   ADD KEY `id_serie` (`id_serie`);
+
+--
+-- Indices de la tabla `incidente_recurso`
+--
+ALTER TABLE `incidente_recurso`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_incidente` (`id_incidente`),
+  ADD KEY `id_recurso` (`id_recurso`),
+  ADD KEY `id_serie_recurso` (`id_serie_recurso`);
 
 --
 -- Indices de la tabla `jobs`
@@ -807,7 +856,13 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT de la tabla `incidente`
 --
 ALTER TABLE `incidente`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT de la tabla `incidente_recurso`
+--
+ALTER TABLE `incidente_recurso`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `jobs`
@@ -861,7 +916,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario_recurso`
@@ -886,10 +941,20 @@ ALTER TABLE `detalle_prestamo`
 -- Filtros para la tabla `incidente`
 --
 ALTER TABLE `incidente`
+  ADD CONSTRAINT `fk_incidente_serie` FOREIGN KEY (`id_serie_recurso`) REFERENCES `serie_recurso` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_incidente_trabajador` FOREIGN KEY (`id_trabajador`) REFERENCES `usuario` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_incidente_usuario_creacion` FOREIGN KEY (`id_usuario_creacion`) REFERENCES `usuario` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_incidente_usuario_modificacion` FOREIGN KEY (`id_usuario_modificacion`) REFERENCES `usuario` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `incidente_ibfk_1` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `incidente_ibfk_2` FOREIGN KEY (`id_incidente_detalle`) REFERENCES `incidente_detalle` (`id`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `incidente_recurso`
+--
+ALTER TABLE `incidente_recurso`
+  ADD CONSTRAINT `incidente_recurso_ibfk_1` FOREIGN KEY (`id_incidente`) REFERENCES `incidente` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `incidente_recurso_ibfk_2` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `incidente_recurso_ibfk_3` FOREIGN KEY (`id_serie_recurso`) REFERENCES `serie_recurso` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `prestamo`

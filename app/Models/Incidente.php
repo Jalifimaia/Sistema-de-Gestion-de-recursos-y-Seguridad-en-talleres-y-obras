@@ -66,6 +66,13 @@ public function serieRecurso()
     return $this->belongsTo(SerieRecurso::class, 'id_serie_recurso');
 }
 
+public function recursos()
+{
+    return $this->belongsToMany(Recurso::class, 'incidente_recurso', 'id_incidente', 'id_recurso')
+                ->withPivot('id_serie_recurso'); // 👈 sin withTimestamps()
+}
+
+
 
     // 🔹 Estado del incidente
     public function estadoIncidente()

@@ -54,40 +54,40 @@ public function index()
 public function store(Request $request)
 {
     $request->validate([
-        'id_usuario'                  => 'required|exists:usuario,id', // hidden que se llena al buscar por DNI
-        'recursos.0.id_categoria'     => 'required|exists:categoria,id',
-        'recursos.0.id_subcategoria'  => 'required|exists:subcategoria,id',
-        'recursos.0.id_recurso'       => 'required|exists:recurso,id',
-        'recursos.0.id_serie_recurso' => 'required|exists:serie_recurso,id',
-        'descripcion'                 => 'required|string|max:255',
-        'fecha_incidente'             => 'required|date',
+        'id_usuario' => 'required|exists:usuario,id',
+        'recursos'   => 'required|array|min:1',
+        'recursos.*.id_categoria'    => 'required|exists:categoria,id',
+        'recursos.*.id_subcategoria' => 'required|exists:subcategoria,id',
+        'recursos.*.id_recurso'      => 'required|exists:recurso,id',
+        'recursos.*.id_serie_recurso'=> 'required|exists:serie_recurso,id',
+        'descripcion' => 'required|string|max:255',
+        'fecha_incidente' => 'required|date',
     ]);
 
-    // Verificar que el usuario sea un trabajador
     $usuario = Usuario::where('id', $request->id_usuario)
-                      ->where('id_rol', 3) // solo trabajadores
-                      ->first();
+                      ->where('id_rol', 3)
+                      ->firstOrFail();
 
-    if (!$usuario) {
-        return redirect()->back()->with('error', 'El usuario no es un trabajador válido.');
-    }
-
-    // Obtener estado "En revisión"
     $estadoRevision = EstadoIncidente::where('nombre_estado', 'En revisión')->first();
 
-    // Crear incidente
-    Incidente::create([
+    $incidente = Incidente::create([
         'id_trabajador'       => $usuario->id,
-        'id_supervisor'       => auth()->id(), // 👈 supervisor actual (usuario logueado)
-        'id_recurso'          => $request->recursos[0]['id_recurso'],
-        'id_serie_recurso'    => $request->recursos[0]['id_serie_recurso'],
+        'id_supervisor'       => auth()->id(),
         'descripcion'         => $request->descripcion,
         'fecha_incidente'     => $request->fecha_incidente,
-        'id_estado_incidente' => $estadoRevision ? $estadoRevision->id : null,
+        'id_estado_incidente' => $estadoRevision?->id,
     ]);
 
-    return redirect()->route('incidente.index')->with('success', '✅ Incidente registrado correctamente.');
+    // Guardar recursos asociados
+    foreach ($request->recursos as $recurso) {
+        $incidente->recursos()->attach($recurso['id_recurso'], [
+            'id_serie_recurso' => $recurso['id_serie_recurso'],
+        ]);
+    }
+
+    return redirect()->route('incidente.index')->with('success', '✅ Incidente registrado con múltiples recursos.');
 }
+
 
 
 
@@ -124,27 +124,41 @@ public function store(Request $request)
     // =======================
     // ACTUALIZAR INCIDENTE
     // =======================
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'id_trabajador'       => 'required|exists:usuario,id',
-            'descripcion'         => 'required|string|max:255',
-            'id_estado_incidente' => 'required|exists:estado_incidente,id',
-            'fecha_incidente'     => 'required|date',
+  public function update(Request $request, $id)
+{
+    $request->validate([
+        'id_trabajador'                  => 'required|exists:usuario,id',
+        'descripcion'                    => 'required|string|max:255',
+        'id_estado_incidente'            => 'required|exists:estado_incidente,id',
+        'fecha_incidente'                => 'required|date',
+        'recursos'                       => 'required|array|min:1',
+        'recursos.*.id_recurso'          => 'required|exists:recurso,id',
+        'recursos.*.id_serie_recurso'    => 'required|exists:serie_recurso,id',
+    ]);
+
+    $incidente = Incidente::findOrFail($id);
+
+    // Actualizar datos principales del incidente
+    $incidente->update([
+        'id_trabajador'       => $request->id_trabajador,
+        'descripcion'         => $request->descripcion,
+        'id_estado_incidente' => $request->id_estado_incidente,
+        'resolucion'          => $request->resolucion,
+        'fecha_incidente'     => $request->fecha_incidente,
+    ]);
+
+    // 🔹 Actualizar recursos asociados (limpia y vuelve a insertar)
+    $incidente->recursos()->detach();
+
+    foreach ($request->recursos as $recurso) {
+        $incidente->recursos()->attach($recurso['id_recurso'], [
+            'id_serie_recurso' => $recurso['id_serie_recurso'],
         ]);
-
-        $incidente = Incidente::findOrFail($id);
-
-        $incidente->update([
-            'id_trabajador'       => $request->id_trabajador,
-            'descripcion'         => $request->descripcion,
-            'id_estado_incidente' => $request->id_estado_incidente,
-            'resolucion'          => $request->resolucion,
-            'fecha_incidente'     => $request->fecha_incidente,
-        ]);
-
-        return redirect()->route('incidente.index')->with('success', 'Incidente actualizado correctamente');
     }
+
+    return redirect()->route('incidente.index')->with('success', '✅ Incidente actualizado correctamente con sus recursos.');
+}
+
 
     // =======================
     // ELIMINAR INCIDENTE
