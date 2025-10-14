@@ -28,7 +28,9 @@
         @foreach($incidentes as $incidente)
         <tr>
             <td>{{ $incidente->id }}</td>
-            <td>{{ $incidente->usuarioCreacion?->nombre ?? '-' }}</td>
+           <td>{{ $incidente->trabajador?->name ?? '-' }}</td>
+
+
             <td>{{ $incidente->recurso?->subcategoria?->categoria?->nombre ?? '-' }}</td>
             <td>{{ $incidente->recurso?->subcategoria?->nombre ?? '-' }}</td>
             <td>{{ $incidente->recurso?->nombre ?? '-' }}</td>

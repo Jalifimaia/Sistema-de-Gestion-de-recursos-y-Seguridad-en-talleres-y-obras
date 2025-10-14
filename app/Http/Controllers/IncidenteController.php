@@ -16,16 +16,18 @@ class IncidenteController extends Controller
     // =======================
     // LISTAR INCIDENTES
     // =======================
-    public function index()
-    {
-        $incidentes = Incidente::with([
-            'usuarioCreacion',        // trabajador
-            'recurso.subcategoria.categoria', // categoría y subcategoría
-            'estadoIncidente'         // estado
-        ])->get();
+public function index()
+{
+    $incidentes = Incidente::with([
+        'trabajador',                  // 👈 este es el trabajador afectado
+        'recurso.subcategoria.categoria',
+        'estadoIncidente'
+    ])->get();
 
-        return view('incidente.index', compact('incidentes'));
-    }
+    return view('incidente.index', compact('incidentes'));
+}
+
+
     // =======================
     // FORMULARIO CREAR NUEVO
     // =======================
@@ -41,49 +43,60 @@ class IncidenteController extends Controller
             }
         ])->get();
 
-        return view('incidente.create', compact('categorias'));
-    }
+        $trabajadores = Usuario::where('id_rol', 3)->get(); // rol 3 = Trabajador
 
+        return view('incidente.create', compact('categorias', 'trabajadores'));
+    }
 
     // =======================
     // GUARDAR NUEVO INCIDENTE
     // =======================
-    public function store(Request $request)
-    {
-        $request->validate([
-            'dni_usuario' => 'required|exists:usuario,dni',
-            'id_categoria' => 'required|exists:categoria,id',
-            'id_subcategoria' => 'required|exists:subcategoria,id',
-            'id_recurso' => 'required|exists:recurso,id',
-            'id_serie_recurso' => 'required|exists:serie_recurso,id',
-            'descripcion' => 'required|string|max:255',
-            'fecha_incidente' => 'required|date',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'id_usuario'                  => 'required|exists:usuario,id', // hidden que se llena al buscar por DNI
+        'recursos.0.id_categoria'     => 'required|exists:categoria,id',
+        'recursos.0.id_subcategoria'  => 'required|exists:subcategoria,id',
+        'recursos.0.id_recurso'       => 'required|exists:recurso,id',
+        'recursos.0.id_serie_recurso' => 'required|exists:serie_recurso,id',
+        'descripcion'                 => 'required|string|max:255',
+        'fecha_incidente'             => 'required|date',
+    ]);
 
-        // Buscar usuario por DNI
-        $usuario = Usuario::where('dni', $request->dni_usuario)->first();
+    // Verificar que el usuario sea un trabajador
+    $usuario = Usuario::where('id', $request->id_usuario)
+                      ->where('id_rol', 3) // solo trabajadores
+                      ->first();
 
-        // Obtener estado "En revisión"
-        $estadoRevision = EstadoIncidente::where('nombre_estado', 'En revisión')->first();
-
-        Incidente::create([
-            'id_usuario' => $usuario->id,
-            'id_recurso' => $request->id_recurso,
-            'id_serie_recurso' => $request->id_serie_recurso,
-            'descripcion' => $request->descripcion,
-            'fecha_incidente' => $request->fecha_incidente,
-            'id_estado' => $estadoRevision ? $estadoRevision->id : null,
-        ]);
-
-        return redirect()->route('incidente.index')->with('success', '✅ Incidente registrado correctamente.');
+    if (!$usuario) {
+        return redirect()->back()->with('error', 'El usuario no es un trabajador válido.');
     }
+
+    // Obtener estado "En revisión"
+    $estadoRevision = EstadoIncidente::where('nombre_estado', 'En revisión')->first();
+
+    // Crear incidente
+    Incidente::create([
+        'id_trabajador'       => $usuario->id,
+        'id_supervisor'       => auth()->id(), // 👈 supervisor actual (usuario logueado)
+        'id_recurso'          => $request->recursos[0]['id_recurso'],
+        'id_serie_recurso'    => $request->recursos[0]['id_serie_recurso'],
+        'descripcion'         => $request->descripcion,
+        'fecha_incidente'     => $request->fecha_incidente,
+        'id_estado_incidente' => $estadoRevision ? $estadoRevision->id : null,
+    ]);
+
+    return redirect()->route('incidente.index')->with('success', '✅ Incidente registrado correctamente.');
+}
+
+
 
     // =======================
     // MOSTRAR UN INCIDENTE
     // =======================
     public function show($id)
     {
-        $incidente = Incidente::with(['usuarioCreacion', 'recurso', 'estado'])->findOrFail($id);
+        $incidente = Incidente::with(['trabajador', 'recurso', 'estadoIncidente'])->findOrFail($id);
         return view('incidente.show', compact('incidente'));
     }
 
@@ -93,40 +106,45 @@ class IncidenteController extends Controller
     public function edit($id)
     {
         $incidente = Incidente::with([
-        'usuarioCreacion',
-        'recurso.subcategoria.categoria',
-        'estadoIncidente',
-        'serieRecurso' // reemplazamos 'serie'
-    ])->findOrFail($id);
+            'trabajador',
+            'recurso.subcategoria.categoria',
+            'estadoIncidente',
+            'serieRecurso'
+        ])->findOrFail($id);
 
+        $categorias   = Categoria::all();
+        $subcategorias= Subcategoria::all();
+        $recursos     = Recurso::all();
+        $estados      = EstadoIncidente::all();
+        $trabajadores = Usuario::where('id_rol', 3)->get();
 
-        $categorias = Categoria::all();
-        $subcategorias = Subcategoria::all();
-        $recursos = Recurso::all();
-        $estados = EstadoIncidente::all();
-
-        return view('incidente.edit', compact('incidente', 'categorias', 'subcategorias', 'recursos', 'estados'));
+        return view('incidente.edit', compact('incidente', 'categorias', 'subcategorias', 'recursos', 'estados', 'trabajadores'));
     }
-
 
     // =======================
     // ACTUALIZAR INCIDENTE
     // =======================
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'id_trabajador'       => 'required|exists:usuario,id',
+            'descripcion'         => 'required|string|max:255',
+            'id_estado_incidente' => 'required|exists:estado_incidente,id',
+            'fecha_incidente'     => 'required|date',
+        ]);
+
         $incidente = Incidente::findOrFail($id);
 
         $incidente->update([
-            'descripcion' => $request->descripcion,
+            'id_trabajador'       => $request->id_trabajador,
+            'descripcion'         => $request->descripcion,
             'id_estado_incidente' => $request->id_estado_incidente,
-            'resolucion' => $request->resolucion,
-            'fecha_incidente' => $request->fecha_incidente,
-            // otros campos si querés permitir cambios
+            'resolucion'          => $request->resolucion,
+            'fecha_incidente'     => $request->fecha_incidente,
         ]);
 
         return redirect()->route('incidente.index')->with('success', 'Incidente actualizado correctamente');
     }
-
 
     // =======================
     // ELIMINAR INCIDENTE
@@ -142,27 +160,29 @@ class IncidenteController extends Controller
     // =======================
     // AJAX: BUSCAR USUARIO POR DNI
     // =======================
-    public function buscarUsuarioPorDni($dni)
-    {
-        // Limpiamos puntos y espacios
-        $dni = str_replace(['.', ' '], '', $dni);
+public function buscarUsuarioPorDni($dni)
+{
+    $dni = str_replace(['.', ' '], '', $dni);
 
-        $usuario = \App\Models\Usuario::whereRaw("REPLACE(REPLACE(dni, '.', ''), ' ', '') = ?", [$dni])->first();
+    $usuario = \App\Models\Usuario::where('id_rol', 3) // solo trabajadores
+        ->whereRaw("REPLACE(REPLACE(dni, '.', ''), ' ', '') = ?", [$dni])
+        ->first();
 
-        if ($usuario) {
-            return response()->json([
-                'id' => $usuario->id,
-                'nombre' => $usuario->name,
-            ]);
-        }
-
-        return response()->json(['error' => 'Usuario no encontrado'], 404);
+    if ($usuario) {
+        return response()->json([
+            'id'     => $usuario->id,
+            'nombre' => $usuario->name,
+        ]);
     }
+
+    return response()->json(['error' => 'Trabajador no encontrado o no es rol válido'], 404);
+}
+
 
     // Obtener subcategorías por categoría
     public function getSubcategorias($categoriaId)
     {
-        $subcategorias = \App\Models\Subcategoria::where('categoria_id', $categoriaId)
+        $subcategorias = Subcategoria::where('categoria_id', $categoriaId)
                             ->select('id', 'nombre as nombre')
                             ->get();
         return response()->json($subcategorias);
@@ -171,7 +191,7 @@ class IncidenteController extends Controller
     // Obtener recursos por subcategoría
     public function getRecursos($subcategoriaId)
     {
-        $recursos = \App\Models\Recurso::where('id_subcategoria', $subcategoriaId)
+        $recursos = Recurso::where('id_subcategoria', $subcategoriaId)
                         ->select('id', 'nombre')
                         ->get();
         return response()->json($recursos);
@@ -180,7 +200,7 @@ class IncidenteController extends Controller
     // Obtener series por recurso
     public function getSeries($recursoId)
     {
-        $series = \App\Models\SerieRecurso::where('id_recurso', $recursoId)
+        $series = SerieRecurso::where('id_recurso', $recursoId)
                         ->select('id', 'nro_serie')
                         ->get();
         return response()->json($series);

@@ -12,8 +12,10 @@ class Incidente extends Model
     protected $table = 'incidente';
 
     protected $fillable = [
-        'id_recurso',
+        'id_trabajador',
         'id_supervisor',
+        'id_recurso',
+        'id_serie_recurso',
         'id_incidente_detalle',
         'id_usuario_creacion',
         'id_usuario_modificacion',
@@ -23,49 +25,69 @@ class Incidente extends Model
         'fecha_modificacion',
         'fecha_cierre_incidente',
         'resolucion',
-        'id_estado_incidente'
+        'id_estado_incidente',
     ];
 
-    public $timestamps = false; // Ya que usas fechas manualmente
+    public $timestamps = false; // Usás fechas manualmente
 
-    // 🔹 Usuario que creó el incidente
+    // 🔹 Trabajador que sufrió el incidente
+    public function trabajador()
+    {
+        return $this->belongsTo(Usuario::class, 'id_trabajador');
+    }
+
+    // 🔹 Supervisor que registró o gestionó el incidente
+    public function supervisor()
+    {
+        return $this->belongsTo(Usuario::class, 'id_supervisor');
+    }
+
+    // 🔹 Usuario que creó el registro
     public function usuarioCreacion()
     {
         return $this->belongsTo(Usuario::class, 'id_usuario_creacion');
     }
 
-    // 🔹 Usuario que modificó el incidente
+    // 🔹 Usuario que modificó el registro
     public function usuarioModificacion()
     {
         return $this->belongsTo(Usuario::class, 'id_usuario_modificacion');
     }
 
     // 🔹 Recurso afectado
-   public function recurso() {
-    return $this->belongsTo(Recurso::class, 'id_recurso');
+    public function recurso()
+    {
+        return $this->belongsTo(Recurso::class, 'id_recurso');
     }
 
-    public function estadoIncidente() {
+    // 🔹 Serie del recurso
+public function serieRecurso()
+{
+    return $this->belongsTo(SerieRecurso::class, 'id_serie_recurso');
+}
+
+
+    // 🔹 Estado del incidente
+    public function estadoIncidente()
+    {
         return $this->belongsTo(EstadoIncidente::class, 'id_estado_incidente');
     }
 
-    // 🔹 Detalles del incidente (si los hay)
+    // 🔹 Detalles adicionales del incidente
     public function detalles()
     {
         return $this->hasMany(IncidenteDetalle::class, 'id_incidente');
     }
-    public function categoria() {
-    return $this->belongsTo(Categoria::class, 'id_categoria');
+
+    // 🔹 Categoría (a través del recurso)
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'id_categoria');
     }
 
-    public function subcategoria() {
+    // 🔹 Subcategoría (a través del recurso)
+    public function subcategoria()
+    {
         return $this->belongsTo(Subcategoria::class, 'id_subcategoria');
     }
-        public function serieRecurso()
-    {
-        return $this->belongsTo(\App\Models\SerieRecurso::class, 'id_serie_recurso');
-    }
-
-
-   
 }
