@@ -31,8 +31,7 @@
            <td>{{ $incidente->trabajador?->name ?? '-' }}</td>
 
 
-            <td>{{ $incidente->recurso?->subcategoria?->categoria?->nombre ?? '-' }}</td>
-            <td>{{ $incidente->recurso?->subcategoria?->nombre ?? '-' }}</td>
+            <td>{{ $incidente->recurso?->subcategoria?->categoria?->nombre_categoria ?? '-' }}</td>            <td>{{ $incidente->recurso?->subcategoria?->nombre ?? '-' }}</td>
             <td>{{ $incidente->recurso?->nombre ?? '-' }}</td>
             <td>{{ $incidente->descripcion ?? '-' }}</td>
             <td>{{ $incidente->estadoIncidente?->nombre_estado ?? '-' }}</td>
