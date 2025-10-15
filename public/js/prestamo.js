@@ -1,11 +1,9 @@
-console.log('prestamo.js cargado');
-
 let contador = 1;
 const categoriaSelect = document.getElementById('categoria');
 const subcategoriaSelect = document.getElementById('subcategoria');
 const recursoSelect = document.getElementById('recurso');
 const serieSelect = document.getElementById('serie');
-const tabla = document.querySelector('#tablaPrestamos tbody');
+const contenedorSeries = document.getElementById('contenedorSeries');
 const agregarBtn = document.getElementById('agregar');
 
 // Cargar subcategorías al cambiar categoría
@@ -56,7 +54,6 @@ recursoSelect.addEventListener('change', () => {
         serieSelect.innerHTML += `<option value="${s.id}">${s.nro_serie}</option>`;
       });
 
-      // Ocultar series ya agregadas
       if (Array.isArray(window.seriesOcultas)) {
         window.seriesOcultas.forEach(id => {
           const option = serieSelect.querySelector(`option[value="${id}"]`);
@@ -66,7 +63,7 @@ recursoSelect.addEventListener('change', () => {
     });
 });
 
-// Agregar serie a la tabla
+// Agregar tarjeta de serie
 agregarBtn.addEventListener('click', () => {
   const recursoText = recursoSelect.options[recursoSelect.selectedIndex]?.text;
   const serieText = serieSelect.options[serieSelect.selectedIndex]?.text;
@@ -74,17 +71,19 @@ agregarBtn.addEventListener('click', () => {
 
   if (!serieId || serieSelect.selectedIndex === 0) return;
 
-  const fila = document.createElement('tr');
-  fila.innerHTML = `
-    <td>${contador++}</td>
-    <td>${recursoText}</td>
-    <td>${serieText}</td>
-    <td>
-      <button type="button" class="btn btn-sm btn-danger eliminar">Eliminar</button>
-      <input type="hidden" name="series[]" value="${serieId}">
-    </td>
+  const tarjeta = document.createElement('div');
+  tarjeta.className = 'col-md-4';
+  tarjeta.innerHTML = `
+    <div class="card border-success shadow-sm">
+      <div class="card-body p-2">
+        <h6 class="card-title mb-1">${recursoText}</h6>
+        <p class="card-text text-muted mb-2">Serie: ${serieText}</p>
+        <input type="hidden" name="series[]" value="${serieId}">
+        <button type="button" class="btn btn-sm btn-outline-danger w-100 eliminar">Eliminar</button>
+      </div>
+    </div>
   `;
-  tabla.appendChild(fila);
+  contenedorSeries.appendChild(tarjeta);
 
   const optionToHide = serieSelect.querySelector(`option[value="${serieId}"]`);
   if (optionToHide) optionToHide.style.display = 'none';
@@ -92,39 +91,41 @@ agregarBtn.addEventListener('click', () => {
   window.seriesOcultas = window.seriesOcultas || [];
   window.seriesOcultas.push(serieId);
 
-  fila.querySelector('.eliminar').addEventListener('click', () => {
+  tarjeta.querySelector('.eliminar').addEventListener('click', () => {
     if (optionToHide) optionToHide.style.display = 'block';
-    fila.remove();
+    tarjeta.remove();
     window.seriesOcultas = window.seriesOcultas.filter(id => id !== serieId);
   });
 
   serieSelect.selectedIndex = 0;
 });
 
-// Precargar tabla con series ya prestadas (modo edición)
+// Precargar tarjetas en modo edición
 window.addEventListener('load', () => {
   if (Array.isArray(window.detalles) && window.detalles.length > 0) {
     window.seriesOcultas = [];
 
     window.detalles.forEach((detalle) => {
-      const fila = document.createElement('tr');
-      fila.innerHTML = `
-        <td>${contador++}</td>
-        <td>${detalle.recurso_nombre}</td>
-        <td>${detalle.serie_nro}</td>
-        <td>
-          <button type="button" class="btn btn-sm btn-danger eliminar">Eliminar</button>
-          <input type="hidden" name="series[]" value="${detalle.serie_id}">
-        </td>
+      const tarjeta = document.createElement('div');
+      tarjeta.className = 'col-md-4';
+      tarjeta.innerHTML = `
+        <div class="card border-success shadow-sm">
+          <div class="card-body p-2">
+            <h6 class="card-title mb-1">${detalle.recurso_nombre}</h6>
+            <p class="card-text text-muted mb-2">Serie: ${detalle.serie_nro}</p>
+            <input type="hidden" name="series[]" value="${detalle.serie_id}">
+            <button type="button" class="btn btn-sm btn-outline-danger w-100 eliminar">Eliminar</button>
+          </div>
+        </div>
       `;
-      tabla.appendChild(fila);
+      contenedorSeries.appendChild(tarjeta);
 
       window.seriesOcultas.push(detalle.serie_id);
 
-      fila.querySelector('.eliminar').addEventListener('click', () => {
+      tarjeta.querySelector('.eliminar').addEventListener('click', () => {
         const option = serieSelect.querySelector(`option[value="${detalle.serie_id}"]`);
         if (option) option.style.display = 'block';
-        fila.remove();
+        tarjeta.remove();
         window.seriesOcultas = window.seriesOcultas.filter(id => id !== detalle.serie_id);
       });
     });

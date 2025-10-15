@@ -1,32 +1,48 @@
 @extends('layouts.app')
 
 @section('template_title')
-  Editar Préstamo #{{ $prestamo->id }}
+  Editar Préstamo
 @endsection
 
 @section('content')
 <div class="container py-4">
   <div class="card shadow-sm">
     <div class="card-header bg-warning text-dark text-center">
-      <h4 class="mb-0">Editar Préstamo #{{ $prestamo->id }}</h4>
+      <h4 class="mb-0">Editar Préstamo</h4>
     </div>
     <div class="card-body bg-white">
+
+      {{-- Mensajes de error --}}
+      @if ($errors->any())
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
       <form method="POST" action="{{ route('prestamos.update', $prestamo->id) }}">
         @csrf
-        @method('PATCH')
+        @method('PUT')
 
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="fecha_prestamo" class="form-label">Fecha de Préstamo</label>
-            <input type="date" name="fecha_prestamo" class="form-control" value="{{ $prestamo->fecha_prestamo->format('Y-m-d') }}" required>
+            <input type="date" name="fecha_prestamo" class="form-control"
+              value="{{ \Carbon\Carbon::parse($prestamo->fecha_prestamo)->format('Y-m-d') }}"
+              {{ $prestamo->estado == 3 ? 'readonly' : '' }} required>
           </div>
           <div class="col-md-6">
             <label for="fecha_devolucion" class="form-label">Fecha de Devolución</label>
-            <input type="date" name="fecha_devolucion" class="form-control" value="{{ optional($prestamo->fecha_devolucion)->format('Y-m-d') }}">
+            <input type="date" name="fecha_devolucion" class="form-control"
+              value="{{ $prestamo->fecha_devolucion ? \Carbon\Carbon::parse($prestamo->fecha_devolucion)->format('Y-m-d') : '' }}"
+              {{ $prestamo->estado == 3 ? 'readonly' : '' }}>
           </div>
         </div>
 
-        <input type="hidden" name="estado" value="2"> {{-- Activo --}}
+        <input type="hidden" name="estado" value="{{ $prestamo->estado }}">
 
         <div class="row mb-3">
           <div class="col-md-4">
@@ -52,7 +68,7 @@
           </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-4">
           <div class="col-md-10">
             <label for="serie" class="form-label">Serie del Recurso</label>
             <select id="serie" class="form-select">
@@ -65,44 +81,13 @@
         </div>
 
         <hr>
-        <h5>Recursos ya prestados</h5>
-        <table class="table table-bordered text-center mb-4">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>Recurso</th>
-              <th>Serie</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($prestamo->detallePrestamos as $i => $detalle)
-              <tr>
-                <td>{{ $i + 1 }}</td>
-                <td>{{ optional($detalle->serieRecurso->recurso)->nombre ?? '—' }}</td>
-                <td>{{ optional($detalle->serieRecurso)->nro_serie ?? '—' }}</td>
-                <td>{{ optional($detalle->estadoPrestamo)->nombre ?? '—' }}</td>
-              </tr>
-            @endforeach
-          </tbody>
-        </table>
+        <h5 class="mb-3">Recursos prestados</h5>
+        <div id="contenedorSeries" class="row g-3">
+          {{-- Tarjetas precargadas desde el controlador --}}
+        </div>
 
-        <h5>Recursos nuevos a agregar</h5>
-        <table class="table table-bordered text-center" id="tablaPrestamos">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>Recurso</th>
-              <th>Serie</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <div class="text-end mt-3">
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-          <a href="{{ route('prestamos.index') }}" class="btn btn-secondary">Cancelar</a>
+        <div class="text-end mt-4">
+          <button type="submit" class="btn btn-warning">Actualizar Préstamo</button>
         </div>
       </form>
     </div>
@@ -110,10 +95,9 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
   <script>
     window.detalles = @json($detalles);
   </script>
   <script src="{{ asset('js/prestamo.js') }}"></script>
-@endsection
-
+@endpush

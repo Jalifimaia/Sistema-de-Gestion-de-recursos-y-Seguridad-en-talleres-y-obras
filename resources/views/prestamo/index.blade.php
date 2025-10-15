@@ -12,8 +12,7 @@
   <table class="table table-bordered table-striped">
     <thead class="table-dark">
       <tr>
-        <th>ID</th>
-        <th>Operario</th>
+        <th>Creado por</th>
         <th>Recurso</th>
         <th>N° Serie</th>
         <th>Fecha Préstamo</th>
@@ -25,7 +24,6 @@
     <tbody>
       @foreach ($prestamos as $p)
       <tr>
-        <td>{{ $p->id }}</td>
         <td>{{ $p->operario }}</td>
         <td>{{ $p->recurso }}</td>
         <td>{{ $p->nro_serie }}</td>

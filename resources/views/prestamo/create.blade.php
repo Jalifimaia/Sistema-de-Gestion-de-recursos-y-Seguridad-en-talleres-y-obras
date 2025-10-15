@@ -12,7 +12,7 @@
     </div>
     <div class="card-body bg-white">
 
-      <!--Mensajes de error-->
+      {{-- Mensajes de error --}}
       @if ($errors->any())
         <div class="alert alert-danger">
           <ul class="mb-0">
@@ -37,7 +37,7 @@
           </div>
         </div>
 
-        <input type="hidden" name="estado" value="2"> {{-- Activo --}}
+        <input type="hidden" name="estado" value="2">
 
         <div class="row mb-3">
           <div class="col-md-4">
@@ -63,7 +63,7 @@
           </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-4">
           <div class="col-md-10">
             <label for="serie" class="form-label">Serie del Recurso</label>
             <select id="serie" class="form-select" required>
@@ -76,20 +76,12 @@
         </div>
 
         <hr>
-        <h5>Recursos a prestar</h5>
-        <table class="table table-bordered text-center" id="tablaPrestamos">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>Recurso</th>
-              <th>Serie</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <h5 class="mb-3">Recursos seleccionados</h5>
+        <div id="contenedorSeries" class="row g-3">
+          {{-- Aquí se insertan las tarjetas dinámicamente --}}
+        </div>
 
-        <div class="text-end mt-3">
+        <div class="text-end mt-4">
           <button type="submit" class="btn btn-primary">Guardar Préstamo</button>
         </div>
       </form>
@@ -97,9 +89,6 @@
   </div>
 </div>
 @endsection
-
-
-
 
 @push('scripts')
   <script src="{{ asset('js/prestamo.js') }}"></script>

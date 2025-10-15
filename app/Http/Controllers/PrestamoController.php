@@ -142,39 +142,47 @@ class PrestamoController extends Controller
                 'id_usuario_modificacion' => Auth::id(),
             ]);
 
-            if ($request->filled('series')) {
-                foreach ($request->series as $idSerie) {
-                    $serie = SerieRecurso::findOrFail($idSerie);
+          if ($request->filled('series')) {
+    $seriesExistentes = DetallePrestamo::where('id_prestamo', $id)->pluck('id_serie')->toArray();
 
-                    $yaPrestada = DetallePrestamo::where('id_serie', $idSerie)
-                        ->where('id_estado_prestamo', 2)
-                        ->exists();
+    foreach ($request->series as $idSerie) {
+        if (in_array($idSerie, $seriesExistentes)) {
+            continue; // ya está en el préstamo, no la agregamos de nuevo
+        }
 
-                    if ($serie->id_estado != 1 || $yaPrestada) {
-                        throw new \Exception("La serie $serie->nro_serie no está disponible o ya está prestada.");
-                    }
+        $serie = SerieRecurso::findOrFail($idSerie);
 
-                    DetallePrestamo::create([
-                        'id_prestamo' => $id,
-                        'id_serie' => $idSerie,
-                        'id_recurso' => $serie->id_recurso,
-                        'id_estado_prestamo' => 2,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+        $yaPrestada = DetallePrestamo::where('id_serie', $idSerie)
+            ->where('id_estado_prestamo', 2)
+            ->where('id_prestamo', '!=', $id)
+            ->exists();
 
-                    $serie->update(['id_estado' => 3]);
+        if ($serie->id_estado != 1 || $yaPrestada) {
+            throw new \Exception("La serie $serie->nro_serie no está disponible o ya está prestada.");
+        }
 
-                    DB::table('stock')->updateOrInsert(
-                        ['id_serie_recurso' => $idSerie],
-                        [
-                            'id_recurso' => $serie->id_recurso,
-                            'id_estado_recurso' => 3,
-                            'id_usuario' => Auth::id(),
-                        ]
-                    );
-                }
-            }
+        DetallePrestamo::create([
+            'id_prestamo' => $id,
+            'id_serie' => $idSerie,
+            'id_recurso' => $serie->id_recurso,
+            'id_estado_prestamo' => 2,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $serie->update(['id_estado' => 3]);
+
+        DB::table('stock')->updateOrInsert(
+            ['id_serie_recurso' => $idSerie],
+            [
+                'id_recurso' => $serie->id_recurso,
+                'id_estado_recurso' => 3,
+                'id_usuario' => Auth::id(),
+            ]
+        );
+    }
+}
+
 
             DB::commit();
             return redirect()->route('prestamos.index')->with('success', 'Préstamo actualizado correctamente.');
