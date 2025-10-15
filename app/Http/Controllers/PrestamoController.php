@@ -15,7 +15,7 @@ use Carbon\Carbon;
 
 class PrestamoController extends Controller
 {
- public function index(): View
+public function index(): View
 {
     $prestamos = DB::table('prestamo')
         ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
@@ -32,13 +32,17 @@ class PrestamoController extends Controller
             'serie_recurso.nro_serie',
             'prestamo.fecha_prestamo',
             'prestamo.fecha_devolucion',
+            'prestamo.fecha_creacion',
             'estado_prestamo.nombre as estado'
         )
+        ->whereIn('estado_prestamo.nombre', ['Cancelado', 'Activo', 'Vencido'])
         ->orderByDesc('prestamo.id')
         ->get();
 
     return view('prestamo.index', compact('prestamos'));
 }
+
+
 
 
 public function darDeBaja($id)
@@ -67,18 +71,18 @@ public function darDeBaja($id)
 }
 
 
-    public function create(): View
-    {
-        $categorias = DB::table('categoria')->get();
+public function create(): View
+{
+    $categorias = DB::table('categoria')->get();
 
-        $trabajadores = DB::table('usuario')
+    $trabajadores = DB::table('usuario')
         ->where('id_rol', 3) // 3 = trabajador
         ->where('id_estado', 1)
         ->get();
 
+    return view('prestamo.create', compact('categorias', 'trabajadores'));
+}
 
-        return view('prestamo.create', compact('categorias', 'trabajadores'));
-    }
 
     public function store(PrestamoRequest $request)
     {
