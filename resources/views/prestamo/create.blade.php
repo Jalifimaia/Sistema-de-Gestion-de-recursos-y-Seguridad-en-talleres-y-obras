@@ -12,7 +12,6 @@
     </div>
     <div class="card-body bg-white">
 
-      {{-- Mensajes de error --}}
       @if ($errors->any())
         <div class="alert alert-danger">
           <ul class="mb-0">
@@ -38,20 +37,16 @@
         </div>
 
         <div class="row mb-3">
-  <div class="col-md-6">
-    <label for="id_trabajador" class="form-label">Trabajador</label>
-    <select name="id_trabajador" class="form-select" required>
-      <option selected disabled>Seleccione un trabajador</option>
-      @foreach($trabajadores as $t)
-        <option value="{{ $t->id }}"
-          {{ isset($prestamo) && $prestamo->id_usuario == $t->id ? 'selected' : '' }}>
-          {{ $t->name }}
-        </option>
-      @endforeach
-    </select>
-  </div>
-</div>
-
+          <div class="col-md-6">
+            <label for="id_trabajador" class="form-label">Trabajador</label>
+            <select name="id_trabajador" class="form-select" required>
+              <option selected disabled>Seleccione un trabajador</option>
+              @foreach($trabajadores as $t)
+                <option value="{{ $t->id }}">{{ $t->name }}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
 
         <input type="hidden" name="estado" value="2">
 
@@ -94,7 +89,7 @@
         <hr>
         <h5 class="mb-3">Recursos seleccionados</h5>
         <div id="contenedorSeries" class="row g-3">
-          {{-- Aquí se insertan las tarjetas dinámicamente --}}
+          {{-- Tarjetas dinámicas --}}
         </div>
 
         <div class="text-end mt-4">

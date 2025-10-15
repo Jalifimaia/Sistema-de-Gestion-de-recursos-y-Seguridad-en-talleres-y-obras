@@ -6,12 +6,12 @@ const serieSelect = document.getElementById('serie');
 const contenedorSeries = document.getElementById('contenedorSeries');
 const agregarBtn = document.getElementById('agregar');
 
-// Cargar subcategorías al cambiar categoría
+// 🔹 Cargar subcategorías al cambiar categoría
 categoriaSelect.addEventListener('change', () => {
   const id = categoriaSelect.value;
   if (!id) return;
 
-  fetch(`/subcategorias/${id}`)
+  fetch(`/api/prestamo/subcategorias/${id}`)
     .then(res => res.json())
     .then(data => {
       subcategoriaSelect.innerHTML = '<option selected disabled>Seleccione una subcategoría</option>';
@@ -24,12 +24,12 @@ categoriaSelect.addEventListener('change', () => {
     });
 });
 
-// Cargar recursos al cambiar subcategoría
+// 🔹 Cargar recursos al cambiar subcategoría
 subcategoriaSelect.addEventListener('change', () => {
   const id = subcategoriaSelect.value;
   if (!id) return;
 
-  fetch(`/recursos/${id}`)
+  fetch(`/api/prestamo/recursos/${id}`)
     .then(res => res.json())
     .then(data => {
       recursoSelect.innerHTML = '<option selected disabled>Seleccione un recurso</option>';
@@ -41,12 +41,12 @@ subcategoriaSelect.addEventListener('change', () => {
     });
 });
 
-// Cargar series al cambiar recurso
+// 🔹 Cargar series al cambiar recurso
 recursoSelect.addEventListener('change', () => {
   const id = recursoSelect.value;
   if (!id) return;
 
-  fetch(`/series/${id}`)
+  fetch(`/api/prestamo/series/${id}`)
     .then(res => res.json())
     .then(data => {
       serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
@@ -63,7 +63,7 @@ recursoSelect.addEventListener('change', () => {
     });
 });
 
-// Agregar recurso dinámico
+// 🔹 Agregar recurso dinámico
 agregarBtn.addEventListener('click', () => {
   const recursoText = recursoSelect.options[recursoSelect.selectedIndex]?.text;
   const serieText = serieSelect.options[serieSelect.selectedIndex]?.text;
@@ -105,6 +105,7 @@ agregarBtn.addEventListener('click', () => {
   serieSelect.selectedIndex = 0;
 });
 
+// 🔹 Dar de baja recurso
 document.querySelectorAll('.dar-baja').forEach(btn => {
   btn.addEventListener('click', function () {
     const detalleId = this.dataset.id;
@@ -121,11 +122,11 @@ document.querySelectorAll('.dar-baja').forEach(btn => {
     })
     .then(res => {
       if (!res.ok) throw new Error('Error al dar de baja');
-      return res.json().catch(() => ({})); // por si no hay JSON
+      return res.json().catch(() => ({}));
     })
     .then(() => {
       console.log(`Recurso ${detalleId} dado de baja`);
-      location.reload(); // o actualizar visualmente sin recargar
+      location.reload();
     })
     .catch(err => {
       console.error(err);

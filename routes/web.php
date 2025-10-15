@@ -28,6 +28,26 @@ Route::get('/operario/epp', fn() => view('operario.epp'));
 Route::get('/supervisor/control-herramientas', fn() => view('supervisor.control_herramientas'));
 Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp'));
 
+// ruta de inventario
+Route::resource('recursos', \App\Http\Controllers\RecursoController::class);
+
+
+// prestamos
+Route::get('/api/prestamo/subcategorias/{categoriaId}', function ($categoriaId) {
+    return \App\Models\Subcategoria::where('categoria_id', $categoriaId)->get();
+});
+
+Route::get('/api/prestamo/recursos/{subcategoriaId}', function ($subcategoriaId) {
+    return \App\Models\Recurso::where('id_subcategoria', $subcategoriaId)->get();
+});
+
+Route::get('/api/prestamo/series/{recursoId}', function ($recursoId) {
+    return \App\Models\SerieRecurso::where('id_recurso', $recursoId)
+        ->where('id_estado', 1)
+        ->get();
+});
+
+
 // Cambios de estado de usuario
 Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
 Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');

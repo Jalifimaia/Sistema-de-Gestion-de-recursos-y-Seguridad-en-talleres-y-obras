@@ -26,10 +26,8 @@ class RecursoController extends Controller
 }
 
 
-    public function store(RecursoRequest $request)
+public function store(RecursoRequest $request)
 {
-    \Log::info('Datos recibidos:', $request->all());
-
     $validated = $request->validated();
 
     Recurso::create([
@@ -39,11 +37,11 @@ class RecursoController extends Controller
         'costo_unitario' => $validated['costo_unitario'],
         'id_usuario_creacion' => auth()->id(),
         'id_usuario_modificacion' => auth()->id(),
-        // No hace falta asignar fecha_creacion ni fecha_modificacion
     ]);
 
-    return response()->json(['success' => true]);
+    return redirect()->route('inventario')->with('success', 'Recurso creado correctamente.');
 }
+
 
 
 
@@ -99,12 +97,12 @@ class RecursoController extends Controller
         return Redirect::route('inventario')
             ->with('success', 'Recurso deleted successfully');
     }
-    public function create()
+public function create()
 {
-    $categorias = Categoria::all();
-
+    $categorias = \App\Models\Categoria::all();
     return view('recurso.create', compact('categorias'));
 }
+
 
 public function getSubcategorias($categoriaId)
 {
