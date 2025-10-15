@@ -10,29 +10,54 @@ use App\Http\Controllers\SerieRecursoController;
 use App\Http\Controllers\IncidenteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrestamoController;
+use App\Http\Controllers\OperarioHerramientaController;
 
-// Rutas públicas
+/*
+|--------------------------------------------------------------------------
+| Rutas Públicas
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
 Route::get('/reportes', fn() => view('supervisor.reportes'));
 
-// Vistas estáticas para Operario
+/*
+|--------------------------------------------------------------------------
+| Rutas del rol Operario
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/operario/solicitar', fn() => view('operario.solicitar'));
-Route::get('/operario/mis-herramientas', fn() => view('operario.mis_herramientas'));
+Route::get('/operario/mis-herramientas', [OperarioHerramientaController::class, 'index']);
 Route::get('/operario/devolver', fn() => view('operario.devolver'));
 Route::get('/operario/epp', fn() => view('operario.epp'));
 
-// Vistas estáticas para Supervisor
+/*
+|--------------------------------------------------------------------------
+| Rutas del rol Supervisor
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/supervisor/control-herramientas', fn() => view('supervisor.control_herramientas'));
 Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp'));
 
-// ruta de inventario
-Route::resource('recursos', \App\Http\Controllers\RecursoController::class);
+/*
+|--------------------------------------------------------------------------
+| Rutas de Inventario
+|--------------------------------------------------------------------------
+*/
 
+Route::resource('recursos', RecursoController::class);
 
-// prestamos
+/*
+|--------------------------------------------------------------------------
+| Rutas AJAX para Préstamos
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/api/prestamo/subcategorias/{categoriaId}', function ($categoriaId) {
     return \App\Models\Subcategoria::where('categoria_id', $categoriaId)->get();
 });
@@ -47,60 +72,62 @@ Route::get('/api/prestamo/series/{recursoId}', function ($recursoId) {
         ->get();
 });
 
+/*
+|--------------------------------------------------------------------------
+| Rutas AJAX para Incidentes
+|--------------------------------------------------------------------------
+*/
 
-// Cambios de estado de usuario
-Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
-Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');
+Route::get('/ajax/incidente/subcategorias/{categoriaId}', [IncidenteController::class, 'getSubcategorias']);
+Route::get('/ajax/incidente/recursos/{subcategoriaId}', [IncidenteController::class, 'getRecursos']);
+Route::get('/ajax/incidente/series/{recursoId}', [IncidenteController::class, 'getSeries']);
+Route::get('/ajax/incidente/buscar-usuario/{dni}', [IncidenteController::class, 'buscarUsuarioPorDni']);
 
-// Rutas AJAX para selects dinámicos (usadas por prestamo.js)
-Route::get('/subcategorias/{categoriaId}', function ($categoriaId) {
-    return DB::table('subcategoria')
-        ->where('categoria_id', $categoriaId)
-        ->select('id', 'nombre')
-        ->get();
-});
+/*
+|--------------------------------------------------------------------------
+| Rutas de Incidentes
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/recursos/{subcategoriaId}', function ($subcategoriaId) {
-    return DB::table('recurso')
-        ->where('id_subcategoria', $subcategoriaId)
-        ->select('id', 'nombre')
-        ->get();
-});
-
-Route::get('/series/{recursoId}', function ($recursoId) {
-    return DB::table('serie_recurso')
-        ->where('id_recurso', $recursoId)
-        ->where('id_estado', 1) // Disponible
-        ->select('id', 'nro_serie')
-        ->get();
-});
-
-// Rutas de incidente
 Route::get('/incidente', [IncidenteController::class, 'index'])->name('incidente.index');
 Route::get('/incidente/create', [IncidenteController::class, 'create'])->name('incidente.create');
 Route::post('/incidente', [IncidenteController::class, 'store'])->name('incidente.store');
+Route::get('/incidente/{id}/edit', [IncidenteController::class, 'edit'])->name('incidente.edit');
+Route::put('/incidente/{id}', [IncidenteController::class, 'update'])->name('incidente.update');
+Route::delete('/incidente/{id}', [IncidenteController::class, 'destroy'])->name('incidente.destroy');
 
-// Rutas protegidas por autenticación
+/*
+|--------------------------------------------------------------------------
+| Rutas protegidas por autenticación
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/supervisor/registrar-incidente', [IncidenteController::class, 'create'])->name('incidente.create');
-    Route::post('/supervisor/registrar-incidente', [IncidenteController::class, 'store'])->name('incidente.store');
-
     Route::resource('usuarios', UserController::class);
-    Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
-    Route::resource('recursos', RecursoController::class);
-    Route::resource('incidente', IncidenteController::class);
     Route::resource('estado_incidente', EstadoIncidenteController::class);
     Route::resource('prestamos', PrestamoController::class);
     Route::patch('/prestamos/detalle/{id}/baja', [PrestamoController::class, 'darDeBaja'])->name('prestamos.bajaDetalle');
 
-
-    // Serie recurso personalizado
     Route::get('/serie_recurso/create/{id}', [SerieRecursoController::class, 'createConRecurso'])->name('serie_recurso.createConRecurso');
     Route::post('/serie_recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])->name('serie_recurso.storeMultiple');
     Route::resource('serie_recurso', SerieRecursoController::class)->except(['create']);
 });
 
-// Autenticación
+/*
+|--------------------------------------------------------------------------
+| Cambios de estado de usuario
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
+Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');
+
+/*
+|--------------------------------------------------------------------------
+| Autenticación
+|--------------------------------------------------------------------------
+*/
+
 require __DIR__.'/auth.php';
