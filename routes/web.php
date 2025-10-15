@@ -49,7 +49,7 @@ Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp')
 | Rutas de Inventario
 |--------------------------------------------------------------------------
 */
-
+Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
 Route::resource('recursos', RecursoController::class);
 
 /*
