@@ -11,6 +11,18 @@
       <h4 class="mb-0">Registrar Préstamo</h4>
     </div>
     <div class="card-body bg-white">
+
+      <!--Mensajes de error-->
+      @if ($errors->any())
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
       <form method="POST" action="{{ route('prestamos.store') }}">
         @csrf
 
@@ -84,10 +96,11 @@
     </div>
   </div>
 </div>
+@endsection
 
-@section('scripts')
+
+
+
+@push('scripts')
   <script src="{{ asset('js/prestamo.js') }}"></script>
-@endsection
-
-
-@endsection
+@endpush

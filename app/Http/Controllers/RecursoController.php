@@ -105,4 +105,23 @@ class RecursoController extends Controller
 
     return view('recurso.create', compact('categorias'));
 }
+
+public function getSubcategorias($categoriaId)
+{
+    return DB::table('subcategoria')->where('categoria_id', $categoriaId)->get();
+}
+
+public function getRecursos($subcategoriaId)
+{
+    return DB::table('recurso')->where('id_subcategoria', $subcategoriaId)->get();
+}
+
+public function getSeries($recursoId)
+{
+    return DB::table('serie_recurso')
+        ->where('id_recurso', $recursoId)
+        ->where('id_estado', 1) // solo disponibles
+        ->get();
+}
+
 }

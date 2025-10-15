@@ -1,3 +1,5 @@
+console.log('prestamo.js cargado');
+
 let contador = 1;
 const categoriaSelect = document.getElementById('categoria');
 const subcategoriaSelect = document.getElementById('subcategoria');
@@ -8,13 +10,17 @@ const agregarBtn = document.getElementById('agregar');
 
 // Cargar subcategorías al cambiar categoría
 categoriaSelect.addEventListener('change', () => {
-  fetch(`/api/subcategorias/${categoriaSelect.value}`)
+  const id = categoriaSelect.value;
+  if (!id) return;
+
+  fetch(`/subcategorias/${id}`)
     .then(res => res.json())
     .then(data => {
       subcategoriaSelect.innerHTML = '<option selected disabled>Seleccione una subcategoría</option>';
       data.forEach(sub => {
         subcategoriaSelect.innerHTML += `<option value="${sub.id}">${sub.nombre}</option>`;
       });
+
       recursoSelect.innerHTML = '<option selected disabled>Seleccione un recurso</option>';
       serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
     });
@@ -22,20 +28,27 @@ categoriaSelect.addEventListener('change', () => {
 
 // Cargar recursos al cambiar subcategoría
 subcategoriaSelect.addEventListener('change', () => {
-  fetch(`/api/recursos/${subcategoriaSelect.value}`)
+  const id = subcategoriaSelect.value;
+  if (!id) return;
+
+  fetch(`/recursos/${id}`)
     .then(res => res.json())
     .then(data => {
       recursoSelect.innerHTML = '<option selected disabled>Seleccione un recurso</option>';
       data.forEach(r => {
         recursoSelect.innerHTML += `<option value="${r.id}">${r.nombre}</option>`;
       });
+
       serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
     });
 });
 
 // Cargar series al cambiar recurso
 recursoSelect.addEventListener('change', () => {
-  fetch(`/api/series/${recursoSelect.value}`)
+  const id = recursoSelect.value;
+  if (!id) return;
+
+  fetch(`/series/${id}`)
     .then(res => res.json())
     .then(data => {
       serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
@@ -53,7 +66,7 @@ recursoSelect.addEventListener('change', () => {
     });
 });
 
-// Agregar a tabla
+// Agregar serie a la tabla
 agregarBtn.addEventListener('click', () => {
   const recursoText = recursoSelect.options[recursoSelect.selectedIndex]?.text;
   const serieText = serieSelect.options[serieSelect.selectedIndex]?.text;
@@ -88,7 +101,7 @@ agregarBtn.addEventListener('click', () => {
   serieSelect.selectedIndex = 0;
 });
 
-// Precargar tabla con series ya prestadas
+// Precargar tabla con series ya prestadas (modo edición)
 window.addEventListener('load', () => {
   if (Array.isArray(window.detalles) && window.detalles.length > 0) {
     window.seriesOcultas = [];
