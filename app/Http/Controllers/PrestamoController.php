@@ -50,7 +50,7 @@ public function darDeBaja($id)
         Log::info("Dando de baja recurso ID: {$detalle->id} en préstamo {$detalle->id_prestamo}");
 
         $detalle->update([
-            'id_estado_prestamo' => 4,
+            'id_estado_prestamo' => 5,
             'updated_at' => now(),
             'id_usuario_modificacion' => Auth::id(),
         ]);

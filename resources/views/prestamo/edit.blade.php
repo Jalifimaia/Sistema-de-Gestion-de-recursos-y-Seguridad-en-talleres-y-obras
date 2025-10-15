@@ -104,7 +104,7 @@
   @foreach ($prestamo->detallePrestamos as $detalle)
     @php
       $estado = $detalle->id_estado_prestamo;
-      $baja = $estado == 4;
+      $baja = $estado == 5;
     @endphp
     <div class="col-md-4">
       <div class="card border {{ $baja ? 'border-danger' : 'border-secondary' }}">
@@ -112,7 +112,7 @@
           <h6 class="card-title mb-1">{{ $detalle->serieRecurso->recurso->nombre }}</h6>
           <p class="card-text mb-2">Serie: <strong>{{ $detalle->serieRecurso->nro_serie }}</strong></p>
           <span class="badge bg-{{ $baja ? 'danger' : 'secondary' }}">
-            {{ $baja ? 'Dado de baja' : 'Asignado' }}
+            {{ $baja ? 'Cancelado' : 'Asignado' }}
           </span>
 
           @if (!$baja)
