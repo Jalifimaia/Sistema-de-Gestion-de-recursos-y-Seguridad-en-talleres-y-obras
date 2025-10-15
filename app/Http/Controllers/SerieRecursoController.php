@@ -45,7 +45,7 @@ public function storeMultiple(Request $request): RedirectResponse
     for ($i = 1; $i <= $request->cantidad; $i++) {
         SerieRecurso::create([
             'id_recurso' => $request->id_recurso,
-            'nro_serie' => $request->nro_serie . str_pad($i, 3, '0', STR_PAD_LEFT),
+            'nro_serie' => $request->nro_serie . ' - ' . str_pad($i, 3, '0', STR_PAD_LEFT),
             'talle' => $request->talle,
             'fecha_adquisicion' => $request->fecha_adquisicion,
             'fecha_vencimiento' => $request->fecha_vencimiento,

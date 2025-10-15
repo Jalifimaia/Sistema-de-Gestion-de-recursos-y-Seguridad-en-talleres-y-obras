@@ -6,10 +6,6 @@
         <th>Estado</th>
         <th>Email</th>
         <th>Rol</th>
-        <th>Creado por</th>
-        <th>Modificado por</th>
-        <th>Creado el</th>
-        <th>Modificado el</th>
         <th>Acciones</th>
       </tr>
     </thead>
@@ -17,26 +13,36 @@
       @foreach ($usuarios as $usuario)
         <tr>
           <td>{{ $usuario->name }}</td>
-          <td>{{ optional($usuario->estado)->nombre }}</td>
+          <td>
+            @if ($usuario->estado?->nombre === 'Baja')
+              <span >Baja</span>
+            @elseif ($usuario->estado?->nombre === 'Alta')
+              <span>Alta</span>
+            @elseif ($usuario->estado?->nombre === 'stand by')
+              <span">Stand by</span>
+            @else
+              <span>Sin estado</span>
+            @endif
+          </td>
           <td>{{ $usuario->email }}</td>
           <td>{{ $usuario->rol->nombre_rol ?? 'Sin rol' }}</td>
-          <td>{{ $usuario->usuario_creacion ?? '—' }}</td>
-          <td>{{ $usuario->usuario_modificacion ?? '—' }}</td>
-          <td>{{ $usuario->created_at?->format('d/m/Y H:i') ?? '—' }}</td>
-          <td>{{ $usuario->updated_at?->format('d/m/Y H:i') ?? '—' }}</td>
-
           <td>
-            <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-info">Ver</a>
-            <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-sm btn-warning">Editar</a>
-            <form action="{{ route('usuarios.destroy', $usuario->id) }}" method="POST" style="display:inline;">
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-            </form>
-          </td>
+          <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-info">Ver</a>
+          <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-sm btn-warning">Editar</a>
+
+          @if ($usuario->estado?->nombre === 'Baja')
+            <button class="btn btn-sm btn-danger opacity-50 pointer-events-none" disabled>
+              Dar de baja
+            </button>
+          @else
+            <button wire:click="darDeBaja({{ $usuario->id }})" class="btn btn-sm btn-danger">
+              Dar de baja
+            </button>
+          @endif
+        </td>
+
         </tr>
       @endforeach
     </tbody>
   </table>
 </div>
-

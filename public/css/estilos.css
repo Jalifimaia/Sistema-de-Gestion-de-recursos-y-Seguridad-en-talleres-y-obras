@@ -1,3 +1,217 @@
-h1 {
-    font-size: large;
+/* === Fondo exclusivo para login === */
+.login-fondo {
+  background: url('/images/login-logo.png') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+}
+
+.login-fondo::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(162, 162, 162, 0.61);
+  z-index: -1;
+}
+
+.login-card {
+  max-width: 420px;
+  margin: auto;
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-logo img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.login-logo h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* === Sidebar ocultable === */
+#sidebar {
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: -250px;
+  background-color: #383b3f;
+  color: white;
+  transition: left 0.4s ease;
+  z-index: 1000;
+}
+
+#sidebar.active {
+  left: 0;
+}
+
+/* Oculta visualmente el sidebar al cargar */
+.sidebar.invisible {
+  visibility: hidden;
+}
+
+/* Desactiva transición al cargar */
+.sidebar.no-transition {
+  transition: none !important;
+}
+
+/* === Contenido principal === */
+#main {
+  margin-left: 0;
+  transition: margin-left 0.4s ease;
+}
+
+#main.shifted {
+  margin-left: 250px;
+}
+
+/* === Botón de apertura (☰) === */
+.toggle-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-size: 1.2rem;
+  transition: left 0.3s ease;
+}
+
+.toggle-btn.hidden {
+  display: none;
+}
+
+/* Ocultar botón ☰ cuando el sidebar está abierto */
+#sidebar.active ~ .toggle-btn {
+  left: -100px;
+}
+
+/* === Botón de cierre (X) === */
+#closeSidebar {
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+#closeSidebar:hover {
+  opacity: 0.9;
+}
+
+/* === Ítems del menú === */
+.sidebar .nav-link {
+  color: #f8f9fa;
+  padding: 12px 15px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background-color: #d06842;
+  color: white;
+}
+
+/* === Perfil de usuario === */
+.sidebar .mt-auto {
+  margin-top: auto;
+  padding-top: 20px;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  #sidebar {
+    left: -250px;
+  }
+
+  #sidebar.active {
+    left: 0;
+  }
+
+  #main {
+    margin-left: 0;
+  }
+
+  #main.shifted {
+    margin-left: 250px;
+  }
+}
+
+/* === Botón naranja personalizado === */
+.btn-orange {
+  background-color: #d06842;
+  color: white;
+  border: none;
+}
+
+.btn-orange:hover {
+  background-color: #b85c3a;
+  color: white;
+}
+
+/* === Botón gris neutro === */
+.btn-outline-secondary {
+  border-color: #ccc;
+  color: #555;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #eee;
+  color: #333;
+}
+
+/* === Tabla con estilo naranja === */
+.table-naranja {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table-naranja thead {
+  background-color: #d06842; /* naranja obra */
+  color: white;
+}
+
+.table-naranja th {
+  padding: 12px;
+  font-weight: bold;
+  border: 1px solid #e0e0e0;
+}
+
+.table-naranja td {
+  padding: 10px;
+  border: 1px solid #f0f0f0;
+}
+
+/* Filas alternadas */
+.table-naranja tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.table-naranja tbody tr:nth-child(even) {
+  background-color: #ffeddf; /* naranja claro */
+}
+
+/* Hover suave */
+.table-naranja tbody tr:hover {
+  background-color: #ffd1be;
 }

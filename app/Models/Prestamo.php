@@ -75,5 +75,12 @@ class Prestamo extends Model
     return $this->hasMany(\App\Models\DetallePrestamo::class, 'id_prestamo', 'id');
 }
 
-    
+    /**
+     * Relación con el recurso
+     */
+    public function recurso()
+    {
+        return $this->belongsTo(\App\Models\Recurso::class, 'id_recurso', 'id');
+    }
+
 }

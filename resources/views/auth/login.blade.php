@@ -3,25 +3,36 @@
 @section('title', 'Iniciar sesión')
 
 @section('content')
-  <h2 class="mb-4">Iniciar sesión</h2>
-
-  @if (session('status'))
-    <div class="alert alert-success">{{ session('status') }}</div>
-  @endif
-
-  <form method="POST" action="{{ route('login') }}">
-    @csrf
-
-    <div class="mb-3">
-      <label for="email">Email</label>
-      <input type="email" name="email" class="form-control" required autofocus>
+<div class="container py-5">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="{{ asset('images/SafeStock.png') }}" alt="SafeStock">
+      <h1>SafeStock</h1>
     </div>
 
-    <div class="mb-3">
-      <label for="password">Contraseña</label>
-      <input type="password" name="password" class="form-control" required>
-    </div>
+    <h5 class="text-center mb-4">Iniciar sesión</h5>
 
-    <button type="submit" class="btn btn-primary">Ingresar</button>
-  </form>
+    @if (session('status'))
+      <div class="alert alert-success">{{ session('status') }}</div>
+    @endif
+
+    <form method="POST" action="{{ route('login') }}">
+      @csrf
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" required autofocus>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+
+      <div class="d-grid mb-3">
+        <button type="submit" class="btn btn-orange">Ingresar</button>
+      </div>
+    </form>
+  </div>
+</div>
 @endsection

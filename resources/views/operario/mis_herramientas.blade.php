@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Panel de Operario - Mis Herramientas</title>
+    <title>Panel del trabajador - Mis Herramientas</title>
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   </head>
@@ -11,7 +11,7 @@
     <header class="bg-light border-bottom mb-4">
       <div class="container py-3 d-flex justify-content-between align-items-center">
         <div>
-          <h4 class="mb-0">Panel de Operario</h4>
+          <h4 class="mb-0">Panel del trabajador</h4>
           <small class="text-muted">SafeWork - Sistema de Gestión de Recursos y Seguridad</small>
         </div>
         <div class="text-end">
@@ -23,10 +23,10 @@
 
     <main class="container">
       <div class="mb-3 d-flex gap-2">
-        <a class="btn btn-primary" href="#">Solicitar</a>
-        <a class="btn btn-outline-secondary" href="#">Mis Herramientas</a>
-        <a class="btn btn-outline-secondary" href="#">Mi EPP</a>
-        <a class="btn btn-outline-danger" href="#">Devolver</a>
+        <a href="{{ url('/operario/solicitar') }}" class="btn {{ request()->is('operario/solicitar') ? 'btn-primary' : 'btn-outline-primary' }}">Solicitar</a>
+        <a href="{{ url('/operario/mis-herramientas') }}" class="btn {{ request()->is('operario/mis-herramientas') ? 'btn-primary' : 'btn-outline-secondary' }}">Mis Herramientas</a>
+        <a href="{{ url('/operario/epp') }}" class="btn {{ request()->is('operario/epp') ? 'btn-primary' : 'btn-outline-secondary' }}">Mi EPP</a>
+        <a href="{{ url('/operario/devolver') }}" class="btn {{ request()->is('operario/devolver') ? 'btn-primary' : 'btn-outline-primary' }}">Devolver</a>
       </div>
 
       <section>
@@ -34,31 +34,24 @@
         <p class="text-muted">Herramientas que tienes asignadas actualmente</p>
 
         <div class="row row-cols-1 row-cols-md-2 g-3">
-
-          <div class="col">
-            <div class="card h-100">
-              <div class="card-body">
-                <h6 class="card-title">Taladro Bosch</h6>
-                <p class="mb-1">Serie: <strong>TB-001</strong></p>
-                <p class="mb-1">Prestado: <span class="text-muted">2024-01-15</span></p>
-                <p class="mb-2"><span class="badge bg-success">En uso</span></p>
-                <a href="#" class="btn btn-sm btn-outline-primary">Ver detalle</a>
+          @forelse($herramientas as $herramienta)
+            <div class="col">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h6 class="card-title">{{ $herramienta->recurso ?? 'Sin nombre' }}</h6>
+                  <p class="mb-1">Serie: <strong>{{ $herramienta->nro_serie ?? 'N/A' }}</strong></p>
+                  <p class="mb-1">Prestado: <span class="text-muted">{{ $herramienta->fecha_prestamo ?? 'N/A' }}</span></p>
+                  <p class="mb-1">Devolución: <span class="text-muted">{{ $herramienta->fecha_devolucion ?? 'N/A' }}</span></p>
+                  <p class="mb-2"><span class="badge bg-info">{{ $herramienta->estado ?? 'Sin estado' }}</span></p>
+                  
+                </div>
               </div>
             </div>
-          </div>
-
-          <div class="col">
-            <div class="card h-100">
-              <div class="card-body">
-                <h6 class="card-title">Martillo Neumático</h6>
-                <p class="mb-1">Serie: <strong>MN-005</strong></p>
-                <p class="mb-1">Prestado: <span class="text-muted">2024-01-14</span></p>
-                <p class="mb-2"><span class="badge bg-warning text-dark">Vence hoy</span></p>
-                <a href="#" class="btn btn-sm btn-outline-primary">Ver detalle</a>
-              </div>
+          @empty
+            <div class="col">
+              <div class="alert alert-info">No tienes herramientas asignadas actualmente.</div>
             </div>
-          </div>
-
+          @endforelse
         </div>
       </section>
 
