@@ -27,6 +27,7 @@
         @csrf
         @method('PUT')
 
+        {{-- Fechas --}}
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="fecha_prestamo" class="form-label">Fecha de Préstamo</label>
@@ -42,8 +43,25 @@
           </div>
         </div>
 
+        {{-- Trabajador asignado --}}
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="id_trabajador" class="form-label">Trabajador</label>
+            <select name="id_trabajador" class="form-select" required>
+              <option selected disabled>Seleccione un trabajador</option>
+              @foreach($trabajadores as $t)
+                <option value="{{ $t->id }}"
+                  {{ $prestamo->id_usuario == $t->id ? 'selected' : '' }}>
+                  {{ $t->name }}
+                </option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+
         <input type="hidden" name="estado" value="{{ $prestamo->estado }}">
 
+        {{-- Filtros para agregar recursos --}}
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="categoria" class="form-label">Categoría</label>
@@ -80,11 +98,36 @@
           </div>
         </div>
 
-        <hr>
-        <h5 class="mb-3">Recursos prestados</h5>
-        <div id="contenedorSeries" class="row g-3">
-          {{-- Tarjetas precargadas desde el controlador --}}
+    <hr>
+<h5 class="mb-3">Recursos prestados</h5>
+<div id="contenedorSeries" class="row g-3">
+  @foreach ($prestamo->detallePrestamos as $detalle)
+    @php
+      $estado = $detalle->id_estado_prestamo;
+      $baja = $estado == 4;
+    @endphp
+    <div class="col-md-4">
+      <div class="card border {{ $baja ? 'border-danger' : 'border-secondary' }}">
+        <div class="card-body">
+          <h6 class="card-title mb-1">{{ $detalle->serieRecurso->recurso->nombre }}</h6>
+          <p class="card-text mb-2">Serie: <strong>{{ $detalle->serieRecurso->nro_serie }}</strong></p>
+          <span class="badge bg-{{ $baja ? 'danger' : 'secondary' }}">
+            {{ $baja ? 'Dado de baja' : 'Asignado' }}
+          </span>
+
+          @if (!$baja)
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger w-100 dar-baja mt-2"
+                    data-id="{{ $detalle->id }}">
+              Dar de baja
+            </button>
+          @endif
         </div>
+      </div>
+    </div>
+  @endforeach
+</div>
+
 
         <div class="text-end mt-4">
           <button type="submit" class="btn btn-warning">Actualizar Préstamo</button>

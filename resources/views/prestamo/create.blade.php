@@ -37,6 +37,22 @@
           </div>
         </div>
 
+        <div class="row mb-3">
+  <div class="col-md-6">
+    <label for="id_trabajador" class="form-label">Trabajador</label>
+    <select name="id_trabajador" class="form-select" required>
+      <option selected disabled>Seleccione un trabajador</option>
+      @foreach($trabajadores as $t)
+        <option value="{{ $t->id }}"
+          {{ isset($prestamo) && $prestamo->id_usuario == $t->id ? 'selected' : '' }}>
+          {{ $t->name }}
+        </option>
+      @endforeach
+    </select>
+  </div>
+</div>
+
+
         <input type="hidden" name="estado" value="2">
 
         <div class="row mb-3">

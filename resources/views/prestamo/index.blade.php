@@ -10,34 +10,37 @@
   </div>
 
   <table class="table table-bordered table-striped">
-    <thead class="table-dark">
-      <tr>
-        <th>Creado por</th>
-        <th>Recurso</th>
-        <th>N° Serie</th>
-        <th>Fecha Préstamo</th>
-        <th>Fecha Devolución</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      @foreach ($prestamos as $p)
-      <tr>
-        <td>{{ $p->operario }}</td>
-        <td>{{ $p->recurso }}</td>
-        <td>{{ $p->nro_serie }}</td>
-        <td>{{ $p->fecha_prestamo }}</td>
-        <td>{{ $p->fecha_devolucion ?? 'Pendiente' }}</td>
-        <td>{{ $p->estado }}</td>
-        <td>
-          <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-sm btn-warning">
-            <i class="bi bi-pencil-square"></i> Editar
-          </a>
-        </td>
-      </tr>
-      @endforeach
-    </tbody>
+   <thead class="table-dark">
+  <tr>
+    <th>Asignado a</th>
+    <th>Registrado por</th>
+    <th>Recurso</th>
+    <th>N° Serie</th>
+    <th>Fecha Préstamo</th>
+    <th>Fecha Devolución</th>
+    <th>Estado</th>
+    <th>Acciones</th>
+  </tr>
+</thead>
+<tbody>
+  @foreach ($prestamos as $p)
+  <tr>
+    <td>{{ $p->asignado }}</td>
+    <td>{{ $p->creado_por }}</td>
+    <td>{{ $p->recurso }}</td>
+    <td>{{ $p->nro_serie }}</td>
+    <td>{{ $p->fecha_prestamo }}</td>
+    <td>{{ $p->fecha_devolucion ?? 'Pendiente' }}</td>
+    <td>{{ $p->estado }}</td>
+    <td>
+      <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-sm btn-warning">
+        <i class="bi bi-pencil-square"></i> Editar
+      </a>
+    </td>
+  </tr>
+  @endforeach
+</tbody>
+
   </table>
 </div>
 @endsection

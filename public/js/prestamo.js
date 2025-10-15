@@ -63,13 +63,18 @@ recursoSelect.addEventListener('change', () => {
     });
 });
 
-// Agregar tarjeta de serie
+// Agregar recurso dinámico
 agregarBtn.addEventListener('click', () => {
   const recursoText = recursoSelect.options[recursoSelect.selectedIndex]?.text;
   const serieText = serieSelect.options[serieSelect.selectedIndex]?.text;
   const serieId = serieSelect.value;
 
   if (!serieId || serieSelect.selectedIndex === 0) return;
+
+  if (document.querySelector(`input[value="${serieId}"]`)) {
+    alert('Esta serie ya fue agregada.');
+    return;
+  }
 
   const tarjeta = document.createElement('div');
   tarjeta.className = 'col-md-4';
@@ -79,7 +84,7 @@ agregarBtn.addEventListener('click', () => {
         <h6 class="card-title mb-1">${recursoText}</h6>
         <p class="card-text text-muted mb-2">Serie: ${serieText}</p>
         <input type="hidden" name="series[]" value="${serieId}">
-        <button type="button" class="btn btn-sm btn-outline-danger w-100 eliminar">Eliminar</button>
+        <button type="button" class="btn btn-sm btn-outline-danger eliminar w-100 mt-2">Quitar</button>
       </div>
     </div>
   `;
@@ -100,34 +105,31 @@ agregarBtn.addEventListener('click', () => {
   serieSelect.selectedIndex = 0;
 });
 
-// Precargar tarjetas en modo edición
-window.addEventListener('load', () => {
-  if (Array.isArray(window.detalles) && window.detalles.length > 0) {
-    window.seriesOcultas = [];
+document.querySelectorAll('.dar-baja').forEach(btn => {
+  btn.addEventListener('click', function () {
+    const detalleId = this.dataset.id;
 
-    window.detalles.forEach((detalle) => {
-      const tarjeta = document.createElement('div');
-      tarjeta.className = 'col-md-4';
-      tarjeta.innerHTML = `
-        <div class="card border-success shadow-sm">
-          <div class="card-body p-2">
-            <h6 class="card-title mb-1">${detalle.recurso_nombre}</h6>
-            <p class="card-text text-muted mb-2">Serie: ${detalle.serie_nro}</p>
-            <input type="hidden" name="series[]" value="${detalle.serie_id}">
-            <button type="button" class="btn btn-sm btn-outline-danger w-100 eliminar">Eliminar</button>
-          </div>
-        </div>
-      `;
-      contenedorSeries.appendChild(tarjeta);
+    if (!confirm('¿Estás seguro de que querés dar de baja este recurso?')) return;
 
-      window.seriesOcultas.push(detalle.serie_id);
-
-      tarjeta.querySelector('.eliminar').addEventListener('click', () => {
-        const option = serieSelect.querySelector(`option[value="${detalle.serie_id}"]`);
-        if (option) option.style.display = 'block';
-        tarjeta.remove();
-        window.seriesOcultas = window.seriesOcultas.filter(id => id !== detalle.serie_id);
-      });
+    fetch(`/prestamos/detalle/${detalleId}/baja`, {
+      method: 'PATCH',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Error al dar de baja');
+      return res.json().catch(() => ({})); // por si no hay JSON
+    })
+    .then(() => {
+      console.log(`Recurso ${detalleId} dado de baja`);
+      location.reload(); // o actualizar visualmente sin recargar
+    })
+    .catch(err => {
+      console.error(err);
+      alert('No se pudo dar de baja el recurso.');
     });
-  }
+  });
 });

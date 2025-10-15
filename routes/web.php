@@ -73,6 +73,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('incidente', IncidenteController::class);
     Route::resource('estado_incidente', EstadoIncidenteController::class);
     Route::resource('prestamos', PrestamoController::class);
+    Route::patch('/prestamos/detalle/{id}/baja', [PrestamoController::class, 'darDeBaja'])->name('prestamos.bajaDetalle');
+
 
     // Serie recurso personalizado
     Route::get('/serie_recurso/create/{id}', [SerieRecursoController::class, 'createConRecurso'])->name('serie_recurso.createConRecurso');

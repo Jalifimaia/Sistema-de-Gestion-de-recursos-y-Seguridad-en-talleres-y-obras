@@ -32,11 +32,7 @@
           <td>{{ $incidente->fecha_incidente }}</td>
           <td>
             <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-sm btn-warning">Editar</a>
-            <form action="{{ route('incidente.destroy', $incidente->id) }}" method="POST" style="display:inline-block;">
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este incidente?')">Eliminar</button>
-            </form>
+       
           </td>
         </tr>
       @endforeach
