@@ -11,6 +11,7 @@ use App\Http\Controllers\IncidenteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
+use App\Http\Controllers\ReporteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +23,18 @@ Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
-Route::get('/reportes', fn() => view('supervisor.reportes'));
+//Route::get('/reportes', fn() => view('supervisor.reportes'));
+//Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
+
+Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
+Route::get('/reportes/prestamos', [PrestamoController::class, 'ultimosPrestamos'])->name('reportes.prestamos');
+
+Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
+Route::get('/reportes/prestamos/pdf', [ReporteController::class, 'exportarPrestamosPDF'])->name('reportes.prestamos.pdf');
+
+Route::get('/reportes', function () {
+    return view('reportes.index');
+})->name('reportes.index');
 
 /*
 |--------------------------------------------------------------------------

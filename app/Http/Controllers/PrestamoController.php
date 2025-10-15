@@ -12,6 +12,7 @@ use App\Models\Prestamo;
 use App\Models\DetallePrestamo;
 use App\Models\SerieRecurso;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PrestamoController extends Controller
 {
@@ -43,6 +44,32 @@ public function index(): View
 }
 
 
+public function ultimosPrestamos(Request $request)
+{
+    $query = DB::table('prestamo')
+        ->leftJoin('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
+        ->select(
+            'prestamo.id',
+            'prestamo.fecha_prestamo',
+            'prestamo.fecha_devolucion',
+            'prestamo.estado',
+            'usuario.name as trabajador'
+        );
+
+    if ($request->filled('fecha_inicio')) {
+        $query->where('prestamo.fecha_prestamo', '>=', $request->fecha_inicio);
+    }
+
+    if ($request->filled('fecha_fin')) {
+        $query->where('prestamo.fecha_prestamo', '<=', $request->fecha_fin);
+    }
+
+    $prestamos = $query->orderBy('prestamo.fecha_prestamo', 'desc')
+                       ->limit(3)
+                       ->get();
+
+    return view('reportes.reportePrestamos', compact('prestamos'));
+}
 
 
 public function darDeBaja($id)
