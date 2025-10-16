@@ -34,31 +34,24 @@
         <p class="text-muted">Herramientas que tienes asignadas actualmente</p>
 
         <div class="row row-cols-1 row-cols-md-2 g-3">
-
-          <div class="col">
-            <div class="card h-100">
-              <div class="card-body">
-                <h6 class="card-title">Taladro Bosch</h6>
-                <p class="mb-1">Serie: <strong>TB-001</strong></p>
-                <p class="mb-1">Prestado: <span class="text-muted">2024-01-15</span></p>
-                <p class="mb-2"><span class="badge bg-success">En uso</span></p>
-                <a href="#" class="btn btn-sm btn-outline-primary">Ver detalle</a>
+          @forelse($herramientas as $herramienta)
+            <div class="col">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h6 class="card-title">{{ $herramienta->recurso ?? 'Sin nombre' }}</h6>
+                  <p class="mb-1">Serie: <strong>{{ $herramienta->nro_serie ?? 'N/A' }}</strong></p>
+                  <p class="mb-1">Prestado: <span class="text-muted">{{ $herramienta->fecha_prestamo ?? 'N/A' }}</span></p>
+                  <p class="mb-1">Devolución: <span class="text-muted">{{ $herramienta->fecha_devolucion ?? 'N/A' }}</span></p>
+                  <p class="mb-2"><span class="badge bg-info">{{ $herramienta->estado ?? 'Sin estado' }}</span></p>
+                  
+                </div>
               </div>
             </div>
-          </div>
-
-          <div class="col">
-            <div class="card h-100">
-              <div class="card-body">
-                <h6 class="card-title">Martillo Neumático</h6>
-                <p class="mb-1">Serie: <strong>MN-005</strong></p>
-                <p class="mb-1">Prestado: <span class="text-muted">2024-01-14</span></p>
-                <p class="mb-2"><span class="badge bg-warning text-dark">Vence hoy</span></p>
-                <a href="#" class="btn btn-sm btn-outline-primary">Ver detalle</a>
-              </div>
+          @empty
+            <div class="col">
+              <div class="alert alert-info">No tienes herramientas asignadas actualmente.</div>
             </div>
-          </div>
-
+          @endforelse
         </div>
       </section>
 

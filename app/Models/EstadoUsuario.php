@@ -9,9 +9,7 @@ class EstadoUsuario extends Model
 {
     protected $table = 'estado_usuario'; // ← nombre exacto de la tabla
 
-    protected $fillable = [
-        'nombre_estado', // ← ajustá según tus columnas reales
-    ];
+    protected $fillable = ['nombre'];
 
     public function usuarios(): HasMany
     {
