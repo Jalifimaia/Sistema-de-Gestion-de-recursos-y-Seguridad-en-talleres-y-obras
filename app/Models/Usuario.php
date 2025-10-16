@@ -48,9 +48,17 @@ class Usuario extends Model
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function rol()
-    {
-        return $this->belongsTo(\App\Models\Rol::class, 'id_rol', 'id');
+        {
+            return $this->belongsTo(\App\Models\Rol::class, 'id_rol', 'id');
+        }
+        public function trabajador() {
+        return $this->belongsTo(Usuario::class, 'trabajador_id');
     }
+
+    public function supervisor() {
+        return $this->belongsTo(Usuario::class, 'supervisor_id');
+    }
+
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
