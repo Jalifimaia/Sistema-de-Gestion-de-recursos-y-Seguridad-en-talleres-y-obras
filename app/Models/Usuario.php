@@ -107,5 +107,12 @@ class Usuario extends Model
     {
         return $this->hasMany(\App\Models\Recurso::class, 'usuario_modificacion', 'id_usuario_modificacion');
     }
+
+    public function estado()
+    {
+        return $this->belongsTo(EstadoUsuario::class, 'id_estado');
+    }
+
+
     
 }
