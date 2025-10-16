@@ -11,7 +11,7 @@ use App\Http\Controllers\IncidenteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrestamoController;
 use App\Models\Subcategoria;
-
+use App\Http\Controllers\InventarioController;
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas
@@ -115,6 +115,12 @@ Route::get('/api/recursos/{subcategoriaId}', function ($subcategoriaId) {
         ->select('id', 'nombre')
         ->get();
 });
+
+
+
+Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario');
+Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])->name('inventario.exportar');
+
 
 /*
 |--------------------------------------------------------------------------

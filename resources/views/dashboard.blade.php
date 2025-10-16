@@ -25,33 +25,36 @@
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card shadow-sm text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h2 class="fw-bold">18</h2>
-          <p class="mb-0">Herramientas en Uso</p>
-          <small class="text-muted">de 45 disponibles</small>
-        </div>
+    <div class="card shadow-sm text-center h-100">
+      <div class="card-body d-flex flex-column justify-content-center">
+        <h2 class="fw-bold">{{ $herramientasEnUso }}</h2>
+        <p class="mb-0">Herramientas en Uso</p>
+        <small class="text-muted">de {{ $herramientasTotales }} disponibles</small>
       </div>
     </div>
+  </div>
+
+    <div class="col-md-3">
+    <div class="card shadow-sm text-center h-100">
+      <div class="card-body d-flex flex-column justify-content-center">
+        <h2 class="fw-bold text-success">{{ $porcentajeEntregado }}%</h2>
+        <p class="mb-0">EPP Entregados</p>
+        <small class="text-muted">{{ $eppEntregados }} de {{ $totalTrabajadores }} trabajadores</small>
+      </div>
+    </div>
+  </div>
+
     <div class="col-md-3">
       <div class="card shadow-sm text-center h-100">
         <div class="card-body d-flex flex-column justify-content-center">
-          <h2 class="fw-bold text-success">96%</h2>
-          <p class="mb-0">EPP Entregados</p>
-          <small class="text-muted">23 de 24 trabajadores</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card shadow-sm text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h2 class="fw-bold text-danger">3</h2>
+          <h2 class="fw-bold text-danger">{{ $alertasActivas }}</h2>
           <p class="mb-0">Alertas Activas</p>
           <small class="text-muted">Requieren atención</small>
         </div>
       </div>
     </div>
-  </div>
+
+
 
   <!-- Alertas + Inventario -->
   <div class="row g-3 mb-4">
@@ -61,21 +64,31 @@
           <h5 class="card-title fw-bold">Alertas Prioritarias</h5>
           <p class="text-muted small">Situaciones que requieren atención inmediata</p>
 
-          <div class="alert alert-warning mb-3">
-            <strong>Stock bajo:</strong> Cascos de seguridad <br>
-            <small>Quedan 3 unidades disponibles</small>
-          </div>
-          <div class="alert alert-danger mb-3">
-            <strong>Crítico:</strong> EPP vencido: Arnés de seguridad <br>
-            <small>Trabajador: Carlos Mendez</small>
-          </div>
-          <div class="alert alert-info mb-0">
-            <strong>Medio:</strong> Herramienta no devuelta <br>
-            <small>Taladro #001 - Ana García</small>
-          </div>
+          @foreach($stockBajo as $stock)
+            <div class="alert alert-warning mb-3">
+              <strong>Stock bajo:</strong> {{ $stock->nombre }} <br>
+              <small>Quedan {{ $stock->cantidad }} unidades disponibles</small>
+            </div>
+          @endforeach
+
+          @foreach($alertasVencidos as $alerta)
+            <div class="alert alert-danger mb-3">
+              <strong>Vencido:</strong> {{ $alerta->recurso->nombre }} (Serie: {{ $alerta->nro_serie }}) <br>
+              <small>Venció el {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}</small>
+            </div>
+          @endforeach
+
+          @foreach($herramientasNoDevueltas as $item)
+            <div class="alert alert-info mb-3">
+              <strong>Herramienta no devuelta:</strong> {{ $item->recurso }} <br>
+              <small>Serie {{ $item->nro_serie }} - {{ $item->trabajador }}</small>
+            </div>
+          @endforeach
+
         </div>
       </div>
     </div>
+
 
     <div class="col-md-4">
       <div class="card shadow-sm h-100">
@@ -85,27 +98,33 @@
 
           <ul class="list-group mb-3">
             <li class="list-group-item d-flex justify-content-between">
-              Herramientas disponibles <span class="fw-bold">27/45</span>
+              Herramientas disponibles <span class="fw-bold">{{ $herramientasDisponibles }}/{{ $herramientasTotales }}</span>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-              EPP en stock <span class="fw-bold">85/120</span>
+              EPP en stock <span class="fw-bold">{{ $eppStock }}/{{ $eppTotales }}</span>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-              Elementos en reparación <span class="fw-bold">8</span>
+              Elementos en reparación <span class="fw-bold">{{ $elementosReparacion }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              EPP vencidos <span class="fw-bold">{{ $eppVencidos }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              Elementos dañados <span class="fw-bold">{{ $elementosDañados }}</span>
             </li>
           </ul>
           <div class="d-flex gap-2">
-            <button class="btn btn-orange btn-sm flex-fill">
+            <a href="{{ route('inventario') }}" class="btn btn-orange btn-sm flex-fill">
               <i class="bi bi-box-seam me-1"></i> Ver Inventario
-            </button>
-            <button class="btn btn-outline-secondary btn-sm flex-fill">
+            </a>
+              <a href="{{ route('inventario.exportar') }}" class="btn btn-outline-secondary btn-sm flex-fill">
               <i class="bi bi-download me-1"></i> Exportar
-            </button>
+            </a>
           </div>
         </div>
       </div>
     </div>
-  </div>
+
 
   <!-- Seguridad + Acciones -->
   <div class="d-flex flex-wrap gap-3 mb-4">
