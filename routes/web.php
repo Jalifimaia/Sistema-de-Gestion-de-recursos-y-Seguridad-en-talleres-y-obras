@@ -13,6 +13,8 @@ use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
 use App\Http\Controllers\ReporteController;
 
+use App\Models\Subcategoria;
+use App\Http\Controllers\InventarioController;
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas
@@ -126,6 +128,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/serie_recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])->name('serie_recurso.storeMultiple');
     Route::resource('serie_recurso', SerieRecursoController::class)->except(['create']);
 });
+
+
+
+Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario');
+Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])->name('inventario.exportar');
+
 
 /*
 |--------------------------------------------------------------------------
