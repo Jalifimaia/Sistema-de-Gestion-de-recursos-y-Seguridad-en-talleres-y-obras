@@ -29,9 +29,9 @@ Route::get('/controlEPP', fn() => view('controlEPP'));
 //Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
 
 Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
-Route::get('/reportes/prestamos', [PrestamoController::class, 'ultimosPrestamos'])->name('reportes.prestamos');
+//Route::get('/reportes/prestamos', [PrestamoController::class, 'ultimosPrestamos'])->name('reportes.prestamos');
 
-Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
+//Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
 Route::get('/reportes/prestamos/pdf', [ReporteController::class, 'exportarPrestamosPDF'])->name('reportes.prestamos.pdf');
 
 Route::get('/reportes', function () {
@@ -72,20 +72,26 @@ Route::resource('recursos', RecursoController::class);
 |--------------------------------------------------------------------------
 */
 
-Route::get('/api/prestamo/subcategorias/{categoriaId}', function ($categoriaId) {
-    return \App\Models\Subcategoria::where('categoria_id', $categoriaId)->get();
+Route::get('/subcategorias/{categoriaId}', function ($categoriaId) {
+    return Subcategoria::where('categoria_id', $categoriaId)->get(['id', 'nombre']);
 });
 
-Route::get('/api/prestamo/recursos/{subcategoriaId}', function ($subcategoriaId) {
+
+Route::get('/prestamo/subcategorias/{categoriaId}', function ($categoriaId) {
+    return Subcategoria::where('categoria_id', $categoriaId)->get();
+});
+
+Route::get('/prestamo/recursos/{subcategoriaId}', function ($subcategoriaId) {
     return \App\Models\Recurso::where('id_subcategoria', $subcategoriaId)->get();
 });
 
-Route::get('/api/prestamo/series/{recursoId}', function ($recursoId) {
+Route::get('/prestamo/series/{recursoId}', function ($recursoId) {
     return \App\Models\SerieRecurso::where('id_recurso', $recursoId)
         ->where('id_estado', 1)
         ->get();
 });
 
+Route::post('/subcategorias', [SubcategoriaController::class, 'store']);
 /*
 |--------------------------------------------------------------------------
 | Rutas AJAX para Incidentes

@@ -125,5 +125,6 @@
     toggleBtn.addEventListener('click', abrirSidebar);
     closeBtn.addEventListener('click', cerrarSidebar);
   </script>
+  @yield('scripts')
 </body>
 </html>

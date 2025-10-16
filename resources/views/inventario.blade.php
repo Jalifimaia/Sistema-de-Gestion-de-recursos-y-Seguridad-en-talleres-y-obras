@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="container py-4">
-  <!-- Encabezado -->
   <header class="row mb-4">
     <div class="col-md-8">
       <h1 class="h4 fw-bold mb-1">Gestión de Inventario</h1>
@@ -15,23 +14,20 @@
     </div>
   </header>
 
-  <!-- Acciones -->
-    <div class="d-flex flex-wrap gap-2 mb-3">
-      <a href="{{ route('recursos.create') }}" class="btn btn-orange">Agregar Elemento</a>
-    </div>
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{{ route('recursos.create') }}" class="btn btn-orange">Agregar Elemento</a>
+  </div>
 
-    <!-- Filtro por categoría y estado -->
-    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-      <label class="form-label mb-0">Filtrar por:</label>
-      <select id="filtroInventario" class="form-select w-auto">
-        <option value="todos">Todos</option>
-        <option value="herramienta">Herramientas</option>
-        <option value="epp">EPP</option>
-        <option value="reparacion">En reparación</option>
-      </select>
-    </div>
+  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+    <label class="form-label mb-0">Filtrar por:</label>
+    <select id="filtroInventario" class="form-select w-auto">
+      <option value="todos">Todos</option>
+      <option value="herramienta">Herramientas</option>
+      <option value="epp">EPP</option>
+      <option value="reparacion">En reparación</option>
+    </select>
+  </div>
 
-  <!-- Tabla -->
   <div class="card shadow-sm">
     <div class="card-body">
       <h5 class="card-title fw-bold">Listado de Recursos</h5>
@@ -41,9 +37,9 @@
         <table class="table-naranja align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th>ID</th>
               <th>Nombre</th>
               <th>Serie</th>
+              <th>Estado</th>
               <th>Categoría</th>
               <th>Descripción</th>
               <th>Acciones</th>
@@ -52,7 +48,6 @@
           <tbody>
             @foreach ($recursos as $recurso)
             <tr>
-              <td>{{ $recurso->id }}</td>
               <td>{{ $recurso->nombre }}</td>
               <td>
                 @if ($recurso->serieRecursos->count())
@@ -60,25 +55,30 @@
                     <select class="form-select form-select-sm w-auto"
                             onchange="mostrarEstado(this)"
                             data-id="{{ $recurso->id }}">
-                      <option value="" data-fecha="">Seleccionar serie</option>
+                      <option value="">Seleccionar serie</option>
                       @foreach ($recurso->serieRecursos as $serie)
                         @php
-                          $vence = \Carbon\Carbon::parse($serie->fecha_vencimiento);
-                          $dias_restantes = $vence->diffInDays(now(), false);
-                          $estado = $vence->isPast() ? 'Vencido' : ($dias_restantes <= 7 ? 'Por vencer' : 'Vigente');
+                          $estadoNombre = $serie->estado->nombre_estado ?? 'Sin estado';
+                          $esEPP = strtolower($recurso->categoria->nombre_categoria) === 'epp';
                         @endphp
-                        <option value="{{ $estado }}" data-fecha="{{ $serie->fecha_vencimiento }}">
-                          {{ $serie->nro_serie }}
+                        <option 
+                          value="{{ $serie->id }}"
+                          data-estado="{{ $estadoNombre }}"
+                          data-talle="{{ $esEPP ? $serie->talle : '' }}"
+                        >
+                          {{ $serie->nro_serie }}{{ $esEPP && $serie->talle ? ' T:' . $serie->talle : '' }}
                         </option>
                       @endforeach
                     </select>
-                    <div id="estado-{{ $recurso->id }}"
-                         class="px-2 py-1 border rounded small fw-semibold"
-                         style="min-width: 160px; display: none;"></div>
                   </div>
                 @else
                   <span class="text-muted">Sin series</span>
                 @endif
+              </td>
+              <td>
+                <div id="estado-{{ $recurso->id }}"
+                     class="badge estado-vencimiento px-2 py-1 border rounded small fw-semibold"
+                     style="min-width: 160px; display: none;"></div>
               </td>
               <td>{{ $recurso->categoria->nombre_categoria ?? 'Sin categoría' }}</td>
               <td>{{ $recurso->descripcion }}</td>
@@ -106,3 +106,9 @@
   </div>
 </div>
 @endsection
+
+@section('scripts')
+  <script src="{{ asset('js/inventario.js') }}?v={{ time() }}"></script>
+  <script src="{{ asset('js/filtroBusqueda.js') }}?v={{ time() }}"></script>
+@endsection
+
