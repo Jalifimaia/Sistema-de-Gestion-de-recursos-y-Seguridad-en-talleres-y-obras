@@ -13,181 +13,307 @@
     <div class="text-muted small">Fecha: <strong id="today"></strong></div>
   </header>
 
-  <!-- Estadísticas principales -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-3">
-      <div class="card shadow-sm text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h2 class="fw-bold">{{ $usuariosActivos }}</h2>
+ <!-- Estadísticas principales -->
+<div class="row g-4 mb-5">
+  <!-- Trabajadores activos -->
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100 text-center" style="border-left: 4px solid #f57c00;">
+      <div class="card-body d-flex flex-column justify-content-center">
+        <button class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalUsuarios">
+          <div class="mb-2"><i class="bi bi-person-badge fs-2"></i></div>
+          <h2 class="fw-bold mb-1">{{ $usuariosActivos }}</h2>
           <p class="mb-0">Trabajadores Activos</p>
           <small class="text-muted">Registrados en el sistema</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-    <div class="card shadow-sm text-center h-100">
-      <div class="card-body d-flex flex-column justify-content-center">
-        <h2 class="fw-bold">{{ $herramientasEnUso }}</h2>
-        <p class="mb-0">Herramientas en Uso</p>
-        <small class="text-muted">de {{ $herramientasTotales }} disponibles</small>
+        </button>
       </div>
     </div>
   </div>
 
-    <div class="col-md-3">
-    <div class="card shadow-sm text-center h-100">
+  <!-- Herramientas en uso -->
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100 text-center" style="border-left: 4px solid #f57c00;">
       <div class="card-body d-flex flex-column justify-content-center">
-        <h2 class="fw-bold text-success">{{ $porcentajeEntregado }}%</h2>
-        <p class="mb-0">EPP Entregados</p>
-        <small class="text-muted">{{ $eppEntregados }} de {{ $totalTrabajadores }} trabajadores</small>
+        <button class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalHerramientas">
+          <div class="mb-2"><i class="bi bi-wrench fs-2"></i></div>
+          <h2 class="fw-bold mb-1">{{ $herramientasEnUso }}</h2>
+          <p class="mb-0">Herramientas en Uso</p>
+          <small class="text-muted">de {{ $herramientasTotales }} disponibles</small>
+        </button>
       </div>
     </div>
   </div>
 
-    <div class="col-md-3">
-      <div class="card shadow-sm text-center h-100">
-        <div class="card-body d-flex flex-column justify-content-center">
-          <h2 class="fw-bold text-danger">{{ $alertasActivas }}</h2>
+  <!-- Alertas activas -->
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100 text-center" style="border-left: 4px solid #f57c00;">
+      <div class="card-body d-flex flex-column justify-content-center">
+        <button class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalAlertas">
+          <div class="mb-2"><i class="bi bi-exclamation-circle fs-2"></i></div>
+          <h2 class="fw-bold mb-1">{{ $alertasActivas }}</h2>
           <p class="mb-0">Alertas Activas</p>
           <small class="text-muted">Requieren atención</small>
-        </div>
+        </button>
       </div>
     </div>
+  </div>
+</div>
 
-
-
-  <!-- Alertas + Inventario -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-8">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h5 class="card-title fw-bold">Alertas Prioritarias</h5>
-          <p class="text-muted small">Situaciones que requieren atención inmediata</p>
-
-          @foreach($stockBajo as $stock)
-            <div class="alert alert-warning mb-3">
-              <strong>Stock bajo:</strong> {{ $stock->nombre }} <br>
-              <small>Quedan {{ $stock->cantidad }} unidades disponibles</small>
-            </div>
-          @endforeach
-
-          @foreach($alertasVencidos as $alerta)
-            <div class="alert alert-danger mb-3">
-              <strong>Vencido:</strong> {{ $alerta->recurso->nombre }} (Serie: {{ $alerta->nro_serie }}) <br>
-              <small>Venció el {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}</small>
-            </div>
-          @endforeach
-
-          @foreach($herramientasNoDevueltas as $item)
-            <div class="alert alert-info mb-3">
-              <strong>Herramienta no devuelta:</strong> {{ $item->recurso }} <br>
-              <small>Serie {{ $item->nro_serie }} - {{ $item->trabajador }}</small>
-            </div>
-          @endforeach
-
-        </div>
+ <!-- Modal: Trabajadores Activos -->
+<div class="modal fade" id="modalUsuarios" tabindex="-1" aria-labelledby="modalUsuariosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalUsuariosLabel">Trabajadores Activos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-    </div>
-
-
-    <div class="col-md-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h5 class="card-title fw-bold">Estado del Inventario</h5>
-          <p class="text-muted small">Resumen de herramientas y EPP</p>
-
-          <ul class="list-group mb-3">
-            <li class="list-group-item d-flex justify-content-between">
-              Herramientas disponibles <span class="fw-bold">{{ $herramientasDisponibles }}/{{ $herramientasTotales }}</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between">
-              EPP en stock <span class="fw-bold">{{ $eppStock }}/{{ $eppTotales }}</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between">
-              Elementos en reparación <span class="fw-bold">{{ $elementosReparacion }}</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between">
-              EPP vencidos <span class="fw-bold">{{ $eppVencidos }}</span>
-            </li>
-            <li class="list-group-item d-flex justify-content-between">
-              Elementos dañados <span class="fw-bold">{{ $elementosDañados }}</span>
-            </li>
-          </ul>
-          <div class="d-flex gap-2">
-            <a href="{{ route('inventario') }}" class="btn btn-orange btn-sm flex-fill">
-              <i class="bi bi-box-seam me-1"></i> Ver Inventario
-            </a>
-              <a href="{{ route('inventario.exportar') }}" class="btn btn-outline-secondary btn-sm flex-fill">
-              <i class="bi bi-download me-1"></i> Exportar
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-  <!-- Seguridad + Acciones -->
-  <div class="d-flex flex-wrap gap-3 mb-4">
-    <div class="card shadow-sm flex-fill">
-      <div class="card-body">
-        <h5 class="card-title fw-bold">Cumplimiento de Seguridad</h5>
-        <p class="text-muted small">Estado actual de EPP por trabajador</p>
-
-        <div class="row align-items-center mb-3">
-          <div class="col-md-2 text-center">
-            <h2 class="fw-bold text-success">96%</h2>
-            <div class="text-muted small">Cumplimiento General</div>
-          </div>
-          <div class="col-md-10">
-            <div class="row text-center">
-              <div class="col">
-                <h5 class="fw-bold">23</h5>
-                <div class="text-muted small">Con EPP completo</div>
-              </div>
-              <div class="col">
-                <h5 class="fw-bold text-danger">1</h5>
-                <div class="text-muted small">EPP incompleto</div>
-              </div>
-              <div class="col-12 mt-2">
-                <div class="progress">
-                  <div class="progress-bar bg-success" style="width:96%"></div>
-                </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          @foreach($usuarios as $usuario)
+            <div class="col-md-6">
+              <div class="border rounded p-3 bg-light shadow-sm h-100">
+                <h6 class="fw-bold mb-1">{{ $usuario->nombre }}</h6>
+                <p class="mb-1 text-muted small">Email: <span class="fw-semibold">{{ $usuario->email }}</span></p>
+                <p class="mb-0 text-muted small">Rol: <span class="fw-semibold">{{ $usuario->rol->nombre_rol ?? 'Sin rol' }}</span></p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card shadow-sm flex-fill">
-      <div class="card-body">
-        <h5 class="card-title fw-bold">Acciones rápidas</h5>
-        <div class="d-flex flex-column gap-2">
-          <button class="btn btn-orange">
-            <i class="bi bi-check2-circle me-1"></i> Checklist de Seguridad
-          </button>
-          <button class="btn btn-orange">
-            <i class="bi bi-arrow-return-left me-1"></i> Registrar Devolución
-          </button>
-          <button class="btn btn-orange">
-            <i class="bi bi-exclamation-triangle me-1"></i> Reportar Incidente
-          </button>
-          <button class="btn btn-orange">
-            <i class="bi bi-person-plus me-1"></i> Nuevo Trabajador
-          </button>
+          @endforeach
         </div>
       </div>
     </div>
   </div>
+</div>
+
+
+  <!-- Modal: Herramientas -->
+<div class="modal fade" id="modalHerramientas" tabindex="-1" aria-labelledby="modalHerramientasLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalHerramientasLabel">Herramientas en Uso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          @foreach($herramientasUsadas as $herramienta)
+            <div class="col-md-6">
+              <div class="border rounded p-3 bg-light shadow-sm h-100">
+                <h6 class="fw-bold mb-1">{{ $herramienta->recurso->nombre }}</h6>
+                <p class="mb-1 text-muted small">Subcategoría: <span class="fw-semibold">{{ $herramienta->recurso->subcategoria->nombre }}</span></p>
+                <p class="mb-0 text-muted small">Serie: <span class="fw-semibold">{{ $herramienta->nro_serie }}</span></p>
+              </div>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Modal: Alertas Activas -->
+<div class="modal fade" id="modalAlertas" tabindex="-1" aria-labelledby="modalAlertasLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAlertasLabel">Alertas Activas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          @foreach($alertasLista as $alerta)
+            @php
+              $tipo = strtolower($alerta->tipo);
+              $color = match(true) {
+                str_contains($tipo, 'vencido') => 'danger',
+                str_contains($tipo, 'stock') => 'warning',
+                str_contains($tipo, 'devolución') => 'info',
+                default => 'secondary'
+              };
+            @endphp
+            <div class="col-md-6">
+              <div class="alert alert-{{ $color }} shadow-sm mb-0 h-100">
+                <strong>{{ $alerta->tipo }}</strong><br>
+                <small>{{ $alerta->descripcion }}</small>
+              </div>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+ <div class="card shadow-sm mb-4" style="border-left: 4px solid #f57c00;">
+  <div class="card-body">
+    <h5 class="card-title fw-bold mb-3">📝 Checklists del Día</h5>
+
+    @if($checklistsHoy->isEmpty())
+      <p class="text-muted">No se registraron checklists hoy.</p>
+    @else
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Trabajador</th>
+              <th>Supervisor</th>
+              <th>Altura</th>
+              <th>Anteojos</th>
+              <th>Botas</th>
+              <th>Chaleco</th>
+              <th>Guantes</th>
+              <th>Arnés</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($checklistsHoy as $item)
+              <tr>
+                <td>{{ $item->trabajador->name ?? '—' }}</td>
+                <td>{{ $item->supervisor->name ?? '—' }}</td>
+                <td>{{ $item->es_en_altura ? 'Sí' : 'No' }}</td>
+                <td>{{ $item->anteojos ? '✔️' : '❌' }}</td>
+                <td>{{ $item->botas ? '✔️' : '❌' }}</td>
+                <td>{{ $item->chaleco ? '✔️' : '❌' }}</td>
+                <td>{{ $item->guantes ? '✔️' : '❌' }}</td>
+                <td>{{ $item->arnes ? '✔️' : '❌' }}</td>
+                <td>{{ $item->observaciones ?? '—' }}</td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+    @endif
+  </div>
+</div>
+
+
+
+ <div class="row g-4 mt-4">
+  <!-- Alertas Prioritarias -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100" style="border-left: 4px solid #f57c00;">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-2">Alertas Prioritarias</h5>
+        <p class="text-muted small mb-3">Situaciones que requieren atención inmediata</p>
+
+        <div class="accordion" id="alertasPrioritarias">
+          <!-- Stock Bajo -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingStock">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStock" aria-expanded="false" aria-controls="collapseStock">
+                Stock bajo ({{ $stockBajo->count() }})
+              </button>
+            </h2>
+            <div id="collapseStock" class="accordion-collapse collapse" aria-labelledby="headingStock" data-bs-parent="#alertasPrioritarias">
+              <div class="accordion-body">
+                @foreach($stockBajo as $stock)
+                  <div class="alert alert-warning mb-3">
+                    <strong>{{ $stock->nombre }}</strong><br>
+                    <small>Quedan {{ $stock->cantidad }} unidades disponibles</small>
+                  </div>
+                @endforeach
+              </div>
+            </div>
+          </div>
+
+          <!-- Vencidos -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingVencidos">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVencidos" aria-expanded="false" aria-controls="collapseVencidos">
+                Elementos vencidos ({{ $alertasVencidos->count() }})
+              </button>
+            </h2>
+            <div id="collapseVencidos" class="accordion-collapse collapse" aria-labelledby="headingVencidos" data-bs-parent="#alertasPrioritarias">
+              <div class="accordion-body">
+                @foreach($alertasVencidos as $alerta)
+                  <div class="alert alert-danger mb-3">
+                    <strong>{{ $alerta->recurso->nombre }}</strong> (Serie: {{ $alerta->nro_serie }})<br>
+                    <small>Venció el {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}</small>
+                  </div>
+                @endforeach
+              </div>
+            </div>
+          </div>
+
+          <!-- Sin devolución -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDevolucion">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDevolucion" aria-expanded="false" aria-controls="collapseDevolucion">
+                Sin devolución ({{ $herramientasNoDevueltas->count() }})
+              </button>
+            </h2>
+            <div id="collapseDevolucion" class="accordion-collapse collapse" aria-labelledby="headingDevolucion" data-bs-parent="#alertasPrioritarias">
+              <div class="accordion-body">
+                @foreach($herramientasNoDevueltas as $item)
+                  <div class="alert alert-info mb-3">
+                    <strong>{{ $item->recurso }}</strong><br>
+                    <small>Serie {{ $item->nro_serie }} - {{ $item->trabajador }}</small>
+                  </div>
+                @endforeach
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de estado general del inventario -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100" style="border-left: 4px solid #f57c00;">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-2">Estado General del Inventario</h5>
+        <canvas id="graficoInventario" style="height:300px;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 
   <footer class="text-center text-muted small">
     Panel generado estáticamente. Integrar con backend para datos dinámicos.
   </footer>
 </div>
 
-<script>
-  const today = new Date();
-  document.getElementById('today').textContent =
-    today.toLocaleDateString('es-AR',{year:'numeric',month:'short',day:'numeric'});
-</script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Fecha actual
+    const today = new Date();
+    document.getElementById('today').textContent =
+      today.toLocaleDateString('es-AR', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    // Gráfico de barras: Estado general del inventario
+    const ctx1 = document.getElementById('graficoInventario').getContext('2d');
+    new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: @json($labels),
+        datasets: [{
+          label: 'Cantidad de recursos',
+          data: @json($valores),
+          backgroundColor: ['#4caf50', '#2196f3', '#ff9800', '#f44336', '#9e9e9e']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: 'Estado general del inventario' }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 }
+          }
+        }
+      }
+    });
+
+  
+  </script>
+
 @endsection
