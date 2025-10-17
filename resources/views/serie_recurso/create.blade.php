@@ -36,11 +36,7 @@
             <input type="date" name="fecha_adquisicion" class="form-control" required>
         </div>
 
-        <div class="mb-3">
-            <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento (opcional)</label>
-            <input type="date" name="fecha_vencimiento" class="form-control">
-        </div>
-
+    
         <div class="mb-3">
             <select name="id_estado" class="form-select">
         @foreach($estados as $estado)
