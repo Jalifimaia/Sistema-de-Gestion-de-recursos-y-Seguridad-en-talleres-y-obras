@@ -28,7 +28,8 @@
 
     <!-- Paso 2: Elegir acción -->
     <div id="step2" class="step">
-      <h2 class="mb-4 text-center">¿Qué querés hacer?</h2>
+     <h2 id="saludo-trabajador" class="mb-2 text-center">Hola 👷</h2>
+      <h4 class="mb-4 text-center">¿Qué querés hacer?</h4>
       <button class="btn btn-outline-success btn-lg" onclick="nextStep(3)">📦 Tengo la herramienta en mano</button>
       <button class="btn btn-outline-primary btn-lg" onclick="nextStep(5)">🛠️ Quiero solicitar una herramienta</button>
       <button class="btn btn-info btn-lg" onclick="cargarRecursos()" data-bs-toggle="modal" data-bs-target="#modalRecursos">📋 Ver recursos asignados</button>
@@ -84,17 +85,20 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+            <div class="table-responsive"> {{-- 👈 NUEVO --}}
           <table class="table table-bordered table-striped">
             <thead>
               <tr>
                 <th>Categoría</th>
                 <th>Subcategoría / Recurso</th>
                 <th>Serie</th>
-                <th>Fecha</th>
+                <th>Fecha de préstamo</th>
+                <th>Fecha de devolución</th>
               </tr>
             </thead>
             <tbody id="tablaRecursos"></tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>

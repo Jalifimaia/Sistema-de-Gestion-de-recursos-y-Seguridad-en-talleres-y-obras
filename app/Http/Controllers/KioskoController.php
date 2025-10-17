@@ -48,21 +48,22 @@ class KioskoController extends Controller
     public function recursosAsignados($usuarioId)
     {
         try {
-            $detalles = DetallePrestamo::with('serieRecurso.recurso.subcategoria.categoria')
+            $detalles = DetallePrestamo::with('serieRecurso.recurso.subcategoria.categoria', 'prestamo')
                 ->whereHas('prestamo', function ($q) use ($usuarioId) {
                     $q->where('id_usuario', $usuarioId)
-                      ->where('estado', 2); // solo activos
+                    ->where('estado', 2); // solo activos
                 })
                 ->where('id_estado_prestamo', 2) // asignado
                 ->get()
                 ->map(function($d) {
                     return [
-                        'detalle_id'   => $d->id,
-                        'categoria'    => $d->serieRecurso->recurso->subcategoria->categoria->nombre_categoria ?? '-',
-                        'subcategoria' => $d->serieRecurso->recurso->subcategoria->nombre ?? '-',
-                        'recurso'      => $d->serieRecurso->recurso->nombre ?? '-',
-                        'serie'        => $d->serieRecurso->nro_serie ?? '-',
-                        'fecha'        => $d->created_at ? $d->created_at->format('Y-m-d') : '-',
+                        'detalle_id'       => $d->id,
+                        'categoria'        => $d->serieRecurso->recurso->subcategoria->categoria->nombre_categoria ?? '-',
+                        'subcategoria'     => $d->serieRecurso->recurso->subcategoria->nombre ?? '-',
+                        'recurso'          => $d->serieRecurso->recurso->nombre ?? '-',
+                        'serie'            => $d->serieRecurso->nro_serie ?? '-',
+                        'fecha_prestamo'   => $d->prestamo->fecha_prestamo ? \Carbon\Carbon::parse($d->prestamo->fecha_prestamo)->format('Y-m-d') : '-',
+                        'fecha_devolucion' => $d->prestamo->fecha_devolucion ? \Carbon\Carbon::parse($d->prestamo->fecha_devolucion)->format('Y-m-d') : '-',
                     ];
                 });
 
@@ -71,6 +72,7 @@ class KioskoController extends Controller
             return response()->json(['success' => false, 'message' => 'Error interno: '.$e->getMessage()], 500);
         }
     }
+
 
     // ✅ Registrar manualmente (usa PrestamoService)
     public function registrarManual(Request $request)

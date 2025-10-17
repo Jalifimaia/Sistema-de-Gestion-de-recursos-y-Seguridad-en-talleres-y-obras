@@ -29,6 +29,8 @@ function identificarTrabajador() {
       if (res.success) {
         localStorage.setItem('id_usuario', res.usuario.id);
         nextStep(2);
+        document.getElementById('saludo-trabajador').textContent = `Hola ${res.usuario.name}`;
+
       } else {
         mostrarMensajeKiosco(res.message, 'danger');
       }
@@ -76,10 +78,7 @@ function cargarCategorias() {
 
 function cargarRecursos() {
   const id_usuario = localStorage.getItem('id_usuario');
-  if (!id_usuario) {
-    //alert('No hay usuario identificado');
-    return;
-  }
+  if (!id_usuario) return;
 
   const xhr = new XMLHttpRequest();
   xhr.open('GET', `/terminal/recursos-asignados/${id_usuario}`, true);
@@ -91,7 +90,7 @@ function cargarRecursos() {
       tabla.innerHTML = '';
 
       if (recursos.length === 0) {
-        tabla.innerHTML = `<tr><td colspan="4" class="text-center">No tiene recursos asignados</td></tr>`;
+        tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
         return;
       }
 
@@ -100,7 +99,8 @@ function cargarRecursos() {
           <td>${r.categoria}</td>
           <td>${r.subcategoria} / ${r.recurso}</td>
           <td>${r.serie}</td>
-          <td>${r.fecha}</td>
+          <td> ${r.fecha_prestamo || '-'}</td>
+          <td> ${r.fecha_devolucion || '-'}</td>
           <td>
             <button class="btn btn-sm btn-outline-danger" onclick="devolverRecurso(${r.detalle_id})">
               Devolver
@@ -110,13 +110,40 @@ function cargarRecursos() {
       });
 
     } catch (e) {
-      // .error('Respuesta no válida:', xhr.responseText);
       mostrarMensajeKiosco('Error al cargar recursos asignados', 'danger');
     }
   };
 
   xhr.send();
 }
+
+
+function mostrarRecursosAsignados(recursos) {
+  const contenedor = document.getElementById('contenedorRecursos');
+  contenedor.innerHTML = '';
+
+  recursos.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'card mb-3 shadow-sm';
+
+    card.innerHTML = `
+      <div class="card-body">
+        <h5 class="card-title mb-1">${r.recurso}</h5>
+        <p class="card-text mb-1">Serie: <strong>${r.serie}</strong></p>
+        <p class="card-text mb-1">Categoría: ${r.categoria}</p>
+        <p class="card-text mb-1">Subcategoría: ${r.subcategoria}</p>
+        <p class="card-text mb-1">📅 Prestado: ${r.fecha_prestamo}</p>
+        <p class="card-text mb-1">📅 Devolución: ${r.fecha_devolucion}</p>
+        <button class="btn btn-outline-danger btn-sm mt-2" onclick="devolverRecurso(${r.detalle_id})">
+          Devolver recurso
+        </button>
+      </div>
+    `;
+
+    contenedor.appendChild(card);
+  });
+}
+
 
 function devolverRecurso(detalleId) {
   if (!confirm('¿Confirmás que querés devolver este recurso?')) return;
@@ -411,3 +438,4 @@ document.getElementById('serie-buttons').addEventListener('click', function (e) 
     registrarSerie(btn.dataset.serieId);
   }
 });
+
