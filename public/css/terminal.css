@@ -1,0 +1,19 @@
+.container-kiosk {
+  max-width: 600px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.step {
+  display: none;
+}
+
+.step.active {
+  display: block;
+}
+
+.tool-img {
+  width: 100px;
+  height: auto;
+  margin-right: 10px;
+}
