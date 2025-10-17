@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\KioskoController;
 
 use App\Models\Subcategoria;
 use App\Http\Controllers\InventarioController;
@@ -25,11 +26,6 @@ Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
-//Route::get('/reportes', fn() => view('supervisor.reportes'));
-//Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
-
-Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
-//Route::get('/reportes/prestamos', [PrestamoController::class, 'ultimosPrestamos'])->name('reportes.prestamos');
 
 //Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
 Route::get('/reportes/prestamos/pdf', [ReporteController::class, 'exportarPrestamosPDF'])->name('reportes.prestamos.pdf');
@@ -37,6 +33,49 @@ Route::get('/reportes/prestamos/pdf', [ReporteController::class, 'exportarPresta
 Route::get('/reportes', function () {
     return view('reportes.index');
 })->name('reportes.index');
+
+/*
+|--------------------------------------------------------------------------
+| Rutas del Kiosko / Terminal
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('terminal')->group(function () {
+    Route::get('/', [KioskoController::class, 'index'])->name('terminal.index');
+
+    // Identificación de trabajador
+    Route::post('/identificar', [KioskoController::class, 'identificarTrabajador']);
+
+    // Registro / asignación de serie a usuario
+    Route::post('/registrar-manual', [KioskoController::class, 'registrarManual']);
+
+    // Solicitud genérica
+    Route::post('/solicitar', [KioskoController::class, 'solicitarRecurso']);
+
+    // Flujo jerárquico real
+    Route::get('/categorias', [KioskoController::class, 'getCategorias']);
+    Route::get('/subcategorias/{categoriaId}', [KioskoController::class, 'getSubcategorias']);
+    Route::get('/recursos/{subcategoriaId}', [KioskoController::class, 'getRecursos']);
+    Route::get('/recursos-filtrados/{subcategoriaId}', [KioskoController::class, 'getRecursosConSeries']);
+    Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
+    Route::get('/terminal/recursos-disponibles/{subcategoriaId}', [KioskoController::class, 'getRecursosConDisponibles']);
+
+    // mostrar recursos disponibles
+    Route::get('/recursos-disponibles/{subcategoriaId}', [KioskoController::class, 'getRecursosConDisponibles']);
+    Route::get('/subcategorias-disponibles/{categoriaId}', [KioskoController::class, 'getSubcategoriasConDisponibles']);
+    Route::get('/terminal/series/{recursoId}', [KioskoController::class, 'getSeries']);
+
+    // Recursos asignados al usuario
+    Route::get('/recursos-asignados/{usuarioId}', [KioskoController::class, 'recursosAsignados']);
+
+    // Devolución
+    Route::post('/devolver/{detalleId}', [KioskoController::class, 'devolverRecurso']);
+
+    // 🚀 NUEVA RUTA: registrar préstamo desde la terminal
+    Route::post('/prestamos/{dni}', [\App\Http\Controllers\PrestamoTerminalController::class, 'store'])
+        ->name('terminal.prestamos.store');
+});
+
 
 /*
 |--------------------------------------------------------------------------

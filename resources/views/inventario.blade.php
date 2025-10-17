@@ -4,6 +4,45 @@
 
 @section('content')
 <div class="container py-4">
+
+  <!-- Estado del Inventario -->
+<div class="card shadow border mt-4">
+  <div class="card-header bg-white border-bottom">
+    <h5 class="fw-bold mb-0">📊 Estado del Inventario</h5>
+    <p class="text-muted small mb-0">Resumen general de herramientas y EPP</p>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      @php
+        $estadoItems = [
+          ['label' => 'Herramientas disponibles', 'valor' => "$herramientasDisponibles/$herramientasTotales"],
+          ['label' => 'EPP en stock', 'valor' => "$eppStock/$eppTotales"],
+          ['label' => 'En reparación', 'valor' => $elementosReparacion],
+          ['label' => 'EPP vencidos', 'valor' => $eppVencidos],
+          ['label' => 'Elementos dañados', 'valor' => $elementosDañados],
+        ];
+      @endphp
+
+      @foreach ($estadoItems as $item)
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="border rounded p-3 text-center h-100 bg-light d-flex flex-column justify-content-center shadow-sm" style="border-left: 5px solid #f57c00;">
+            <div class="fw-semibold text-muted small">{{ $item['label'] }}</div>
+            <div class="fs-5 fw-bold text-orange">{{ $item['valor'] }}</div>
+          </div>
+        </div>
+      @endforeach
+
+      <!-- Botón exportar -->
+      <div class="col-6 col-md-4 col-lg-2 d-flex align-items-center justify-content-center">
+        <a href="{{ route('inventario.exportar') }}" class="btn btn-orange btn-sm w-100">
+          <i class="bi bi-download me-1"></i> Exportar CSV
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
   <header class="row mb-4">
     <div class="col-md-8">
       <h1 class="h4 fw-bold mb-1">Gestión de Inventario</h1>
@@ -107,8 +146,8 @@
 </div>
 @endsection
 
+
 @section('scripts')
   <script src="{{ asset('js/inventario.js') }}?v={{ time() }}"></script>
   <script src="{{ asset('js/filtroBusqueda.js') }}?v={{ time() }}"></script>
 @endsection
-
