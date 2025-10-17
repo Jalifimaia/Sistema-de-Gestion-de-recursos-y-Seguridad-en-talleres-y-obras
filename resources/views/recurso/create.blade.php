@@ -19,7 +19,10 @@
         </div>
       @endif
 
-      <form method="POST" action="{{ route('recursos.store') }}">
+      <!-- Contenedor para mensajes JS -->
+      <div id="mensaje"></div>
+
+      <form id="recursoForm" method="POST" action="{{ route('recursos.store') }}">
         @csrf
 
         <!-- Categoría -->
@@ -41,22 +44,28 @@
           </select>
         </div>
 
+        <!-- Nueva Subcategoría -->
+        <div class="input-group mt-2">
+          <input type="text" id="nuevaSubcategoria" class="form-control" placeholder="Nueva subcategoría">
+          <button type="button" class="btn btn-outline-success" id="agregarSubcategoria">Agregar</button>
+        </div>
+
         <!-- Nombre -->
         <div class="mb-3">
           <label for="nombre" class="form-label">Nombre</label>
-          <input type="text" name="nombre" class="form-control" required>
+          <input type="text" id="nombre" name="nombre" class="form-control" required>
         </div>
 
         <!-- Descripción -->
         <div class="mb-3">
           <label for="descripcion" class="form-label">Descripción</label>
-          <textarea name="descripcion" class="form-control" rows="3"></textarea>
+          <textarea id="descripcion" name="descripcion" class="form-control" rows="3"></textarea>
         </div>
 
         <!-- Costo unitario -->
         <div class="mb-3">
           <label for="costo_unitario" class="form-label">Costo Unitario</label>
-          <input type="number" name="costo_unitario" class="form-control" step="0.01" min="0">
+          <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" step="0.01" min="0">
         </div>
 
         <div class="text-end">
@@ -69,36 +78,5 @@
 @endsection
 
 @section('scripts')
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const categoriaSelect = document.getElementById('categoria');
-    const subcategoriaSelect = document.getElementById('id_subcategoria');
-
-    categoriaSelect.addEventListener('change', function () {
-      const categoriaId = this.value;
-      subcategoriaSelect.innerHTML = '<option>Cargando...</option>';
-      subcategoriaSelect.disabled = true;
-
-      if (!categoriaId) {
-        subcategoriaSelect.innerHTML = '<option value="">Seleccione una subcategoría</option>';
-        return;
-      }
-
-      fetch(`/api/subcategorias/${categoriaId}`)
-        .then(res => res.json())
-        .then(data => {
-          let options = '<option value="">Seleccione una subcategoría</option>';
-          data.forEach(sub => {
-            options += `<option value="${sub.id}">${sub.nombre}</option>`;
-          });
-          subcategoriaSelect.innerHTML = options;
-          subcategoriaSelect.disabled = false;
-        })
-        .catch(error => {
-          console.error('Error al cargar subcategorías:', error);
-          subcategoriaSelect.innerHTML = '<option>Error al cargar</option>';
-        });
-    });
-  });
-</script>
+  <script src="{{ asset('js/recurso.js') }}?v={{ time() }}"></script>
 @endsection

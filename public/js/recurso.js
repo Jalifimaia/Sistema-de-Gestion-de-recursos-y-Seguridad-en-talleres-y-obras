@@ -2,11 +2,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('recursoForm');
     const mensaje = document.getElementById('mensaje');
     const categoriaSelect = document.getElementById('categoria');
-    const subcategoriaSelect = document.getElementById('subcategoria');
+    const subcategoriaSelect = document.getElementById('id_subcategoria');
 
     // 🔹 Cargar subcategorías dinámicamente
     categoriaSelect.addEventListener('change', function () {
         const categoriaId = this.value;
+        console.log('Categoría seleccionada:', categoriaId);
+
         subcategoriaSelect.innerHTML = '<option>Cargando...</option>';
         subcategoriaSelect.disabled = true;
 
@@ -15,13 +17,17 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        fetch(`/api/subcategorias/${categoriaId}`)
+        fetch(`/subcategorias/${categoriaId}`)
             .then(res => res.json())
             .then(data => {
+                console.log('Subcategorías recibidas:', data);
+
                 let options = '<option value="">Seleccione una subcategoría</option>';
                 data.forEach(sub => {
+                    console.log(`Agregando opción: ${sub.id} - ${sub.nombre}`);
                     options += `<option value="${sub.id}">${sub.nombre}</option>`;
                 });
+
                 subcategoriaSelect.innerHTML = options;
                 subcategoriaSelect.disabled = false;
             })
@@ -73,39 +79,38 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 🔹 Agregar nueva subcategoría
     document.getElementById('agregarSubcategoria').addEventListener('click', function () {
-        const nombre = document.getElementById('nuevaSubcategoria').value.trim();
-        const categoriaId = categoriaSelect.value;
+  const nombre = document.getElementById('nuevaSubcategoria').value.trim();
+  const categoriaId = document.getElementById('categoria').value;
+  const subcategoriaSelect = document.getElementById('id_subcategoria');
+  const mensaje = document.getElementById('mensaje');
 
-        if (!nombre || !categoriaId) {
-            mensaje.innerHTML = `<div class="alert alert-warning">Escribí un nombre y seleccioná una categoría.</div>`;
-            return;
-        }
+  if (!nombre || !categoriaId) {
+    mensaje.innerHTML = `<div class="alert alert-warning">Escribí un nombre y seleccioná una categoría.</div>`;
+    return;
+  }
 
-        fetch('/api/subcategorias', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            },
-            body: JSON.stringify({ nombre, categoria_id: categoriaId }),
-        })
-        .then(res => res.json())
-        .then(data => {
-            const option = document.createElement('option');
-            option.value = data.id;
-            option.textContent = data.nombre;
-            subcategoriaSelect.appendChild(option);
-            subcategoriaSelect.value = data.id;
-            subcategoriaSelect.disabled = false;
-            document.getElementById('nuevaSubcategoria').value = '';
-            mensaje.innerHTML = `<div class="alert alert-success">Subcategoría agregada.</div>`;
-        })
-        .catch(error => {
-            console.error('Error al agregar subcategoría:', error);
-            mensaje.innerHTML = `<div class="alert alert-danger">No se pudo agregar la subcategoría.</div>`;
-        });
-    });
+  fetch('/subcategorias', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+    },
+    body: JSON.stringify({ nombre, categoria_id: categoriaId }),
+  })
+  .then(res => res.json())
+  .then(data => {
+    categoriaSelect.dispatchEvent(new Event('change'));
+subcategoriaSelect.value = data.id;
+
+    document.getElementById('nuevaSubcategoria').value = '';
+    mensaje.innerHTML = `<div class="alert alert-success">Subcategoría agregada.</div>`;
+  })
+  .catch(error => {
+    console.error('Error al agregar subcategoría:', error);
+    mensaje.innerHTML = `<div class="alert alert-danger">No se pudo agregar la subcategoría.</div>`;
+  });
+});
+
 });

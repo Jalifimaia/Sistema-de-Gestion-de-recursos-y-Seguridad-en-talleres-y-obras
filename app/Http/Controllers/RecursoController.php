@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recurso;
+use DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\RecursoRequest;
@@ -19,7 +20,8 @@ class RecursoController extends Controller
      */
     public function index(Request $request): View
 {
-    $recursos = Recurso::paginate();
+    $recursos = Recurso::with(['serieRecursos.estado', 'categoria'])->paginate();
+
 
     return view('inventario', compact('recursos'))
         ->with('i', ($request->input('page', 1) - 1) * $recursos->perPage());
@@ -30,7 +32,7 @@ public function store(RecursoRequest $request)
 {
     $validated = $request->validated();
 
-    Recurso::create([
+    $recurso = Recurso::create([
         'id_subcategoria' => $validated['id_subcategoria'],
         'nombre' => $validated['nombre'],
         'descripcion' => $validated['descripcion'] ?? null,
@@ -39,8 +41,16 @@ public function store(RecursoRequest $request)
         'id_usuario_modificacion' => auth()->id(),
     ]);
 
+    if ($request->expectsJson()) {
+        return response()->json([
+            'message' => 'Recurso creado correctamente.',
+            'recurso' => $recurso
+        ]);
+    }
+
     return redirect()->route('inventario')->with('success', 'Recurso creado correctamente.');
 }
+
 
 
 
@@ -99,7 +109,7 @@ public function store(RecursoRequest $request)
     }
 public function create()
 {
-    $categorias = \App\Models\Categoria::all();
+    $categorias = Categoria::all();
     return view('recurso.create', compact('categorias'));
 }
 
