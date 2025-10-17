@@ -5,7 +5,18 @@
 @section('content')
 <div class="container py-4">
 
-  <!-- Estado del Inventario -->
+  <header class="row mb-4">
+    <div class="col-md-8">
+      <h1 class="h4 fw-bold mb-1">Gestión de Inventario</h1>
+      <p class="text-muted small">Control de herramientas y equipos de protección personal</p>
+    </div>
+    <div class="col-md-4 text-md-end text-muted small">
+      Fecha: <strong id="today" class="text-nowrap"></strong>
+    </div>
+  </header>
+
+<section id="estado-inventario">
+<!-- Estado del Inventario -->
 <div class="card shadow border mt-4">
   <div class="card-header bg-white border-bottom">
     <h5 class="fw-bold mb-0">📊 Estado del Inventario</h5>
@@ -42,16 +53,7 @@
   </div>
 </div>
 
-
-  <header class="row mb-4">
-    <div class="col-md-8">
-      <h1 class="h4 fw-bold mb-1">Gestión de Inventario</h1>
-      <p class="text-muted small">Control de herramientas y equipos de protección personal</p>
-    </div>
-    <div class="col-md-4 text-md-end text-muted small">
-      Fecha: <strong id="today" class="text-nowrap"></strong>
-    </div>
-  </header>
+</section>
 
   <div class="d-flex flex-wrap gap-2 mb-3">
     <a href="{{ route('recursos.create') }}" class="btn btn-orange">Agregar Elemento</a>

@@ -27,7 +27,7 @@ Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
 
-//Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
+Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
 Route::get('/reportes/prestamos/pdf', [ReporteController::class, 'exportarPrestamosPDF'])->name('reportes.prestamos.pdf');
 
 Route::get('/reportes', function () {
