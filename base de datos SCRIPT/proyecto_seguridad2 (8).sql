@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-10-2025 a las 06:43:48
+-- Tiempo de generación: 16-10-2025 a las 00:39:37
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -229,17 +229,9 @@ CREATE TABLE `incidente` (
 --
 
 INSERT INTO `incidente` (`id`, `id_recurso`, `id_serie_recurso`, `id_supervisor`, `id_trabajador`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `descripcion`, `fecha_incidente`, `fecha_creacion`, `fecha_modificacion`, `fecha_cierre_incidente`, `resolucion`, `id_estado_incidente`) VALUES
-(1, 6, NULL, 6, NULL, 0, 5, 5, 'Cable del taladro quemado por sobrecarga', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', '2025-10-05 23:27:35', 'Se reemplazó el cable dañado', 5),
-(2, 6, NULL, 5, NULL, NULL, 5, 5, 'Taladro no enciende al conectar', '2025-10-08 04:11:00', '2025-10-08 04:11:49', '2025-10-08 04:11:49', NULL, 'Se arreglo la termica', 1),
-(5, 6, NULL, 5, NULL, NULL, 5, 5, 'Taladro sin potencia al perforar', '2025-10-17 01:40:00', '2025-10-08 04:40:15', '2025-10-08 04:40:15', NULL, 'Revisión técnica programada', 2),
-(7, 4, NULL, 5, NULL, NULL, NULL, NULL, 'Chaleco con desgaste en material reflectante', '2025-10-30 02:04:00', '2025-10-08 02:11:33', '2025-10-08 02:11:33', NULL, 'En espera de revisión técnica', 2),
-(24, 9, NULL, 5, NULL, NULL, NULL, NULL, '.', '2025-10-18 01:02:00', '2025-10-14 01:03:47', '2025-10-14 01:03:47', NULL, NULL, 2),
-(25, 9, NULL, 5, NULL, NULL, NULL, NULL, '.', '2025-10-21 01:04:00', '2025-10-14 01:04:29', '2025-10-14 01:04:29', NULL, NULL, 2),
-(26, 10, 25, 5, 8, NULL, NULL, NULL, '.', '2025-10-23 01:10:00', '2025-10-14 01:13:39', '2025-10-14 01:13:39', NULL, NULL, 2),
-(27, 8, 10, 5, 14, NULL, NULL, NULL, '.', '2025-10-28 01:14:00', '2025-10-14 01:14:39', '2025-10-14 01:14:39', NULL, NULL, 2),
-(28, 8, 11, 5, 8, NULL, NULL, NULL, '.', '2025-10-16 01:22:00', '2025-10-14 01:22:43', '2025-10-14 01:22:43', NULL, NULL, 2),
 (29, NULL, NULL, 5, 8, NULL, NULL, NULL, '.', '2025-10-20 01:33:00', '2025-10-14 01:34:55', '2025-10-14 01:34:55', NULL, NULL, 2),
-(30, NULL, NULL, 5, 8, NULL, NULL, NULL, 'Se cayo', '2025-10-23 01:35:00', '2025-10-14 01:35:42', '2025-10-14 01:35:42', NULL, 'No hay', 1);
+(30, NULL, NULL, 5, 8, NULL, NULL, NULL, 'Se cayo', '2025-10-23 01:35:00', '2025-10-14 01:35:42', '2025-10-14 01:35:42', NULL, 'No hay', 1),
+(31, NULL, NULL, 5, 8, NULL, NULL, NULL, 'Se rompio el mango', '2025-10-28 13:51:00', '2025-10-14 13:51:50', '2025-10-14 13:51:50', NULL, '-', 1);
 
 -- --------------------------------------------------------
 
@@ -468,9 +460,9 @@ CREATE TABLE `serie_recurso` (
 --
 
 INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_incidente_detalle`, `nro_serie`, `talle`, `fecha_adquisicion`, `fecha_vencimiento`, `created_at`, `updated_at`, `id_estado`) VALUES
-(4, 4, NULL, '78YT', 40, '2025-10-05 00:00:00', '2025-10-31 00:00:00', '2025-10-05 15:49:01', '2025-10-05 15:49:01', 3),
+(4, 4, NULL, '78YT', 40, '2025-10-05 00:00:00', '2025-10-31 00:00:00', '2025-10-05 15:49:01', '2025-10-15 08:06:44', 4),
 (5, 6, NULL, 'XP-001', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
-(6, 6, NULL, 'XP-002', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
+(6, 6, NULL, 'XP-002', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-15 08:02:09', 4),
 (7, 6, NULL, 'XP-003', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
 (8, 6, NULL, 'XP-004', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
 (9, 6, NULL, 'XP-005', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3),
