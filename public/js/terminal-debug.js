@@ -1,3 +1,7 @@
+let scanner;
+let isScanning = false; // 👈 flag de estado
+
+
 function mostrarMensajeKiosco(texto, tipo = 'warning') {
   const mensaje = document.getElementById('mensaje-kiosco');
   mensaje.className = `alert alert-${tipo} text-center`;
@@ -10,11 +14,13 @@ function mostrarMensajeKiosco(texto, tipo = 'warning') {
 }
 
 function nextStep(n) {
+  if (n !== 3) detenerEscaneoQR(); // 👈 apaga escáner si salís del step3
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById('step' + n).classList.add('active');
 
   if (n === 5) cargarCategorias();
 }
+
 
 function identificarTrabajador() {
   const dni = document.getElementById('dni').value;
@@ -439,3 +445,136 @@ document.getElementById('serie-buttons').addEventListener('click', function (e) 
   }
 });
 
+
+function activarEscaneoQR() {
+  const qrContainer = document.getElementById('qr-reader');
+  const btnEscanear = document.getElementById('btn-escanear-qr');
+  const btnCancelar = document.getElementById('btn-cancelar-qr');
+  const textoCamara = document.getElementById('texto-camara-activa');
+
+  if (!qrContainer) {
+    mostrarMensajeKiosco('No se encontró el contenedor de escaneo QR', 'danger');
+    return;
+  }
+
+  if (isScanning) return; // ya está activo
+
+  qrContainer.innerHTML = '';
+  if (btnEscanear) btnEscanear.classList.add('d-none');
+  if (btnCancelar) btnCancelar.classList.remove('d-none');
+  if (textoCamara) textoCamara.classList.remove('d-none');
+
+  scanner = new Html5Qrcode("qr-reader");
+  isScanning = true;
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 400, height: 400 } },
+    qrCodeMessage => {
+      console.log('QR detectado:', qrCodeMessage);
+      cleanupScanUI();
+      registrarPorQR(qrCodeMessage);
+    },
+    errorMessage => {
+      console.warn('Error de escaneo:', errorMessage);
+    }
+  ).catch(err => {
+    console.error('Error al iniciar escaneo:', err);
+    mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
+    cleanupScanUI();
+  });
+}
+
+
+function cancelarEscaneoQR() {
+  cleanupScanUI();
+}
+
+
+
+function registrarPorQR(codigoQR) {
+  fetch(`/terminal/registrar-por-qr`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ codigo_qr: codigoQR, dni: document.getElementById('dni').value })
+  })
+  .then(res => res.json())
+  .then(data => {
+  if (data.success) {
+    const mensaje = `✅ Recurso registrado: ${data.recurso} - Serie: ${data.serie}`;
+    mostrarMensajeKiosco(mensaje, 'success');
+    nextStep(2);
+  } else {
+    const mensaje = data.recurso && data.serie
+      ? `⚠️ Ya asignado: ${data.recurso} - Serie: ${data.serie}`
+      : (data.message || 'QR no válido');
+    mostrarMensajeKiosco(mensaje, 'danger');
+  }
+
+});
+}
+
+function detenerEscaneoQR(next = null) {
+  const qrContainer = document.getElementById('qr-reader');
+  const btnEscanear = document.getElementById('btn-escanear-qr');
+  const btnCancelar = document.getElementById('btn-cancelar-qr');
+  const textoCamara = document.getElementById('texto-camara-activa');
+
+  if (scanner && isScanning) {
+    scanner.stop().catch(() => {}).then(() => {
+      qrContainer.innerHTML = '';
+      if (btnCancelar) btnCancelar.classList.add('d-none');
+      if (btnEscanear) btnEscanear.classList.remove('d-none');
+      if (textoCamara) textoCamara.classList.add('d-none');
+      isScanning = false;
+      if (next) nextStep(next); // 👈 avanzar al paso cuando termina
+    });
+  } else {
+    qrContainer.innerHTML = '';
+    if (btnCancelar) btnCancelar.classList.add('d-none');
+    if (btnEscanear) btnEscanear.classList.remove('d-none');
+    if (textoCamara) textoCamara.classList.add('d-none');
+    isScanning = false;
+    if (next) nextStep(next);
+  }
+}
+
+
+
+function setModoEscaneo(modo) {
+  const titulo = document.getElementById('titulo-step3');
+  if (modo === 'manual') {
+    titulo.textContent = '📦 Tengo la herramienta en mano';
+    detenerEscaneoQR();
+  } else {
+    titulo.textContent = '📷 Escanear Recurso';
+    activarEscaneoQR();
+  }
+  nextStep(3);
+}
+
+function cleanupScanUI() {
+  const qrContainer = document.getElementById('qr-reader');
+  const btnEscanear = document.getElementById('btn-escanear-qr');
+  const btnCancelar = document.getElementById('btn-cancelar-qr');
+  const textoCamara = document.getElementById('texto-camara-activa');
+
+  if (scanner && isScanning) {
+    scanner.stop().catch(() => {}).then(() => {
+      qrContainer.innerHTML = '';
+      if (btnCancelar) btnCancelar.classList.add('d-none');
+      if (btnEscanear) btnEscanear.classList.remove('d-none');
+      if (textoCamara) textoCamara.classList.add('d-none');
+      isScanning = false;
+    });
+  } else {
+    qrContainer.innerHTML = '';
+    if (btnCancelar) btnCancelar.classList.add('d-none');
+    if (btnEscanear) btnEscanear.classList.remove('d-none');
+    if (textoCamara) textoCamara.classList.add('d-none');
+    isScanning = false;
+  }
+}

@@ -12,12 +12,10 @@
   <div class="container-kiosk">
 
     <!-- contenedor de mensajes -->
-    
     <div id="mensaje-kiosco" class="alert alert-warning text-center d-none" role="alert">
-  <span id="mensaje-kiosco-texto"></span>
-  <button type="button" class="btn-close float-end" onclick="document.getElementById('mensaje-kiosco').classList.add('d-none')"></button>
-</div>
-
+      <span id="mensaje-kiosco-texto"></span>
+      <button type="button" class="btn-close float-end" onclick="document.getElementById('mensaje-kiosco').classList.add('d-none')"></button>
+    </div>
 
     <!-- Paso 1: Identificar trabajador -->
     <div id="step1" class="step active">
@@ -28,9 +26,9 @@
 
     <!-- Paso 2: Elegir acción -->
     <div id="step2" class="step">
-     <h2 id="saludo-trabajador" class="mb-2 text-center">Hola 👷</h2>
+      <h2 id="saludo-trabajador" class="mb-2 text-center">Hola 👷</h2>
       <h4 class="mb-4 text-center">¿Qué querés hacer?</h4>
-      <button class="btn btn-outline-success btn-lg" onclick="nextStep(3)">📦 Tengo la herramienta en mano</button>
+      <button class="btn btn-outline-success btn-lg" onclick="setModoEscaneo('manual')">📦 Tengo la herramienta en mano</button>
       <button class="btn btn-outline-primary btn-lg" onclick="nextStep(5)">🛠️ Quiero solicitar una herramienta</button>
       <button class="btn btn-info btn-lg" onclick="cargarRecursos()" data-bs-toggle="modal" data-bs-target="#modalRecursos">📋 Ver recursos asignados</button>
       <button class="btn btn-secondary btn-lg" onclick="nextStep(1)">🔙 Volver</button>
@@ -38,11 +36,23 @@
 
     <!-- Paso 3: Escaneo QR -->
     <div id="step3" class="step">
-      <h2 class="mb-4 text-center">📷 Escanear Recurso</h2>
-      <p class="text-center mb-4">Escaneá el código QR del recurso.</p>
-      <button class="btn btn-outline-primary btn-lg" onclick="simularEscaneo()">📡 Escanear QR</button>
-      <button class="btn btn-outline-dark btn-lg" onclick="nextStep(5)">No tiene QR / Solicitar manualmente</button>
-      <button class="btn btn-secondary btn-lg" onclick="nextStep(2)">🔙 Volver</button>
+      <h2 id="titulo-step3" class="mb-4 text-center">📷 Escanear Recurso</h2>
+
+      <h5 id="texto-camara-activa" class="text-center mb-3 d-none">📡 Cámara activa — escaneá el código QR</h5>
+
+      <div id="qr-reader" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
+
+      <div class="text-center mt-3">
+        <button id="btn-escanear-qr" class="btn btn-outline-primary btn-lg" onclick="activarEscaneoQR()">📡 Escanear QR</button>
+        <button id="btn-cancelar-qr" class="btn btn-outline-danger btn-lg d-none" onclick="cancelarEscaneoQR()">❌ Cancelar escaneo</button>
+      </div>
+
+      <p class="text-center mt-4">Si no tiene QR, podés solicitar la herramienta manualmente.</p>
+      <div class="text-center">
+        <button class="btn btn-outline-dark btn-lg" onclick="detenerEscaneoQR(5)">Solicitar manualmente</button>
+        <button class="btn btn-secondary btn-lg" onclick="detenerEscaneoQR(2)">🔙 Volver</button>
+
+      </div>
     </div>
 
     <!-- Paso 5: Categoría -->
@@ -75,7 +85,6 @@
 
   </div>
 
-  
   <!-- Modal -->
   <div class="modal fade" id="modalRecursos" tabindex="-1" aria-labelledby="modalRecursosLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -85,19 +94,19 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-            <div class="table-responsive"> {{-- 👈 NUEVO --}}
-          <table class="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th>Categoría</th>
-                <th>Subcategoría / Recurso</th>
-                <th>Serie</th>
-                <th>Fecha de préstamo</th>
-                <th>Fecha de devolución</th>
-              </tr>
-            </thead>
-            <tbody id="tablaRecursos"></tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>Categoría</th>
+                  <th>Subcategoría / Recurso</th>
+                  <th>Serie</th>
+                  <th>Fecha de préstamo</th>
+                  <th>Fecha de devolución</th>
+                </tr>
+              </thead>
+              <tbody id="tablaRecursos"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -106,6 +115,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ asset('js/terminal-debug.js') }}"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
 </body>
 </html>

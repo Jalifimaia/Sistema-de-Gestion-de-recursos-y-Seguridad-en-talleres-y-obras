@@ -36,7 +36,8 @@ class SerieRecurso extends Model
         'talle',
         'fecha_adquisicion',
         'fecha_vencimiento',
-        'id_estado'
+        'id_estado',
+        'codigo_qr'
     ];
 
     /**

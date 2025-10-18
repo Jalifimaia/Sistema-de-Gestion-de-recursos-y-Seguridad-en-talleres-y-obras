@@ -74,6 +74,12 @@ Route::prefix('terminal')->group(function () {
     // 🚀 NUEVA RUTA: registrar préstamo desde la terminal
     Route::post('/prestamos/{dni}', [\App\Http\Controllers\PrestamoTerminalController::class, 'store'])
         ->name('terminal.prestamos.store');
+
+
+    //QR
+    Route::post('/registrar-por-qr', [KioskoController::class, 'registrarPorQR']);
+
+
 });
 
 
@@ -104,6 +110,18 @@ Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp')
 */
 Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
 Route::resource('recursos', RecursoController::class);
+
+//QR de inventario
+Route::get('/series/{id}/qr', [SerieRecursoController::class, 'showQr'])->name('series.qr.show');
+Route::get('/series/{id}/qr-snippet', [SerieRecursoController::class, 'qrSnippet']);
+
+
+//QR
+Route::get('/series-qr', [SerieRecursoController::class, 'qrIndex'])->name('series.qr');
+Route::get('/series-qr/{id}/pdf', [SerieRecursoController::class, 'exportQrPdf'])->name('series.qr.pdf');
+Route::get('/series-qr-lote', [SerieRecursoController::class, 'qrLote'])->name('series.qr.lote');
+Route::get('/series-qr-lote/pdf', [SerieRecursoController::class, 'exportQrLotePdf'])
+    ->name('series.qr.lote.pdf');
 
 /*
 |--------------------------------------------------------------------------

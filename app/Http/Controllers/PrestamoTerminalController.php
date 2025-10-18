@@ -51,4 +51,30 @@ class PrestamoTerminalController extends Controller
     }
 }
 
+public function registrarPorQR(Request $request)
+{
+    $serie = SerieRecurso::where('codigo_qr', $request->codigo_qr)->first();
+    if (!$serie) {
+        return response()->json(['success' => false, 'message' => 'QR no encontrado']);
+    }
+
+    $usuario = Usuario::where('dni', $request->dni)
+        ->where('id_rol', 3)
+        ->firstOrFail();
+
+    $prestamo = $this->prestamoService->crearPrestamo(
+        $usuario->id,
+        [$serie->id],
+        'terminal'
+    );
+
+    return response()->json([
+        'success'  => true,
+        'message'  => '✅ Préstamo registrado por QR',
+        'prestamo' => $prestamo->id,
+    ]);
+}
+
+
+
 }

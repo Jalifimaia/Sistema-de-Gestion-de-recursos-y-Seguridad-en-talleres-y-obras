@@ -189,4 +189,56 @@ class KioskoController extends Controller
     {
         return response()->json(['message' => 'Solicitud recibida']);
     }
+
+public function registrarPorQR(Request $request)
+{
+    $codigoQR = $request->input('codigo_qr');
+    $dni      = $request->input('dni');
+
+    if (!$codigoQR || !$dni) {
+        return response()->json(['success' => false, 'message' => 'Datos incompletos']);
+    }
+
+    // Buscar al trabajador por DNI
+    $usuario = \App\Models\Usuario::where('dni', $dni)
+        ->where('id_rol', 3)
+        ->first();
+
+    if (!$usuario) {
+        return response()->json(['success' => false, 'message' => 'Usuario no encontrado']);
+    }
+
+    // Buscar la serie por código QR
+    $serie = \App\Models\SerieRecurso::where('codigo_qr', $codigoQR)->first();
+    if (!$serie) {
+        return response()->json(['success' => false, 'message' => 'QR no válido']);
+    }
+
+    // Validar que esté disponible
+    if ($serie->id_estado != 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Este recurso ya está asignado',
+            'recurso' => $serie->recurso->nombre ?? '',
+            'serie'   => $serie->nro_serie ?? ''
+        ]);
+    }
+
+    // ✅ Usar PrestamoService para crear el préstamo
+    $prestamo = app(\App\Services\PrestamoService::class)->crearPrestamo(
+        $usuario->id,
+        [$serie->id],
+        'terminal'
+    );
+
+    return response()->json([
+        'success'     => true,
+        'message'     => '✅ Recurso registrado por QR',
+        'prestamo_id' => $prestamo->id,
+        'recurso'     => $serie->recurso->nombre ?? '',
+        'serie'       => $serie->nro_serie ?? ''
+    ]);
+}
+
+
 }
