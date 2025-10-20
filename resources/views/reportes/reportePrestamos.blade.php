@@ -45,15 +45,28 @@
                 @endforeach
             </tbody>
         </table>
-    @else
-    <div class="alert alert-info">No se encontraron préstamos recientes.</div>
-    @endif
+    </div>
 
+    <div class="row mb-5">
+    <div class="col-md-6">
+        <h5 class="text-center text-orange mb-2">📊 Préstamos por día</h5>
+        <div style="width: 100%; height: 240px;">
+            <canvas id="graficoBarras"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6 d-flex flex-column align-items-center">
+        <h5 class="text-center text-orange mb-2">📊 Distribución por estado</h5>
+        <div style="width: 80%; max-width: 300px; height: 240px;">
+            <canvas id="graficoTorta"></canvas>
+        </div>
+    </div>
 </div>
-@endsection
 
 
-@section('scripts')
+    @else
+    <div class="alert alert-info">No se encontraron préstamos en el rango seleccionado.</div>
+    @endif
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -79,13 +92,33 @@
             datasets: [{
                 label: 'Préstamos por día',
                 data: Object.values(fechaCount),
-                backgroundColor: '#0d6efd'
+                backgroundColor: 'rgba(255, 140, 0, 0.7)',
+                borderColor: 'rgba(255, 140, 0, 1)',
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Préstamos por día',
+                    color: '#ff6600',
+                    font: { size: 16 }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#ff6600', font: { size: 12 } },
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#333', font: { size: 12 } },
+                    grid: { color: '#eee' }
+                }
             }
         }
     });
@@ -97,15 +130,32 @@
             datasets: [{
                 label: 'Distribución por estado',
                 data: Object.values(estadoCount),
-                backgroundColor: ['#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6c757d']
+                backgroundColor: ['#ff6600', '#ffc107', '#0d6efd', '#6c757d', '#198754'],
+                borderColor: '#fff',
+                borderWidth: 2
             }]
         },
         options: {
-            responsive: true
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribución por estado',
+                    color: '#ff6600',
+                    font: { size: 16 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const value = context.raw;
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${context.label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
         }
     });
 </script>
-
-
-
 @endsection
