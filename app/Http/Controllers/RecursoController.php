@@ -77,7 +77,7 @@ class RecursoController extends Controller
 
         $total = $recursos->sum('cantidad_prestamos');
 
-        $pdf = Pdf::loadView('reportes.pdf.recursosMasPrestadosPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
+        $pdf = Pdf::loadView('reportes.recursosMasPrestadosPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
         return $pdf->download('reporte_recursos_mas_prestados.pdf');
     }
 
@@ -124,7 +124,7 @@ class RecursoController extends Controller
         $recursos = $query->orderByDesc('serie_recurso.fecha_adquisicion')->get();
         $total = $recursos->count();
 
-        $pdf = Pdf::loadView('reportes/pdf/recursosEnReparacionPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
+        $pdf = Pdf::loadView('reportes/recursosEnReparacionPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
         return $pdf->download('reporte_recursos_en_reparacion.pdf');
     }
 
@@ -186,7 +186,7 @@ class RecursoController extends Controller
         $herramientas = $query->orderByDesc('usuario_recurso.fecha_asignacion')->get();
         $total = $herramientas->count();
 
-        $pdf = Pdf::loadView('reportes/pdf/herramientasPorTrabajadorPDF', compact('herramientas', 'fecha_inicio', 'fecha_fin', 'total'));
+        $pdf = Pdf::loadView('reportes/herramientasPorTrabajadorPDF', compact('herramientas', 'fecha_inicio', 'fecha_fin', 'total'));
         return $pdf->download('reporte_herramientas_por_trabajador.pdf');
     }
 
@@ -247,7 +247,7 @@ class RecursoController extends Controller
 
         $total = $incidentes->sum('cantidad_incidentes');
 
-        $pdf = Pdf::loadView('reportes/pdf/incidentesPorTipoPDF', compact('incidentes', 'fecha_inicio', 'fecha_fin', 'total'));
+        $pdf = Pdf::loadView('reportes/incidentesPorTipoPDF', compact('incidentes', 'fecha_inicio', 'fecha_fin', 'total'));
         return $pdf->download('reporte_incidentes_por_tipo.pdf');
     }
 
