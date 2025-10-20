@@ -31,6 +31,8 @@
             <tr>
                 <th>Recurso</th>
                 <th>Cantidad de préstamos</th>
+                <th>Última fecha de préstamo</th>
+
             </tr>
         </thead>
         <tbody>
@@ -38,6 +40,8 @@
             <tr>
                 <td>{{ $r->nombre }}</td>
                 <td>{{ $r->cantidad_prestamos }}</td>
+                <td>{{ $r->ultima_fecha }}</td>
+
             </tr>
             @endforeach
         </tbody>

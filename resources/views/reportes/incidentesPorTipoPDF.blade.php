@@ -31,6 +31,8 @@
             <tr>
                 <th>Tipo de recurso</th>
                 <th>Cantidad de incidentes</th>
+                <th>Última fecha de incidente</th>
+
             </tr>
         </thead>
         <tbody>
@@ -38,6 +40,8 @@
             <tr>
                 <td>{{ $item->nombre_categoria }}</td>
                 <td>{{ $item->cantidad_incidentes }}</td>
+                <td>{{ $item->ultima_fecha }}</td>
+
             </tr>
             @endforeach
         </tbody>

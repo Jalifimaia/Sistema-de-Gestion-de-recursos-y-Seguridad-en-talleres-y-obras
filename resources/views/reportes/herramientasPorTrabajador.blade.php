@@ -30,7 +30,9 @@
             <tr>
                 <th>Trabajador</th>
                 <th>Herramienta</th>
-                <th>Fecha de asignación</th>
+                <th>Subcategoría</th>
+                <th>Número de serie</th>
+                <th>Fecha de adquisición</th>
             </tr>
         </thead>
         <tbody>
@@ -38,13 +40,48 @@
             <tr>
                 <td>{{ $item->trabajador }}</td>
                 <td>{{ $item->herramienta }}</td>
-                <td>{{ $item->fecha_asignacion }}</td>
+                <td>{{ $item->subcategoria }}</td>
+                <td>{{ $item->nro_serie }}</td>
+                <td>{{ $item->fecha_adquisicion }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
+
     @else
     <div class="alert alert-info">No se encontraron asignaciones en el rango seleccionado.</div>
     @endif
 </div>
+
+<div style="max-width: 100%; height: 220px;">
+    <canvas id="graficoHerramientas"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('graficoHerramientas').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($labels) !!},
+            datasets: [{
+                label: 'Cantidad de herramientas',
+                data: {!! json_encode($valores) !!},
+                backgroundColor: 'rgba(255, 140, 0, 0.7)', // naranja suave
+                borderColor: 'rgba(255, 140, 0, 1)',       // naranja fuerte
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y', // 🔄 barras horizontales
+            responsive: true,
+            scales: {
+                x: { beginAtZero: true },
+                y: { ticks: { color: '#ff6600' } }
+            }
+        }
+    });
+</script>
+
+
 @endsection

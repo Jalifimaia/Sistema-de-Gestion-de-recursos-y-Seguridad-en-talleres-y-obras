@@ -47,4 +47,61 @@
     <div class="alert alert-info">No se encontraron recursos en reparación en el rango seleccionado.</div>
     @endif
 </div>
+
+<div style="max-width: 100%; height: 220px;">
+    <canvas id="graficoReparacion"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('graficoReparacion').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: {!! json_encode($labels) !!},
+            datasets: [{
+                data: {!! json_encode($valores) !!},
+                backgroundColor: [
+                    'rgba(255, 140, 0, 0.8)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)'
+                ],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: '#333',
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const value = context.raw;
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${context.label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Recursos en reparación por tipo',
+                    color: '#ff6600',
+                    font: { size: 16 }
+                }
+            }
+        }
+    });
+</script>
+
+
 @endsection

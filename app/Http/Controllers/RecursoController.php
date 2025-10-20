@@ -31,11 +31,16 @@ class RecursoController extends Controller
     {
         $fecha_inicio = $request->input('fecha_inicio');
         $fecha_fin = $request->input('fecha_fin');
+        
 
         $query = DB::table('detalle_prestamo')
-            ->join('prestamo', 'detalle_prestamo.id_prestamo', '=', 'prestamo.id')
-            ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
-            ->select('recurso.nombre', DB::raw('COUNT(*) as cantidad_prestamos'));
+        ->join('prestamo', 'detalle_prestamo.id_prestamo', '=', 'prestamo.id')
+        ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
+        ->select(
+            'recurso.nombre',
+            DB::raw('COUNT(*) as cantidad_prestamos'),
+            DB::raw('MAX(prestamo.fecha_prestamo) as ultima_fecha')
+        );
 
         if ($fecha_inicio) {
             $query->where('prestamo.fecha_prestamo', '>=', $fecha_inicio);
@@ -50,7 +55,11 @@ class RecursoController extends Controller
             ->orderByDesc('cantidad_prestamos')
             ->get();
 
-        return view('reportes.recursosMasPrestados', compact('recursos', 'fecha_inicio', 'fecha_fin'));
+        $labels = $recursos->pluck('nombre');
+        $valores = $recursos->pluck('cantidad_prestamos');
+
+
+        return view('reportes.recursosMasPrestados', compact('recursos', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
     }
     public function recursosMasPrestadosPDF(Request $request)
     {
@@ -60,7 +69,12 @@ class RecursoController extends Controller
         $query = DB::table('detalle_prestamo')
             ->join('prestamo', 'detalle_prestamo.id_prestamo', '=', 'prestamo.id')
             ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
-            ->select('recurso.nombre', DB::raw('COUNT(*) as cantidad_prestamos'));
+            ->select(
+        'recurso.nombre',
+        DB::raw('COUNT(*) as cantidad_prestamos'),
+        DB::raw('MAX(prestamo.fecha_prestamo) as ultima_fecha')
+    );
+
 
         if ($fecha_inicio) {
             $query->where('prestamo.fecha_prestamo', '>=', $fecha_inicio);
@@ -82,27 +96,39 @@ class RecursoController extends Controller
     }
 
     public function recursosEnReparacion(Request $request)
-    {
-        $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
+{
+    $fecha_inicio = $request->input('fecha_inicio');
+    $fecha_fin = $request->input('fecha_fin');
 
-        $query = DB::table('serie_recurso')
-            ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
-            ->where('serie_recurso.id_estado', 6) // estado "En reparación"
-            ->select('recurso.nombre', 'serie_recurso.nro_serie', 'serie_recurso.fecha_adquisicion');
+    $query = DB::table('serie_recurso')
+        ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
+        ->where('serie_recurso.id_estado', 6) // estado "En reparación"
+        ->select('recurso.nombre', 'serie_recurso.nro_serie', 'serie_recurso.fecha_adquisicion');
 
-        if ($fecha_inicio) {
-            $query->where('serie_recurso.fecha_adquisicion', '>=', $fecha_inicio);
-        }
-
-        if ($fecha_fin) {
-            $query->where('serie_recurso.fecha_adquisicion', '<=', $fecha_fin);
-        }
-
-        $recursos = $query->orderByDesc('serie_recurso.fecha_adquisicion')->get();
-
-        return view('reportes.recursosEnReparacion', compact('recursos', 'fecha_inicio', 'fecha_fin'));
+    if ($fecha_inicio) {
+        $query->where('serie_recurso.fecha_adquisicion', '>=', $fecha_inicio);
     }
+
+    if ($fecha_fin) {
+        $query->where('serie_recurso.fecha_adquisicion', '<=', $fecha_fin);
+    }
+
+    $recursos = $query->orderByDesc('serie_recurso.fecha_adquisicion')->get();
+
+    // 🔧 Agrupar por nombre de recurso y contar
+    $agrupado = $recursos->groupBy('nombre')->map(function ($items, $nombre) {
+        return [
+            'tipo' => $nombre,
+            'cantidad' => $items->count()
+        ];
+    })->values();
+
+    $labels = $agrupado->pluck('tipo');
+    $valores = $agrupado->pluck('cantidad');
+
+    return view('reportes.recursosEnReparacion', compact('recursos', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
+}
+
     public function recursosEnReparacionPDF(Request $request)
     {
         $fecha_inicio = $request->input('fecha_inicio');
@@ -130,65 +156,82 @@ class RecursoController extends Controller
 
 
     public function herramientasPorTrabajador(Request $request)
-    {
-        $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
+{
+    $fecha_inicio = $request->input('fecha_inicio');
+    $fecha_fin = $request->input('fecha_fin');
 
-        $query = DB::table('usuario_recurso')
-            ->join('usuario', 'usuario_recurso.id_usuario', '=', 'usuario.id')
-            ->join('recurso', 'usuario_recurso.id_recurso', '=', 'recurso.id')
-            ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
-            ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
-            ->where('categoria.nombre_categoria', 'Herramienta')
-            ->select(
-                'usuario.name as trabajador',
-                'recurso.nombre as herramienta',
-                'usuario_recurso.fecha_asignacion'
-            );
+    $query = DB::table('serie_recurso')
+        ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
+        ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
+        ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
+        ->join('usuario', 'recurso.id_usuario_creacion', '=', 'usuario.id')
+        ->where('categoria.nombre_categoria', 'Herramienta')
+        ->select(
+            'usuario.name as trabajador',
+            'recurso.nombre as herramienta',
+            'serie_recurso.nro_serie',
+            'subcategoria.nombre as subcategoria',
+            'serie_recurso.fecha_adquisicion'
+        );
 
-        if ($fecha_inicio) {
-            $query->where('usuario_recurso.fecha_asignacion', '>=', $fecha_inicio);
-        }
-
-        if ($fecha_fin) {
-            $query->where('usuario_recurso.fecha_asignacion', '<=', $fecha_fin);
-        }
-
-        $herramientas = $query->orderByDesc('usuario_recurso.fecha_asignacion')->get();
-
-        return view('reportes.herramientasPorTrabajador', compact('herramientas', 'fecha_inicio', 'fecha_fin'));
+    if ($fecha_inicio) {
+        $query->where('serie_recurso.fecha_adquisicion', '>=', $fecha_inicio);
     }
+
+    if ($fecha_fin) {
+        $query->where('serie_recurso.fecha_adquisicion', '<=', $fecha_fin);
+    }
+
+    $herramientas = $query->orderByDesc('serie_recurso.fecha_adquisicion')->get();
+
+    // 🔧 Agrupar por trabajador y contar herramientas
+    $agrupado = $herramientas->groupBy('trabajador')->map(function ($items, $trabajador) {
+        return [
+            'trabajador' => $trabajador,
+            'cantidad' => $items->count()
+        ];
+    })->values();
+
+    // 🔧 Preparar datos para el gráfico
+    $labels = $agrupado->pluck('trabajador');
+    $valores = $agrupado->pluck('cantidad');
+
+    return view('reportes.herramientasPorTrabajador', compact('herramientas', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
+}
+
     public function herramientasPorTrabajadorPDF(Request $request)
-    {
-        $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
+{
+    $fecha_inicio = $request->input('fecha_inicio');
+    $fecha_fin = $request->input('fecha_fin');
 
-        $query = DB::table('usuario_recurso')
-            ->join('usuario', 'usuario_recurso.id_usuario', '=', 'usuario.id')
-            ->join('recurso', 'usuario_recurso.id_recurso', '=', 'recurso.id')
-            ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
-            ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
-            ->where('categoria.nombre_categoria', 'Herramienta')
-            ->select(
-                'usuario.name as trabajador',
-                'recurso.nombre as herramienta',
-                'usuario_recurso.fecha_asignacion'
-            );
+    $query = DB::table('serie_recurso')
+        ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
+        ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
+        ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
+        ->join('usuario', 'recurso.id_usuario_creacion', '=', 'usuario.id')
+        ->where('categoria.nombre_categoria', 'Herramienta')
+        ->select(
+            'usuario.name as trabajador',
+            'recurso.nombre as herramienta',
+            'subcategoria.nombre as subcategoria',
+            'serie_recurso.nro_serie',
+            'serie_recurso.fecha_adquisicion'
+        );
 
-        if ($fecha_inicio) {
-            $query->where('usuario_recurso.fecha_asignacion', '>=', $fecha_inicio);
-        }
-
-        if ($fecha_fin) {
-            $query->where('usuario_recurso.fecha_asignacion', '<=', $fecha_fin);
-        }
-
-        $herramientas = $query->orderByDesc('usuario_recurso.fecha_asignacion')->get();
-        $total = $herramientas->count();
-
-        $pdf = Pdf::loadView('reportes/herramientasPorTrabajadorPDF', compact('herramientas', 'fecha_inicio', 'fecha_fin', 'total'));
-        return $pdf->download('reporte_herramientas_por_trabajador.pdf');
+    if ($fecha_inicio) {
+        $query->where('serie_recurso.fecha_adquisicion', '>=', $fecha_inicio);
     }
+
+    if ($fecha_fin) {
+        $query->where('serie_recurso.fecha_adquisicion', '<=', $fecha_fin);
+    }
+
+    $herramientas = $query->orderByDesc('serie_recurso.fecha_adquisicion')->get();
+    $total = $herramientas->count();
+
+    $pdf = Pdf::loadView('reportes.herramientasPorTrabajadorPDF', compact('herramientas', 'fecha_inicio', 'fecha_fin', 'total'));
+    return $pdf->download('reporte_herramientas_por_trabajador.pdf');
+}
 
 
 
@@ -198,11 +241,15 @@ class RecursoController extends Controller
         $fecha_fin = $request->input('fecha_fin');
 
         $query = DB::table('incidente_recurso')
-            ->join('recurso', 'incidente_recurso.id_recurso', '=', 'recurso.id')
-            ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
-            ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
-            ->join('incidente', 'incidente_recurso.id_incidente', '=', 'incidente.id')
-            ->select('categoria.nombre_categoria', DB::raw('COUNT(*) as cantidad_incidentes'));
+        ->join('recurso', 'incidente_recurso.id_recurso', '=', 'recurso.id')
+        ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
+        ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
+        ->join('incidente', 'incidente_recurso.id_incidente', '=', 'incidente.id')
+        ->select(
+            'categoria.nombre_categoria',
+            DB::raw('COUNT(*) as cantidad_incidentes'),
+            DB::raw('MAX(incidente.fecha_incidente) as ultima_fecha')
+        );
 
         if ($fecha_inicio) {
             $query->where('incidente.fecha_incidente', '>=', $fecha_inicio);
@@ -217,7 +264,14 @@ class RecursoController extends Controller
             ->orderByDesc('cantidad_incidentes')
             ->get();
 
-        return view('reportes.incidentesPorTipoRecurso', compact('incidentes', 'fecha_inicio', 'fecha_fin'));
+        $filtrados = $incidentes->filter(function ($item) {
+            return in_array($item->nombre_categoria, ['Herramienta', 'EPP']);
+        });
+        $labels = $filtrados->pluck('nombre_categoria');
+        $valores = $filtrados->pluck('cantidad_incidentes');
+
+
+        return view('reportes.incidentesPorTipoRecurso', compact('incidentes', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
     }
 
     public function incidentesPorTipoPDF(Request $request)
@@ -230,7 +284,11 @@ class RecursoController extends Controller
             ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
             ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
             ->join('incidente', 'incidente_recurso.id_incidente', '=', 'incidente.id')
-            ->select('categoria.nombre_categoria', DB::raw('COUNT(*) as cantidad_incidentes'));
+            ->select(
+            'categoria.nombre_categoria',
+            DB::raw('COUNT(*) as cantidad_incidentes'),
+            DB::raw('MAX(incidente.fecha_incidente) as ultima_fecha')
+        );
 
         if ($fecha_inicio) {
             $query->where('incidente.fecha_incidente', '>=', $fecha_inicio);

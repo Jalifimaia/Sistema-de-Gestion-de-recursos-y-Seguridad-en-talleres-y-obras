@@ -10,7 +10,10 @@
   <link href="{{ asset('css/estilos.css') }}" rel="stylesheet">
   @livewireStyles
   @stack('styles')
+   @yield('scripts')
+ 
 </head>
+
 
 <body class="d-flex">
 

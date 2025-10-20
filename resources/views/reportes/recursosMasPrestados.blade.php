@@ -30,6 +30,8 @@
             <tr>
                 <th>Recurso</th>
                 <th>Cantidad de préstamos</th>
+                <th>Última fecha de préstamo</th>
+
             </tr>
         </thead>
         <tbody>
@@ -37,6 +39,8 @@
             <tr>
                 <td>{{ $r->nombre }}</td>
                 <td>{{ $r->cantidad_prestamos }}</td>
+                <td>{{ $r->ultima_fecha }}</td>
+
             </tr>
             @endforeach
         </tbody>
@@ -45,4 +49,59 @@
     <div class="alert alert-info">No se encontraron préstamos en el rango seleccionado.</div>
     @endif
 </div>
+<div style="width: 100%; max-width: 100%; height: 220px;">
+    <canvas id="graficoPrestamos"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('graficoPrestamos').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($labels) !!},
+            datasets: [{
+                label: 'Cantidad de préstamos',
+                data: {!! json_encode($valores) !!},
+                backgroundColor: 'rgba(255, 140, 0, 0.7)', // naranja suave
+                borderColor: 'rgba(255, 140, 0, 1)',       // naranja fuerte
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#ff6600',
+                    bodyColor: '#333',
+                    borderColor: '#ff6600',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#ff6600',
+                        font: { size: 12 }
+                    },
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#333',
+                        font: { size: 12 }
+                    },
+                    grid: { color: '#eee' }
+                }
+            }
+        }
+    });
+</script>
+
+
+
 @endsection
