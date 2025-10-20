@@ -17,38 +17,49 @@
       </div>
     </div>
 
-    <!-- Tarjeta: Herramientas más prestadas -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card card-report shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-box-arrow-down card-icon"></i> Herramientas más prestadas</h5>
-          <p class="card-text">Ranking por frecuencia de uso, ideal para detectar sobreuso o alta demanda.</p>
-          <button class="btn btn-outline-primary btn-sm" onclick="abrirModal('Herramientas más prestadas')">Ver reporte</button>
-        </div>
+     <!-- Tarjeta: Recursos más prestados -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-bar-chart-line card-icon"></i> Recursos más prestados</h5>
+        <p class="card-text">Ranking de recursos por cantidad de préstamos registrados en el sistema.</p>
+        <a href="{{ route('reportes.masPrestados') }}" class="btn btn-outline-primary btn-sm">Ver reporte</a>
       </div>
     </div>
+  </div>
 
-    <!-- Tarjeta: Herramientas dañadas -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card card-report shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-tools card-icon"></i> Herramientas dañadas o fuera de servicio</h5>
-          <p class="card-text">Recursos con incidentes, roturas o en reparación.</p>
-          <button class="btn btn-outline-danger btn-sm" onclick="abrirModal('Herramientas dañadas o fuera de servicio')">Ver reporte</button>
-        </div>
+  <!-- Tarjeta: Recursos en reparación -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-wrench-adjustable-circle card-icon"></i> Recursos en reparación</h5>
+        <p class="card-text">Listado de recursos que están actualmente en estado de reparación.</p>
+        <a href="{{ route('reportes.enReparacion') }}" class="btn btn-outline-danger btn-sm">Ver reporte</a>
       </div>
     </div>
+  </div>
 
-    <!-- Tarjeta: Herramientas por trabajador -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card card-report shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-person-lines-fill card-icon"></i> Herramientas por trabajador</h5>
-          <p class="card-text">Trazabilidad completa de asignaciones por persona.</p>
-          <button class="btn btn-outline-secondary btn-sm" onclick="abrirModal('Herramientas por trabajador')">Ver reporte</button>
-        </div>
+  <!-- Tarjeta: Herramientas por trabajador -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-person-badge card-icon"></i> Herramientas por trabajador</h5>
+        <p class="card-text">Asignaciones de herramientas por usuario para trazabilidad y control.</p>
+        <a href="{{ route('reportes.herramientasPorTrabajador') }}" class="btn btn-outline-secondary btn-sm">Ver reporte</a>
       </div>
     </div>
+  </div>
+
+  <!-- Tarjeta: Incidentes por tipo de recurso -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-exclamation-triangle card-icon"></i> Incidentes por tipo de recurso</h5>
+        <p class="card-text">Análisis de incidentes agrupados por categoría de recurso.</p>
+        <a href="{{ route('reportes.incidentesPorTipo') }}" class="btn btn-outline-warning btn-sm">Ver reporte</a>
+      </div>
+    </div>
+  </div>
 
   </div>
 </div>

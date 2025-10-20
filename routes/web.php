@@ -40,6 +40,23 @@ Route::get('/reportes', function () {
 
 /*
 |--------------------------------------------------------------------------
+| Rutas de Reportes de Recursos
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/reportes/recursos-mas-prestados', [RecursoController::class, 'recursosMasPrestados'])->name('reportes.masPrestados');
+Route::get('/reportes/recursos-en-reparacion', [RecursoController::class, 'recursosEnReparacion'])->name('reportes.enReparacion');
+Route::get('/reportes/herramientas-por-trabajador', [RecursoController::class, 'herramientasPorTrabajador'])->name('reportes.herramientasPorTrabajador');
+Route::get('/reportes/incidentes-por-tipo', [RecursoController::class, 'incidentesPorTipo'])->name('reportes.incidentesPorTipo');
+Route::get('/reportes/recursos-mas-prestados/pdf', [RecursoController::class, 'recursosMasPrestadosPDF'])->name('reportes.masPrestados.pdf');
+Route::get('/reportes/recursos-en-reparacion/pdf', [RecursoController::class, 'recursosEnReparacionPDF'])->name('reportes.enReparacion.pdf');
+Route::get('/reportes/herramientas-por-trabajador/pdf', [RecursoController::class, 'herramientasPorTrabajadorPDF'])->name('reportes.herramientasPorTrabajador.pdf');
+Route::get('/reportes/incidentes-por-tipo/pdf', [RecursoController::class, 'incidentesPorTipoPDF'])->name('reportes.incidentesPorTipo.pdf');
+
+
+
+/*
+|--------------------------------------------------------------------------
 | Rutas del rol Operario
 |--------------------------------------------------------------------------
 */
@@ -143,6 +160,7 @@ Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])
 
 Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
 Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');
+
 
 /*
 |--------------------------------------------------------------------------
