@@ -2,16 +2,47 @@ let scanner;
 let isScanning = false; // 👈 flag de estado
 
 
-function mostrarMensajeKiosco(texto, tipo = 'warning') {
-  const mensaje = document.getElementById('mensaje-kiosco');
-  mensaje.className = `alert alert-${tipo} text-center`;
-  mensaje.textContent = texto;
-  mensaje.classList.remove('d-none');
+function mostrarMensajeKiosco(texto, tipo = 'info') {
+  const container = document.getElementById('toastContainer');
 
-  setTimeout(() => {
-    mensaje.classList.add('d-none');
-  }, 4000);
+  // Crear elemento toast
+  const toastEl = document.createElement('div');
+  toastEl.className = 'toast align-items-center border-0 mb-2';
+  toastEl.setAttribute('role', 'alert');
+
+  // Colores según tipo
+  if (tipo === 'success') {
+    toastEl.classList.add('text-bg-success');
+  } else if (tipo === 'danger') {
+    toastEl.classList.add('text-bg-danger');
+  } else if (tipo === 'warning') {
+    toastEl.classList.add('text-bg-warning', 'text-dark');
+  } else {
+    toastEl.classList.add('text-bg-info');
+  }
+
+  // Contenido del toast
+  toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">${texto}</div>
+      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  `;
+
+  // Agregar al contenedor
+  container.appendChild(toastEl);
+
+  // Inicializar y mostrar
+  const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+  toast.show();
+
+  // Eliminar del DOM cuando se oculta
+  toastEl.addEventListener('hidden.bs.toast', () => {
+    toastEl.remove();
+  });
 }
+
+
 
 function nextStep(n) {
   if (n !== 3) detenerEscaneoQR(); // 👈 apaga escáner si salís del step3
@@ -33,21 +64,32 @@ function identificarTrabajador() {
     try {
       const res = JSON.parse(xhr.responseText);
       if (res.success) {
+        // Usuario válido (rol trabajador + estado Alta)
         localStorage.setItem('id_usuario', res.usuario.id);
         nextStep(2);
         document.getElementById('saludo-trabajador').textContent = `Hola ${res.usuario.name}`;
-
       } else {
-        mostrarMensajeKiosco(res.message, 'danger');
+        // Mensajes diferenciados según backend
+        if (res.message === 'Usuario no encontrado') {
+          mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
+        } else if (res.message === 'Este usuario no tiene permisos para usar el kiosco') {
+          mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
+        } else if (res.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
+          mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
+        } else {
+          mostrarMensajeKiosco(res.message || 'Error al identificar al trabajador', 'danger');
+        }
       }
     } catch (e) {
-      // .error(xhr.responseText);
+      console.error('Error parseando respuesta identificarTrabajador:', e, xhr.responseText);
       mostrarMensajeKiosco('Error al identificar al trabajador', 'danger');
     }
   };
 
   xhr.send('dni=' + encodeURIComponent(dni));
 }
+
+
 
 function simularEscaneo() {
   //alert("Simulación de escaneo QR");
@@ -383,15 +425,15 @@ function seleccionarRecurso(recursoId) {
 
 
 function registrarSerie(serieId) {
-  const dni = document.getElementById('dni').value;
-  if (!dni) {
+  const id_usuario = localStorage.getItem('id_usuario');
+  if (!id_usuario) {
     mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
     return;
   }
 
   if (!confirm('¿Confirmás que querés solicitar esta herramienta?')) return;
 
-  fetch(`/terminal/prestamos/${dni}`, {
+  fetch(`/terminal/prestamos/${id_usuario}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -412,6 +454,8 @@ function registrarSerie(serieId) {
     mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
   });
 }
+
+
 
 
 /*
@@ -493,29 +537,48 @@ function cancelarEscaneoQR() {
 
 
 function registrarPorQR(codigoQR) {
+  const id_usuario = localStorage.getItem('id_usuario');
+  if (!id_usuario) {
+    mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+    return;
+  }
+
   fetch(`/terminal/registrar-por-qr`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
     },
-    body: JSON.stringify({ codigo_qr: codigoQR, dni: document.getElementById('dni').value })
+    body: JSON.stringify({ codigo_qr: codigoQR, id_usuario })
   })
   .then(res => res.json())
   .then(data => {
-  if (data.success) {
-    const mensaje = `✅ Recurso registrado: ${data.recurso} - Serie: ${data.serie}`;
-    mostrarMensajeKiosco(mensaje, 'success');
-    nextStep(2);
-  } else {
-    const mensaje = data.recurso && data.serie
-      ? `⚠️ Ya asignado: ${data.recurso} - Serie: ${data.serie}`
-      : (data.message || 'QR no válido');
-    mostrarMensajeKiosco(mensaje, 'danger');
-  }
+    console.log('Respuesta registrarPorQR:', data);
 
-});
+    if (data.success) {
+      // Caso éxito
+      const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
+      mostrarMensajeKiosco(mensaje, 'success');
+      nextStep(2);
+    } else {
+      // Mensajes diferenciados según backend
+      if (data.message === 'QR no encontrado') {
+        mostrarMensajeKiosco('❌ QR no encontrado en el sistema', 'danger');
+      } else if (data.message === 'Este recurso ya está asignado') {
+        mostrarMensajeKiosco(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
+      } else {
+        mostrarMensajeKiosco(data.message || 'Error al registrar recurso por QR', 'danger');
+      }
+    }
+  })
+  .catch(err => {
+    console.error('Error en registrarPorQR:', err);
+    mostrarMensajeKiosco('Error de red al registrar recurso por QR', 'danger');
+  });
 }
+
+
+
 
 function detenerEscaneoQR(next = null) {
   const qrContainer = document.getElementById('qr-reader');
@@ -577,4 +640,105 @@ function cleanupScanUI() {
     if (textoCamara) textoCamara.classList.add('d-none');
     isScanning = false;
   }
+}
+
+function activarEscaneoQRLogin() {
+  const qrContainer = document.getElementById('qr-login-reader');
+  const wrapper = document.getElementById('qr-login-container');
+
+  if (!qrContainer || !wrapper || isScanning) return;
+
+  wrapper.style.display = 'block';
+  qrContainer.innerHTML = '';
+  scanner = new Html5Qrcode("qr-login-reader");
+  isScanning = true;
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    qrCodeMessage => {
+      console.log('QR de login detectado:', qrCodeMessage);
+
+      // 👉 detenemos el escaneo para liberar la cámara
+      detenerEscaneoQRLogin();
+
+      // 👉 llamamos al método corregido que envía { codigo_qr: ... }
+      identificarPorQR(qrCodeMessage);
+    },
+    errorMessage => {
+      console.warn('Error escaneo login:', errorMessage);
+    }
+  ).catch(err => {
+    console.error('No se pudo iniciar escaneo login:', err);
+    mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
+    detenerEscaneoQRLogin();
+  });
+}
+
+
+function detenerEscaneoQRLogin() {
+  const qrContainer = document.getElementById('qr-login-reader');
+  const wrapper = document.getElementById('qr-login-container');
+
+  if (scanner && isScanning) {
+    scanner.stop().catch(() => {}).then(() => {
+      qrContainer.innerHTML = '';
+      wrapper.style.display = 'none';
+      isScanning = false;
+    });
+  } else {
+    qrContainer.innerHTML = '';
+    wrapper.style.display = 'none';
+    isScanning = false;
+  }
+}
+
+function identificarPorQR(codigoQR) {
+  fetch('/terminal/identificar', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ codigo_qr: codigoQR })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log('Respuesta login QR:', data);
+
+    if (data.success) {
+      // Usuario válido (rol trabajador + estado Alta)
+      localStorage.setItem('id_usuario', data.usuario.id);
+      nextStep(2);
+      document.getElementById('saludo-trabajador').textContent = `Hola ${data.usuario.name}`;
+    } else {
+      // Mensajes diferenciados según backend
+      if (data.message === 'Usuario no encontrado') {
+        mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
+      } else if (data.message === 'Este usuario no tiene permisos para usar el kiosco') {
+        mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
+      } else if (data.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
+        mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
+      } else {
+        mostrarMensajeKiosco(data.message || 'Error al identificar por QR', 'danger');
+      }
+    }
+  })
+  .catch(err => {
+    console.error('Error en fetch login QR:', err);
+    mostrarMensajeKiosco('Error de red al identificar por QR', 'danger');
+  });
+}
+
+
+function volverAInicio() {
+  // Limpiamos la sesión del trabajador
+  localStorage.removeItem('id_usuario');
+
+  // Volvemos al paso 1
+  nextStep(1);
+
+  // Opcional: limpiar el campo DNI por si quedó algo escrito
+  const dniInput = document.getElementById('dni');
+  if (dniInput) dniInput.value = '';
 }

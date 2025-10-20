@@ -13,9 +13,11 @@ use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\KioskoController;
-
 use App\Models\Subcategoria;
 use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\PrestamoTerminalController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas
@@ -40,16 +42,17 @@ Route::get('/reportes', function () {
 |--------------------------------------------------------------------------
 */
 
+
 Route::prefix('terminal')->group(function () {
     Route::get('/', [KioskoController::class, 'index'])->name('terminal.index');
 
     // Identificación de trabajador
     Route::post('/identificar', [KioskoController::class, 'identificarTrabajador']);
 
-    // Registro / asignación de serie a usuario
+    // Registro manual de préstamo (usa PrestamoService)
     Route::post('/registrar-manual', [KioskoController::class, 'registrarManual']);
 
-    // Solicitud genérica
+    // Solicitud genérica (placeholder)
     Route::post('/solicitar', [KioskoController::class, 'solicitarRecurso']);
 
     // Flujo jerárquico real
@@ -57,13 +60,9 @@ Route::prefix('terminal')->group(function () {
     Route::get('/subcategorias/{categoriaId}', [KioskoController::class, 'getSubcategorias']);
     Route::get('/recursos/{subcategoriaId}', [KioskoController::class, 'getRecursos']);
     Route::get('/recursos-filtrados/{subcategoriaId}', [KioskoController::class, 'getRecursosConSeries']);
-    Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
-    Route::get('/terminal/recursos-disponibles/{subcategoriaId}', [KioskoController::class, 'getRecursosConDisponibles']);
-
-    // mostrar recursos disponibles
     Route::get('/recursos-disponibles/{subcategoriaId}', [KioskoController::class, 'getRecursosConDisponibles']);
     Route::get('/subcategorias-disponibles/{categoriaId}', [KioskoController::class, 'getSubcategoriasConDisponibles']);
-    Route::get('/terminal/series/{recursoId}', [KioskoController::class, 'getSeries']);
+    Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
 
     // Recursos asignados al usuario
     Route::get('/recursos-asignados/{usuarioId}', [KioskoController::class, 'recursosAsignados']);
@@ -71,17 +70,12 @@ Route::prefix('terminal')->group(function () {
     // Devolución
     Route::post('/devolver/{detalleId}', [KioskoController::class, 'devolverRecurso']);
 
-    // 🚀 NUEVA RUTA: registrar préstamo desde la terminal
-    Route::post('/prestamos/{dni}', [\App\Http\Controllers\PrestamoTerminalController::class, 'store'])
+    // 🚀 Rutas oficiales de préstamos (PrestamoTerminalController)
+    Route::post('/prestamos/{id_usuario}', [PrestamoTerminalController::class, 'store'])
         ->name('terminal.prestamos.store');
 
-
-    //QR
-    Route::post('/registrar-por-qr', [KioskoController::class, 'registrarPorQR']);
-
-
+    Route::post('/registrar-por-qr', [PrestamoTerminalController::class, 'registrarPorQR']);
 });
-
 
 /*
 |--------------------------------------------------------------------------

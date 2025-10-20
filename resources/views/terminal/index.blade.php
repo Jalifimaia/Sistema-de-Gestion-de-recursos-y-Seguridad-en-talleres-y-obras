@@ -20,8 +20,23 @@
     <!-- Paso 1: Identificar trabajador -->
     <div id="step1" class="step active">
       <h2 class="mb-4 text-center">👷 Identificar Trabajador</h2>
+
+      <!-- Ingreso manual -->
       <input type="text" id="dni" class="form-control form-control-lg mb-4" placeholder="Ingresar DNI">
-      <button class="btn btn-primary btn-lg" onclick="identificarTrabajador()">Continuar</button>
+      <button class="btn btn-primary btn-lg mb-3" onclick="identificarTrabajador()">Continuar</button>
+
+      <!-- Alternativa por QR -->
+      <div class="text-center mt-4">
+        <button class="btn btn-outline-primary btn-lg" onclick="activarEscaneoQRLogin()">
+          📷 Iniciar sesión con QR
+        </button>
+      </div>
+      
+      <!-- Contenedor de escaneo -->
+      <div id="qr-login-container" class="mt-3 text-center" style="display:none;">
+        <div id="qr-login-reader" style="width:300px; margin:auto;"></div>
+        <p class="text-muted small">Apuntá tu QR de identificación</p>
+      </div>
     </div>
 
     <!-- Paso 2: Elegir acción -->
@@ -31,7 +46,7 @@
       <button class="btn btn-outline-success btn-lg" onclick="setModoEscaneo('manual')">📦 Tengo la herramienta en mano</button>
       <button class="btn btn-outline-primary btn-lg" onclick="nextStep(5)">🛠️ Quiero solicitar una herramienta</button>
       <button class="btn btn-info btn-lg" onclick="cargarRecursos()" data-bs-toggle="modal" data-bs-target="#modalRecursos">📋 Ver recursos asignados</button>
-      <button class="btn btn-secondary btn-lg" onclick="nextStep(1)">🔙 Volver</button>
+      <button class="btn btn-secondary btn-lg" onclick="volverAInicio()">🔙 Volver</button>
     </div>
 
     <!-- Paso 3: Escaneo QR -->
@@ -51,7 +66,6 @@
       <div class="text-center">
         <button class="btn btn-outline-dark btn-lg" onclick="detenerEscaneoQR(5)">Solicitar manualmente</button>
         <button class="btn btn-secondary btn-lg" onclick="detenerEscaneoQR(2)">🔙 Volver</button>
-
       </div>
     </div>
 
@@ -112,6 +126,11 @@
       </div>
     </div>
   </div>
+
+<!-- Contenedor de Toasts (múltiples) -->
+<div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
+
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ asset('js/terminal-debug.js') }}"></script>

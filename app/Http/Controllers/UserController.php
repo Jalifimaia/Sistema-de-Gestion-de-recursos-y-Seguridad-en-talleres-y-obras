@@ -10,6 +10,7 @@ use App\Http\Requests\UserRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\EstadoUsuario;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -57,16 +58,18 @@ public function store(UserRequest $request): RedirectResponse
     $data['usuario_modificacion'] = auth()->id();
     $data['ultimo_acceso'] = now();
 
-    // Estado por defecto: Stand by
     $estadoStandBy = EstadoUsuario::where('nombre', 'stand by')->first();
     if ($estadoStandBy) {
         $data['id_estado'] = $estadoStandBy->id;
     }
 
+    $data['codigo_qr'] = 'USR-' . Str::uuid(); // ✅ QR único
+
     User::create($data);
 
     return Redirect::route('usuarios.index')->with('success', 'Usuario creado correctamente.');
 }
+
 
 
     /**

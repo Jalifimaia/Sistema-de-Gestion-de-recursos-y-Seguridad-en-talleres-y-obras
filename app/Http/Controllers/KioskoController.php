@@ -8,7 +8,6 @@ use App\Models\Categoria;
 use App\Models\Subcategoria;
 use App\Models\Recurso;
 use App\Models\SerieRecurso;
-use App\Models\Prestamo;
 use App\Models\DetallePrestamo;
 use App\Services\PrestamoService;
 use Illuminate\Support\Facades\DB;
@@ -26,23 +25,77 @@ class KioskoController extends Controller
         return Categoria::all();
     }
 
-    // ✅ Identificación de trabajador
-    public function identificarTrabajador(Request $request)
-    {
-        try {
-            $dni = $request->input('dni');
-            $usuario = Usuario::where('dni', $dni)->first();
+    // ✅ Identificación de trabajador (DNI o QR)
+public function identificarTrabajador(Request $request)
+{
+    $dni = $request->input('dni');
+    $codigoQR = $request->input('codigo_qr') ? trim($request->input('codigo_qr')) : null;
 
-            if ($usuario && $usuario->id_rol == 3) {
-                return response()->json(['success' => true, 'usuario' => $usuario]);
-            }
+    \Log::info('🔍 identificarTrabajador llamado', [
+        'dni' => $dni,
+        'codigo_qr' => $codigoQR,
+    ]);
 
-            return response()->json(['success' => false, 'message' => 'Usuario no válido']);
-        } catch (\Exception $e) {
-            \Log::error('Error en identificarTrabajador: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Error interno'], 500);
-        }
+    $usuario = null;
+
+    // Buscar por QR o DNI (sin filtrar rol todavía)
+    if ($codigoQR) {
+        $usuario = \App\Models\Usuario::whereRaw('LOWER(codigo_qr) = ?', [strtolower($codigoQR)])->first();
+    } elseif ($dni) {
+        $usuario = \App\Models\Usuario::where('dni', $dni)->first();
     }
+
+    // Caso 1: no se encontró ningún usuario
+    if (!$usuario) {
+        \Log::warning('⚠️ Usuario no encontrado', [
+            'dni' => $dni,
+            'codigo_qr' => $codigoQR,
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no encontrado'
+        ]);
+    }
+
+    // Caso 2: usuario existe pero no es rol trabajador
+    if ($usuario->id_rol != 3) {
+        \Log::warning('⚠️ Usuario sin permisos para kiosco', [
+            'id' => $usuario->id,
+            'name' => $usuario->name,
+            'rol' => $usuario->id_rol,
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Este usuario no tiene permisos para usar el kiosco'
+        ]);
+    }
+
+    // Caso 3: usuario no está en estado Alta
+    if ($usuario->id_estado != 1) {
+        \Log::warning('⚠️ Usuario no habilitado por estado', [
+            'id' => $usuario->id,
+            'name' => $usuario->name,
+            'estado' => $usuario->id_estado,
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'El usuario no está en estado Alta y no puede usar el kiosco'
+        ]);
+    }
+
+    // Caso 4: usuario válido (rol trabajador + estado Alta)
+    \Log::info('✅ Usuario encontrado y habilitado', [
+        'id' => $usuario->id,
+        'name' => $usuario->name,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'usuario' => $usuario->only(['id','name','dni','email','codigo_qr'])
+    ]);
+}
+
+
 
     // ✅ Recursos asignados al trabajador
     public function recursosAsignados($usuarioId)
@@ -51,7 +104,7 @@ class KioskoController extends Controller
             $detalles = DetallePrestamo::with('serieRecurso.recurso.subcategoria.categoria', 'prestamo')
                 ->whereHas('prestamo', function ($q) use ($usuarioId) {
                     $q->where('id_usuario', $usuarioId)
-                    ->where('estado', 2); // solo activos
+                      ->where('estado', 2); // solo activos
                 })
                 ->where('id_estado_prestamo', 2) // asignado
                 ->get()
@@ -72,7 +125,6 @@ class KioskoController extends Controller
             return response()->json(['success' => false, 'message' => 'Error interno: '.$e->getMessage()], 500);
         }
     }
-
 
     // ✅ Registrar manualmente (usa PrestamoService)
     public function registrarManual(Request $request)
@@ -189,56 +241,4 @@ class KioskoController extends Controller
     {
         return response()->json(['message' => 'Solicitud recibida']);
     }
-
-public function registrarPorQR(Request $request)
-{
-    $codigoQR = $request->input('codigo_qr');
-    $dni      = $request->input('dni');
-
-    if (!$codigoQR || !$dni) {
-        return response()->json(['success' => false, 'message' => 'Datos incompletos']);
-    }
-
-    // Buscar al trabajador por DNI
-    $usuario = \App\Models\Usuario::where('dni', $dni)
-        ->where('id_rol', 3)
-        ->first();
-
-    if (!$usuario) {
-        return response()->json(['success' => false, 'message' => 'Usuario no encontrado']);
-    }
-
-    // Buscar la serie por código QR
-    $serie = \App\Models\SerieRecurso::where('codigo_qr', $codigoQR)->first();
-    if (!$serie) {
-        return response()->json(['success' => false, 'message' => 'QR no válido']);
-    }
-
-    // Validar que esté disponible
-    if ($serie->id_estado != 1) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Este recurso ya está asignado',
-            'recurso' => $serie->recurso->nombre ?? '',
-            'serie'   => $serie->nro_serie ?? ''
-        ]);
-    }
-
-    // ✅ Usar PrestamoService para crear el préstamo
-    $prestamo = app(\App\Services\PrestamoService::class)->crearPrestamo(
-        $usuario->id,
-        [$serie->id],
-        'terminal'
-    );
-
-    return response()->json([
-        'success'     => true,
-        'message'     => '✅ Recurso registrado por QR',
-        'prestamo_id' => $prestamo->id,
-        'recurso'     => $serie->recurso->nombre ?? '',
-        'serie'       => $serie->nro_serie ?? ''
-    ]);
-}
-
-
 }
