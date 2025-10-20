@@ -1,3 +1,4 @@
+
 <?php 
 
 use Illuminate\Support\Facades\Route;
@@ -21,8 +22,13 @@ use App\Models\Subcategoria;
 Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
-Route::get('/controlEPP', fn() => view('controlEPP'));
+Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index']);
 Route::get('/reportes', fn() => view('supervisor.reportes'));
+Route::post('/buscar-epp', [App\Http\Controllers\ControlEPPController::class, 'buscarEPP'])->name('buscar.epp');
+Route::post('/matriz-checklist', [App\Http\Controllers\ControlEPPController::class, 'matrizChecklist'])->name('matrizChecklist');
+Route::get('/trabajador/{id}/detalle-epp', [App\Http\Controllers\ControlEPPController::class, 'detalleEpp']);
+
+
 
 /*
 |--------------------------------------------------------------------------

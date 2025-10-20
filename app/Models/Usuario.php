@@ -107,5 +107,10 @@ class Usuario extends Model
     {
         return $this->hasMany(\App\Models\Recurso::class, 'usuario_modificacion', 'id_usuario_modificacion');
     }
+
+    public function usuarioRecursos()
+    {
+        return $this->hasMany(UsuarioRecurso::class, 'id_usuario');
+    }
     
 }
