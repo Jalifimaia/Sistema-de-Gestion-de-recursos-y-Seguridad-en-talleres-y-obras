@@ -2,47 +2,47 @@
 
 @section('content')
 <div class="container py-4">
-    <h2 class="mb-4">Recursos en reparación</h2>
+    <h2 class="mb-4 text-orange">🔧 Recursos en reparación</h2>
 
-    <div class="mb-3 text-end">
-        <a href="{{ url('/reportes/recursos-en-reparacion/pdf') }}?fecha_inicio={{ request('fecha_inicio') }}&fecha_fin={{ request('fecha_fin') }}" class="btn btn-danger">
-            🧾 Exportar a PDF
-        </a>
-    </div>
-
-    <form method="GET" action="{{ route('reportes.enReparacion') }}" class="row g-3 mb-4">
-        <div class="col-md-4">
+    <form method="GET" action="{{ route('reportes.enReparacion') }}" class="row g-3 align-items-end mb-4">
+        <div class="col-md-3">
             <label for="fecha_inicio" class="form-label">Desde</label>
             <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ request('fecha_inicio') }}">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="fecha_fin" class="form-label">Hasta</label>
             <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ request('fecha_fin') }}">
         </div>
-        <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Aplicar cambios</button>
+        <div class="col-md-3 d-grid">
+            <button type="submit" class="btn btn-orange">🔍 Aplicar filtros</button>
+        </div>
+        <div class="col-md-3 d-grid">
+            <a href="{{ url('/reportes/recursos-en-reparacion/pdf') }}?fecha_inicio={{ request('fecha_inicio') }}&fecha_fin={{ request('fecha_fin') }}" class="btn btn-danger">
+                🧾 Exportar a PDF
+            </a>
         </div>
     </form>
 
     @if($recursos->count())
-    <table class="table table-bordered table-striped">
-        <thead class="table-light">
-            <tr>
-                <th>Recurso</th>
-                <th>Número de serie</th>
-                <th>Fecha adquisición</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($recursos as $r)
-            <tr>
-                <td>{{ $r->nombre }}</td>
-                <td>{{ $r->nro_serie }}</td>
-                <td>{{ $r->fecha_adquisicion }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-light">
+                <tr class="text-orange">
+                    <th>Recurso</th>
+                    <th>Número de serie</th>
+                    <th>Fecha adquisición</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($recursos as $r)
+                <tr>
+                    <td>{{ $r->nombre }}</td>
+                    <td>{{ $r->nro_serie }}</td>
+                    <td>{{ $r->fecha_adquisicion }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     @else
     <div class="alert alert-info">No se encontraron recursos en reparación en el rango seleccionado.</div>
     @endif
