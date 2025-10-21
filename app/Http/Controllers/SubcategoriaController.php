@@ -23,15 +23,20 @@ class SubcategoriaController extends Controller
     public function store(Request $request)
 {
     $validated = $request->validate([
-        'nombre' => 'required|string|max:255',
+        'nombre' => 'required|string|max:50',
         'categoria_id' => 'required|exists:categoria,id',
     ]);
 
-    $subcategoria = Subcategoria::create([
-        'nombre' => $validated['nombre'],
-        'categoria_id' => $validated['categoria_id'],
-    ]);
+    // Evitar duplicados
+    $existing = Subcategoria::where('nombre', $validated['nombre'])
+        ->where('categoria_id', $validated['categoria_id'])
+        ->first();
 
+    if ($existing) {
+        return response()->json($existing);
+    }
+
+    $subcategoria = Subcategoria::create($validated);
     return response()->json($subcategoria);
 }
 

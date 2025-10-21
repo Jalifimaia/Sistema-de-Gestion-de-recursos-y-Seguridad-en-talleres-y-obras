@@ -11,6 +11,17 @@
       <h4 class="mb-0">Registrar Préstamo</h4>
     </div>
     <div class="card-body bg-white">
+
+      @if ($errors->any())
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
       <form method="POST" action="{{ route('prestamos.store') }}">
         @csrf
 
@@ -25,7 +36,19 @@
           </div>
         </div>
 
-        <input type="hidden" name="estado" value="2"> {{-- Activo --}}
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="id_trabajador" class="form-label">Trabajador</label>
+            <select name="id_trabajador" class="form-select" required>
+              <option selected disabled>Seleccione un trabajador</option>
+              @foreach($trabajadores as $t)
+                <option value="{{ $t->id }}">{{ $t->name }}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+
+        <input type="hidden" name="estado" value="2">
 
         <div class="row mb-3">
           <div class="col-md-4">
@@ -51,7 +74,7 @@
           </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-4">
           <div class="col-md-10">
             <label for="serie" class="form-label">Serie del Recurso</label>
             <select id="serie" class="form-select" required>
@@ -64,30 +87,78 @@
         </div>
 
         <hr>
-        <h5>Recursos a prestar</h5>
-        <table class="table table-bordered text-center" id="tablaPrestamos">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>Recurso</th>
-              <th>Serie</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <h5 class="mb-3">Recursos seleccionados</h5>
+        <div id="contenedorSeries" class="row g-3">
+          {{-- Tarjetas dinámicas --}}
+        </div>
 
-        <div class="text-end mt-3">
+        <div class="text-end mt-4">
+          <a href="{{ route('prestamos.index') }}" class="btn btn-outline-secondary">
+          ⬅️ Volver
+        </a>
+
           <button type="submit" class="btn btn-primary">Guardar Préstamo</button>
         </div>
       </form>
     </div>
   </div>
+  <!-- ✅ Modal: Recurso agregado -->
+<div class="modal fade" id="modalRecursoAgregado" tabindex="-1" aria-labelledby="modalRecursoAgregadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalRecursoAgregadoLabel">✅ Recurso agregado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        El recurso fue agregado correctamente a la lista de préstamo.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-@section('scripts')
+<!-- ✅ Modal: Préstamo guardado -->
+@if(session('success'))
+<div class="modal fade" id="modalPrestamoGuardado" tabindex="-1" aria-labelledby="modalPrestamoGuardadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalPrestamoGuardadoLabel">🎉 Préstamo guardado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('success') }}
+      </div>
+      <div class="modal-footer">
+        <a href="{{ route('prestamos.index') }}" class="btn btn-outline-primary">Ver préstamos</a>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
+
+</div>
+@endsection
+
+@push('scripts')
   <script src="{{ asset('js/prestamo.js') }}"></script>
-@endsection
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Mostrar modal de recurso agregado
+    document.getElementById('agregar').addEventListener('click', function () {
+      const modal = new bootstrap.Modal(document.getElementById('modalRecursoAgregado'));
+      modal.show();
+    });
 
-
-@endsection
+    // Mostrar modal de préstamo guardado si hay sesión
+    @if(session('success'))
+      const modal = new bootstrap.Modal(document.getElementById('modalPrestamoGuardado'));
+      modal.show();
+    @endif
+  });
+</script>
+@endpush

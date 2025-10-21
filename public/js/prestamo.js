@@ -3,39 +3,50 @@ const categoriaSelect = document.getElementById('categoria');
 const subcategoriaSelect = document.getElementById('subcategoria');
 const recursoSelect = document.getElementById('recurso');
 const serieSelect = document.getElementById('serie');
-const tabla = document.querySelector('#tablaPrestamos tbody');
+const contenedorSeries = document.getElementById('contenedorSeries');
 const agregarBtn = document.getElementById('agregar');
 
-// Cargar subcategorías al cambiar categoría
+// 🔹 Cargar subcategorías al cambiar categoría
 categoriaSelect.addEventListener('change', () => {
-  fetch(`/api/subcategorias/${categoriaSelect.value}`)
+  const id = categoriaSelect.value;
+  if (!id) return;
+
+  fetch(`/api/prestamo/subcategorias/${id}`)
     .then(res => res.json())
     .then(data => {
       subcategoriaSelect.innerHTML = '<option selected disabled>Seleccione una subcategoría</option>';
       data.forEach(sub => {
         subcategoriaSelect.innerHTML += `<option value="${sub.id}">${sub.nombre}</option>`;
       });
+
       recursoSelect.innerHTML = '<option selected disabled>Seleccione un recurso</option>';
       serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
     });
 });
 
-// Cargar recursos al cambiar subcategoría
+// 🔹 Cargar recursos al cambiar subcategoría
 subcategoriaSelect.addEventListener('change', () => {
-  fetch(`/api/recursos/${subcategoriaSelect.value}`)
+  const id = subcategoriaSelect.value;
+  if (!id) return;
+
+  fetch(`/api/prestamo/recursos/${id}`)
     .then(res => res.json())
     .then(data => {
       recursoSelect.innerHTML = '<option selected disabled>Seleccione un recurso</option>';
       data.forEach(r => {
         recursoSelect.innerHTML += `<option value="${r.id}">${r.nombre}</option>`;
       });
+
       serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
     });
 });
 
-// Cargar series al cambiar recurso
+// 🔹 Cargar series al cambiar recurso
 recursoSelect.addEventListener('change', () => {
-  fetch(`/api/series/${recursoSelect.value}`)
+  const id = recursoSelect.value;
+  if (!id) return;
+
+  fetch(`/api/prestamo/series/${id}`)
     .then(res => res.json())
     .then(data => {
       serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
@@ -43,7 +54,6 @@ recursoSelect.addEventListener('change', () => {
         serieSelect.innerHTML += `<option value="${s.id}">${s.nro_serie}</option>`;
       });
 
-      // Ocultar series ya agregadas
       if (Array.isArray(window.seriesOcultas)) {
         window.seriesOcultas.forEach(id => {
           const option = serieSelect.querySelector(`option[value="${id}"]`);
@@ -53,7 +63,7 @@ recursoSelect.addEventListener('change', () => {
     });
 });
 
-// Agregar a tabla
+// 🔹 Agregar recurso dinámico
 agregarBtn.addEventListener('click', () => {
   const recursoText = recursoSelect.options[recursoSelect.selectedIndex]?.text;
   const serieText = serieSelect.options[serieSelect.selectedIndex]?.text;
@@ -61,17 +71,24 @@ agregarBtn.addEventListener('click', () => {
 
   if (!serieId || serieSelect.selectedIndex === 0) return;
 
-  const fila = document.createElement('tr');
-  fila.innerHTML = `
-    <td>${contador++}</td>
-    <td>${recursoText}</td>
-    <td>${serieText}</td>
-    <td>
-      <button type="button" class="btn btn-sm btn-danger eliminar">Eliminar</button>
-      <input type="hidden" name="series[]" value="${serieId}">
-    </td>
+  if (document.querySelector(`input[value="${serieId}"]`)) {
+    alert('Esta serie ya fue agregada.');
+    return;
+  }
+
+  const tarjeta = document.createElement('div');
+  tarjeta.className = 'col-md-4';
+  tarjeta.innerHTML = `
+    <div class="card border-success shadow-sm">
+      <div class="card-body p-2">
+        <h6 class="card-title mb-1">${recursoText}</h6>
+        <p class="card-text text-muted mb-2">Serie: ${serieText}</p>
+        <input type="hidden" name="series[]" value="${serieId}">
+        <button type="button" class="btn btn-sm btn-outline-danger eliminar w-100 mt-2">Quitar</button>
+      </div>
+    </div>
   `;
-  tabla.appendChild(fila);
+  contenedorSeries.appendChild(tarjeta);
 
   const optionToHide = serieSelect.querySelector(`option[value="${serieId}"]`);
   if (optionToHide) optionToHide.style.display = 'none';
@@ -79,41 +96,41 @@ agregarBtn.addEventListener('click', () => {
   window.seriesOcultas = window.seriesOcultas || [];
   window.seriesOcultas.push(serieId);
 
-  fila.querySelector('.eliminar').addEventListener('click', () => {
+  tarjeta.querySelector('.eliminar').addEventListener('click', () => {
     if (optionToHide) optionToHide.style.display = 'block';
-    fila.remove();
+    tarjeta.remove();
     window.seriesOcultas = window.seriesOcultas.filter(id => id !== serieId);
   });
 
   serieSelect.selectedIndex = 0;
 });
 
-// Precargar tabla con series ya prestadas
-window.addEventListener('load', () => {
-  if (Array.isArray(window.detalles) && window.detalles.length > 0) {
-    window.seriesOcultas = [];
+// 🔹 Dar de baja recurso
+document.querySelectorAll('.dar-baja').forEach(btn => {
+  btn.addEventListener('click', function () {
+    const detalleId = this.dataset.id;
 
-    window.detalles.forEach((detalle) => {
-      const fila = document.createElement('tr');
-      fila.innerHTML = `
-        <td>${contador++}</td>
-        <td>${detalle.recurso_nombre}</td>
-        <td>${detalle.serie_nro}</td>
-        <td>
-          <button type="button" class="btn btn-sm btn-danger eliminar">Eliminar</button>
-          <input type="hidden" name="series[]" value="${detalle.serie_id}">
-        </td>
-      `;
-      tabla.appendChild(fila);
+    if (!confirm('¿Estás seguro de que querés dar de baja este recurso?')) return;
 
-      window.seriesOcultas.push(detalle.serie_id);
-
-      fila.querySelector('.eliminar').addEventListener('click', () => {
-        const option = serieSelect.querySelector(`option[value="${detalle.serie_id}"]`);
-        if (option) option.style.display = 'block';
-        fila.remove();
-        window.seriesOcultas = window.seriesOcultas.filter(id => id !== detalle.serie_id);
-      });
+    fetch(`/prestamos/detalle/${detalleId}/baja`, {
+      method: 'PATCH',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Error al dar de baja');
+      return res.json().catch(() => ({}));
+    })
+    .then(() => {
+      console.log(`Recurso ${detalleId} dado de baja`);
+      location.reload();
+    })
+    .catch(err => {
+      console.error(err);
+      alert('No se pudo dar de baja el recurso.');
     });
-  }
+  });
 });
