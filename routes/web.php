@@ -13,9 +13,11 @@ use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\KioskoController;
-
 use App\Models\Subcategoria;
 use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\PrestamoTerminalController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas
@@ -27,7 +29,7 @@ Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/controlEPP', fn() => view('controlEPP'));
 
-//Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
+Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
 Route::get('/reportes/prestamos/pdf', [ReporteController::class, 'exportarPrestamosPDF'])->name('reportes.prestamos.pdf');
 
 Route::get('/reportes', function () {
@@ -40,16 +42,17 @@ Route::get('/reportes', function () {
 |--------------------------------------------------------------------------
 */
 
+
 Route::prefix('terminal')->group(function () {
     Route::get('/', [KioskoController::class, 'index'])->name('terminal.index');
 
     // Identificación de trabajador
     Route::post('/identificar', [KioskoController::class, 'identificarTrabajador']);
 
-    // Registro / asignación de serie a usuario
+    // Registro manual de préstamo (usa PrestamoService)
     Route::post('/registrar-manual', [KioskoController::class, 'registrarManual']);
 
-    // Solicitud genérica
+    // Solicitud genérica (placeholder)
     Route::post('/solicitar', [KioskoController::class, 'solicitarRecurso']);
 
     // Flujo jerárquico real
@@ -57,13 +60,9 @@ Route::prefix('terminal')->group(function () {
     Route::get('/subcategorias/{categoriaId}', [KioskoController::class, 'getSubcategorias']);
     Route::get('/recursos/{subcategoriaId}', [KioskoController::class, 'getRecursos']);
     Route::get('/recursos-filtrados/{subcategoriaId}', [KioskoController::class, 'getRecursosConSeries']);
-    Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
-    Route::get('/terminal/recursos-disponibles/{subcategoriaId}', [KioskoController::class, 'getRecursosConDisponibles']);
-
-    // mostrar recursos disponibles
     Route::get('/recursos-disponibles/{subcategoriaId}', [KioskoController::class, 'getRecursosConDisponibles']);
     Route::get('/subcategorias-disponibles/{categoriaId}', [KioskoController::class, 'getSubcategoriasConDisponibles']);
-    Route::get('/terminal/series/{recursoId}', [KioskoController::class, 'getSeries']);
+    Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
 
     // Recursos asignados al usuario
     Route::get('/recursos-asignados/{usuarioId}', [KioskoController::class, 'recursosAsignados']);
@@ -71,11 +70,12 @@ Route::prefix('terminal')->group(function () {
     // Devolución
     Route::post('/devolver/{detalleId}', [KioskoController::class, 'devolverRecurso']);
 
-    // 🚀 NUEVA RUTA: registrar préstamo desde la terminal
-    Route::post('/prestamos/{dni}', [\App\Http\Controllers\PrestamoTerminalController::class, 'store'])
+    // 🚀 Rutas oficiales de préstamos (PrestamoTerminalController)
+    Route::post('/prestamos/{id_usuario}', [PrestamoTerminalController::class, 'store'])
         ->name('terminal.prestamos.store');
-});
 
+    Route::post('/registrar-por-qr', [PrestamoTerminalController::class, 'registrarPorQR']);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -104,6 +104,18 @@ Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp')
 */
 Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
 Route::resource('recursos', RecursoController::class);
+
+//QR de inventario
+Route::get('/series/{id}/qr', [SerieRecursoController::class, 'showQr'])->name('series.qr.show');
+Route::get('/series/{id}/qr-snippet', [SerieRecursoController::class, 'qrSnippet']);
+
+
+//QR
+Route::get('/series-qr', [SerieRecursoController::class, 'qrIndex'])->name('series.qr');
+Route::get('/series-qr/{id}/pdf', [SerieRecursoController::class, 'exportQrPdf'])->name('series.qr.pdf');
+Route::get('/series-qr-lote', [SerieRecursoController::class, 'qrLote'])->name('series.qr.lote');
+Route::get('/series-qr-lote/pdf', [SerieRecursoController::class, 'exportQrLotePdf'])
+    ->name('series.qr.lote.pdf');
 
 /*
 |--------------------------------------------------------------------------

@@ -8,7 +8,6 @@ use App\Models\Categoria;
 use App\Models\Subcategoria;
 use App\Models\Recurso;
 use App\Models\SerieRecurso;
-use App\Models\Prestamo;
 use App\Models\DetallePrestamo;
 use App\Services\PrestamoService;
 use Illuminate\Support\Facades\DB;
@@ -26,29 +25,83 @@ class KioskoController extends Controller
         return Categoria::all();
     }
 
-    // ✅ Identificación de trabajador
-    public function identificarTrabajador(Request $request)
-    {
-        try {
-            $dni = $request->input('dni');
-            $usuario = Usuario::where('dni', $dni)->first();
+    // ✅ Identificación de trabajador (DNI o QR)
+public function identificarTrabajador(Request $request)
+{
+    $dni = $request->input('dni');
+    $codigoQR = $request->input('codigo_qr') ? trim($request->input('codigo_qr')) : null;
 
-            if ($usuario && $usuario->id_rol == 3) {
-                return response()->json(['success' => true, 'usuario' => $usuario]);
-            }
+    \Log::info('🔍 identificarTrabajador llamado', [
+        'dni' => $dni,
+        'codigo_qr' => $codigoQR,
+    ]);
 
-            return response()->json(['success' => false, 'message' => 'Usuario no válido']);
-        } catch (\Exception $e) {
-            \Log::error('Error en identificarTrabajador: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Error interno'], 500);
-        }
+    $usuario = null;
+
+    // Buscar por QR o DNI (sin filtrar rol todavía)
+    if ($codigoQR) {
+        $usuario = \App\Models\Usuario::whereRaw('LOWER(codigo_qr) = ?', [strtolower($codigoQR)])->first();
+    } elseif ($dni) {
+        $usuario = \App\Models\Usuario::where('dni', $dni)->first();
     }
+
+    // Caso 1: no se encontró ningún usuario
+    if (!$usuario) {
+        \Log::warning('⚠️ Usuario no encontrado', [
+            'dni' => $dni,
+            'codigo_qr' => $codigoQR,
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Usuario no encontrado'
+        ]);
+    }
+
+    // Caso 2: usuario existe pero no es rol trabajador
+    if ($usuario->id_rol != 3) {
+        \Log::warning('⚠️ Usuario sin permisos para kiosco', [
+            'id' => $usuario->id,
+            'name' => $usuario->name,
+            'rol' => $usuario->id_rol,
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Este usuario no tiene permisos para usar el kiosco'
+        ]);
+    }
+
+    // Caso 3: usuario no está en estado Alta
+    if ($usuario->id_estado != 1) {
+        \Log::warning('⚠️ Usuario no habilitado por estado', [
+            'id' => $usuario->id,
+            'name' => $usuario->name,
+            'estado' => $usuario->id_estado,
+        ]);
+        return response()->json([
+            'success' => false,
+            'message' => 'El usuario no está en estado Alta y no puede usar el kiosco'
+        ]);
+    }
+
+    // Caso 4: usuario válido (rol trabajador + estado Alta)
+    \Log::info('✅ Usuario encontrado y habilitado', [
+        'id' => $usuario->id,
+        'name' => $usuario->name,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'usuario' => $usuario->only(['id','name','dni','email','codigo_qr'])
+    ]);
+}
+
+
 
     // ✅ Recursos asignados al trabajador
     public function recursosAsignados($usuarioId)
     {
         try {
-            $detalles = DetallePrestamo::with('serieRecurso.recurso.subcategoria.categoria')
+            $detalles = DetallePrestamo::with('serieRecurso.recurso.subcategoria.categoria', 'prestamo')
                 ->whereHas('prestamo', function ($q) use ($usuarioId) {
                     $q->where('id_usuario', $usuarioId)
                       ->where('estado', 2); // solo activos
@@ -57,12 +110,13 @@ class KioskoController extends Controller
                 ->get()
                 ->map(function($d) {
                     return [
-                        'detalle_id'   => $d->id,
-                        'categoria'    => $d->serieRecurso->recurso->subcategoria->categoria->nombre_categoria ?? '-',
-                        'subcategoria' => $d->serieRecurso->recurso->subcategoria->nombre ?? '-',
-                        'recurso'      => $d->serieRecurso->recurso->nombre ?? '-',
-                        'serie'        => $d->serieRecurso->nro_serie ?? '-',
-                        'fecha'        => $d->created_at ? $d->created_at->format('Y-m-d') : '-',
+                        'detalle_id'       => $d->id,
+                        'categoria'        => $d->serieRecurso->recurso->subcategoria->categoria->nombre_categoria ?? '-',
+                        'subcategoria'     => $d->serieRecurso->recurso->subcategoria->nombre ?? '-',
+                        'recurso'          => $d->serieRecurso->recurso->nombre ?? '-',
+                        'serie'            => $d->serieRecurso->nro_serie ?? '-',
+                        'fecha_prestamo'   => $d->prestamo->fecha_prestamo ? \Carbon\Carbon::parse($d->prestamo->fecha_prestamo)->format('Y-m-d') : '-',
+                        'fecha_devolucion' => $d->prestamo->fecha_devolucion ? \Carbon\Carbon::parse($d->prestamo->fecha_devolucion)->format('Y-m-d') : '-',
                     ];
                 });
 

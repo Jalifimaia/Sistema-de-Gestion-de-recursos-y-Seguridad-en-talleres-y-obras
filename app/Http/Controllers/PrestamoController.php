@@ -36,7 +36,7 @@ public function index(): View
             'prestamo.fecha_creacion',
             'estado_prestamo.nombre as estado'
         )
-        ->whereIn('estado_prestamo.nombre', ['Cancelado', 'Activo', 'Vencido'])
+        ->whereIn('prestamo.estado', [1, 2, 3]) // 1 = Cancelado, 2 = Activo, 3 = Devuelto
         ->orderByDesc('prestamo.id')
         ->get();
 
