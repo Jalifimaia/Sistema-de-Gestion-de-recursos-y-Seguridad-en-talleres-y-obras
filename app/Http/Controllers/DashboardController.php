@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Usuario;
 use App\Models\Recurso;
@@ -183,7 +184,8 @@ public function index()
     }
 
     $checklistsHoy = Checklist::with(['trabajador', 'supervisor'])
-        ->whereDate('fecha', now()->toDateString())
+        ->whereDate('fecha', Carbon::today())
+        ->take(5)
         ->get();
 
 

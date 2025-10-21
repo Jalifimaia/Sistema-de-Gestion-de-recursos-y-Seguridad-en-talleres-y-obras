@@ -28,14 +28,14 @@ use App\Http\Controllers\PrestamoTerminalController;
 Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
-Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index']);
-//Route::get('/reportes', fn() => view('supervisor.reportes'));
+//Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index']);
+Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index'])->name('controlEPP');
+
+Route::get('/reportes', fn() => view('supervisor.reportes'));
 Route::post('/buscar-epp', [App\Http\Controllers\ControlEPPController::class, 'buscarEPP'])->name('buscar.epp');
 Route::post('/matriz-checklist', [App\Http\Controllers\ControlEPPController::class, 'matrizChecklist'])->name('matrizChecklist');
 Route::get('/trabajador/{id}/detalle-epp', [App\Http\Controllers\ControlEPPController::class, 'detalleEpp']);
 
-
-Route::get('/controlEPP', fn() => view('controlEPP'));
 
 Route::get('/reportes/prestamos', [ReporteController::class, 'reportePrestamos'])->name('reportes.prestamos');
 Route::get('/reportes/prestamos/pdf', [ReporteController::class, 'exportarPrestamosPDF'])->name('reportes.prestamos.pdf');

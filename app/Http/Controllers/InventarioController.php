@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Checklist;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\Recurso;
@@ -77,7 +78,23 @@ class InventarioController extends Controller
         ));
     }
 
+    public function tieneEppCompleto($usuarioId)
+{
+    $checklist = Checklist::where('trabajador_id', $usuarioId)
+        ->whereDate('fecha', Carbon::today())
+        ->latest()
+        ->first();
 
+    if (!$checklist) return false;
+
+    $basicos = $checklist->anteojos && $checklist->botas && $checklist->chaleco && $checklist->guantes;
+
+    if ($checklist->es_en_altura) {
+        return $basicos && $checklist->arnes;
+    }
+
+    return $basicos;
+}
 
     public function exportarCSV()
     {
@@ -107,7 +124,7 @@ class InventarioController extends Controller
                 $series = $recurso->serieRecursos->pluck('nro_serie')->implode(', ');
                 $estados = $recurso->serieRecursos->pluck('id_estado')->implode(', ');
                 $fechas = $recurso->serieRecursos->pluck('fecha_vencimiento')->map(function ($fecha) {
-                    return $fecha ? \Carbon\Carbon::parse($fecha)->format('d/m/Y') : '-';
+                    return $fecha ? Carbon::parse($fecha)->format('d/m/Y') : '-';
                 })->implode(', ');
 
                 fputcsv($file, [
