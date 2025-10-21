@@ -11,6 +11,8 @@ use App\Models\SerieRecurso;
 use App\Models\DetallePrestamo;
 use App\Services\PrestamoService;
 use Illuminate\Support\Facades\DB;
+use App\Models\checklist;
+use Carbon\Carbon;
 
 class KioskoController extends Controller
 {
@@ -40,9 +42,9 @@ public function identificarTrabajador(Request $request)
 
     // Buscar por QR o DNI (sin filtrar rol todavía)
     if ($codigoQR) {
-        $usuario = \App\Models\Usuario::whereRaw('LOWER(codigo_qr) = ?', [strtolower($codigoQR)])->first();
+        $usuario = Usuario::whereRaw('LOWER(codigo_qr) = ?', [strtolower($codigoQR)])->first();
     } elseif ($dni) {
-        $usuario = \App\Models\Usuario::where('dni', $dni)->first();
+        $usuario = Usuario::where('dni', $dni)->first();
     }
 
     // Caso 1: no se encontró ningún usuario
@@ -237,8 +239,41 @@ public function identificarTrabajador(Request $request)
     }
 
     // Placeholder para solicitudes genéricas
-    public function solicitarRecurso(Request $request)
+    /*public function solicitarRecurso(Request $request)
     {
         return response()->json(['message' => 'Solicitud recibida']);
+    }*/
+
+        private function tieneEppCompleto($usuarioId)
+{
+    $checklist = Checklist::where('trabajador_id', $usuarioId)
+        ->whereDate('fecha', Carbon::today())
+        ->latest()
+        ->first();
+
+    if (!$checklist) return false;
+
+    $basicos = $checklist->anteojos && $checklist->botas && $checklist->chaleco && $checklist->guantes;
+
+    return $checklist->es_en_altura ? $basicos && $checklist->arnes : $basicos;
+}
+
+    public function solicitarRecurso(Request $request)
+{
+    $usuarioId = $request->input('id_usuario');
+
+    if (!$this->tieneEppCompleto($usuarioId)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No se puede solicitar herramientas sin EPP completo.'
+        ], 403);
     }
+
+    // Lógica de solicitud real (si la tenés)
+    return response()->json([
+        'success' => true,
+        'message' => 'Solicitud permitida'
+    ]);
+}
+
 }
