@@ -57,29 +57,52 @@
     </div>
   </div>
 
-  <!-- Filtros -->
-  <div class="mb-4 d-flex gap-2 flex-wrap">
-    <input type="text" class="form-control" style="min-width: 240px;" placeholder="Buscar por nombre de Trabajador/EPP...">
-    
-    <!--<select class="form-select" style="min-width: 200px;">
-      <option>Todos los sectores</option>
-    </select>-->
-  </div>
+<!-- ✅ Buscador -->
+<div class="mb-4 d-flex gap-2 flex-wrap">
+  <input type="text" class="form-control" style="min-width: 240px;" placeholder="Buscar por nombre de Trabajador/EPP...">
+  <!--<select class="form-select" style="min-width: 200px;">
+    <option>Todos los sectores</option>
+  </select>-->
+</div>
 
-  <!-- Tabla de búsqueda de EPP -->
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <h5 class="card-title fw-bold">Estado de EPP por Trabajador</h5>
-      <p class="text-muted small">Control detallado de equipos de protección personal asignados</p>
-      <div class="table-responsive">
-
-        <!-- Contenedor dinámico para la tabla generada por JS -->
-        <div id="tablaChecklistContainer" class="table-responsive mt-4"></div>
-      
-      </div>
+<!-- ✅ Tabla de checklist diario -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="card-title fw-bold">Checklist Diario</h5>
+    <p class="text-muted small">Cumplimiento de EPP por trabajador hoy</p>
+    <div class="table-responsive">
+      <table id="tablaChecklistDiario" class="table table-bordered text-center">
+        <thead>
+          <tr>
+            <th>Trabajador</th>
+            <th>Anteojos</th>
+            <th>Botas</th>
+            <th>Chaleco</th>
+            <th>Guantes</th>
+            <th>Arnés</th>
+            <th>Altura</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach($checklists as $c)
+          <tr>
+            <td>{{ $c->trabajador->name }}</td>
+            <td>{!! $c->anteojos ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
+            <td>{!! $c->botas ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
+            <td>{!! $c->chaleco ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
+            <td>{!! $c->guantes ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
+            <td>{!! $c->arnes ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
+            <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
+            <td>{{ $c->observaciones }}</td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
+
 
 <div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -99,91 +122,77 @@
 
 @push('scripts')
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const inputBuscar = document.querySelector('input[placeholder="Buscar por nombre de Trabajador/EPP..."]');
-    const tablaContainer = document.querySelector('#tablaChecklistContainer');
+document.addEventListener('DOMContentLoaded', function () {
+  const inputBuscar = document.querySelector('input[placeholder="Buscar por nombre de Trabajador/EPP..."]');
+  const tablaDiario = document.querySelector('#tablaChecklistDiario tbody');
 
-    let timeout = null;
-    inputBuscar.addEventListener('keyup', function () {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        const valor = inputBuscar.value.trim();
+  inputBuscar.addEventListener('keyup', function () {
+    const filtro = inputBuscar.value.toLowerCase().trim();
 
-        fetch("{{ route('matrizChecklist') }}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-          },
-          body: JSON.stringify({ nombre: valor })
-        })
-        .then(res => res.json())
-        .then(data => {
-          console.log(data);
-          if (!data.success) return;
+    // Filtrar tabla checklist diario
+    if (tablaDiario) {
+      const filas = tablaDiario.querySelectorAll('tr');
+      filas.forEach(fila => {
+        const texto = fila.textContent.toLowerCase();
+        fila.style.display = texto.includes(filtro) ? '' : 'none';
+      });
+    }
 
-          const epps = data.epps; // array de strings
-          const matriz = data.data;
-
-          let html = `
-            <table class="table table-bordered text-center">
-              <thead>
-                <tr>
-                  <th style="background-color: #E36137; color: white;">Trabajador</th>
-                  ${epps.map(eppNombre => `<th style="background-color: #E36137; color: white;">${eppNombre}</th>`).join('')}
-                  <th style="background-color: #E36137; color: white;"> Acciones </th>
-                </tr>
-              </thead>
-              <tbody>
-                ${matriz.map(fila => `
-                  <tr>
-                    <td>${fila.trabajador}</td>
-                    ${epps.map(eppNombre => `
-                      <td>
-                        ${fila[eppNombre] === '✅'
-                          ? '<span style="color: green;">&#10004;</span>'
-                          : '<span style="color: red;">&#10006;</span>'}
-                      </td>                  
-                    `).join('')}
-                      <td>
-                        <button class="btn btn-sm btn-primary ver-detalle" data-id="${fila.id}">
-                          VER
-                        </button>
-                      </td>                        
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          `;
-
-          tablaContainer.innerHTML = html;
-        });
-      }, 500);
-    });
-  });
-
-
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('ver-detalle')) {
-    const id = e.target.dataset.id;
-
-    fetch(`/trabajador/${id}/detalle-epp`)
+    // Ya existente: búsqueda dinámica para la tabla generada por JS
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      fetch("{{ route('matrizChecklist') }}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ nombre: filtro })
+      })
       .then(res => res.json())
       .then(data => {
-        let html = `
-          <p><strong>Nombre:</strong> ${data.trabajador.nombre}</p>
-          <p><strong>Sector:</strong> ${data.trabajador.sector}</p>
-          <h6>EPP asignados:</h6>
-          <ul>
-            ${data.epps.map(epp => `<li>${epp.nombre} (vence: ${epp.vencimiento})</li>`).join('')}
-          </ul>
-        `;
-        document.querySelector('#detalleContenido').innerHTML = html;
-        new bootstrap.Modal(document.getElementById('detalleModal')).show();
-      });
-  }
-});
+        if (!data.success) return;
 
+        const epps = data.epps;
+        const matriz = data.data;
+
+        let html = `
+          <table class="table table-bordered text-center">
+            <thead>
+              <tr>
+                <th style="background-color: #E36137; color: white;">Trabajador</th>
+                ${epps.map(eppNombre => `<th style="background-color: #E36137; color: white;">${eppNombre}</th>`).join('')}
+                <th style="background-color: #E36137; color: white;"> Acciones </th>
+              </tr>
+            </thead>
+            <tbody>
+              ${matriz.map(fila => `
+                <tr>
+                  <td>${fila.trabajador}</td>
+                  ${epps.map(eppNombre => `
+                    <td>
+                      ${fila[eppNombre] === '✅'
+                        ? '<span style="color: green;">&#10004;</span>'
+                        : '<span style="color: red;">&#10006;</span>'}
+                    </td>                  
+                  `).join('')}
+                    <td>
+                      <button class="btn btn-sm btn-primary ver-detalle" data-id="${fila.id}">
+                        VER
+                      </button>
+                    </td>                        
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+
+        document.querySelector('#tablaChecklistContainer').innerHTML = html;
+      });
+    }, 500);
+  });
+});
 </script>
+
 
 @endpush
