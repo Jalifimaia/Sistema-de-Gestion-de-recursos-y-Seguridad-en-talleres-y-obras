@@ -126,6 +126,10 @@ class Recurso extends Model
         return $this->hasMany(SerieRecurso::class, 'id_recurso');
     }
 
+    public function usuarioRecursos()
+    {
+        return $this->hasMany(UsuarioRecurso::class, 'id_recurso');
+    }    
     public function series()
     {
         return $this->hasMany(SerieRecurso::class, 'id_recurso');

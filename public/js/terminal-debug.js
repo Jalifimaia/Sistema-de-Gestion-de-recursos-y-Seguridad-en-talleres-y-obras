@@ -679,10 +679,35 @@ function cargarMenuPrincipal() {
   const opciones = [
     { id: 1, texto: "📦 Tengo la herramienta en mano", accion: () => setModoEscaneo('manual'), clase: "btn-outline-success" },
     { id: 2, texto: "🛠️ Quiero solicitar una herramienta", accion: () => {
-        // 👇 si entrás a step5 desde el menú, el volver debe ir al menú (step2)
-        step5ReturnTarget = 2;
-        nextStep(5);
-      }, clase: "btn-outline-primary" },
+    const id_usuario = localStorage.getItem('id_usuario');
+    if (!id_usuario) {
+      mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+      return;
+    }
+
+    fetch('/terminal/solicitar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ id_usuario })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
+        return;
+      }
+
+      // ✅ Si pasa la validación, continuar
+      step5ReturnTarget = 2;
+      nextStep(5);
+    })
+    .catch(() => {
+      mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
+    });
+  }, clase: "btn-outline-primary" },
     { id: 3, texto: "📋 Ver recursos asignados", accion: () => {
         cargarRecursos();
         const modalEl = document.getElementById('modalRecursos');
