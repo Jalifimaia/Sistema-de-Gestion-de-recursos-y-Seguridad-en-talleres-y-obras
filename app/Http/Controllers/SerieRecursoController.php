@@ -44,7 +44,7 @@ public function storeMultiple(Request $request): RedirectResponse
     $request->validate([
         'id_recurso' => 'required|exists:recurso,id',
         'cantidad' => 'required|integer|min:1|max:100',
-        'nro_serie' => 'required|string', // esto será el prefijo
+        'nro_serie' => 'required|string',
         'talle' => 'nullable|string|max:50',
         'fecha_adquisicion' => 'required|date',
         'fecha_vencimiento' => 'nullable|date|after_or_equal:fecha_adquisicion',
@@ -66,7 +66,9 @@ for ($i = 1; $i <= $request->cantidad; $i++) {
 }
 
 
-    return redirect()->route('inventario')->with('success', 'Series creadas correctamente.');
+    // redirigir a la misma vista de creación con mensaje en sesión para mostrar modal
+    return redirect()->route('serie_recurso.createConRecurso', $request->id_recurso)
+        ->with('success', 'Serie(s) guardada(s) correctamente.');
 }
 
 
