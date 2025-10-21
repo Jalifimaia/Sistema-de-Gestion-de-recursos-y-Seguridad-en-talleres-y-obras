@@ -314,7 +314,7 @@ class RecursoController extends Controller
     {
         $validated = $request->validated();
 
-        Recurso::create([
+        $recurso = Recurso::create([
             'id_subcategoria' => $validated['id_subcategoria'],
             'nombre' => $validated['nombre'],
             'descripcion' => $validated['descripcion'] ?? null,
@@ -323,8 +323,11 @@ class RecursoController extends Controller
             'id_usuario_modificacion' => auth()->id(),
         ]);
 
-        return redirect()->route('inventario')->with('success', 'Recurso creado correctamente.');
+        // Volvemos a la vista create y dejamos el mensaje en la sesión para mostrar modal
+        return redirect()->route('recursos.create')
+            ->with('success', 'Recurso creado correctamente.');
     }
+
 
     /**
      * Display the specified resource.
@@ -362,8 +365,7 @@ class RecursoController extends Controller
     {
         $recurso->update($request->validated());
 
-        return Redirect::route('inventario')
-            ->with('success', 'Recurso updated successfully');
+        return redirect()->route('recursos.edit', $recurso->id)->with('success', 'Recurso actualizado correctamente.');
     }
 
     public function destroy($id): RedirectResponse
@@ -380,10 +382,13 @@ class RecursoController extends Controller
         return view('recurso.create', compact('categorias'));
     }
 
-    public function getSubcategorias($categoriaId)
+   public function getSubcategorias($categoriaId)
     {
-        return DB::table('subcategoria')->where('categoria_id', $categoriaId)->get();
+        $subs = \App\Models\Subcategoria::where('categoria_id', $categoriaId)->get(['id','nombre']);
+        return response()->json($subs);
     }
+
+
 
     public function getRecursos($subcategoriaId)
     {

@@ -86,13 +86,15 @@
                 <a href="{{ route('recursos.edit', $recurso->id) }}" class="btn btn-sm btn-orange">
                   <i class="bi bi-pencil"></i>
                 </a>
-                <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" class="d-inline">
+
+                <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" class="d-inline eliminar-recurso-form" data-nombre="{{ $recurso->nombre }}" data-id="{{ $recurso->id }}">
                   @csrf
                   @method('DELETE')
-                  <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Seguro que quieres eliminar este EPP?')">
+                  <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" data-id="{{ $recurso->id }}">
                     <i class="bi bi-trash"></i>
                   </button>
                 </form>
+
                 <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-outline-info">
                   <i class="bi bi-plus-circle"> Agregar serie</i>
                 </a>
@@ -106,43 +108,69 @@
   </div>
 </div>
 
-<!-- Estado del Inventario -->
-<div class="card shadow border mt-4">
-  <div class="card-header bg-white border-bottom">
-    <h5 class="fw-bold mb-0">📊 Estado del Inventario</h5>
-    <p class="text-muted small mb-0">Resumen general de herramientas y EPP</p>
-  </div>
-  <div class="card-body">
-    <div class="row g-3">
-      @php
-        $estadoItems = [
-          ['label' => 'Herramientas disponibles', 'valor' => "$herramientasDisponibles/$herramientasTotales"],
-          ['label' => 'EPP en stock', 'valor' => "$eppStock/$eppTotales"],
-          ['label' => 'En reparación', 'valor' => $elementosReparacion],
-          ['label' => 'EPP vencidos', 'valor' => $eppVencidos],
-          ['label' => 'Elementos dañados', 'valor' => $elementosDañados],
-        ];
-      @endphp
-
-      @foreach ($estadoItems as $item)
-        <div class="col-6 col-md-4 col-lg-2">
-          <div class="border rounded p-3 text-center h-100 bg-light d-flex flex-column justify-content-center shadow-sm" style="border-left: 5px solid #f57c00;">
-            <div class="fw-semibold text-muted small">{{ $item['label'] }}</div>
-            <div class="fs-5 fw-bold text-orange">{{ $item['valor'] }}</div>
-          </div>
-        </div>
-      @endforeach
-
-      <!-- Botón exportar -->
-      <div class="col-6 col-md-4 col-lg-2 d-flex align-items-center justify-content-center">
-        <a href="{{ route('inventario.exportar') }}" class="btn btn-orange btn-sm w-100">
-          <i class="bi bi-download me-1"></i> Exportar CSV
-        </a>
+<!-- Modal Confirmar Eliminación (global) -->
+<div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalConfirmDeleteLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalConfirmDeleteText" class="mb-0">¿Seguro que quieres eliminar este recurso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="modalConfirmDeleteBtn" class="btn btn-danger">Sí, eliminar</button>
       </div>
     </div>
   </div>
 </div>
 
-
-
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Variables del modal
+  const modalEl = document.getElementById('modalConfirmDelete');
+  const modalText = document.getElementById('modalConfirmDeleteText');
+  const modalConfirmBtn = document.getElementById('modalConfirmDeleteBtn');
+  const bsModal = new bootstrap.Modal(modalEl);
+
+  // Form objetivo a enviar al confirmar
+  let targetForm = null;
+
+  // Handler: abrir modal al click de cualquier .btn-eliminar
+  document.querySelectorAll('.btn-eliminar').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      const id = this.dataset.id;
+      // buscar el form asociado (ascendiendo en DOM)
+      const form = this.closest('.eliminar-recurso-form');
+      if (!form) return console.warn('Formulario de eliminación no encontrado para id', id);
+
+      const nombre = form.dataset.nombre || `ID ${id}`;
+      // personalizar texto del modal
+      modalText.textContent = `¿Seguro que quieres eliminar este recurso "${nombre}"?`;
+      targetForm = form;
+      bsModal.show();
+    });
+  });
+
+  // Confirmar eliminación: enviar form guardado
+  modalConfirmBtn.addEventListener('click', function () {
+    if (!targetForm) return;
+    // opcional: deshabilitar botón para evitar doble submit
+    modalConfirmBtn.disabled = true;
+    targetForm.submit();
+  });
+
+  // Reiniciar estado del modal al cerrarlo
+  modalEl.addEventListener('hidden.bs.modal', function () {
+    targetForm = null;
+    modalConfirmBtn.disabled = false;
+    modalText.textContent = '¿Seguro que quieres eliminar este recurso?';
+  });
+});
+</script>
+@endpush

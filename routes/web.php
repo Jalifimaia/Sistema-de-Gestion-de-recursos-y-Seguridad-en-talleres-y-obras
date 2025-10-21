@@ -105,6 +105,9 @@ Route::get('/api/prestamo/series/{recursoId}', function ($recursoId) {
         ->get();
 });
 
+Route::get('api/subcategorias/{categoriaId}', [RecursoController::class, 'getSubcategorias']);
+
+
 /*
 |--------------------------------------------------------------------------
 | Rutas AJAX para Incidentes
@@ -164,6 +167,12 @@ Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])
 
 Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
 Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');
+
+
+Route::get('serie_recurso/create-con-recurso/{id}', [SerieRecursoController::class, 'createConRecurso'])
+    ->name('serie_recurso.createConRecurso');
+Route::post('serie_recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])
+    ->name('serie_recurso.storeMultiple');
 
 
 /*
