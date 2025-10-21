@@ -12,6 +12,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\UsuarioController;
+
 
 use App\Models\Subcategoria;
 use App\Http\Controllers\InventarioController;
@@ -108,6 +110,8 @@ Route::get('/api/prestamo/series/{recursoId}', function ($recursoId) {
 | Rutas AJAX para Incidentes
 |--------------------------------------------------------------------------
 */
+
+Route::get('/inventario', function () { return view('inventario');})->name('inventario');
 
 Route::get('/ajax/incidente/subcategorias/{categoriaId}', [IncidenteController::class, 'getSubcategorias']);
 Route::get('/ajax/incidente/recursos/{subcategoriaId}', [IncidenteController::class, 'getRecursos']);

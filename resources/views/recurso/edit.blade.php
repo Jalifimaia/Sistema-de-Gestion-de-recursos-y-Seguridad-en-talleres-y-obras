@@ -79,11 +79,17 @@
 
     <!-- Opcional: botón para eliminar y volver a registrar -->
     <div class="d-flex justify-content-between">
+        <a href="{{ route('inventario') }}" class="btn btn-outline-secondary">
+              ⬅️ Volver
+          </a>
+
         <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar este recurso?')">
             @csrf
             @method('DELETE')
             <button class="btn btn-outline-danger">Eliminar recurso</button>
         </form>
+        
+
         <a href="{{ route('recursos.create') }}" class="btn btn-outline-primary">Registrar nuevo recurso</a>
     </div>
 </div>

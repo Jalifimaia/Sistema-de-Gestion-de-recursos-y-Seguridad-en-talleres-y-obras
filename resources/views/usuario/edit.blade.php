@@ -91,8 +91,14 @@
                                 @endif
                             </div>
                         </div>
+                        
 
-                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        
+                        <a href="{{ route('usuarios.index') }}" class="btn btn-outline-secondary">
+                            ⬅️ Volver
+                        </a>
+                        
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
                     </form>
 
                     {{-- Bloque de acciones de estado --}}

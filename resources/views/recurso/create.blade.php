@@ -8,6 +8,7 @@
     <div class="card-body">
       <h5 class="card-title fw-bold mb-1">Agregar Nuevo Recurso</h5>
       <p class="text-muted small mb-4">Complete los campos para registrar un nuevo recurso.</p>
+     
 
       @if ($errors->any())
         <div class="alert alert-danger">
@@ -60,6 +61,11 @@
         </div>
 
         <div class="text-end">
+          <a href="{{ route('inventario') }}" class="btn btn-outline-secondary">
+              ⬅️ Volver
+          </a>
+
+
           <button type="submit" class="btn btn-primary">Guardar Recurso</button>
         </div>
       </form>

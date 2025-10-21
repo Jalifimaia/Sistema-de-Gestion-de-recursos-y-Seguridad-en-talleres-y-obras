@@ -32,4 +32,10 @@
   <p><strong>Creado el:</strong> {{ $usuario->created_at ? $usuario->created_at->format('d/m/Y H:i') : 'N/A' }}</p>
   <p><strong>Modificado el:</strong> {{ $usuario->updated_at ? $usuario->updated_at->format('d/m/Y H:i') : 'N/A' }}</p>
 </div>
+
+    <div class="d-flex align-items-center justify-content-start gap-3 mb-4">
+            <a href="{{ route('usuarios.index') }}" class="btn btn-outline-secondary">
+                ⬅️ Volver
+            </a>
+            </div>
 @endsection

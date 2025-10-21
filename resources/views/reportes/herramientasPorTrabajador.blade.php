@@ -2,7 +2,12 @@
 
 @section('content')
 <div class="container py-4">
-    <h2 class="mb-4 text-orange">🧰 Herramientas asignadas por trabajador</h2>
+        <div class="d-flex align-items-center justify-content-start gap-3 mb-4">
+        <a href="{{ route('reportes.index') }}" class="btn btn-outline-secondary">
+            ⬅️ Volver
+        </a>
+            <h2 class="mb-4 text-orange">🧰 Herramientas asignadas por trabajador</h2>
+        </div>
 
     <form method="GET" action="{{ route('reportes.herramientasPorTrabajador') }}" class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
