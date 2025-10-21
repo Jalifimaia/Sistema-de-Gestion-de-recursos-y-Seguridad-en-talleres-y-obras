@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '16534e85744dacd85fcb67bc312b1814e7b51ba8',
+        'reference' => 'ad691b52e566ff044f7b2740eabcb7ebaeda0dd0',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -466,7 +466,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '16534e85744dacd85fcb67bc312b1814e7b51ba8',
+            'reference' => 'ad691b52e566ff044f7b2740eabcb7ebaeda0dd0',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -1109,11 +1109,29 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'spatie/browsershot' => array(
+            'pretty_version' => '5.0.11',
+            'version' => '5.0.11.0',
+            'reference' => 'f84d9c332899596d0884922772593a10e3925969',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/browsershot',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'spatie/once' => array(
             'dev_requirement' => false,
             'replaced' => array(
                 0 => '*',
             ),
+        ),
+        'spatie/temporary-directory' => array(
+            'pretty_version' => '2.3.0',
+            'version' => '2.3.0.0',
+            'reference' => '580eddfe9a0a41a902cac6eeb8f066b42e65a32b',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/temporary-directory',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'staabm/side-effects-detector' => array(
             'pretty_version' => '1.0.5',

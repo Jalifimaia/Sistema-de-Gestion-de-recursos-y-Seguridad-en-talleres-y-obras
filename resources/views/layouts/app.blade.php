@@ -48,7 +48,10 @@
                 alt="Foto de perfil"
                 class="rounded-circle border shadow-sm me-2"
                 style="width: 40px; height: 40px; object-fit: cover;">
-            <span class="fw-semibold">{{ auth()->user()->name }}</span>
+           @auth
+  <span class="fw-semibold">{{ auth()->user()->name }}</span>
+@endauth
+
           </div>
         </button>
         <ul class="dropdown-menu dropdown-menu-end mt-2">
@@ -128,5 +131,6 @@
     toggleBtn.addEventListener('click', abrirSidebar);
     closeBtn.addEventListener('click', cerrarSidebar);
   </script>
+  @yield('scripts')
 </body>
 </html>

@@ -93,6 +93,8 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
             'Symfony\\Component\\Console\\' => 26,
             'Symfony\\Component\\Clock\\' => 24,
             'Svg\\' => 4,
+            'Spatie\\TemporaryDirectory\\' => 26,
+            'Spatie\\Browsershot\\' => 19,
             'SimpleSoftwareIO\\QrCode\\' => 24,
             'Sabberworm\\CSS\\' => 15,
         ),
@@ -346,6 +348,14 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
         'Svg\\' => 
         array (
             0 => __DIR__ . '/..' . '/dompdf/php-svg-lib/src/Svg',
+        ),
+        'Spatie\\TemporaryDirectory\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/spatie/temporary-directory/src',
+        ),
+        'Spatie\\Browsershot\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/spatie/browsershot/src',
         ),
         'SimpleSoftwareIO\\QrCode\\' => 
         array (
@@ -620,8 +630,10 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
         'App\\Http\\Controllers\\EstadoPrestamoController' => __DIR__ . '/../..' . '/app/Http/Controllers/EstadoPrestamoController.php',
         'App\\Http\\Controllers\\IncidenteController' => __DIR__ . '/../..' . '/app/Http/Controllers/IncidenteController.php',
         'App\\Http\\Controllers\\InventarioController' => __DIR__ . '/../..' . '/app/Http/Controllers/InventarioController.php',
+        'App\\Http\\Controllers\\KioskoController' => __DIR__ . '/../..' . '/app/Http/Controllers/KioskoController.php',
         'App\\Http\\Controllers\\OperarioHerramientaController' => __DIR__ . '/../..' . '/app/Http/Controllers/OperarioHerramientaController.php',
         'App\\Http\\Controllers\\PrestamoController' => __DIR__ . '/../..' . '/app/Http/Controllers/PrestamoController.php',
+        'App\\Http\\Controllers\\PrestamoTerminalController' => __DIR__ . '/../..' . '/app/Http/Controllers/PrestamoTerminalController.php',
         'App\\Http\\Controllers\\RecomendacionController' => __DIR__ . '/../..' . '/app/Http/Controllers/RecomendacionController.php',
         'App\\Http\\Controllers\\RecursoController' => __DIR__ . '/../..' . '/app/Http/Controllers/RecursoController.php',
         'App\\Http\\Controllers\\ReporteController' => __DIR__ . '/../..' . '/app/Http/Controllers/ReporteController.php',
@@ -635,6 +647,7 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
         'App\\Http\\Requests\\EstadoPrestamoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/EstadoPrestamoRequest.php',
         'App\\Http\\Requests\\EstadoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/EstadoRequest.php',
         'App\\Http\\Requests\\PrestamoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/PrestamoRequest.php',
+        'App\\Http\\Requests\\PrestamoTerminalRequest' => __DIR__ . '/../..' . '/app/Http/Requests/PrestamoTerminalRequest.php',
         'App\\Http\\Requests\\RecursoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/RecursoRequest.php',
         'App\\Http\\Requests\\RolRequest' => __DIR__ . '/../..' . '/app/Http/Requests/RolRequest.php',
         'App\\Http\\Requests\\SerieRecursoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/SerieRecursoRequest.php',
@@ -657,6 +670,7 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Models\\Usuario' => __DIR__ . '/../..' . '/app/Models/Usuario.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
+        'App\\Services\\PrestamoService' => __DIR__ . '/../..' . '/app/Services/PrestamoService.php',
         'App\\Services\\RecomendacionService' => __DIR__ . '/../..' . '/app/Services/RecomendacionService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'BaconQrCode\\Common\\BitArray' => __DIR__ . '/..' . '/bacon/bacon-qr-code/src/Common/BitArray.php',
@@ -6369,6 +6383,19 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
         'SimpleSoftwareIO\\QrCode\\Image' => __DIR__ . '/..' . '/simplesoftwareio/simple-qrcode/src/Image.php',
         'SimpleSoftwareIO\\QrCode\\ImageMerge' => __DIR__ . '/..' . '/simplesoftwareio/simple-qrcode/src/ImageMerge.php',
         'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider' => __DIR__ . '/..' . '/simplesoftwareio/simple-qrcode/src/QrCodeServiceProvider.php',
+        'Spatie\\Browsershot\\Browsershot' => __DIR__ . '/..' . '/spatie/browsershot/src/Browsershot.php',
+        'Spatie\\Browsershot\\ChromiumResult' => __DIR__ . '/..' . '/spatie/browsershot/src/ChromiumResult.php',
+        'Spatie\\Browsershot\\Enums\\Polling' => __DIR__ . '/..' . '/spatie/browsershot/src/Enums/Polling.php',
+        'Spatie\\Browsershot\\Exceptions\\CouldNotTakeBrowsershot' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/CouldNotTakeBrowsershot.php',
+        'Spatie\\Browsershot\\Exceptions\\ElementNotFound' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/ElementNotFound.php',
+        'Spatie\\Browsershot\\Exceptions\\FileDoesNotExistException' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/FileDoesNotExistException.php',
+        'Spatie\\Browsershot\\Exceptions\\FileUrlNotAllowed' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/FileUrlNotAllowed.php',
+        'Spatie\\Browsershot\\Exceptions\\HtmlIsNotAllowedToContainFile' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/HtmlIsNotAllowedToContainFile.php',
+        'Spatie\\Browsershot\\Exceptions\\UnsuccessfulResponse' => __DIR__ . '/..' . '/spatie/browsershot/src/Exceptions/UnsuccessfulResponse.php',
+        'Spatie\\Browsershot\\ImageManipulations' => __DIR__ . '/..' . '/spatie/browsershot/src/ImageManipulations.php',
+        'Spatie\\TemporaryDirectory\\Exceptions\\InvalidDirectoryName' => __DIR__ . '/..' . '/spatie/temporary-directory/src/Exceptions/InvalidDirectoryName.php',
+        'Spatie\\TemporaryDirectory\\Exceptions\\PathAlreadyExists' => __DIR__ . '/..' . '/spatie/temporary-directory/src/Exceptions/PathAlreadyExists.php',
+        'Spatie\\TemporaryDirectory\\TemporaryDirectory' => __DIR__ . '/..' . '/spatie/temporary-directory/src/TemporaryDirectory.php',
         'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'Svg\\CssLength' => __DIR__ . '/..' . '/dompdf/php-svg-lib/src/Svg/CssLength.php',
         'Svg\\DefaultStyle' => __DIR__ . '/..' . '/dompdf/php-svg-lib/src/Svg/DefaultStyle.php',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recurso;
+use DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\RecursoRequest;
@@ -10,7 +11,6 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Categoria;
 use App\Models\Estado;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -20,8 +20,9 @@ class RecursoController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request): View
-    {
-        $recursos = Recurso::paginate();
+{
+    $recursos = Recurso::with(['serieRecursos.estado', 'categoria'])->paginate();
+
 
         return view('inventario', compact('recursos'))
             ->with('i', ($request->input('page', 1) - 1) * $recursos->perPage());
@@ -329,6 +330,7 @@ class RecursoController extends Controller
     }
 
 
+
     /**
      * Display the specified resource.
      */
@@ -375,12 +377,11 @@ class RecursoController extends Controller
         return Redirect::route('inventario')
             ->with('success', 'Recurso deleted successfully');
     }
-
-    public function create()
-    {
-        $categorias = \App\Models\Categoria::all();
-        return view('recurso.create', compact('categorias'));
-    }
+public function create()
+{
+    $categorias = Categoria::all();
+    return view('recurso.create', compact('categorias'));
+}
 
    public function getSubcategorias($categoriaId)
     {

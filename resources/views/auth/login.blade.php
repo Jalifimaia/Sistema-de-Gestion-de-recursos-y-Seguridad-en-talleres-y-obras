@@ -33,6 +33,11 @@
         <button type="submit" class="btn btn-orange">Ingresar</button>
       </div>
     </form>
+
+    {{-- Botón para ir directo a la terminal --}}
+    <div class="d-grid mt-3">
+      <a href="{{ url('/terminal') }}" class="btn btn-secondary">Ir a la Terminal</a>
+    </div>
   </div>
 </div>
 @endsection
