@@ -93,14 +93,72 @@
         </div>
 
         <div class="text-end mt-4">
+          <a href="{{ route('prestamos.index') }}" class="btn btn-outline-secondary">
+          ⬅️ Volver
+        </a>
+
           <button type="submit" class="btn btn-primary">Guardar Préstamo</button>
         </div>
       </form>
     </div>
   </div>
+  <!-- ✅ Modal: Recurso agregado -->
+<div class="modal fade" id="modalRecursoAgregado" tabindex="-1" aria-labelledby="modalRecursoAgregadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalRecursoAgregadoLabel">✅ Recurso agregado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        El recurso fue agregado correctamente a la lista de préstamo.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ Modal: Préstamo guardado -->
+@if(session('success'))
+<div class="modal fade" id="modalPrestamoGuardado" tabindex="-1" aria-labelledby="modalPrestamoGuardadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalPrestamoGuardadoLabel">🎉 Préstamo guardado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('success') }}
+      </div>
+      <div class="modal-footer">
+        <a href="{{ route('prestamos.index') }}" class="btn btn-outline-primary">Ver préstamos</a>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
+
 </div>
 @endsection
 
 @push('scripts')
   <script src="{{ asset('js/prestamo.js') }}"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Mostrar modal de recurso agregado
+    document.getElementById('agregar').addEventListener('click', function () {
+      const modal = new bootstrap.Modal(document.getElementById('modalRecursoAgregado'));
+      modal.show();
+    });
+
+    // Mostrar modal de préstamo guardado si hay sesión
+    @if(session('success'))
+      const modal = new bootstrap.Modal(document.getElementById('modalPrestamoGuardado'));
+      modal.show();
+    @endif
+  });
+</script>
 @endpush

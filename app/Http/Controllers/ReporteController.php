@@ -7,6 +7,7 @@ use App\Models\Prestamo;
 use App\Models\Usuario;
 use App\Models\Recurso;
 use Carbon\Carbon;
+
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -70,11 +71,11 @@ public function reportePrestamos(Request $request)
         );
 
     if ($fecha_inicio) {
-        $query->where('prestamo.fecha_prestamo', '>=', $fecha_inicio);
+        $query->whereDate('prestamo.fecha_prestamo', '>=', $fecha_inicio);
     }
 
     if ($fecha_fin) {
-        $query->where('prestamo.fecha_prestamo', '<=', $fecha_fin);
+        $query->whereDate('prestamo.fecha_prestamo', '<=', $fecha_fin);
     }
 
     $prestamos = $query->orderBy('prestamo.fecha_prestamo', 'desc')->get();
@@ -85,9 +86,8 @@ public function reportePrestamos(Request $request)
             : '—';
     }
 
-    return view('reportes.reportePrestamos', compact('prestamos'));
+    return view('reportes.reportePrestamos', compact('prestamos', 'fecha_inicio', 'fecha_fin'));
 }
-
 
 
 

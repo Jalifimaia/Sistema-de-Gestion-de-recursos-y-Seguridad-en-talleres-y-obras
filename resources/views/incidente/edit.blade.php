@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="d-flex justify-content-start mb-3">
+  <a href="{{ route('incidente.index') }}" class="btn btn-outline-secondary">
+    ⬅️ Volver
+  </a>
+</div>
+
 <div class="container">
     <h2>Editar incidente</h2>
 

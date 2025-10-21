@@ -32,6 +32,7 @@
             <option value="Cancelado">Cancelado</option>
             <option value="Activo">Activo</option>
             <option value="Vencido">Vencido</option>
+            <option value="Devuelto">Devuelto</option>
           </select>
         </div>
         <div class="col-md-2">
