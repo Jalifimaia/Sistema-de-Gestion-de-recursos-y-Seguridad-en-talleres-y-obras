@@ -24,6 +24,7 @@ class User extends Authenticatable
         'dni',
         'auth_key',
         'access_token',
+        'codigo_qr',
     ];
 
     protected $hidden = [
