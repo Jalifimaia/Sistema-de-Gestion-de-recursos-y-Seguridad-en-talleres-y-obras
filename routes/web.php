@@ -14,6 +14,9 @@ use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\KioskoController;
+use App\Http\Controllers\UsuarioController;
+
+
 use App\Models\Subcategoria;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\PrestamoTerminalController;
@@ -84,6 +87,21 @@ Route::prefix('terminal')->group(function () {
 
     Route::post('/registrar-por-qr', [PrestamoTerminalController::class, 'registrarPorQR']);
 });
+/*
+| Rutas de Reportes de Recursos
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/reportes/recursos-mas-prestados', [RecursoController::class, 'recursosMasPrestados'])->name('reportes.masPrestados');
+Route::get('/reportes/recursos-en-reparacion', [RecursoController::class, 'recursosEnReparacion'])->name('reportes.enReparacion');
+Route::get('/reportes/herramientas-por-trabajador', [RecursoController::class, 'herramientasPorTrabajador'])->name('reportes.herramientasPorTrabajador');
+Route::get('/reportes/incidentes-por-tipo', [RecursoController::class, 'incidentesPorTipo'])->name('reportes.incidentesPorTipo');
+Route::get('/reportes/recursos-mas-prestados/pdf', [RecursoController::class, 'recursosMasPrestadosPDF'])->name('reportes.masPrestados.pdf');
+Route::get('/reportes/recursos-en-reparacion/pdf', [RecursoController::class, 'recursosEnReparacionPDF'])->name('reportes.enReparacion.pdf');
+Route::get('/reportes/herramientas-por-trabajador/pdf', [RecursoController::class, 'herramientasPorTrabajadorPDF'])->name('reportes.herramientasPorTrabajador.pdf');
+Route::get('/reportes/incidentes-por-tipo/pdf', [RecursoController::class, 'incidentesPorTipoPDF'])->name('reportes.incidentesPorTipo.pdf');
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -151,11 +169,16 @@ Route::get('/prestamo/series/{recursoId}', function ($recursoId) {
 });
 
 Route::post('/subcategorias', [SubcategoriaController::class, 'store']);
+Route::get('api/subcategorias/{categoriaId}', [RecursoController::class, 'getSubcategorias']);
+
+
 /*
 |--------------------------------------------------------------------------
 | Rutas AJAX para Incidentes
 |--------------------------------------------------------------------------
 */
+
+Route::get('/inventario', function () { return view('inventario');})->name('inventario');
 
 Route::get('/ajax/incidente/subcategorias/{categoriaId}', [IncidenteController::class, 'getSubcategorias']);
 Route::get('/ajax/incidente/recursos/{subcategoriaId}', [IncidenteController::class, 'getRecursos']);
@@ -208,6 +231,13 @@ Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])
 
 Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
 Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');
+
+
+Route::get('serie_recurso/create-con-recurso/{id}', [SerieRecursoController::class, 'createConRecurso'])
+    ->name('serie_recurso.createConRecurso');
+Route::post('serie_recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])
+    ->name('serie_recurso.storeMultiple');
+
 
 /*
 |--------------------------------------------------------------------------

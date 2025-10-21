@@ -69,14 +69,89 @@
         </div>
 
         <div class="text-end">
+          <a href="{{ route('inventario') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
           <button type="submit" class="btn btn-primary">Guardar Recurso</button>
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<!-- Modal que aparece al crear -->
+@if(session('success'))
+<div class="modal fade" id="modalRecursoCreado" tabindex="-1" aria-labelledby="modalRecursoCreadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalRecursoCreadoLabel">Nuevo recurso agregado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('success') }}
+      </div>
+      <div class="modal-footer">
+        <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
+        <a href="{{ route('recursos.create') }}" class="btn btn-success">Seguir agregando</a>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
+
 @endsection
 
 @section('scripts')
   <script src="{{ asset('js/recurso.js') }}?v={{ time() }}"></script>
 @endsection
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Poblado dinámico de subcategorías al cambiar categoría
+  const categoriaSelect = document.getElementById('categoria');
+  const subcategoriaSelect = document.getElementById('id_subcategoria');
+
+  if (categoriaSelect) {
+    categoriaSelect.addEventListener('change', function () {
+      const categoriaId = this.value;
+      if (!categoriaId) {
+        subcategoriaSelect.innerHTML = '<option value="">Seleccione una subcategoría</option>';
+        subcategoriaSelect.disabled = true;
+        return;
+      }
+      subcategoriaSelect.innerHTML = '<option value="">Cargando...</option>';
+      subcategoriaSelect.disabled = true;
+
+      fetch(`/api/subcategorias/${encodeURIComponent(categoriaId)}`)
+        .then(res => {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(data => {
+          if (!Array.isArray(data) || data.length === 0) {
+            subcategoriaSelect.innerHTML = '<option value="">Sin subcategorías</option>';
+            subcategoriaSelect.disabled = true;
+            return;
+          }
+          let html = '<option value="">Seleccione una subcategoría</option>';
+          data.forEach(s => {
+            html += `<option value="${s.id}">${s.nombre}</option>`;
+          });
+          subcategoriaSelect.innerHTML = html;
+          subcategoriaSelect.disabled = false;
+        })
+        .catch(err => {
+          console.error('Error al cargar subcategorías:', err);
+          subcategoriaSelect.innerHTML = '<option value="">Error al cargar</option>';
+          subcategoriaSelect.disabled = true;
+        });
+    });
+  }
+
+  // Mostrar modal si existe en DOM
+  const modalEl = document.getElementById('modalRecursoCreado');
+  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    new bootstrap.Modal(modalEl).show();
+  }
+});
+</script>
+@endpush

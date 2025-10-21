@@ -127,4 +127,9 @@ class InventarioController extends Controller
 
         return new StreamedResponse($callback, 200, $headers);
     }
+    public function inventario()
+{
+    return view('usuario.inventario');
+}
+
 }
