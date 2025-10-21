@@ -67,4 +67,9 @@ function copiarCodigoQR() {
   });
 }
 </script>
+    <div class="d-flex align-items-center justify-content-start gap-3 mb-4">
+            <a href="{{ route('usuarios.index') }}" class="btn btn-outline-secondary">
+                ⬅️ Volver
+            </a>
+            </div>
 @endsection
