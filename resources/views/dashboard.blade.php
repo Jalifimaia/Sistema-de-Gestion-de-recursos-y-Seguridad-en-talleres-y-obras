@@ -277,12 +277,6 @@
   </div>
 </div>
 
-
-
-
-  <footer class="text-center text-muted small">
-    Panel generado estáticamente. Integrar con backend para datos dinámicos.
-  </footer>
 </div>
 
 

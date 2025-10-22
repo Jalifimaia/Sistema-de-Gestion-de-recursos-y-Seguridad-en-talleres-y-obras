@@ -4,16 +4,20 @@
 
 @section('content')
 <div class="container py-4">
-  <!-- Encabezado -->
-  <header class="row mb-4">
-    <div class="col-md-8">
-      <h1 class="h4 fw-bold mb-1">Control de EPP y Seguridad</h1>
-      <p class="text-muted small">Gestión de equipos de protección personal y checklist de seguridad</p>
+  <!-- Fecha arriba a la derecha -->
+  <div class="row mb-2">
+      <div class="col-12 text-end text-muted small pt-1">
+          Fecha: <strong id="today" class="text-nowrap"></strong>
+      </div>
+  </div>
+
+  <!-- Título -->  
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="text-center text-orange">🛡️ Control de EPP y Seguridad</h1>
+      <p class="text-center text-muted small">Gestión de equipos de protección personal y checklist de seguridad</p>
     </div>
-    <div class="col-md-4 text-md-end text-muted small">
-      Fecha: <strong id="today" class="text-nowrap"></strong>
-    </div>
-  </header>
+  </div>
 
   <!-- Tarjetas resumen -->
   <div class="row g-3 mb-4">
@@ -71,8 +75,8 @@
     <h5 class="card-title fw-bold">Checklist Diario</h5>
     <p class="text-muted small">Cumplimiento de EPP por trabajador hoy</p>
     <div class="table-responsive">
-      <table id="tablaChecklistDiario" class="table table-bordered text-center">
-        <thead>
+      <table id="tablaChecklistDiario" class="table-naranja align-middle mb-0">
+        <thead class="table-light">
           <tr>
             <th>Trabajador</th>
             <th>Anteojos</th>
