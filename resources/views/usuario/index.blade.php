@@ -3,11 +3,25 @@
 @section('title', 'Gestión de Usuarios y Roles')
 
 @section('content')
-  <!-- Título -->
-  <div class="mb-4">
-    <h2>Gestión de Usuarios y Roles</h2>
-    <p class="text-muted">Administración de usuarios, permisos y roles del sistema</p>
+<div class="container py-4">  
+<!--para alertas-->
+  @if (session('success'))
+  <div id="alertaEstado" class="alert alert-success alert-dismissible fade show" role="alert">
+  <span id="mensajeAlertaEstado">{{ session('success') }}</span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
   </div>
+  @endif
+
+<!-- Título -->
+  <header class="row mb-4">
+    <div class="col-md-8">
+      <h1 class="h4 fw-bold mb-1">Gestión de Usuarios y Roles</h1>
+      <p class="text-muted small">Administración de usuarios, permisos y roles del sistema</p>
+    </div>
+    <div class="col-md-4 text-md-end text-muted small">
+      Fecha: <strong id="today" class="text-nowrap"></strong>
+    </div>
+  </header>
 
   <!-- Resumen -->
   <div class="row mb-4">
@@ -38,7 +52,7 @@
 
   @auth
     @if (Auth::user()->rol->nombre_rol === 'Administrador')
-      <a href="{{ route('usuarios.create') }}" class="btn btn-success mb-3">
+      <a href="{{ route('usuarios.create') }}" class="btn btn-orange mb-3">
         + Crear nuevo usuario
       </a>
     @endif
@@ -63,7 +77,7 @@
     </select>
 
     <!-- 🔍 Barra de búsqueda -->
-    <input type="text" id="buscador" class="form-control w-auto" placeholder="Buscar por nombre o email...">
+    <input type="text" id="buscador" class="form-control w-25" placeholder="Buscar por nombre o email...">
   </div>
 
   <!-- Tabla -->
@@ -73,8 +87,8 @@
       <p class="text-muted small">Usuarios registrados en el sistema</p>
 
       <div class="table-responsive">
-        <table class="table align-middle mb-0" id="tablaUsuarios">
-          <thead>
+        <table class="table-naranja align-middle mb-0" id="tablaUsuarios">
+          <thead class="table-light">
             <tr>
               <th>Nombre</th>
               <th>Email</th>
@@ -92,26 +106,46 @@
                 <td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>
                 <td class="estado">{{ $usuario->estado->nombre ?? '-' }}</td>
                 <td>
-                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-outline-info">Ver</a>
-                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
-
-                  <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST" class="d-inline form-baja">
+                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-info">Ver</a>
+                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-sm btn-orange">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST" class="d-inline form-baja" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol ?? '-' }}">
                     @csrf
-                    <button class="btn btn-sm btn-outline-warning"
-                            @if(($usuario->estado->nombre ?? null) === 'Baja')
-                              disabled style="opacity:0.5; cursor:not-allowed;"
-                            @endif>
-                      Dar de baja
+                    <button type="button" class="btn btn-sm btn-warning btn-confirmar-baja" @if(($usuario->estado->nombre ?? null) === 'Baja') disabled style="opacity:0.5; cursor:not-allowed;"
+                    @endif>
+                    Dar de baja
                     </button>
-                  </form>
+                  </form>    
                 </td>
               </tr>
-            @endforeach
+          @endforeach
           </tbody>
         </table>
       </div>
     </div>
   </div>
+</div>
+
+<!-- Modal de confirmación de baja -->
+<div class="modal fade" id="modalConfirmarBaja" tabindex="-1" aria-labelledby="modalConfirmarBajaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalConfirmarBajaLabel">Confirmar baja</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p id="textoConfirmacion">¿Desea dar de baja a ...?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmarBaja">Sí</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -169,5 +203,41 @@
       });
     });
   });
+
+  // Modal para confirmación de baja
+  let formSeleccionado = null;
+  document.querySelectorAll('.btn-confirmar-baja').forEach(boton => {
+    boton.addEventListener('click', function () {
+      formSeleccionado = this.closest('form');
+      const nombre = formSeleccionado.getAttribute('data-nombre');
+      const rol = formSeleccionado.getAttribute('data-rol');
+      const texto = document.getElementById('textoConfirmacion');
+      texto.textContent = `¿Desea dar de baja a ${nombre} (${rol})?`;
+      const modal = new bootstrap.Modal(document.getElementById('modalConfirmarBaja'));
+      modal.show();
+    });
+  });
+
+  document.getElementById('btnConfirmarBaja').addEventListener('click', function () {
+    if (formSeleccionado) {
+      formSeleccionado.dispatchEvent(new Event('submit', { cancelable: true }));
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarBaja'));
+      modal.hide();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const alerta = document.getElementById('alertaEstado');
+    if (alerta) {
+      setTimeout(() => {
+        alerta.classList.add('fade');
+        alerta.classList.remove('show');
+        alerta.addEventListener('transitionend', () => {
+          alerta.remove();
+        }, { once: true });
+      }, 5000);
+    }
+  });
+
 </script>
 @endpush

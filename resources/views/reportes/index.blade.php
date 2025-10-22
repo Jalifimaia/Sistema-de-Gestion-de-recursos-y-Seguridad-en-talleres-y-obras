@@ -1,11 +1,23 @@
 @extends('layouts.app')
 
+@section('title', 'Reportes')
+
 @section('content')
-<div class="container py-5">
-  <h1 class="mb-4 text-center text-orange">📊 Panel de Reportes</h1>
+<div class="container py-4">
+  
+  <div class="row mb-2">
+    <div class="col-12 text-end text-muted small pt-1">
+      Fecha: <strong id="today" class="text-nowrap"></strong>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="text-center text-orange">📊 Panel de Reportes</h1>
+    </div>
+  </div>
 
   <div class="row g-4">
-
     <!-- Tarjeta: Préstamos registrados -->
     <div class="col-md-6 col-lg-4">
       <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
