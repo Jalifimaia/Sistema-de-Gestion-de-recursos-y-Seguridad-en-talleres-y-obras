@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-10-2025 a las 05:52:01
+-- Tiempo de generación: 22-10-2025 a las 22:51:47
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -83,27 +83,35 @@ CREATE TABLE `checklist` (
   `fecha` date NOT NULL,
   `observaciones` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `hora` time DEFAULT NULL,
+  `critico` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `checklist`
 --
 
-INSERT INTO `checklist` (`id`, `trabajador_id`, `supervisor_id`, `anteojos`, `botas`, `chaleco`, `guantes`, `arnes`, `es_en_altura`, `fecha`, `observaciones`, `created_at`, `updated_at`) VALUES
-(1, 7, 6, 1, 1, 1, 1, 1, 1, '2025-10-16', 'Checklist completo en altura', '2025-10-16 23:36:51', '2025-10-16 23:36:51'),
-(2, 9, 6, 1, 1, 1, 1, 0, 1, '2025-10-20', 'Falta arnés en trabajo en altura', '2025-10-16 23:52:21', '2025-10-21 02:07:57'),
-(3, 8, 6, 1, 1, 1, 1, 0, 0, '2025-10-16', 'Checklist completo en tarea de suelo', '2025-10-16 23:52:33', '2025-10-16 23:52:33'),
-(4, 7, 6, 1, 1, 1, 1, 1, 1, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(5, 8, 6, 1, 1, 1, 0, 0, 0, '2025-10-21', 'Faltan guantes y arnés', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(6, 9, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés pero trabaja en altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(7, 10, 6, 0, 1, 1, 1, 1, 0, '2025-10-21', 'Sin anteojos', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(8, 14, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(9, 23, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés en tarea de altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(10, 24, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(11, 26, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(12, 27, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés en tarea de altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40'),
-(13, 28, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40');
+INSERT INTO `checklist` (`id`, `trabajador_id`, `supervisor_id`, `anteojos`, `botas`, `chaleco`, `guantes`, `arnes`, `es_en_altura`, `fecha`, `observaciones`, `created_at`, `updated_at`, `hora`, `critico`) VALUES
+(1, 7, 6, 1, 1, 1, 1, 1, 1, '2025-10-16', 'Checklist completo en altura', '2025-10-16 23:36:51', '2025-10-16 23:36:51', NULL, 0),
+(2, 9, 6, 1, 1, 1, 1, 0, 1, '2025-10-20', 'Falta arnés en trabajo en altura', '2025-10-16 23:52:21', '2025-10-21 02:07:57', NULL, 0),
+(3, 8, 6, 1, 1, 1, 1, 0, 0, '2025-10-16', 'Checklist completo en tarea de suelo', '2025-10-16 23:52:33', '2025-10-16 23:52:33', NULL, 0),
+(4, 7, 6, 1, 1, 1, 1, 1, 1, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(5, 8, 6, 1, 1, 1, 0, 0, 0, '2025-10-21', 'Faltan guantes y arnés', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(6, 9, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés pero trabaja en altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(7, 10, 6, 0, 1, 1, 1, 1, 0, '2025-10-21', 'Sin anteojos', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(8, 14, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(9, 23, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés en tarea de altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(10, 24, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(11, 26, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(12, 27, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés en tarea de altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(13, 28, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(14, 28, 5, 1, 1, 1, 1, 1, 1, '2025-10-22', NULL, '2025-10-22 06:57:11', '2025-10-22 06:57:11', NULL, 0),
+(15, 8, 5, 1, 1, 1, 1, 1, 1, '2025-10-22', NULL, '2025-10-22 07:00:55', '2025-10-22 07:00:55', NULL, 0),
+(16, 8, 5, 1, 1, 1, 1, 1, 1, '2025-10-22', NULL, '2025-10-22 07:07:53', '2025-10-22 07:07:53', NULL, 0),
+(17, 8, 5, 1, 1, 0, 1, 0, 0, '2025-10-22', NULL, '2025-10-22 07:08:25', '2025-10-22 07:08:25', NULL, 0),
+(18, 23, 5, 1, 1, 1, 1, 0, 1, '2025-10-22', NULL, '2025-10-22 07:17:26', '2025-10-22 07:17:26', '04:17:00', 1),
+(19, 14, 5, 1, 1, 1, 1, 1, 0, '2025-10-22', NULL, '2025-10-22 07:19:05', '2025-10-22 07:19:05', '04:19:00', 0);
 
 -- --------------------------------------------------------
 
@@ -185,7 +193,8 @@ INSERT INTO `detalle_prestamo` (`id`, `id_prestamo`, `id_serie`, `id_recurso`, `
 (63, 64, 16, 9, 2, NULL, NULL),
 (64, 65, 36, 4, 2, NULL, NULL),
 (65, 66, 23, 10, 2, NULL, NULL),
-(66, 67, 46, 4, 2, NULL, NULL);
+(66, 67, 46, 4, 2, NULL, NULL),
+(67, 68, 7, 6, 2, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -525,7 +534,8 @@ INSERT INTO `prestamo` (`id`, `id_usuario`, `id_usuario_creacion`, `id_usuario_m
 (64, 8, 8, 8, '2025-10-21 00:04:44', '2025-10-22 00:04:44', 2, '2025-10-21 00:04:44', '2025-10-21 00:04:44'),
 (65, 8, 8, 8, '2025-10-21 02:33:48', '2025-10-22 02:33:48', 2, '2025-10-21 02:33:48', '2025-10-21 02:33:48'),
 (66, 8, 8, 8, '2025-10-21 02:38:40', '2025-10-22 02:38:40', 2, '2025-10-21 02:38:40', '2025-10-21 02:38:40'),
-(67, 26, 26, 26, '2025-10-21 02:42:15', '2025-10-22 02:42:15', 2, '2025-10-21 02:42:15', '2025-10-21 02:42:15');
+(67, 26, 26, 26, '2025-10-21 02:42:15', '2025-10-22 02:42:15', 2, '2025-10-21 02:42:15', '2025-10-21 02:42:15'),
+(68, 28, 28, 28, '2025-10-22 03:59:20', '2025-10-23 03:59:20', 2, '2025-10-22 03:59:20', '2025-10-22 03:59:20');
 
 -- --------------------------------------------------------
 
@@ -557,7 +567,19 @@ INSERT INTO `recurso` (`id`, `id_incidente_detalle`, `id_usuario_creacion`, `id_
 (7, NULL, 5, 5, 'Taladro XP', 'Acero', 20000.00, '2025-10-08 03:06:55', '2025-10-08 03:06:55', 6),
 (8, NULL, 5, 5, 'Stanley', 'Azul, acero', 30000.00, '2025-10-08 03:08:01', '2025-10-08 03:08:01', 1),
 (9, NULL, 5, 5, 'Casco de prueba', 'Naranja', 10000.00, '2025-10-08 21:34:06', '2025-10-08 21:34:06', 4),
-(10, NULL, 5, 5, 'Termonimayc', '.', 2000.00, '2025-10-08 22:12:08', '2025-10-08 22:12:08', 1);
+(10, NULL, 5, 5, 'Termonimayc', '.', 2000.00, '2025-10-08 22:12:08', '2025-10-08 22:12:08', 1),
+(301, NULL, NULL, NULL, 'Casco Azul', 'Casco de seguridad tipo A', 15000.00, NULL, NULL, 4),
+(302, NULL, NULL, NULL, 'Casco Blanco', 'Casco de seguridad tipo B', 16000.00, NULL, NULL, 4),
+(303, NULL, NULL, NULL, 'Chaleco Reflectante', 'Alta visibilidad', 7000.00, NULL, NULL, 2),
+(304, NULL, NULL, NULL, 'Chaleco Térmico', 'Protección contra frío', 8000.00, NULL, NULL, 2),
+(305, NULL, NULL, NULL, 'Arnés Básico', 'Para tareas en altura', 25000.00, NULL, NULL, 5),
+(306, NULL, NULL, NULL, 'Arnés Doble Anclaje', 'Mayor seguridad', 27000.00, NULL, NULL, 5),
+(307, NULL, NULL, NULL, 'Guantes de Cuero', 'Resistentes al corte', 5000.00, NULL, NULL, 7),
+(308, NULL, NULL, NULL, 'Guantes Térmicos', 'Para bajas temperaturas', 5500.00, NULL, NULL, 7),
+(309, NULL, NULL, NULL, 'Lentes Transparentes', 'Protección ocular básica', 3000.00, NULL, NULL, 8),
+(310, NULL, NULL, NULL, 'Lentes Polarizados', 'Protección solar y ocular', 3500.00, NULL, NULL, 8),
+(311, NULL, NULL, NULL, 'Botas con Punta de Acero', 'Seguridad industrial', 18000.00, NULL, NULL, 9),
+(312, NULL, NULL, NULL, 'Botas Dieléctricas', 'Para trabajos eléctricos', 19000.00, NULL, NULL, 9);
 
 -- --------------------------------------------------------
 
@@ -607,7 +629,7 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_incidente_detalle`, `nro_se
 (4, 4, NULL, '78YT', '40', '2025-10-05 00:00:00', '2025-10-31 00:00:00', '2025-10-05 15:49:01', '2025-10-15 08:06:44', 1, 'QR-c6aecaf1-ac60-11f0-9639-00e070eec074'),
 (5, 6, NULL, 'XP-001', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-17 06:01:11', 3, 'QR-c6aed3e5-ac60-11f0-9639-00e070eec074'),
 (6, 6, NULL, 'XP-002', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-15 08:02:09', 6, 'QR-c6aeddb6-ac60-11f0-9639-00e070eec074'),
-(7, 6, NULL, 'XP-003', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 1, 'QR-c6aede74-ac60-11f0-9639-00e070eec074'),
+(7, 6, NULL, 'XP-003', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3, 'QR-c6aede74-ac60-11f0-9639-00e070eec074'),
 (8, 6, NULL, 'XP-004', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3, 'QR-c6aedefa-ac60-11f0-9639-00e070eec074'),
 (9, 6, NULL, 'XP-005', NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3, 'QR-c6aedf79-ac60-11f0-9639-00e070eec074'),
 (10, 8, NULL, 'GT001', NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 3, 'QR-c6aedff4-ac60-11f0-9639-00e070eec074'),
@@ -651,7 +673,19 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_incidente_detalle`, `nro_se
 (48, 4, NULL, 'GTRTk - 001', 'L', '2025-10-22 00:00:00', NULL, NULL, NULL, 1, 'QR-a8c00497-9ff9-45fd-a4b0-6dc21cb09e7c'),
 (49, 4, NULL, 'GTRTk - 001', 'L', '2025-10-22 00:00:00', NULL, NULL, NULL, 3, 'QR-0b8f1d5a-8640-42ae-bc42-5b69f387e5fc'),
 (50, 4, NULL, 'GTRTk - 001', 'L', '2025-10-22 00:00:00', NULL, NULL, NULL, 1, 'QR-35dff6bd-5dbf-4546-9ba4-275dea96779f'),
-(51, 4, NULL, 'GTRT - 001', 'L', '2025-10-23 00:00:00', NULL, NULL, NULL, 2, 'QR-8c674814-f9e9-45f2-a4ad-e36ee8e65a1e');
+(51, 4, NULL, 'GTRT - 001', 'L', '2025-10-23 00:00:00', NULL, NULL, NULL, 2, 'QR-8c674814-f9e9-45f2-a4ad-e36ee8e65a1e'),
+(52, 301, NULL, 'CASC-A001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(53, 302, NULL, 'CASC-B001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(54, 303, NULL, 'CHAL-R001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(55, 304, NULL, 'CHAL-T001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(56, 305, NULL, 'ARN-B001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(57, 306, NULL, 'ARN-D001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(58, 307, NULL, 'GUAN-C001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(59, 308, NULL, 'GUAN-T001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(60, 309, NULL, 'LENT-T001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(61, 310, NULL, 'LENT-P001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(62, 311, NULL, 'BOT-A001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL),
+(63, 312, NULL, 'BOT-D001', NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -702,7 +736,7 @@ INSERT INTO `stock` (`id`, `id_recurso`, `id_serie_recurso`, `id_estado_recurso`
 (13, 9, 16, 3, 8),
 (14, 8, 12, 3, 8),
 (15, 8, 11, 1, 5),
-(16, 6, 7, 1, NULL),
+(16, 6, 7, 3, 28),
 (17, 8, 10, 3, 8),
 (18, 6, 41, 3, 8),
 (19, 4, 49, 3, 8),
@@ -737,7 +771,10 @@ INSERT INTO `subcategoria` (`id`, `nombre`, `categoria_id`) VALUES
 (3, 'Test', 1),
 (4, 'Casco', 1),
 (5, 'Arnes', 1),
-(6, 'Taladro', 2);
+(6, 'Taladro', 2),
+(7, 'guantes', 1),
+(8, 'lentes', 1),
+(9, 'botas', 1);
 
 -- --------------------------------------------------------
 
@@ -809,7 +846,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`, `updated_at`, `usuario_creacion`, `usuario_modificacion`, `ultimo_acceso`, `id_estado`, `fecha_nacimiento`, `dni`, `telefono`, `nro_legajo`, `auth_key`, `access_token`, `codigo_qr`) VALUES
-(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-21 03:01:07', NULL, NULL, '2025-10-21 03:01:07', 1, NULL, '16', NULL, NULL, NULL, NULL, 'USR-722c6a13-ad73-11f0-a94d-00e070eec074'),
+(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-22 17:31:14', NULL, NULL, '2025-10-22 17:31:14', 1, NULL, '16', NULL, NULL, NULL, NULL, 'USR-722c6a13-ad73-11f0-a94d-00e070eec074'),
 (6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-13 18:29:09', 5, 5, '2025-10-11 15:18:10', 2, NULL, '2', NULL, NULL, NULL, NULL, 'USR-722c8102-ad73-11f0-a94d-00e070eec074'),
 (7, 3, 'trabajador', 'trabajador@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-13 18:19:12', 5, 5, '2025-10-03 21:44:20', 1, NULL, '4', NULL, NULL, NULL, NULL, 'USR-722c823c-ad73-11f0-a94d-00e070eec074'),
 (8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-17 02:15:53', 5, 5, '2025-10-17 02:15:53', 1, NULL, '1', NULL, NULL, NULL, NULL, 'USR-722c830f-ad73-11f0-a94d-00e070eec074'),
@@ -841,8 +878,27 @@ CREATE TABLE `usuario_recurso` (
   `id` int(10) NOT NULL,
   `id_usuario` int(10) NOT NULL,
   `id_recurso` int(10) NOT NULL,
+  `id_serie_recurso` int(10) UNSIGNED DEFAULT NULL,
   `fecha_asignacion` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `usuario_recurso`
+--
+
+INSERT INTO `usuario_recurso` (`id`, `id_usuario`, `id_recurso`, `id_serie_recurso`, `fecha_asignacion`) VALUES
+(1, 24, 301, 52, '2025-10-22 00:00:00'),
+(2, 24, 307, 58, '2025-10-22 00:00:00'),
+(3, 24, 309, 60, '2025-10-22 00:00:00'),
+(4, 24, 311, 62, '2025-10-22 00:00:00'),
+(5, 24, 4, 48, '2025-10-22 00:00:00'),
+(6, 24, 306, 57, '2025-10-22 00:00:00'),
+(7, 27, 302, 53, '2025-10-22 00:00:00'),
+(8, 27, 308, 59, '2025-10-22 00:00:00'),
+(9, 27, 310, 61, '2025-10-22 00:00:00'),
+(10, 27, 312, 63, '2025-10-22 00:00:00'),
+(11, 27, 4, 50, '2025-10-22 00:00:00'),
+(12, 27, 305, 56, '2025-10-22 00:00:00');
 
 --
 -- Índices para tablas volcadas
@@ -1062,7 +1118,8 @@ ALTER TABLE `usuario`
 --
 ALTER TABLE `usuario_recurso`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `index_usuario` (`id_usuario`,`id_recurso`);
+  ADD KEY `index_usuario` (`id_usuario`,`id_recurso`),
+  ADD KEY `fk_usuario_recurso_serie` (`id_serie_recurso`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -1072,13 +1129,13 @@ ALTER TABLE `usuario_recurso`
 -- AUTO_INCREMENT de la tabla `checklist`
 --
 ALTER TABLE `checklist`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_prestamo`
 --
 ALTER TABLE `detalle_prestamo`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT de la tabla `estado_incidente`
@@ -1132,19 +1189,19 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT de la tabla `prestamo`
 --
 ALTER TABLE `prestamo`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT de la tabla `recurso`
 --
 ALTER TABLE `recurso`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=313;
 
 --
 -- AUTO_INCREMENT de la tabla `serie_recurso`
 --
 ALTER TABLE `serie_recurso`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT de la tabla `stock`
@@ -1156,7 +1213,7 @@ ALTER TABLE `stock`
 -- AUTO_INCREMENT de la tabla `subcategoria`
 --
 ALTER TABLE `subcategoria`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `tareas_diarias`
@@ -1180,7 +1237,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `usuario_recurso`
 --
 ALTER TABLE `usuario_recurso`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Restricciones para tablas volcadas
@@ -1233,6 +1290,12 @@ ALTER TABLE `subcategoria`
 ALTER TABLE `tareas_diarias`
   ADD CONSTRAINT `tareas_diarias_ibfk_1` FOREIGN KEY (`trabajador_id`) REFERENCES `usuario` (`id`),
   ADD CONSTRAINT `tareas_diarias_ibfk_2` FOREIGN KEY (`asignado_por`) REFERENCES `usuario` (`id`);
+
+--
+-- Filtros para la tabla `usuario_recurso`
+--
+ALTER TABLE `usuario_recurso`
+  ADD CONSTRAINT `fk_usuario_recurso_serie` FOREIGN KEY (`id_serie_recurso`) REFERENCES `serie_recurso` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

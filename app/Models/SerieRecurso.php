@@ -47,6 +47,12 @@ class SerieRecurso extends Model
     {
         return $this->belongsTo(Recurso::class, 'id_recurso');
     }
+    public function usuarioRecurso()
+{
+    return $this->hasOne(\App\Models\UsuarioRecurso::class, 'id_serie_recurso');
+}
+
+
 
     /**
      * Incidente detalle asociado (si aplica)

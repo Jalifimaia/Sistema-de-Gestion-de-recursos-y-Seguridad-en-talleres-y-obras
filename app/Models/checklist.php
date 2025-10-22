@@ -17,17 +17,20 @@ class Checklist extends Model
 
     // Campos que se pueden asignar masivamente
     protected $fillable = [
-        'trabajador_id',
-        'supervisor_id',
-        'anteojos',
-        'botas',
-        'chaleco',
-        'guantes',
-        'arnes',
-        'es_en_altura',
-        'fecha',
-        'observaciones',
-    ];
+    'trabajador_id',
+    'supervisor_id',
+    'anteojos',
+    'botas',
+    'chaleco',
+    'guantes',
+    'arnes',
+    'es_en_altura',
+    'fecha',
+    'hora',
+    'observaciones',
+    'critico',
+];
+
 
     // Cast automático de booleanos
     protected $casts = [
@@ -38,6 +41,8 @@ class Checklist extends Model
         'arnes' => 'boolean',
         'es_en_altura' => 'boolean',
         'fecha' => 'date',
+        'hora' => 'datetime:H:i',
+        'critico' => 'boolean',
     ];
 
     // Relaciones
