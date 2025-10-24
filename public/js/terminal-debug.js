@@ -1,5 +1,6 @@
 let scanner;
 let isScanning = false; // 👈 flag de estado
+window.comandoVozReciente = null;
 
 
 function mostrarMensajeKiosco(texto, tipo = 'info') {
@@ -46,6 +47,8 @@ function mostrarMensajeKiosco(texto, tipo = 'info') {
 
 
 function nextStep(n) {
+  console.log(`🔄 Cambio de step: ahora activo step${n}`);
+
   // 🔒 Cerrar modal de recursos si está abierto
   const modalEl = document.getElementById('modalRecursos');
   if (modalEl) {
@@ -322,6 +325,9 @@ function seleccionarRecurso(recursoId) {
       const contenedor = document.getElementById('serie-buttons');
       contenedor.innerHTML = '';
 
+      window.modalSerieCancelado = false; // ✅ permitir nuevo registro
+      
+      step5ReturnTarget = 7; // 👈 volver a selección de recurso si se cancela
       nextStep(8);
 
       series.forEach((s, index) => {
@@ -343,42 +349,152 @@ function seleccionarRecurso(recursoId) {
   xhr.send();
 }
 
-
-
-
-
+// ----------------- modal de confirmación para series -----------------
+window.modalSerieActivo = null;
 
 function registrarSerie(serieId) {
+  if (window.modalSerieCancelado) {
+    console.warn('⛔ Intento de registrar serie después de cancelación');
+    return;
+  }
+
   const id_usuario = localStorage.getItem('id_usuario');
   if (!id_usuario) {
     mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
     return;
   }
 
-  if (!confirm('¿Confirmás que querés solicitar esta herramienta?')) return;
+  const btn = document.querySelector(`[data-serie-id="${serieId}"]`);
+  let nombreSerie = `Serie ${serieId}`;
+  if (btn) {
+    const copia = btn.cloneNode(true);
+    copia.querySelector('.badge-opcion')?.remove();
+    nombreSerie = copia.textContent.trim();
+  }
 
-  fetch(`/terminal/prestamos/${id_usuario}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    },
-    body: JSON.stringify({ series: [serieId] })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
-      nextStep(2);
-    } else {
-      mostrarMensajeKiosco(data.message || 'Error al registrar recurso', 'danger');
-    }
-  })
-  .catch(() => {
-    mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+  console.log(`📤 Enviando solicitud de préstamo para serie ${serieId}`);
+  mostrarModalSerie(nombreSerie, () => {
+    fetch(`/terminal/prestamos/${id_usuario}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ series: [serieId] })
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log('📥 Respuesta del backend al registrar serie:', data);
+        if (data.success) {
+          mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
+          actualizarSeriesLocales(serieId);
+        } else {
+          mostrarMensajeKiosco(data.message || 'Error al registrar recurso', 'danger');
+        }
+      })
+      .catch(() => {
+        mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+      });
+  }, () => {
+    mostrarMensajeKiosco('❌ Solicitud cancelada', 'danger');
   });
 }
 
+
+function mostrarModalSerie(nombreSerie, onAceptar, onCancelar) {
+  window.modalSerieCancelado = false; // ✅ resetear flag
+
+  const existente = document.getElementById('modalSerie');
+  if (existente) existente.remove();
+
+  const modalHTML = `
+    <div class="modal fade" id="modalSerie" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmar acción</h5>
+          </div>
+          <div class="modal-body">
+            ¿Quiere solicitar o registrar <b>${nombreSerie}</b>?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelarSerie" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btnAceptarSerie">Aceptar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  const modalEl = document.getElementById('modalSerie');
+  const modalInstance = new bootstrap.Modal(modalEl);
+
+  const limpiar = (accion) => {
+    try { modalInstance.hide(); } catch(e){}
+    window.modalSerieActivo = null;
+
+    if (accion === 'cancelar') {
+      window.modalSerieCancelado = true;
+      console.log('🚫 Flag modalSerieCancelado activado');
+
+      // ❌ Ya no forzamos nextStep aquí
+      // Solo cerramos y limpiamos botones
+      /*const contenedor = document.getElementById('serie-buttons');
+      if (contenedor) contenedor.innerHTML = '';*/
+    }
+
+    setTimeout(() => {
+      const el = document.getElementById('modalSerie');
+      if (el) el.remove();
+    }, 300);
+
+    if (accion === 'aceptar' && typeof onAceptar === 'function') onAceptar();
+    if (accion === 'cancelar' && typeof onCancelar === 'function') onCancelar();
+  };
+
+  modalEl.querySelector('#btnAceptarSerie').onclick = () => limpiar('aceptar');
+  modalEl.querySelector('#btnCancelarSerie').onclick = () => limpiar('cancelar');
+
+  modalEl.addEventListener('hidden.bs.modal', () => {
+    if (window.modalSerieActivo) {
+      const cb = window.modalSerieActivo.onCancelar;
+      window.modalSerieActivo = null;
+      if (typeof cb === 'function') cb();
+    }
+    setTimeout(() => {
+      const el = document.getElementById('modalSerie');
+      if (el) el.remove();
+    }, 300);
+  }, { once: true });
+
+  window.modalSerieActivo = {
+    onAceptar: () => limpiar('aceptar'),
+    onCancelar: () => limpiar('cancelar')
+  };
+
+  console.log(`🟢 Modal de serie abierto para: ${nombreSerie}`);
+  modalInstance.show();
+}
+
+
+
+
+function actualizarSeriesLocales(serieId) {
+  // desactivar o marcar la serie recién asignada
+  const btn = document.querySelector(`[data-serie-id="${serieId}"]`);
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.remove('btn-outline-primary');
+    btn.classList.add('btn-success');
+    btn.textContent = '✅ Asignado';
+  }
+
+  // si querés, también podés volver a cargar la lista si existe esa función
+  if (typeof cargarSeriesDisponibles === 'function') {
+    cargarSeriesDisponibles(); // refresca toda la lista si lo necesitás
+  }
+}
 
 
 
@@ -409,6 +525,7 @@ document.getElementById('recurso-buttons').addEventListener('click', function (e
 document.getElementById('serie-buttons').addEventListener('click', function (e) {
   const btn = e.target.closest('[data-serie-id]');
   if (btn) {
+        window.modalSerieCancelado = false; // ✅ resetear flag al intentar otra serie
     registrarSerie(btn.dataset.serieId);
   }
 });
@@ -447,7 +564,7 @@ function activarEscaneoQR() {
       console.warn('Error de escaneo:', errorMessage);
     }
   ).catch(err => {
-    console.error('Error al iniciar escaneo:', err);
+    console.error('❌ Error al iniciar escaneo:', err);
     mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
     cleanupScanUI();
   });
@@ -875,19 +992,64 @@ function matchTextoBoton(limpio, btn) {
 
 
 function procesarComandoVoz(limpio) {
+  
   const step = getStepActivo();
-  console.log("👉 Texto reconocido (normalizado):", limpio, " | Step activo:", step);
 
-// === Step1: Identificación ===
-if (step === 'step1') {
-  let comandoEjecutado = false;
-
-  if (matchOpcion(limpio, 0, "qr", "iniciar sesion con qr", "iniciar con qr", "sesion qr", "login qr")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Iniciar sesión con QR', 'success');
-    activarEscaneoQRLogin();
-    comandoEjecutado = true;
+  // 🛡️ Protección contra comandos repetidos
+  if (window.comandoVozReciente === limpio) {
+    console.log('⏸️ Comando repetido ignorado:', limpio);
     return;
   }
+  window.comandoVozReciente = limpio;
+  setTimeout(() => { window.comandoVozReciente = null; }, 1000);
+
+  // 🔒 Si el modal fue cancelado, ignorar comandos en step8 (excepto "volver")
+  if (step === 'step8' && window.modalSerieCancelado) {
+  if (limpio.includes('volver')) {
+    console.log('↩️ Comando "volver" detectado en step8 tras cancelación');
+    nextStep(step5ReturnTarget);
+    return;
+  }
+
+  // 👇 si el comando es una opción de serie, dejamos que siga abajo
+  const esOpcionSerie = /opcion|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|\d/.test(limpio);
+  if (!esOpcionSerie) {
+    console.log('⛔ Comando ignorado: modal cancelado en step8');
+    return;
+  }
+}
+
+
+// 🔒 Si el modal está activo, interceptar solo "aceptar" o "cancelar"
+  if (window.modalSerieActivo) {
+    if (limpio.includes('aceptar') || limpio.includes('confirmar') || limpio.includes('si')) {
+      console.log('✅ Comando de confirmación detectado con modal activo');
+      window.modalSerieActivo.onAceptar();
+      return;
+    }
+    if (limpio.includes('cancelar') || limpio.includes('no') || limpio.includes('rechazar')) {
+      console.log('❌ Comando de cancelación detectado con modal activo');
+      window.modalSerieActivo.onCancelar();
+      return;
+    }
+    console.log('⛔ Comando ignorado: modal activo sin coincidencia');
+    return;
+  }
+
+    console.log("👉 Texto reconocido (normalizado):", limpio, " | Step activo:", step);
+
+  // === Step1: Identificación ===
+  if (step === 'step1') {
+    let comandoEjecutado = false;
+
+    if (matchOpcion(limpio, 0, "qr", "iniciar sesion con qr", "iniciar con qr", "sesion qr", "login qr")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Iniciar sesión con QR', 'success');
+      activarEscaneoQRLogin();
+      comandoEjecutado = true;
+      return;
+    }
+  
+
 
   if (limpio.includes("continuar")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Continuar con DNI', 'success');
@@ -917,7 +1079,7 @@ else if (step === 'step2') {
   // 🔄 Limpieza de repeticiones (ej: "tres tres" → "tres")
   limpio = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
 
-  if (matchOpcion(limpio, 1, "herramienta en mano")) {
+  if (matchOpcion(limpio, 1, "herramienta en mano", "tengo la herramienta en mano")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
     setModoEscaneo('manual');
     comandoEjecutado = true;
@@ -942,7 +1104,7 @@ else if (step === 'step2') {
     return;
   }
 
-  if (matchOpcion(limpio, 4, "volver", "inicio", "regresar", "atrás", "cerrar")) {
+  if (matchOpcion(limpio, 4, "volver")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
     volverAInicio();
     comandoEjecutado = true;
@@ -981,7 +1143,7 @@ else if (step === 'step3') {
     return;
   }
 
-  if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
+  if (matchOpcion(limpio, 3, "volver")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
     detenerEscaneoQR(2);
     comandoEjecutado = true;
@@ -998,7 +1160,7 @@ else if (step === 'step3') {
 else if (step === 'step5') {
   let comandoEjecutado = false;
 
-  if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+  if (matchOpcion(limpio, 0, "volver")) {
     mostrarMensajeKiosco(
       step5ReturnTarget === 3
         ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"'
@@ -1027,7 +1189,7 @@ else if (step === 'step5') {
 else if (step === 'step6') {
   let comandoEjecutado = false;
 
-  if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+  if (matchOpcion(limpio, 0, "volver")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success');
     nextStep(5);
     comandoEjecutado = true;
@@ -1051,7 +1213,7 @@ else if (step === 'step6') {
 else if (step === 'step7') {
   let comandoEjecutado = false;
 
-  if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+  if (matchOpcion(limpio, 0, "volver")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver a subcategorías', 'success');
     nextStep(6);
     comandoEjecutado = true;
@@ -1075,7 +1237,7 @@ else if (step === 'step7') {
 else if (step === 'step8') {
   let comandoEjecutado = false;
 
-  if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+  if (matchOpcion(limpio, 0, "volver")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success');
     nextStep(7);
     comandoEjecutado = true;
@@ -1085,6 +1247,7 @@ else if (step === 'step8') {
   const botones = document.querySelectorAll('#serie-buttons button');
   botones.forEach((btn, index) => {
     if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
+      window.modalSerieCancelado = false; // ✅ resetear flag también en flujo de voz
       btn.click();
       comandoEjecutado = true;
     }
@@ -1096,15 +1259,5 @@ else if (step === 'step8') {
 }
 
 
-  // === Comando global: cerrar modal de recursos ===
-  const modalEl = document.getElementById('modalRecursos');
-  if (modalEl && modalEl.classList.contains('show')) {
-    if (matchOpcion(limpio, 0, "volver", "cerrar", "cerrar recursos")) {
-      console.log("✅ Comando global: Cerrar modal de recursos asignados");
-      const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-      modalInstance.hide();
-      mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
-      return;
-    }
-  }
+
 }

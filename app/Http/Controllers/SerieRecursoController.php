@@ -139,7 +139,12 @@ public function createConRecurso($id)
 
 public function exportQrPdf($id)
 {
+    
     $serie = SerieRecurso::with('recurso')->findOrFail($id);
+
+    \Log::info("Serie ID {$id} - código_qr: " . var_export($serie->codigo_qr, true));
+    \Log::info("Tipo de dato de código_qr: " . gettype($serie->codigo_qr));
+
 
     // ✅ Generar QR como imagen PNG en base64 (sin Imagick)
     $qrBase64 = base64_encode(\QrCode::format('png')->size(200)->generate($serie->codigo_qr));
