@@ -52,13 +52,19 @@ function nextStep(n) {
     const modalInstance = bootstrap.Modal.getInstance(modalEl);
     if (modalInstance) {
       modalInstance.hide();
+      console.log('📖 cerrarModalRecursos: modal cerrado por cambio de step');
+
     }
   }
+
+  console.log('📖 cerrarModalRecursos: modal cerrado por cambio de step');
+
 
   // 🔒 Detener escaneo QR si no estamos en step3
   if (n !== 3) detenerEscaneoQR();
 
   // 🔄 Cambiar step activo
+  console.log('➡️ nextStep: cambiando al paso', n);
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById('step' + n).classList.add('active');
 
@@ -93,12 +99,16 @@ function identificarTrabajador() {
         // Mensajes diferenciados según backend
         if (res.message === 'Usuario no encontrado') {
           mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
+          console.error('❌ Usuario no encontrado en el sistema', 'danger');
         } else if (res.message === 'Este usuario no tiene permisos para usar el kiosco') {
           mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
+          console.warn('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
         } else if (res.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
           mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
+          console.log('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
         } else {
           mostrarMensajeKiosco(res.message || 'Error al identificar al trabajador', 'danger');
+          console.error(res.message || 'Error al identificar al trabajador', 'danger');
         }
       }
     } catch (e) {
@@ -110,10 +120,9 @@ function identificarTrabajador() {
   xhr.send('dni=' + encodeURIComponent(dni));
 }
 
-
-
 function simularEscaneo() {
   //alert("Simulación de escaneo QR");
+  console.log('🧪 simularEscaneo: simulación activada, avanzando a step5');
   nextStep(5);
 }
 
@@ -124,6 +133,7 @@ function cargarCategorias() {
   xhr.onload = function () {
     try {
       const categorias = JSON.parse(xhr.responseText);
+      console.log('📁 cargarCategorias: categorías recibidas', categorias);
       const contenedor = document.getElementById('categoria-buttons');
       contenedor.innerHTML = '';
 
@@ -141,6 +151,7 @@ function cargarCategorias() {
       });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar las categorías', 'danger');
+      console.log('No se pudieron cargar las categorías');
     }
   };
 
@@ -149,7 +160,11 @@ function cargarCategorias() {
 
 function cargarRecursos() {
   const id_usuario = localStorage.getItem('id_usuario');
-  if (!id_usuario) return;
+
+  if (!id_usuario) {
+    console.warn('⚠️ cargarRecursos: No hay id_usuario en localStorage');
+    return;
+  } 
 
   const xhr = new XMLHttpRequest();
   xhr.open('GET', `/terminal/recursos-asignados/${id_usuario}`, true);
@@ -182,6 +197,7 @@ function cargarRecursos() {
 
     } catch (e) {
       mostrarMensajeKiosco('Error al cargar recursos asignados', 'danger');
+      console.log('Error al cargar recursos asignados');
     }
   };
 
@@ -194,6 +210,7 @@ function mostrarRecursosAsignados(recursos) {
   contenedor.innerHTML = '';
 
   recursos.forEach(r => {
+    console.log('📋 mostrarRecursosAsignados: recursos recibidos', recursos);
     const card = document.createElement('div');
     card.className = 'card mb-3 shadow-sm';
 
@@ -225,19 +242,30 @@ function devolverRecurso(detalleId) {
       'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
     }
   })
-  .then(res => res.json())
+  .then(res => {
+    console.log('📡 devolverRecurso: respuesta HTTP', res);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  })
   .then(data => {
+    console.log('📦 devolverRecurso: respuesta JSON', data);
+
     if (data.success) {
       mostrarMensajeKiosco('✅ Recurso devuelto correctamente', 'success');
-      cargarRecursos(); // refresca la tabla de recursos asignados
+      console.log(`✅ Recurso devuelto: ${data.recurso || 'recurso desconocido'} - Serie: ${data.serie || 'sin serie'} (detalleId ${detalleId})`);
+      cargarRecursos();
     } else {
       mostrarMensajeKiosco(data.message || 'Error al devolver recurso', 'danger');
+      console.warn('⚠️ devolverRecurso: error lógico en respuesta', data.message);
     }
   })
-  .catch(() => {
+  .catch(err => {
     mostrarMensajeKiosco('Error de red al devolver recurso', 'danger');
+    console.error('❌ devolverRecurso: error de red o parseo', err);
   });
 }
+
+
 
 
 function seleccionarCategoria(categoriaId) {
@@ -247,6 +275,7 @@ function seleccionarCategoria(categoriaId) {
   xhr.onload = function () {
     try {
       const subcategorias = JSON.parse(xhr.responseText);
+      console.log('📁 seleccionarCategoria: subcategorías recibidas', subcategorias);
       const contenedor = document.getElementById('subcategoria-buttons');
       contenedor.innerHTML = '';
 
@@ -266,6 +295,7 @@ function seleccionarCategoria(categoriaId) {
       });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar las subcategorías', 'danger');
+      console.log('No se pudieron cargar las subcategorías');
     }
   };
 
@@ -284,6 +314,7 @@ function seleccionarSubcategoria(subcategoriaId) {
   xhr.onload = function () {
     try {
       const recursos = JSON.parse(xhr.responseText);
+      console.log('📦 seleccionarSubcategoria: recursos recibidos', recursos);
       const contenedor = document.getElementById('recurso-buttons');
       contenedor.innerHTML = '';
 
@@ -303,6 +334,7 @@ function seleccionarSubcategoria(subcategoriaId) {
       });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar los recursos', 'danger');
+      console.log('No se pudieron cargar los recursos');
     }
   };
 
@@ -319,6 +351,7 @@ function seleccionarRecurso(recursoId) {
   xhr.onload = function () {
     try {
       const series = JSON.parse(xhr.responseText);
+      console.log('🔢 seleccionarRecurso: series recibidas', series);
       const contenedor = document.getElementById('serie-buttons');
       contenedor.innerHTML = '';
 
@@ -337,6 +370,7 @@ function seleccionarRecurso(recursoId) {
       });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar las series', 'danger');
+      console.log('No se pudieron cargar las series');
     }
   };
 
@@ -351,6 +385,7 @@ function seleccionarRecurso(recursoId) {
 function registrarSerie(serieId) {
   const id_usuario = localStorage.getItem('id_usuario');
   if (!id_usuario) {
+    console.warn('⚠️ registrarSerie: No hay trabajador identificado');
     mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
     return;
   }
@@ -369,13 +404,16 @@ function registrarSerie(serieId) {
   .then(data => {
     if (data.success) {
       mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
+        console.log('✅ Recurso asignado correctamente');
       nextStep(2);
     } else {
       mostrarMensajeKiosco(data.message || 'Error al registrar recurso', 'danger');
+      console.log('Error al registrar recurso');
     }
   })
   .catch(() => {
     mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+      console.log('Error de red al registrar recurso');
   });
 }
 
@@ -421,6 +459,7 @@ function activarEscaneoQR() {
   const textoCamara = document.getElementById('texto-camara-activa');
 
   if (!qrContainer) {
+    console.error('No se encontró el contenedor de escaneo QR')
     mostrarMensajeKiosco('No se encontró el contenedor de escaneo QR', 'danger');
     return;
   }
@@ -463,6 +502,7 @@ function cancelarEscaneoQR() {
 function registrarPorQR(codigoQR) {
   const id_usuario = localStorage.getItem('id_usuario');
   if (!id_usuario) {
+    console.warn('⚠️ registrarPorQR: No hay trabajador identificado');
     mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
     return;
   }
@@ -483,15 +523,19 @@ function registrarPorQR(codigoQR) {
       // Caso éxito
       const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
       mostrarMensajeKiosco(mensaje, 'success');
+      console.log(`✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`);
       nextStep(2);
     } else {
       // Mensajes diferenciados según backend
       if (data.message === 'QR no encontrado') {
         mostrarMensajeKiosco('❌ QR no encontrado en el sistema', 'danger');
+      console.log('❌ QR no encontrado en el sistema');
       } else if (data.message === 'Este recurso ya está asignado') {
         mostrarMensajeKiosco(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
+      console.log(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`);
       } else {
         mostrarMensajeKiosco(data.message || 'Error al registrar recurso por QR', 'danger');
+      console.log('Error al registrar recurso por QR');
       }
     }
   })
@@ -511,6 +555,7 @@ function detenerEscaneoQR(next = null) {
   const textoCamara = document.getElementById('texto-camara-activa');
 
   if (scanner && isScanning) {
+    console.log('📴 detenerEscaneoQR: deteniendo escaneo activo');
     scanner.stop().catch(() => {}).then(() => {
       qrContainer.innerHTML = '';
       if (btnCancelar) btnCancelar.classList.add('d-none');
@@ -518,6 +563,7 @@ function detenerEscaneoQR(next = null) {
       if (textoCamara) textoCamara.classList.add('d-none');
       isScanning = false;
       if (next) nextStep(next); // 👈 avanzar al paso cuando termina
+      console.log('➡️ detenerEscaneoQR: avanzando a step', next);
     });
   } else {
     qrContainer.innerHTML = '';
@@ -557,7 +603,10 @@ function activarEscaneoQRLogin() {
   const qrContainer = document.getElementById('qr-login-reader');
   const wrapper = document.getElementById('qr-login-container');
 
-  if (!qrContainer || !wrapper || isScanning) return;
+  if (!qrContainer || !wrapper || isScanning) {
+    console.error('❌ activarEscaneoQRLogin: contenedor o wrapper no disponible, o escaneo ya activo');
+    return;
+  }
 
   wrapper.style.display = 'block';
   qrContainer.innerHTML = '';
@@ -595,6 +644,7 @@ function detenerEscaneoQRLogin() {
     scanner.stop().catch(() => {}).then(() => {
       qrContainer.innerHTML = '';
       wrapper.style.display = 'none';
+      console.log('📴 detenerEscaneoQRLogin: escaneo login detenido y UI oculta');
       isScanning = false;
     });
   } else {
@@ -626,12 +676,16 @@ function identificarPorQR(codigoQR) {
       // Mensajes diferenciados según backend
       if (data.message === 'Usuario no encontrado') {
         mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
+      console.log('❌ Usuario no encontrado en el sistema');
       } else if (data.message === 'Este usuario no tiene permisos para usar el kiosco') {
         mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
+      console.log('⚠️ Este usuario no tiene permisos para usar el kiosco');
       } else if (data.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
         mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
+      console.log('⛔ El usuario no está en estado Alta y no puede usar el kiosco');
       } else {
         mostrarMensajeKiosco(data.message || 'Error al identificar por QR', 'danger');
+      console.log('Error al identificar por QR');
       }
     }
   })
@@ -645,6 +699,7 @@ function identificarPorQR(codigoQR) {
 function volverAInicio() {
   // Limpiamos la sesión del trabajador
   localStorage.removeItem('id_usuario');
+  console.log('🔙 volverAInicio: sesión limpiada');
 
   // Volvemos al paso 1
   nextStep(1);
@@ -660,11 +715,13 @@ let step5ReturnTarget = 2; // default: menú principal
 function setModoEscaneo(modo) {
   const titulo = document.getElementById('titulo-step3');
   if (modo === 'manual') {
+    console.log('🔄 setModoEscaneo: modo manual activado');
     titulo.textContent = '📦 Tengo la herramienta en mano';
     detenerEscaneoQR();
     // 👇 si luego vamos a solicitar manualmente (step5), el volver debe regresar acá (step3)
     step5ReturnTarget = 3;
   } else {
+    console.log('🔄 setModoEscaneo: modo escaneo QR activado');
     titulo.textContent = '📷 Escanear Recurso';
     activarEscaneoQR();
     // escaneo QR no cambia el target de step5
@@ -677,45 +734,75 @@ function cargarMenuPrincipal() {
   contenedor.innerHTML = '';
 
   const opciones = [
-    { id: 1, texto: "📦 Tengo la herramienta en mano", accion: () => setModoEscaneo('manual'), clase: "btn-outline-success" },
-    { id: 2, texto: "🛠️ Quiero solicitar una herramienta", accion: () => {
-    const id_usuario = localStorage.getItem('id_usuario');
-    if (!id_usuario) {
-      mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
-      return;
-    }
-
-    fetch('/terminal/solicitar', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    {
+      id: 1,
+      texto: "📦 Tengo la herramienta en mano",
+      accion: () => {
+        console.log('📦 opción seleccionada: herramienta en mano');
+        setModoEscaneo('manual');
       },
-      body: JSON.stringify({ id_usuario })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success) {
-        mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
-        return;
-      }
+      clase: "btn-outline-success"
+    },
+    {
+      id: 2,
+      texto: "🛠️ Quiero solicitar una herramienta",
+      accion: () => {
+        const id_usuario = localStorage.getItem('id_usuario');
+        if (!id_usuario) {
+          console.warn('⚠️ cargarMenuPrincipal: no hay id_usuario para solicitar herramienta');
+          mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+          return;
+        }
 
-      // ✅ Si pasa la validación, continuar
-      step5ReturnTarget = 2;
-      nextStep(5);
-    })
-    .catch(() => {
-      mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
-    });
-  }, clase: "btn-outline-primary" },
-    { id: 3, texto: "📋 Ver recursos asignados", accion: () => {
+        fetch('/terminal/solicitar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ id_usuario })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success) {
+            console.warn('❌ No se puede solicitar herramientas:', data.message);
+            mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
+            return;
+          }
+
+          console.log('🛠️ opción seleccionada: solicitar herramienta');
+          step5ReturnTarget = 2;
+          nextStep(5);
+        })
+        .catch(() => {
+          console.error('❌ Error de red al validar EPP');
+          mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
+        });
+      },
+      clase: "btn-outline-primary"
+    },
+    {
+      id: 3,
+      texto: "📋 Ver recursos asignados",
+      accion: () => {
+        console.log('📋 opción seleccionada: ver recursos asignados');
         cargarRecursos();
-        const modalEl = document.getElementById('modalRecursos');
-        const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-        modalInstance.show();
-      }, clase: "btn-info" },
-    { id: 4, texto: "🔙 Volver", accion: () => volverAInicio(), clase: "btn-secondary" }
+        abrirModalRecursos(); // ✅ dispara log de apertura y cierre
+      },
+      clase: "btn-info"
+    },
+    {
+      id: 4,
+      texto: "🔙 Volver",
+      accion: () => {
+        console.log('🔙 opción seleccionada: volver al inicio');
+        volverAInicio();
+      },
+      clase: "btn-secondary"
+    }
   ];
+
+  console.log('📋 cargarMenuPrincipal: opciones generadas', opciones);
 
   opciones.forEach(op => {
     const btn = document.createElement('button');
@@ -731,6 +818,7 @@ function cargarMenuPrincipal() {
   });
 }
 
+
 // 👇 nuevo: función para botón Volver en step5
 function volverDesdeStep5() {
   nextStep(step5ReturnTarget);
@@ -741,12 +829,21 @@ function abrirModalRecursos() {
   const modalEl = document.getElementById('modalRecursos');
   if (!modalEl) return;
   const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+  
+  console.log('📖 abrirModalRecursos: modal abierto');
   modalInstance.show();
+
+  modalEl.addEventListener('hidden.bs.modal', () => {
+  console.log('📖 cerrarModalRecursos: modal cerrado por interacción del usuario');
+});
+
 }
 
 
 // 🔧 Normalizar texto (quita acentos)
 function normalizarTexto(str) {
+  console.log('🔤 normalizarTexto: texto original →', str);
+  
   return str
     .toLowerCase()
     .normalize("NFD")
@@ -758,6 +855,7 @@ function getStepActivo() {
   const steps = document.querySelectorAll('.step');
   for (let s of steps) {
     if (s.classList.contains('active')) {
+      console.log('🔍 getStepActivo: step activo detectado →', s.id);
       return s.id; // ej: "step2"
     }
   }
@@ -770,6 +868,7 @@ let recognitionRunning = false;
 
 function iniciarReconocimientoGlobal() {
   if (!('webkitSpeechRecognition' in window)) {
+    console.warn('⚠️ Tu navegador no soporta reconocimiento de voz');
     mostrarMensajeKiosco('⚠️ Tu navegador no soporta reconocimiento de voz', 'warning');
     return;
   }
@@ -803,7 +902,11 @@ function iniciarReconocimientoGlobal() {
   recognitionGlobal.onend = () => {
     recognitionRunning = false;
     // 👇 Si se corta por cualquier motivo, lo reiniciamos
-    if (!recognitionRunning) recognitionGlobal.start();
+    if (!recognitionRunning) 
+      {
+        console.log("ℹ️ Reconocimiento reiniciado");
+        recognitionGlobal.start();
+      }
   };
 
   recognitionGlobal.start();
@@ -820,6 +923,7 @@ let recognition;
 
 function iniciarReconocimientoVoz() {
   if (!('webkitSpeechRecognition' in window)) {
+    console.warn('⚠️ Tu navegador no soporta reconocimiento de voz');
     mostrarMensajeKiosco('⚠️ Tu navegador no soporta reconocimiento de voz', 'warning');
     return;
   }
@@ -836,6 +940,7 @@ function iniciarReconocimientoVoz() {
   };
 
   recognition.start();
+  console.log('🎤 iniciarReconocimientoVoz: reconocimiento iniciado');
 }
 
 function matchOpcion(limpio, numero, ...palabrasClave) {
@@ -850,6 +955,8 @@ function matchOpcion(limpio, numero, ...palabrasClave) {
   };
 
   const palabra = numerosPalabra[numero];
+
+  console.log('🎯 matchOpcion: evaluando coincidencia para opción', numero);
 
   return (
     limpio.includes(`opcion ${numero}`) ||
@@ -870,6 +977,8 @@ function matchTextoBoton(limpio, btn) {
     .replace(/[\s-]/g, '')
     .trim();
   const comando = limpio.replace(/[\s-]/g, '');
+
+  console.log('🎯 matchTextoBoton: comparando comando vs botón', comando, texto);
   return texto.includes(comando) || comando.includes(texto);
 }
 
@@ -884,6 +993,7 @@ if (step === 'step1') {
 
   if (matchOpcion(limpio, 0, "qr", "iniciar sesion con qr", "iniciar con qr", "sesion qr", "login qr")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Iniciar sesión con QR', 'success');
+      console.log('🎤 Comando reconocido: Iniciar sesión con QR');
     activarEscaneoQRLogin();
     comandoEjecutado = true;
     return;
@@ -891,6 +1001,7 @@ if (step === 'step1') {
 
   if (limpio.includes("continuar")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Continuar con DNI', 'success');
+      console.log('🎤 Comando reconocido: Continuar con DNI');
     identificarTrabajador();
     comandoEjecutado = true;
     return;
@@ -900,6 +1011,7 @@ if (step === 'step1') {
   if (numeros.length > 6) {
     document.getElementById('dni').value = numeros;
     mostrarMensajeKiosco(`🎤 DNI detectado: ${numeros}`, 'success');
+    console.log(`🎤 DNI detectado: ${numeros}`);
     comandoEjecutado = true;
     return;
   }
@@ -919,6 +1031,7 @@ else if (step === 'step2') {
 
   if (matchOpcion(limpio, 1, "herramienta en mano")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
+      console.log('🎤 Comando reconocido: Herramienta en mano');
     setModoEscaneo('manual');
     comandoEjecutado = true;
     return;
@@ -926,6 +1039,7 @@ else if (step === 'step2') {
 
   if (matchOpcion(limpio, 2, "solicitar herramienta", "quiero solicitar", "pedir herramienta")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
+      console.log('🎤 Comando reconocido: Solicitar herramienta');
     step5ReturnTarget = 2;
     nextStep(5);
     comandoEjecutado = true;
@@ -934,6 +1048,7 @@ else if (step === 'step2') {
 
   if (matchOpcion(limpio, 3, "ver recursos", "recursos asignados", "mostrar recursos")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
+      console.log('🎤 Comando reconocido: Ver recursos asignados');
     cargarRecursos();
     const modalEl = document.getElementById('modalRecursos');
     const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -944,6 +1059,7 @@ else if (step === 'step2') {
 
   if (matchOpcion(limpio, 4, "volver", "inicio", "regresar", "atrás", "cerrar")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
+      console.log('🎤 Comando reconocido: Volver al inicio');
     volverAInicio();
     comandoEjecutado = true;
     return;
@@ -961,6 +1077,7 @@ else if (step === 'step3') {
 
   if (matchOpcion(limpio, 1, "qr", "escanear")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
+      console.log('🎤 Comando reconocido: Escanear QR');
     activarEscaneoQR();
     comandoEjecutado = true;
     return;
@@ -968,6 +1085,7 @@ else if (step === 'step3') {
 
   if (limpio.includes("cancelar")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
+      console.log('🎤 Comando reconocido: Cancelar escaneo');
     cancelarEscaneoQR();
     comandoEjecutado = true;
     return;
@@ -975,6 +1093,7 @@ else if (step === 'step3') {
 
   if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
+      console.log('🎤 Comando reconocido: Solicitar manualmente');
     step5ReturnTarget = 3;
     detenerEscaneoQR(5);
     comandoEjecutado = true;
@@ -983,6 +1102,7 @@ else if (step === 'step3') {
 
   if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
+      console.log('🎤 Comando reconocido: Volver al menú principal');
     detenerEscaneoQR(2);
     comandoEjecutado = true;
     return;
@@ -1029,6 +1149,7 @@ else if (step === 'step6') {
 
   if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success');
+      console.log('🎤 Comando reconocido: Volver a categorías');
     nextStep(5);
     comandoEjecutado = true;
     return;
@@ -1053,6 +1174,7 @@ else if (step === 'step7') {
 
   if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver a subcategorías', 'success');
+      console.log('🎤 Comando reconocido: Volver a subcategorías');
     nextStep(6);
     comandoEjecutado = true;
     return;
@@ -1077,6 +1199,7 @@ else if (step === 'step8') {
 
   if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
     mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success');
+      console.log('🎤 Comando reconocido: Volver a recursos');
     nextStep(7);
     comandoEjecutado = true;
     return;
@@ -1104,6 +1227,7 @@ else if (step === 'step8') {
       const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
       modalInstance.hide();
       mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
+      console.log('🎤 Comando reconocido: Cerrar recursos asignados');
       return;
     }
   }
