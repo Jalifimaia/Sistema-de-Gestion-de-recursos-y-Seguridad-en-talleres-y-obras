@@ -262,13 +262,12 @@ public function identificarTrabajador(Request $request)
 {
     $usuarioId = $request->input('id_usuario');
 
-    // se desactivo para no hacer conflicto con la terminal
-   /* if (!$this->tieneEppCompleto($usuarioId)) {
+    if (!$this->tieneEppCompleto($usuarioId)) {
         return response()->json([
             'success' => false,
             'message' => 'No se puede solicitar herramientas sin EPP completo.'
         ], 403);
-    }*/
+    }
 
     // Lógica de solicitud real (si la tenés)
     return response()->json([
