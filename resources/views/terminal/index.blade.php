@@ -145,7 +145,7 @@
 <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="{{ asset('js/terminal-debug.js') }}"></script>
+  <script src="{{ asset('js/terminal.js') }}"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
 
 </body>
