@@ -3,7 +3,13 @@ let isScanning = false; // 👈 flag de estado
 
 
 function mostrarMensajeKiosco(texto, tipo = 'info') {
-  const container = document.getElementById('toastContainer');
+  // Asegurar contenedor, si no existe lo creamos (tests o entornos headless)
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    document.body.appendChild(container);
+  }
 
   // Crear elemento toast
   const toastEl = document.createElement('div');
@@ -29,96 +35,80 @@ function mostrarMensajeKiosco(texto, tipo = 'info') {
     </div>
   `;
 
-  // Agregar al contenedor
+  // Agregar al contenedor y mostrar
   container.appendChild(toastEl);
-
-  // Inicializar y mostrar
-  const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
-  toast.show();
-
-  // Eliminar del DOM cuando se oculta
-  toastEl.addEventListener('hidden.bs.toast', () => {
-    toastEl.remove();
-  });
+  try {
+    const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+    toast.show();
+    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+  } catch (e) {
+    // En entornos de test sin bootstrap, simplemente mantener el elemento y removerlo luego
+    setTimeout(() => { if (toastEl && toastEl.remove) toastEl.remove(); }, 4000);
+  }
 }
-
-
 
 
 function nextStep(n) {
-  // 🔒 Cerrar modal de recursos si está abierto
+  // Cerrar modal de recursos si está abierto (con guardas)
   const modalEl = document.getElementById('modalRecursos');
   if (modalEl) {
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance) {
+    const modalInstance = (bootstrap && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function')
+      ? bootstrap.Modal.getInstance(modalEl)
+      : null;
+    if (modalInstance && typeof modalInstance.hide === 'function') {
       modalInstance.hide();
-      console.log('📖 cerrarModalRecursos: modal cerrado por cambio de step');
-
     }
   }
 
-  console.log('📖 cerrarModalRecursos: modal cerrado por cambio de step');
+  // Detener escaneo QR si no estamos en step3
+  if (n !== 3) {
+    try { detenerEscaneoQR(); } catch (e) { /* no bloquear flujo por errores en stop */ }
+  }
 
-
-  // 🔒 Detener escaneo QR si no estamos en step3
-  if (n !== 3) detenerEscaneoQR();
-
-  // 🔄 Cambiar step activo
-  console.log('➡️ nextStep: cambiando al paso', n);
+  // Cambiar step activo con guardas
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step' + n).classList.add('active');
+  const stepEl = document.getElementById('step' + n);
+  if (stepEl && stepEl.classList) {
+    stepEl.classList.add('active');
+  } else {
+    console.warn('nextStep: step element not found:', 'step' + n);
+  }
 
-  // ⚡ Acciones específicas por step
+  // Acciones específicas por step
   if (n === 2) cargarMenuPrincipal();
   if (n === 5) cargarCategorias();
-
-  // 🎤 El micrófono global sigue activo en todo momento
 }
-
-
-
-
 
 
 function identificarTrabajador() {
   const dni = document.getElementById('dni').value;
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', '/terminal/identificar', true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/terminal/identificar', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
 
-  xhr.onload = function () {
-    try {
-      const res = JSON.parse(xhr.responseText);
-      if (res.success) {
-        // Usuario válido (rol trabajador + estado Alta)
-        localStorage.setItem('id_usuario', res.usuario.id);
-        nextStep(2);
-        document.getElementById('saludo-trabajador').textContent = `Hola ${res.usuario.name}`;
-      } else {
-        // Mensajes diferenciados según backend
-        if (res.message === 'Usuario no encontrado') {
-          mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
-          console.error('❌ Usuario no encontrado en el sistema', 'danger');
-        } else if (res.message === 'Este usuario no tiene permisos para usar el kiosco') {
-          mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
-          console.warn('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
-        } else if (res.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
-          mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
-          console.log('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
+    xhr.onload = function () {
+      try {
+        const res = JSON.parse(xhr.responseText);
+        if (res.success) {
+          localStorage.setItem('id_usuario', res.usuario.id);
+          nextStep(2);
+          document.getElementById('saludo-trabajador').textContent = `Hola ${res.usuario.name}`;
         } else {
           mostrarMensajeKiosco(res.message || 'Error al identificar al trabajador', 'danger');
-          console.error(res.message || 'Error al identificar al trabajador', 'danger');
         }
+        resolve(res);
+      } catch (e) {
+        mostrarMensajeKiosco('Error al identificar al trabajador', 'danger');
+        resolve({ success: false, error: e });
       }
-    } catch (e) {
-      console.error('Error parseando respuesta identificarTrabajador:', e, xhr.responseText);
-      mostrarMensajeKiosco('Error al identificar al trabajador', 'danger');
-    }
-  };
+    };
 
-  xhr.send('dni=' + encodeURIComponent(dni));
+    xhr.send('dni=' + encodeURIComponent(dni));
+  });
 }
+
 
 function simularEscaneo() {
   //alert("Simulación de escaneo QR");
@@ -234,38 +224,32 @@ function mostrarRecursosAsignados(recursos) {
 
 
 function devolverRecurso(detalleId) {
-  if (!confirm('¿Confirmás que querés devolver este recurso?')) return;
+  if (!confirm('¿Confirmás que querés devolver este recurso?')) return Promise.resolve({ success: false, reason: 'cancelled' });
 
-  fetch(`/terminal/devolver/${detalleId}`, {
+  return fetch(`/terminal/devolver/${detalleId}`, {
     method: 'POST',
     headers: {
       'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
     }
   })
   .then(res => {
-    console.log('📡 devolverRecurso: respuesta HTTP', res);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   })
   .then(data => {
-    console.log('📦 devolverRecurso: respuesta JSON', data);
-
     if (data.success) {
       mostrarMensajeKiosco('✅ Recurso devuelto correctamente', 'success');
-      console.log(`✅ Recurso devuelto: ${data.recurso || 'recurso desconocido'} - Serie: ${data.serie || 'sin serie'} (detalleId ${detalleId})`);
       cargarRecursos();
     } else {
       mostrarMensajeKiosco(data.message || 'Error al devolver recurso', 'danger');
-      console.warn('⚠️ devolverRecurso: error lógico en respuesta', data.message);
     }
+    return data;
   })
   .catch(err => {
     mostrarMensajeKiosco('Error de red al devolver recurso', 'danger');
-    console.error('❌ devolverRecurso: error de red o parseo', err);
+    return { success: false, error: err };
   });
 }
-
-
 
 
 function seleccionarCategoria(categoriaId) {
@@ -281,18 +265,21 @@ function seleccionarCategoria(categoriaId) {
 
       nextStep(6);
 
-      subcategorias.forEach((s, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
-        btn.dataset.subcategoriaId = s.id;
+      // 👇 solo renderizar las que tengan disponibles > 0
+      subcategorias
+        .filter(s => s.disponibles > 0)
+        .forEach((s, index) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
+          btn.dataset.subcategoriaId = s.id;
 
-        btn.innerHTML = `
-          <span class="badge-opcion">Opción ${index + 1}</span>
-          <span class="flex-grow-1 text-start">${s.nombre}</span>
-          <span class="badge-disponibles">${s.disponibles} disponibles</span>
-        `;
-        contenedor.appendChild(btn);
-      });
+          btn.innerHTML = `
+            <span class="badge-opcion">Opción ${index + 1}</span>
+            <span class="flex-grow-1 text-start">${s.nombre}</span>
+            <span class="badge-disponibles">${s.disponibles} disponibles</span>
+          `;
+          contenedor.appendChild(btn);
+        });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar las subcategorías', 'danger');
       console.log('No se pudieron cargar las subcategorías');
@@ -301,10 +288,6 @@ function seleccionarCategoria(categoriaId) {
 
   xhr.send();
 }
-
-
-
-
 
 
 function seleccionarSubcategoria(subcategoriaId) {
@@ -320,18 +303,21 @@ function seleccionarSubcategoria(subcategoriaId) {
 
       nextStep(7);
 
-      recursos.forEach((r, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-outline-success btn-lg d-flex justify-content-between align-items-center m-2';
-        btn.dataset.recursoId = r.id;
+      // 👇 solo renderizar los que tengan disponibles > 0
+      recursos
+        .filter(r => r.disponibles > 0)
+        .forEach((r, index) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-outline-success btn-lg d-flex justify-content-between align-items-center m-2';
+          btn.dataset.recursoId = r.id;
 
-        btn.innerHTML = `
-          <span class="badge-opcion">Opción ${index + 1}</span>
-          <span class="flex-grow-1 text-start">${r.nombre}</span>
-          <span class="badge-disponibles">${r.disponibles} disponibles</span>
-        `;
-        contenedor.appendChild(btn);
-      });
+          btn.innerHTML = `
+            <span class="badge-opcion">Opción ${index + 1}</span>
+            <span class="flex-grow-1 text-start">${r.nombre}</span>
+            <span class="badge-disponibles">${r.disponibles} disponibles</span>
+          `;
+          contenedor.appendChild(btn);
+        });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar los recursos', 'danger');
       console.log('No se pudieron cargar los recursos');
@@ -340,8 +326,6 @@ function seleccionarSubcategoria(subcategoriaId) {
 
   xhr.send();
 }
-
-
 
 
 function seleccionarRecurso(recursoId) {
@@ -378,45 +362,50 @@ function seleccionarRecurso(recursoId) {
 }
 
 
-
-
-
-
-function registrarSerie(serieId) {
+async function registrarSerie(serieId) {
   const id_usuario = localStorage.getItem('id_usuario');
   if (!id_usuario) {
-    console.warn('⚠️ registrarSerie: No hay trabajador identificado');
-    mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
-    return;
+    if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+    return { success: false, reason: 'no_usuario' };
   }
 
-  if (!confirm('¿Confirmás que querés solicitar esta herramienta?')) return;
+  if (!confirm('¿Confirmás que querés solicitar esta herramienta?')) {
+    return { success: false, reason: 'cancelled' };
+  }
 
-  fetch(`/terminal/prestamos/${id_usuario}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    },
-    body: JSON.stringify({ series: [serieId] })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
-        console.log('✅ Recurso asignado correctamente');
-      nextStep(2);
-    } else {
-      mostrarMensajeKiosco(data.message || 'Error al registrar recurso', 'danger');
-      console.log('Error al registrar recurso');
+  try {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    const csrf = meta && meta.content ? meta.content : null;
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+
+    const res = await fetch(`/terminal/prestamos/${id_usuario}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ series: [serieId] })
+    });
+
+    if (!res || (typeof res.ok === 'boolean' && !res.ok)) {
+      const statusText = res && res.status ? `HTTP ${res.status}` : 'network error';
+      if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+      return { success: false, reason: 'http_error', status: res && res.status, statusText };
     }
-  })
-  .catch(() => {
-    mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
-      console.log('Error de red al registrar recurso');
-  });
-}
 
+    const data = await res.json();
+
+    if (data && data.success) {
+      if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
+      if (typeof window.nextStep === 'function') window.nextStep(2);
+      return { success: true, data };
+    } else {
+      if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco((data && data.message) || 'Error al registrar recurso', 'danger');
+      return { success: false, reason: 'backend_error', data };
+    }
+  } catch (err) {
+    if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+    return { success: false, reason: 'exception', error: err && (err.message || String(err)) };
+  }
+}
 
 
 
@@ -428,28 +417,32 @@ document.addEventListener('click', (e) => {
 */
 
 // Delegación para subcategorías
-document.getElementById('subcategoria-buttons').addEventListener('click', function (e) {
-  const btn = e.target.closest('[data-subcategoria-id]');
-  if (btn) {
-    seleccionarSubcategoria(btn.dataset.subcategoriaId);
-  }
-});
+const _subcatButtons = document.getElementById('subcategoria-buttons');
+if (_subcatButtons) {
+  _subcatButtons.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-subcategoria-id]');
+    if (btn) seleccionarSubcategoria(btn.dataset.subcategoriaId);
+  });
+}
 
 // Delegación para recursos
-document.getElementById('recurso-buttons').addEventListener('click', function (e) {
-  const btn = e.target.closest('[data-recurso-id]');
-  if (btn) {
-    seleccionarRecurso(btn.dataset.recursoId);
-  }
-});
+const _recursoButtons = document.getElementById('recurso-buttons');
+if (_recursoButtons) {
+  _recursoButtons.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-recurso-id]');
+    if (btn) seleccionarRecurso(btn.dataset.recursoId);
+  });
+}
 
 // Delegación para series
-document.getElementById('serie-buttons').addEventListener('click', function (e) {
-  const btn = e.target.closest('[data-serie-id]');
-  if (btn) {
-    registrarSerie(btn.dataset.serieId);
-  }
-});
+const _serieButtons = document.getElementById('serie-buttons');
+if (_serieButtons) {
+  _serieButtons.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-serie-id]');
+    if (btn) registrarSerie(btn.dataset.serieId);
+  });
+}
+
 
 
 function activarEscaneoQR() {
@@ -498,16 +491,14 @@ function cancelarEscaneoQR() {
 }
 
 
-
 function registrarPorQR(codigoQR) {
   const id_usuario = localStorage.getItem('id_usuario');
   if (!id_usuario) {
-    console.warn('⚠️ registrarPorQR: No hay trabajador identificado');
     mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
-    return;
+    return Promise.resolve({ success: false, reason: 'no_usuario' });
   }
 
-  fetch(`/terminal/registrar-por-qr`, {
+  return fetch(`/terminal/registrar-por-qr`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -517,35 +508,26 @@ function registrarPorQR(codigoQR) {
   })
   .then(res => res.json())
   .then(data => {
-    console.log('Respuesta registrarPorQR:', data);
-
     if (data.success) {
-      // Caso éxito
       const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
       mostrarMensajeKiosco(mensaje, 'success');
-      console.log(`✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`);
       nextStep(2);
     } else {
-      // Mensajes diferenciados según backend
       if (data.message === 'QR no encontrado') {
         mostrarMensajeKiosco('❌ QR no encontrado en el sistema', 'danger');
-      console.log('❌ QR no encontrado en el sistema');
       } else if (data.message === 'Este recurso ya está asignado') {
         mostrarMensajeKiosco(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
-      console.log(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`);
       } else {
         mostrarMensajeKiosco(data.message || 'Error al registrar recurso por QR', 'danger');
-      console.log('Error al registrar recurso por QR');
       }
     }
+    return data;
   })
   .catch(err => {
-    console.error('Error en registrarPorQR:', err);
     mostrarMensajeKiosco('Error de red al registrar recurso por QR', 'danger');
+    return { success: false, error: err };
   });
 }
-
-
 
 
 function detenerEscaneoQR(next = null) {
@@ -1231,4 +1213,14 @@ else if (step === 'step8') {
       return;
     }
   }
+}
+
+// Exponer API pública para entorno de tests y JSDOM
+if (typeof window !== 'undefined') {
+  window.registrarSerie = window.registrarSerie || registrarSerie;
+  window.registrarPorQR = window.registrarPorQR || registrarPorQR;
+  window.identificarTrabajador = window.identificarTrabajador || identificarTrabajador;
+  window.getStepActivo = window.getStepActivo || getStepActivo;
+  window.nextStep = window.nextStep || nextStep;
+  window.mostrarMensajeKiosco = window.mostrarMensajeKiosco || mostrarMensajeKiosco;
 }
