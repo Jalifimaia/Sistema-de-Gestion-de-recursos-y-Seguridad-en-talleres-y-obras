@@ -163,6 +163,11 @@ Route::get('/series-qr-lote', [SerieRecursoController::class, 'qrLote'])->name('
 Route::get('/series-qr-lote/pdf', [SerieRecursoController::class, 'exportQrLotePdf'])
     ->name('series.qr.lote.pdf');
 
+
+// SERIES
+Route::post('/serie-recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])->name('serie_recurso.storeMultiple');
+Route::get('/serie-recurso/create/{id}', [SerieRecursoController::class, 'createConRecurso'])->name('serie_recurso.createConRecurso');
+
 /*
 |--------------------------------------------------------------------------
 | Rutas AJAX para Préstamos
