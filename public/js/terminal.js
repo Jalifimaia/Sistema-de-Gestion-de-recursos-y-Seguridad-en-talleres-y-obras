@@ -160,62 +160,43 @@ function cargarRecursos() {
 
   xhr.onload = function () {
     try {
-      const recursos = JSON.parse(xhr.responseText);
-      const tablaEPP = document.getElementById('tablaEPP');
-      const tablaHerramientas = document.getElementById('tablaHerramientas');
-      tablaEPP.innerHTML = '';
-      tablaHerramientas.innerHTML = '';
-
-      if (recursos.length === 0) {
-        const vacio = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
-        tablaEPP.innerHTML = vacio;
-        tablaHerramientas.innerHTML = vacio;
-        return;
-      }
+      const recursos = JSON.parse(xhr.responseText || '[]');
+      const epp = [];
+      const herramientas = [];
 
       recursos.forEach(r => {
-        const fila = `<tr>
-  <td>${r.subcategoria} / ${r.recurso}</td>
-  <td>${r.serie}</td>
-  <td>${r.fecha_prestamo || '-'}</td>
-  <td>${r.fecha_devolucion || '-'}</td>
-  <td>
-    ${`
-      <button class="btn btn-sm btn-outline-danger" onclick="devolverRecurso(${r.detalle_id})">
-        Devolver
-      </button>`}
-  </td>
-</tr>`;
-
-
         const tipo = r.tipo?.toLowerCase();
         const esEPP = tipo === 'epp' || (r.categoria && r.categoria.toLowerCase().includes('epp'));
-
-        if (esEPP) {
-          tablaEPP.innerHTML += fila;
-        } else {
-          tablaHerramientas.innerHTML += fila;
-        }
+        (esEPP ? epp : herramientas).push(r);
       });
 
+      renderTablaRecursos('tablaEPP', epp, 1, 'paginadorEPP');
+      renderTablaRecursos('tablaHerramientas', herramientas, 1, 'paginadorHerramientas');
+
     } catch (e) {
+      console.error('❌ cargarRecursos: error procesando respuesta', e);
       mostrarMensajeKiosco('Error al cargar recursos asignados', 'danger');
-      console.log('Error al cargar recursos asignados');
     }
+  };
+
+  xhr.onerror = function () {
+    mostrarMensajeKiosco('Error de red al cargar recursos asignados', 'danger');
   };
 
   xhr.send();
 }
 
 
-
-
-function mostrarRecursosAsignados(recursos) {
+function mostrarRecursosAsignados(recursos, pagina = 1) {
   const contenedor = document.getElementById('contenedorRecursos');
   contenedor.innerHTML = '';
 
-  recursos.forEach(r => {
-    console.log('📋 mostrarRecursosAsignados: recursos recibidos', recursos);
+  const porPagina = 5;
+  const totalPaginas = Math.ceil(recursos.length / porPagina);
+  const inicio = (pagina - 1) * porPagina;
+  const visibles = recursos.slice(inicio, inicio + porPagina);
+
+  visibles.forEach(r => {
     const card = document.createElement('div');
     card.className = 'card mb-3 shadow-sm';
 
@@ -234,6 +215,63 @@ function mostrarRecursosAsignados(recursos) {
 
     contenedor.appendChild(card);
   });
+
+  renderPaginacionRecursos(recursos, pagina, totalPaginas);
+}
+
+function renderPaginacionRecursos(recursos, paginaActual, totalPaginas) {
+  const paginador = document.getElementById('paginadorRecursos');
+  paginador.innerHTML = '';
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const btn = document.createElement('button');
+    btn.className = `btn btn-sm ${i === paginaActual ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+    btn.textContent = i;
+    btn.onclick = () => mostrarRecursosAsignados(recursos, i);
+    paginador.appendChild(btn);
+  }
+}
+
+function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
+  const tabla = document.getElementById(tablaId);
+  const paginador = document.getElementById(paginadorId);
+  if (!tabla || !paginador) return;
+
+  const porPagina = 5;
+  const totalPaginas = Math.ceil(recursos.length / porPagina);
+  const inicio = (pagina - 1) * porPagina;
+  const visibles = recursos.slice(inicio, inicio + porPagina);
+
+  tabla.innerHTML = '';
+
+  if (visibles.length === 0) {
+    tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
+    paginador.innerHTML = '';
+    return;
+  }
+
+  visibles.forEach(r => {
+    tabla.innerHTML += `<tr>
+      <td>${r.subcategoria || '-'} / ${r.recurso || '-'}</td>
+      <td>${r.serie || '-'}</td>
+      <td>${r.fecha_prestamo || '-'}</td>
+      <td>${r.fecha_devolucion || '-'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-danger" onclick="devolverRecurso(${r.detalle_id})">
+          Devolver
+        </button>
+      </td>
+    </tr>`;
+  });
+
+  paginador.innerHTML = '';
+  for (let i = 1; i <= totalPaginas; i++) {
+    const btn = document.createElement('button');
+    btn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+    btn.textContent = i;
+    btn.onclick = () => renderTablaRecursos(tablaId, recursos, i, paginadorId);
+    paginador.appendChild(btn);
+  }
 }
 
 

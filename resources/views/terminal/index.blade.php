@@ -114,63 +114,74 @@
   </div>
 
   <!-- Modal -->
+  
+ <!-- Modal -->
+  <!-- Modal -->
   <div class="modal fade" id="modalRecursos" tabindex="-1" aria-labelledby="modalRecursosLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">🧰 Recursos asignados</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title" id="modalRecursosLabel">🧰 Recursos asignados</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-  <ul class="nav nav-tabs mb-3" id="recursosTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="tab-epp" data-bs-toggle="tab" data-bs-target="#panel-epp" type="button" role="tab">🦺 EPP</button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-herramientas" data-bs-toggle="tab" data-bs-target="#panel-herramientas" type="button" role="tab">🔧 Herramientas</button>
-    </li>
-  </ul>
+          <ul class="nav nav-tabs mb-3" id="recursosTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-epp" data-bs-toggle="tab" data-bs-target="#panel-epp" type="button" role="tab">🦺 EPP</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-herramientas" data-bs-toggle="tab" data-bs-target="#panel-herramientas" type="button" role="tab">🔧 Herramientas</button>
+            </li>
+           
+          </ul>
 
-  <div class="tab-content" id="recursosTabContent">
-    <div class="tab-pane fade show active" id="panel-epp" role="tabpanel">
-      <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <th>Subcategoría / Recurso</th>
-              <th>Serie</th>
-              <th>Fecha de préstamo</th>
-              <th>Fecha de devolución</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="tablaEPP"></tbody>
-        </table>
-      </div>
-    </div>
+          <div class="tab-content" id="recursosTabContent">
+            <!-- Tabla EPP -->
+            <div class="tab-pane fade show active" id="panel-epp" role="tabpanel" aria-labelledby="tab-epp">
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th>Subcategoría / Recurso</th>
+                      <th>Serie</th>
+                      <th>Fecha de préstamo</th>
+                      <th>Fecha de devolución</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaEPP"></tbody>
+                </table>
+              </div>
+              <div id="paginadorEPP" class="d-flex flex-wrap justify-content-center mt-3"></div>
+            </div>
 
-    <div class="tab-pane fade" id="panel-herramientas" role="tabpanel">
-      <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <th>Subcategoría / Recurso</th>
-              <th>Serie</th>
-              <th>Fecha de préstamo</th>
-              <th>Fecha de devolución</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="tablaHerramientas"></tbody>
-        </table>
+            <!-- Tabla Herramientas -->
+            <div class="tab-pane fade" id="panel-herramientas" role="tabpanel" aria-labelledby="tab-herramientas">
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th>Subcategoría / Recurso</th>
+                      <th>Serie</th>
+                      <th>Fecha de préstamo</th>
+                      <th>Fecha de devolución</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaHerramientas"></tbody>
+                </table>
+              </div>
+              <div id="paginadorHerramientas" class="d-flex flex-wrap justify-content-center mt-3"></div>
+            </div>
+
+
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-      </div>
-    </div>
-  </div>
+
 
 <!-- Contenedor de Toasts -->
 <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
