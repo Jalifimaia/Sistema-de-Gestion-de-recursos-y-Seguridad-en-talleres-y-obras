@@ -206,7 +206,7 @@ document.getElementById('agregar-recurso').addEventListener('click', function() 
 // ---------- Buscar usuario por DNI ----------
 document.getElementById('buscarUsuario').addEventListener('click', function() {
     const dni = document.getElementById('dni_usuario').value.replace(/\./g,'');
-    fetch(`/buscar-usuario/${dni}`)
+    fetch(`/ajax/incidente/buscar-usuario/${dni}`)
         .then(res => res.json())
         .then(data => {
             if(data.nombre && data.id) {
