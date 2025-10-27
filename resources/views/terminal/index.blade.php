@@ -122,21 +122,52 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-              <thead>
-                <tr>
-                  <th>Categoría</th>
-                  <th>Subcategoría / Recurso</th>
-                  <th>Serie</th>
-                  <th>Fecha de préstamo</th>
-                  <th>Fecha de devolución</th>
-                </tr>
-              </thead>
-              <tbody id="tablaRecursos"></tbody>
-            </table>
-          </div>
-        </div>
+  <ul class="nav nav-tabs mb-3" id="recursosTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="tab-epp" data-bs-toggle="tab" data-bs-target="#panel-epp" type="button" role="tab">🦺 EPP</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tab-herramientas" data-bs-toggle="tab" data-bs-target="#panel-herramientas" type="button" role="tab">🔧 Herramientas</button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="recursosTabContent">
+    <div class="tab-pane fade show active" id="panel-epp" role="tabpanel">
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>Subcategoría / Recurso</th>
+              <th>Serie</th>
+              <th>Fecha de préstamo</th>
+              <th>Fecha de devolución</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tablaEPP"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="panel-herramientas" role="tabpanel">
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>Subcategoría / Recurso</th>
+              <th>Serie</th>
+              <th>Fecha de préstamo</th>
+              <th>Fecha de devolución</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tablaHerramientas"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
     </div>
   </div>

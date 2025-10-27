@@ -150,11 +150,10 @@ function cargarCategorias() {
 
 function cargarRecursos() {
   const id_usuario = localStorage.getItem('id_usuario');
-
   if (!id_usuario) {
     console.warn('⚠️ cargarRecursos: No hay id_usuario en localStorage');
     return;
-  } 
+  }
 
   const xhr = new XMLHttpRequest();
   xhr.open('GET', `/terminal/recursos-asignados/${id_usuario}`, true);
@@ -162,27 +161,41 @@ function cargarRecursos() {
   xhr.onload = function () {
     try {
       const recursos = JSON.parse(xhr.responseText);
-      const tabla = document.getElementById('tablaRecursos');
-      tabla.innerHTML = '';
+      const tablaEPP = document.getElementById('tablaEPP');
+      const tablaHerramientas = document.getElementById('tablaHerramientas');
+      tablaEPP.innerHTML = '';
+      tablaHerramientas.innerHTML = '';
 
       if (recursos.length === 0) {
-        tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
+        const vacio = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
+        tablaEPP.innerHTML = vacio;
+        tablaHerramientas.innerHTML = vacio;
         return;
       }
 
       recursos.forEach(r => {
-        tabla.innerHTML += `<tr>
-          <td>${r.categoria}</td>
-          <td>${r.subcategoria} / ${r.recurso}</td>
-          <td>${r.serie}</td>
-          <td> ${r.fecha_prestamo || '-'}</td>
-          <td> ${r.fecha_devolucion || '-'}</td>
-          <td>
-            <button class="btn btn-sm btn-outline-danger" onclick="devolverRecurso(${r.detalle_id})">
-              Devolver
-            </button>
-          </td>
-        </tr>`;
+        const fila = `<tr>
+  <td>${r.subcategoria} / ${r.recurso}</td>
+  <td>${r.serie}</td>
+  <td>${r.fecha_prestamo || '-'}</td>
+  <td>${r.fecha_devolucion || '-'}</td>
+  <td>
+    ${`
+      <button class="btn btn-sm btn-outline-danger" onclick="devolverRecurso(${r.detalle_id})">
+        Devolver
+      </button>`}
+  </td>
+</tr>`;
+
+
+        const tipo = r.tipo?.toLowerCase();
+        const esEPP = tipo === 'epp' || (r.categoria && r.categoria.toLowerCase().includes('epp'));
+
+        if (esEPP) {
+          tablaEPP.innerHTML += fila;
+        } else {
+          tablaHerramientas.innerHTML += fila;
+        }
       });
 
     } catch (e) {
@@ -193,6 +206,8 @@ function cargarRecursos() {
 
   xhr.send();
 }
+
+
 
 
 function mostrarRecursosAsignados(recursos) {
@@ -208,7 +223,6 @@ function mostrarRecursosAsignados(recursos) {
       <div class="card-body">
         <h5 class="card-title mb-1">${r.recurso}</h5>
         <p class="card-text mb-1">Serie: <strong>${r.serie}</strong></p>
-        <p class="card-text mb-1">Categoría: ${r.categoria}</p>
         <p class="card-text mb-1">Subcategoría: ${r.subcategoria}</p>
         <p class="card-text mb-1">📅 Prestado: ${r.fecha_prestamo}</p>
         <p class="card-text mb-1">📅 Devolución: ${r.fecha_devolucion}</p>
@@ -1224,3 +1238,4 @@ if (typeof window !== 'undefined') {
   window.nextStep = window.nextStep || nextStep;
   window.mostrarMensajeKiosco = window.mostrarMensajeKiosco || mostrarMensajeKiosco;
 }
+
