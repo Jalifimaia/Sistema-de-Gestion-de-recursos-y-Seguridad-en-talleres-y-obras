@@ -156,7 +156,7 @@ public function store(Request $request)
         ]);
     }
 
-    return redirect()->route('incidente.index')->with('success', '✅ Incidente actualizado correctamente con sus recursos.');
+return redirect()->route('incidente.edit', $id)->with('success', '✅ Incidente actualizado correctamente.');
 }
 
 

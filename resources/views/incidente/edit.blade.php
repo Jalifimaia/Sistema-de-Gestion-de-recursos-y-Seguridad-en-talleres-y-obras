@@ -114,8 +114,31 @@
 </div>
 
 @if(session('success'))
+<!-- Modal de éxito -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="successModalLabel">✅ Incidente actualizado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('success') }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Seguir editando</button>
+        <a href="{{ route('incidente.index') }}" class="btn btn-success">Ver incidentes</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-    alert("{{ session('success') }}");
+    window.addEventListener('DOMContentLoaded', () => {
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    });
 </script>
 @endif
+
 @endsection
