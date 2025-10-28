@@ -312,34 +312,53 @@ function seleccionarCategoria(categoriaId) {
     try {
       const subcategorias = JSON.parse(xhr.responseText);
       console.log('📁 seleccionarCategoria: subcategorías recibidas', subcategorias);
-      const contenedor = document.getElementById('subcategoria-buttons');
-      contenedor.innerHTML = '';
-
+      window.subcategoriasActuales = subcategorias.filter(s => s.disponibles > 0);
+      renderSubcategoriasPaginadas(window.subcategoriasActuales, 1);
       nextStep(6);
-
-      // 👇 solo renderizar las que tengan disponibles > 0
-      subcategorias
-        .filter(s => s.disponibles > 0)
-        .forEach((s, index) => {
-          const btn = document.createElement('button');
-          btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
-          btn.dataset.subcategoriaId = s.id;
-
-          btn.innerHTML = `
-            <span class="badge-opcion">Opción ${index + 1}</span>
-            <span class="flex-grow-1 text-start">${s.nombre}</span>
-            <span class="badge-disponibles">${s.disponibles} disponibles</span>
-          `;
-          contenedor.appendChild(btn);
-        });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar las subcategorías', 'danger');
-      console.log('No se pudieron cargar las subcategorías');
+      console.log('❌ No se pudieron cargar las subcategorías');
     }
   };
 
   xhr.send();
 }
+
+function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
+  const contenedor = document.getElementById('subcategoria-buttons');
+  const paginador = document.getElementById('paginadorSubcategorias');
+  contenedor.innerHTML = '';
+  paginador.innerHTML = '';
+
+  const porPagina = 5;
+  const totalPaginas = Math.ceil(subcategorias.length / porPagina);
+  const inicio = (pagina - 1) * porPagina;
+  const visibles = subcategorias.slice(inicio, inicio + porPagina);
+
+  visibles.forEach((s, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
+    btn.dataset.subcategoriaId = s.id;
+
+    btn.innerHTML = `
+      <span class="badge-opcion">Opción ${index + 1}</span>
+      <span class="flex-grow-1 text-start">${s.nombre}</span>
+      <span class="badge-disponibles">${s.disponibles} disponibles</span>
+    `;
+    contenedor.appendChild(btn);
+  });
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const pagBtn = document.createElement('button');
+    pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+    pagBtn.textContent = i;
+    pagBtn.onclick = () => renderSubcategoriasPaginadas(subcategorias, i);
+    paginador.appendChild(pagBtn);
+  }
+
+  window.paginaSubcategoriasActual = pagina;
+}
+
 
 
 function seleccionarSubcategoria(subcategoriaId) {
@@ -350,33 +369,51 @@ function seleccionarSubcategoria(subcategoriaId) {
     try {
       const recursos = JSON.parse(xhr.responseText);
       console.log('📦 seleccionarSubcategoria: recursos recibidos', recursos);
-      const contenedor = document.getElementById('recurso-buttons');
-      contenedor.innerHTML = '';
-
+      window.recursosActuales = recursos.filter(r => r.disponibles > 0);
+      renderRecursosPaginados(window.recursosActuales, 1);
       nextStep(7);
-
-      // 👇 solo renderizar los que tengan disponibles > 0
-      recursos
-        .filter(r => r.disponibles > 0)
-        .forEach((r, index) => {
-          const btn = document.createElement('button');
-          btn.className = 'btn btn-outline-success btn-lg d-flex justify-content-between align-items-center m-2';
-          btn.dataset.recursoId = r.id;
-
-          btn.innerHTML = `
-            <span class="badge-opcion">Opción ${index + 1}</span>
-            <span class="flex-grow-1 text-start">${r.nombre}</span>
-            <span class="badge-disponibles">${r.disponibles} disponibles</span>
-          `;
-          contenedor.appendChild(btn);
-        });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar los recursos', 'danger');
-      console.log('No se pudieron cargar los recursos');
+      console.log('❌ No se pudieron cargar los recursos', e);
     }
   };
 
   xhr.send();
+}
+
+function renderRecursosPaginados(recursos, pagina = 1) {
+  const contenedor = document.getElementById('recurso-buttons');
+  const paginador = document.getElementById('paginadorRecursos');
+  contenedor.innerHTML = '';
+  paginador.innerHTML = '';
+
+  const porPagina = 5;
+  const totalPaginas = Math.ceil(recursos.length / porPagina);
+  const inicio = (pagina - 1) * porPagina;
+  const visibles = recursos.slice(inicio, inicio + porPagina);
+
+  visibles.forEach((r, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline-success btn-lg d-flex justify-content-between align-items-center m-2';
+    btn.dataset.recursoId = r.id;
+
+    btn.innerHTML = `
+      <span class="badge-opcion">Opción ${index + 1}</span>
+      <span class="flex-grow-1 text-start">${r.nombre}</span>
+      <span class="badge-disponibles">${r.disponibles} disponibles</span>
+    `;
+    contenedor.appendChild(btn);
+  });
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const pagBtn = document.createElement('button');
+    pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+    pagBtn.textContent = i;
+    pagBtn.onclick = () => renderRecursosPaginados(recursos, i);
+    paginador.appendChild(pagBtn);
+  }
+
+  window.paginaRecursosActual = pagina;
 }
 
 
@@ -388,37 +425,64 @@ function seleccionarRecurso(recursoId) {
     try {
       const series = JSON.parse(xhr.responseText);
       console.log('🔢 seleccionarRecurso: series recibidas', series);
-      const contenedor = document.getElementById('serie-buttons');
-      contenedor.innerHTML = '';
-
+      window.seriesActuales = series;
+      renderSeriesPaginadas(series, 1);
       nextStep(8);
-
-      series.forEach((s, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-outline-success btn-lg d-flex justify-content-between align-items-center m-2';
-        btn.dataset.serieId = s.id;
-
-        btn.innerHTML = `
-          <span class="badge-opcion">Opción ${index + 1}</span>
-          <span class="flex-grow-1 text-start">${s.nro_serie || s.codigo || `Serie ${s.id}`}</span>
-        `;
-
-        contenedor.appendChild(btn);
-      });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar las series', 'danger');
-      console.log('No se pudieron cargar las series', e);
+      console.log('❌ No se pudieron cargar las series', e);
     }
   };
 
   xhr.onerror = function () {
-    mostrarMensajeKiosco('Error de red al cargar las series', 'danger');
+    mostrarMensajeKiosco('❌ Error de red al cargar las series', 'danger');
   };
 
   xhr.send();
 }
 
+
+function renderSeriesPaginadas(series, pagina = 1) {
+  const contenedor = document.getElementById('serie-buttons');
+  const paginador = document.getElementById('paginadorSeries');
+  contenedor.innerHTML = '';
+  paginador.innerHTML = '';
+
+  const porPagina = 5;
+  const totalPaginas = Math.ceil(series.length / porPagina);
+  const inicio = (pagina - 1) * porPagina;
+  const visibles = series.slice(inicio, inicio + porPagina);
+
+  visibles.forEach((s, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline-success btn-lg d-flex justify-content-between align-items-center m-2';
+    btn.dataset.serieId = s.id;
+
+    const textoSerie = s.nro_serie || s.codigo || `Serie ${s.id}`;
+    btn.innerHTML = `
+      <span class="badge-opcion">Opción ${index + 1}</span>
+      <span class="flex-grow-1 text-start">${textoSerie}</span>
+    `;
+
+    contenedor.appendChild(btn);
+  });
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const pagBtn = document.createElement('button');
+    pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+    pagBtn.textContent = i;
+    pagBtn.onclick = () => renderSeriesPaginadas(series, i);
+    paginador.appendChild(pagBtn);
+  }
+
+  window.paginaSeriesActual = pagina;
+}
+
+
+
 function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie = null) {
+  botonSerie = botonSerie || window.botonSerieSeleccionada || null;
+
   const registrar = options.registrarSerie || window.registrarSerie;
   const mostrarMensaje = options.mostrarMensajeKiosco || window.mostrarMensajeKiosco;
 
@@ -460,11 +524,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
     modalActionTaken = true;
     modal.hide();
     cleanup();
-    if (typeof mostrarMensaje === 'function') 
-      {
-      mostrarMensaje('Solicitud cancelada.', 'info');
-        console.log('ℹ️ Solicitud cancelada por el usuario');
-      }
+    if (typeof mostrarMensaje === 'function') mostrarMensaje('Solicitud cancelada.', 'info');
   }
 
   try { if (aceptarBtn) { aceptarBtn.removeEventListener('click', onAceptar); aceptarBtn.addEventListener('click', onAceptar); } } catch (e) {}
@@ -520,6 +580,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
   const onHidden = () => {
     modalEl.removeEventListener('hidden.bs.modal', onHidden);
     cleanup();
+    window.botonSerieSeleccionada = null;
     recognitionGlobalPaused = false;
     try {
       if (recognitionGlobal && typeof recognitionGlobal.start === 'function') {
@@ -636,6 +697,7 @@ if (_serieButtons) {
     if (!btn) return;
     const serieTextoEl = btn.querySelector('.flex-grow-1');
     const serieTexto = serieTextoEl ? serieTextoEl.textContent.trim() : btn.textContent.trim();
+    window.botonSerieSeleccionada = btn;
     confirmarSerieModal(btn.dataset.serieId, serieTexto, { registrarSerie, mostrarMensajeKiosco }, btn);
   });
 }

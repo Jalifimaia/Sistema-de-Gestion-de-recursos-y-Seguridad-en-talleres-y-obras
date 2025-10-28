@@ -93,6 +93,8 @@
       <div id="subcategoria-buttons"></div>
       <button class="btn btn-secondary btn-lg mt-3" onclick="nextStep(5)">🔙 Volver</button>
       
+      <div id="subcategoria-buttons"></div>
+      <div id="paginadorSubcategorias" class="d-flex justify-content-center mt-3"></div>
     </div>
 
     <!-- Paso 7: Recurso -->
@@ -101,6 +103,8 @@
       <div id="recurso-buttons"></div>
       <button class="btn btn-secondary btn-lg mt-3" onclick="nextStep(6)">🔙 Volver</button>
       
+      <div id="recurso-buttons"></div>
+      <div id="paginadorRecursos" class="d-flex justify-content-center mt-3"></div>
     </div>
 
     <!-- Paso 8: Serie -->
@@ -108,7 +112,9 @@
       <h2 class="mb-4 text-center">🔢 Seleccioná la serie disponible</h2>
       <div id="serie-buttons"></div>
       <button class="btn btn-secondary btn-lg mt-3" onclick="nextStep(7)">🔙 Volver</button>
-      
+      <div id="serie-buttons"></div>
+      <div id="paginadorSeries" class="d-flex justify-content-center mt-3"></div>
+
     </div>
 
   </div>
