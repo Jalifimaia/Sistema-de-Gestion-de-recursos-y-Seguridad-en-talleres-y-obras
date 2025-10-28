@@ -1,8 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5">
-  <h1 class="mb-4 text-center text-orange">📊 Panel de Reportes</h1>
+
+<div class="container py-4">
+    <header class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h1 class="mb-4 text-center text-orange">📊 Panel de Reportes</h1>
+        </div>
+        <div class="text-muted small">
+            Fecha: <strong id="today"></strong>
+        </div>
+
+            
+    </header>
 
   <div class="row g-4">
 
@@ -88,3 +98,13 @@
   }
 </style>
 @endsection
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    const dia = String(today.getDate()).padStart(2, '0');
+    const mes = String(today.getMonth() + 1).padStart(2, '0');
+    const año = today.getFullYear();
+    document.getElementById('today').textContent = `${dia}/${mes}/${año}`;
+  });
+</script>

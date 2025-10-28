@@ -31,6 +31,7 @@ use App\Http\Controllers\PrestamoTerminalController;
 Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
+Route::get('/usuarios/{id}', [UserController::class, 'show'])->name('usuarios.show');
 //Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index']);
 Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index'])->name('controlEPP');
 

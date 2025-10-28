@@ -36,7 +36,7 @@
                     <th>Fecha préstamo</th>
                     <th>Trabajador</th>
                     <th>Estado</th>
-                    <th>Duración</th>
+                    <th>Duración (Días)</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,7 +45,13 @@
                     <td>{{ $p->fecha_prestamo }}</td>
                     <td>{{ $p->trabajador }}</td>
                     <td>{{ $p->estado }}</td>
-                    <td>{{ $p->duracion }}</td>
+                    <td>
+                        @if(empty($p->duracion) || $p->duracion === '-' || $p->duracion === '—')
+                            <span class="badge bg-warning text-dark">Sin fecha de devolución</span>
+                        @else
+                            {{ $p->duracion }}
+                        @endif
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
