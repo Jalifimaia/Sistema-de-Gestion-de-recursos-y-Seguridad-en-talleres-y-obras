@@ -93,7 +93,7 @@
         <!-- Resolución -->
         <div class="mb-3">
             <label for="resolucion" class="form-label">Resolución</label>
-            <input type="text" name="resolucion" id="resolucion" class="form-control" 
+            <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución "
                    value="{{ $incidente->resolucion }}">
         </div>
 

@@ -25,14 +25,14 @@
                     <div class="col-md-6">
                         <label>DNI del trabajador</label>
                         <div class="input-group">
-                            <input type="text" id="dni_usuario" class="form-control" required>
+                            <input type="text" id="dni_usuario" class="form-control" required placeholder="Ingrese aquí el DNI del trabajador involucrado" >
                             <button type="button" id="buscarUsuario" class="btn btn-secondary">Buscar</button>
                         </div>
                         <input type="hidden" name="id_usuario" id="id_usuario">
                     </div>
                     <div class="col-md-6">
                         <label>Nombre completo</label>
-                        <input type="text" id="nombre_usuario" class="form-control" readonly>
+                        <input type="text" id="nombre_usuario" class="form-control" readonly placeholder="Se completará automáticamente al buscar"  >
                     </div>
                 </div>
             </div>
@@ -78,7 +78,7 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label>Motivo del incidente</label>
-                    <textarea name="descripcion" class="form-control" required>{{ old('descripcion') }}</textarea>
+                    <textarea name="descripcion" class="form-control" required placeholder="Ingrese aquí cuál fue el motivo del incidente" >{{ old('descripcion') }}</textarea>
                 </div>
                 <div class="mb-3">
                     <label>Fecha del incidente</label>
@@ -89,33 +89,44 @@
 
         <button type="submit" class="btn btn-success w-100">Registrar incidente</button>
     </form>
-
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                {{ session('success') }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
-            </div>
-            </div>
-        </div>
+    <!-- Modal de confirmación -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-success">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="successModalLabel">¡Incidente registrado!</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('success') }}
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <a href="{{ route('incidente.create') }}" class="btn btn-outline-success">
+          + Registrar otro
+        </a>
+        <a href="{{ route('incidente.index') }}" class="btn btn-success">
+          Ver incidentes
+        </a>
+      </div>
     </div>
+  </div>
 
+
+
+    
 </div>
 
 @if(session('success'))
+@push('scripts')
 <script>
-    window.onload = () => {
-        alert("{{ session('success') }}");
-    };
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = new bootstrap.Modal(document.getElementById('successModal'));
+    modal.show();
+  });
 </script>
+@endpush
 @endif
+
 
 <script>
 // ---------- Datos de categorías, subcategorías, recursos y series ----------

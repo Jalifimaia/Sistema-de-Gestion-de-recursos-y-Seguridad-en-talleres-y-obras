@@ -85,7 +85,7 @@ public function store(Request $request)
         ]);
     }
 
-    return redirect()->route('incidente.index')->with('success', '✅ Incidente registrado con múltiples recursos.');
+    return redirect()->route('incidente.create')->with('success', '✅ Incidente registrado correctamente.');
 }
 
 
