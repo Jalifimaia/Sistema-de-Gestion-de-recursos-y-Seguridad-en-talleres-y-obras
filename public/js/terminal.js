@@ -418,7 +418,7 @@ function seleccionarRecurso(recursoId) {
   xhr.send();
 }
 
-function confirmarSerieModal(serieId, serieTexto = '', options = {}) {
+function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie = null) {
   const registrar = options.registrarSerie || window.registrarSerie;
   const mostrarMensaje = options.mostrarMensajeKiosco || window.mostrarMensajeKiosco;
 
@@ -428,7 +428,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}) {
   const modalEl = document.getElementById('modalConfirmarSerie');
   if (!modalEl) {
     if (confirm(`¿Confirmás que querés solicitar el recurso "${serieTexto}"?`)) {
-      if (typeof registrar === 'function') registrar(serieId);
+      if (typeof registrar === 'function') registrar(serieId, botonSerie);
     }
     return;
   }
@@ -437,7 +437,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}) {
   const aceptarBtn = document.getElementById('btnAceptarSerie');
   const cancelarBtn = document.getElementById('btnCancelarSerie');
 
-  let modalActionTaken = false; // 👈 protección contra doble ejecución
+  let modalActionTaken = false;
 
   function cleanup() {
     try {
@@ -452,7 +452,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}) {
     modalActionTaken = true;
     modal.hide();
     cleanup();
-    if (typeof registrar === 'function') registrar(serieId);
+    if (typeof registrar === 'function') registrar(serieId, botonSerie);
   }
 
   function onCancelar() {
@@ -462,7 +462,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}) {
     cleanup();
     if (typeof mostrarMensaje === 'function') 
       {
-        mostrarMensaje('Solicitud cancelada.', 'info');
+      mostrarMensaje('Solicitud cancelada.', 'info');
         console.log('ℹ️ Solicitud cancelada por el usuario');
       }
   }
@@ -537,14 +537,13 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}) {
 
 
 
-async function registrarSerie(serieId) {
+
+async function registrarSerie(serieId, boton = null) {
   const id_usuario = localStorage.getItem('id_usuario');
   if (!id_usuario) {
     if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
     return { success: false, reason: 'no_usuario' };
   }
-
-  // Nota: la confirmación ya sucede en el modal, por eso no hay confirm() nativo aquí.
 
   try {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -572,11 +571,19 @@ async function registrarSerie(serieId) {
 
     if (data && data.success) {
       if (typeof window.mostrarMensajeKiosco === 'function') 
-      {
-        window.mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
-        console.log('✅ Recurso asignado correctamente');
+        {
+          window.mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
+      console.log('✅ Recurso asignado correctamente');
+        }
+
+      // ✅ Actualizar botón si se pasó como referencia
+      if (boton && boton instanceof HTMLElement) {
+        boton.innerHTML = `<span class="flex-grow-1 text-start">✅ Recurso asignado</span>`;
+        boton.disabled = true;
+        boton.classList.remove('btn-outline-success');
+        boton.classList.add('btn-success');
       }
-      if (typeof window.nextStep === 'function') window.nextStep(2);
+
       return { success: true, data };
     } else {
       if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco((data && data.message) || 'Error al registrar recurso', 'danger');
@@ -585,12 +592,13 @@ async function registrarSerie(serieId) {
   } catch (err) {
     if (typeof window.mostrarMensajeKiosco === 'function') 
       {
-        window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+      window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
         console.log('❌ Error de red al registrar recurso');
       }
     return { success: false, reason: 'exception', error: err && (err.message || String(err)) };
   }
 }
+
 
 
 
@@ -628,9 +636,10 @@ if (_serieButtons) {
     if (!btn) return;
     const serieTextoEl = btn.querySelector('.flex-grow-1');
     const serieTexto = serieTextoEl ? serieTextoEl.textContent.trim() : btn.textContent.trim();
-    confirmarSerieModal(btn.dataset.serieId, serieTexto, { registrarSerie, mostrarMensajeKiosco });
+    confirmarSerieModal(btn.dataset.serieId, serieTexto, { registrarSerie, mostrarMensajeKiosco }, btn);
   });
 }
+
 
 
 
