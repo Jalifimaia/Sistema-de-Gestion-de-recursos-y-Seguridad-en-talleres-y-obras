@@ -113,10 +113,7 @@
 
   </div>
 
-  <!-- Modal -->
-  
- <!-- Modal -->
-  <!-- Modal -->
+  <!-- Modal de recursos asignados -->
   <div class="modal fade" id="modalRecursos" tabindex="-1" aria-labelledby="modalRecursosLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
@@ -181,9 +178,29 @@
     </div>
   </div>
 
+  <!-- Modal de confirmacion de serie de recurso -->
+  <div class="modal fade" id="modalConfirmarSerie" tabindex="-1" aria-labelledby="modalConfirmarSerieLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalConfirmarSerieLabel">Confirmar solicitud</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="modalConfirmarSerieBody">
+          ¿Confirmás que querés solicitar este recurso?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelarSerie">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnAceptarSerie">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
-<!-- Contenedor de Toasts -->
+
+
+  <!-- Contenedor de Toasts -->
 <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

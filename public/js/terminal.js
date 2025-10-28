@@ -402,16 +402,139 @@ function seleccionarRecurso(recursoId) {
           <span class="badge-opcion">Opción ${index + 1}</span>
           <span class="flex-grow-1 text-start">${s.nro_serie || s.codigo || `Serie ${s.id}`}</span>
         `;
+
         contenedor.appendChild(btn);
       });
     } catch (e) {
       mostrarMensajeKiosco('No se pudieron cargar las series', 'danger');
-      console.log('No se pudieron cargar las series');
+      console.log('No se pudieron cargar las series', e);
     }
+  };
+
+  xhr.onerror = function () {
+    mostrarMensajeKiosco('Error de red al cargar las series', 'danger');
   };
 
   xhr.send();
 }
+
+function confirmarSerieModal(serieId, serieTexto = '', options = {}) {
+  const registrar = options.registrarSerie || window.registrarSerie;
+  const mostrarMensaje = options.mostrarMensajeKiosco || window.mostrarMensajeKiosco;
+
+  const body = document.getElementById('modalConfirmarSerieBody');
+  if (body) body.textContent = `¿Confirmás que querés solicitar el recurso "${serieTexto}"?`;
+
+  const modalEl = document.getElementById('modalConfirmarSerie');
+  if (!modalEl) {
+    if (confirm(`¿Confirmás que querés solicitar el recurso "${serieTexto}"?`)) {
+      if (typeof registrar === 'function') registrar(serieId);
+    }
+    return;
+  }
+
+  const modal = new bootstrap.Modal(modalEl);
+  const aceptarBtn = document.getElementById('btnAceptarSerie');
+  const cancelarBtn = document.getElementById('btnCancelarSerie');
+
+  let modalActionTaken = false; // 👈 protección contra doble ejecución
+
+  function cleanup() {
+    try {
+      const existing = modalEl._recogInstance;
+      if (existing && typeof existing.stop === 'function') existing.stop();
+    } catch (e) {}
+    modalEl._recogInstance = null;
+  }
+
+  function onAceptar() {
+    if (modalActionTaken) return;
+    modalActionTaken = true;
+    modal.hide();
+    cleanup();
+    if (typeof registrar === 'function') registrar(serieId);
+  }
+
+  function onCancelar() {
+    if (modalActionTaken) return;
+    modalActionTaken = true;
+    modal.hide();
+    cleanup();
+    if (typeof mostrarMensaje === 'function') 
+      {
+        mostrarMensaje('Solicitud cancelada.', 'info');
+        console.log('ℹ️ Solicitud cancelada por el usuario');
+      }
+  }
+
+  try { if (aceptarBtn) { aceptarBtn.removeEventListener('click', onAceptar); aceptarBtn.addEventListener('click', onAceptar); } } catch (e) {}
+  try { if (cancelarBtn) { cancelarBtn.removeEventListener('click', onCancelar); cancelarBtn.addEventListener('click', onCancelar); } } catch (e) {}
+
+  try {
+    recognitionGlobalPaused = true;
+    if (recognitionGlobal && typeof recognitionGlobal.abort === 'function') {
+      recognitionGlobal.abort();
+      console.log('🛑 Recognition global abortado y marcado como pausado');
+    }
+  } catch (e) { console.warn('⚠️ No se pudo abortar recognitionGlobal:', e); }
+
+  try {
+    if ('webkitSpeechRecognition' in window) {
+      const recog = new webkitSpeechRecognition();
+      recog.lang = 'es-ES';
+      recog.continuous = true;
+      recog.interimResults = false;
+
+      recog.onresult = function (event) {
+        const texto = (event.results && event.results[0] && event.results[0][0] && event.results[0][0].transcript)
+          ? event.results[0][0].transcript.toLowerCase().trim()
+          : '';
+        console.log('🎤 Texto reconocido (modal):', texto);
+
+        if (modalActionTaken) return;
+
+        if (texto.includes('aceptar')) {
+          try { aceptarBtn?.click(); } catch (e) { onAceptar(); }
+          try { recog.stop(); } catch (e) {}
+        } else if (texto.includes('cancelar')) {
+          try { cancelarBtn?.click(); } catch (e) { onCancelar(); }
+          try { recog.stop(); } catch (e) {}
+        }
+      };
+
+      recog.onerror = function (e) {
+        if (e && e.error === 'aborted') {
+          console.log('ℹ️ Reconocimiento modal abortado (intencional/conflicto)');
+          return;
+        }
+        console.warn('Reconocimiento de voz modal falló', e);
+      };
+
+      modalEl._recogInstance = recog;
+      try { recog.start(); } catch (e) { console.warn('No se pudo iniciar reconocimiento del modal:', e); }
+    }
+  } catch (e) {
+    console.warn('No se pudo crear reconocimiento del modal', e);
+  }
+
+  const onHidden = () => {
+    modalEl.removeEventListener('hidden.bs.modal', onHidden);
+    cleanup();
+    recognitionGlobalPaused = false;
+    try {
+      if (recognitionGlobal && typeof recognitionGlobal.start === 'function') {
+        console.log('🎤 Reiniciando recognitionGlobal después de modal');
+        recognitionGlobal.start();
+      }
+    } catch (e) { console.warn('No se pudo reiniciar recognitionGlobal:', e); }
+  };
+  modalEl.addEventListener('hidden.bs.modal', onHidden);
+
+  modal.show();
+}
+
+
+
 
 
 async function registrarSerie(serieId) {
@@ -421,9 +544,7 @@ async function registrarSerie(serieId) {
     return { success: false, reason: 'no_usuario' };
   }
 
-  if (!confirm('¿Confirmás que querés solicitar esta herramienta?')) {
-    return { success: false, reason: 'cancelled' };
-  }
+  // Nota: la confirmación ya sucede en el modal, por eso no hay confirm() nativo aquí.
 
   try {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -439,14 +560,22 @@ async function registrarSerie(serieId) {
 
     if (!res || (typeof res.ok === 'boolean' && !res.ok)) {
       const statusText = res && res.status ? `HTTP ${res.status}` : 'network error';
-      if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+      if (typeof window.mostrarMensajeKiosco === 'function') 
+        {
+          window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+          console.log('❌ Error de red al registrar recurso');
+        }
       return { success: false, reason: 'http_error', status: res && res.status, statusText };
     }
 
     const data = await res.json();
 
     if (data && data.success) {
-      if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
+      if (typeof window.mostrarMensajeKiosco === 'function') 
+      {
+        window.mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
+        console.log('✅ Recurso asignado correctamente');
+      }
       if (typeof window.nextStep === 'function') window.nextStep(2);
       return { success: true, data };
     } else {
@@ -454,10 +583,15 @@ async function registrarSerie(serieId) {
       return { success: false, reason: 'backend_error', data };
     }
   } catch (err) {
-    if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+    if (typeof window.mostrarMensajeKiosco === 'function') 
+      {
+        window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+        console.log('❌ Error de red al registrar recurso');
+      }
     return { success: false, reason: 'exception', error: err && (err.message || String(err)) };
   }
 }
+
 
 
 
@@ -486,14 +620,18 @@ if (_recursoButtons) {
   });
 }
 
-// Delegación para series
+// Delegación para series (abre modal de confirmación)
 const _serieButtons = document.getElementById('serie-buttons');
 if (_serieButtons) {
   _serieButtons.addEventListener('click', function (e) {
     const btn = e.target.closest('[data-serie-id]');
-    if (btn) registrarSerie(btn.dataset.serieId);
+    if (!btn) return;
+    const serieTextoEl = btn.querySelector('.flex-grow-1');
+    const serieTexto = serieTextoEl ? serieTextoEl.textContent.trim() : btn.textContent.trim();
+    confirmarSerieModal(btn.dataset.serieId, serieTexto, { registrarSerie, mostrarMensajeKiosco });
   });
 }
+
 
 
 
@@ -577,6 +715,7 @@ function registrarPorQR(codigoQR) {
   })
   .catch(err => {
     mostrarMensajeKiosco('Error de red al registrar recurso por QR', 'danger');
+    console.log('❌ Error de red al registrar recurso por QR');
     return { success: false, error: err };
   });
 }
@@ -899,6 +1038,7 @@ function getStepActivo() {
 // === Reconocimiento de voz global ===
 let recognitionGlobal;
 let recognitionRunning = false;
+let recognitionGlobalPaused = false; // <- nueva bandera
 
 function iniciarReconocimientoGlobal() {
   if (!('webkitSpeechRecognition' in window)) {
@@ -909,7 +1049,7 @@ function iniciarReconocimientoGlobal() {
 
   recognitionGlobal = new webkitSpeechRecognition();
   recognitionGlobal.lang = 'es-ES';
-  recognitionGlobal.continuous = true;   // 👈 siempre escuchando
+  recognitionGlobal.continuous = true;
   recognitionGlobal.interimResults = false;
 
   recognitionGlobal.onstart = () => {
@@ -919,11 +1059,12 @@ function iniciarReconocimientoGlobal() {
   };
 
   recognitionGlobal.onerror = (event) => {
+    // Si abortamos intencionalmente, event.error === 'aborted'. No lo tratamos como fallo.
     if (event.error === "aborted") {
       console.log("ℹ️ Reconocimiento abortado intencionalmente");
-      return; // ignoramos este caso
+      return;
     }
-    console.warn('Error en reconocimiento de voz:', event.error);
+    console.warn('Error en reconocimiento global de voz:', event.error);
   };
 
   recognitionGlobal.onresult = (event) => {
@@ -935,16 +1076,22 @@ function iniciarReconocimientoGlobal() {
 
   recognitionGlobal.onend = () => {
     recognitionRunning = false;
-    // 👇 Si se corta por cualquier motivo, lo reiniciamos
-    if (!recognitionRunning) 
-      {
-        console.log("ℹ️ Reconocimiento reiniciado");
-        recognitionGlobal.start();
-      }
+    // Si está pausado, no reiniciamos. Sólo reiniciamos cuando no fue una pausa intencional.
+    if (!recognitionGlobalPaused) {
+      console.log("ℹ️ Reconocimiento reiniciado");
+      try { recognitionGlobal.start(); } catch (e) { console.warn('No se pudo reiniciar recognitionGlobal:', e); }
+    } else {
+      console.log("ℹ️ Reconocimiento global pausado, no se reinicia");
+    }
   };
 
-  recognitionGlobal.start();
+  try {
+    recognitionGlobal.start();
+  } catch (e) {
+    console.warn('No se pudo iniciar recognitionGlobal:', e);
+  }
 }
+
 
 // 👉 Arranca automáticamente al cargar la página
 window.addEventListener('load', () => {
@@ -1275,5 +1422,28 @@ if (typeof window !== 'undefined') {
   window.getStepActivo = window.getStepActivo || getStepActivo;
   window.nextStep = window.nextStep || nextStep;
   window.mostrarMensajeKiosco = window.mostrarMensajeKiosco || mostrarMensajeKiosco;
+
+  // funciones/objetos nuevos que necesitan estar disponibles para tests
+  window.confirmarSerieModal = window.confirmarSerieModal || confirmarSerieModal;
+  window.seleccionarRecurso = window.seleccionarRecurso || seleccionarRecurso;
+
+  // exponer la instancia/estado del reconocimiento global para inspección en tests
+  window.recognitionGlobal = window.recognitionGlobal || recognitionGlobal;
+  window.recognitionGlobalPaused = typeof recognitionGlobalPaused !== 'undefined' ? recognitionGlobalPaused : (window.recognitionGlobalPaused || false);
 }
 
+// Si se está ejecutando bajo CommonJS (Jest require), exportar también
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    confirmarSerieModal,
+    seleccionarRecurso,
+    registrarSerie,
+    registrarPorQR,
+    identificarTrabajador,
+    getStepActivo,
+    nextStep,
+    mostrarMensajeKiosco,
+    // exportar reconocimiento global para tests si existe
+    recognitionGlobal: typeof recognitionGlobal !== 'undefined' ? recognitionGlobal : null
+  };
+}
