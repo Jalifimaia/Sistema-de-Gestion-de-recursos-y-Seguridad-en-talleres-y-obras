@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-    <h1>🔧 Herramientas por Trabajador</h1>
+    <h1> Herramientas por Trabajador</h1>
 
     <p><strong>Desde:</strong> {{ $fecha_inicio ?? '—' }} &nbsp;&nbsp;
        <strong>Hasta:</strong> {{ $fecha_fin ?? '—' }}</p>

@@ -326,7 +326,7 @@ function mostrarRecursosAsignados(recursos, pagina = 1) {
     card.className = 'card mb-3 shadow-sm';
 
     const btn = document.createElement('button');
-    btn.className = 'btn btn-outline-danger btn-lg d-flex justify-content-between align-items-center mt-2';
+    btn.className = 'btn btn-outline-primary btn-lg d-flex justify-content-between align-items-center mt-2';
     btn.dataset.detalleId = r.detalle_id;
     btn.dataset.opcionIndex = i + 1;
     btn.dataset.recurso = r.recurso || '';
@@ -451,7 +451,7 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
     btn.dataset.recurso = r.recurso || '';
     btn.dataset.serie = r.serie || '';
 
-    btn.className = 'btn btn-sm btn-outline-danger';
+    btn.className = 'btn btn-sm btn-outline-primary';
     btn.dataset.detalleId = r.detalle_id;
     btn.dataset.opcionIndex = index + 1;
     btn.innerHTML = `Opción ${index + 1}`;
@@ -1024,7 +1024,7 @@ function renderRecursosPaginados(recursos, pagina = 1) {
 
   visibles.forEach((r, index) => {
     const btn = document.createElement('button');
-    btn.className = 'btn btn-outline-success btn-lg d-flex justify-content-between align-items-center m-2';
+    btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
     btn.dataset.recursoId = r.id;
 
     btn.innerHTML = `
@@ -1085,7 +1085,7 @@ function renderSeriesPaginadas(series, pagina = 1) {
 
   visibles.forEach((s, index) => {
     const btn = document.createElement('button');
-    btn.className = 'btn btn-outline-success btn-lg d-flex justify-content-between align-items-center m-2';
+    btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
     btn.dataset.serieId = s.id;
 
     const textoSerie = s.nro_serie || s.codigo || `Serie ${s.id}`;
@@ -1619,7 +1619,7 @@ function identificarPorQR(codigoQR) {
 function volverAInicio() {
   // Limpiamos la sesión del trabajador
   localStorage.removeItem('id_usuario');
-  console.log('🔙 volverAInicio: sesión limpiada');
+  console.log('volverAInicio: sesión limpiada');
 
   // Volvemos al paso 1
   window.nextStep(1);
@@ -1636,7 +1636,7 @@ function setModoEscaneo(modo) {
   const titulo = document.getElementById('titulo-step3');
   if (modo === 'manual') {
     console.log('🔄 setModoEscaneo: modo manual activado');
-    titulo.textContent = '📦 Tengo la herramienta en mano';
+    titulo.textContent = 'Tengo la herramienta en mano';
     detenerEscaneoQR();
     // 👇 si luego vamos a solicitar manualmente (step5), el volver debe regresar acá (step3)
     step5ReturnTarget = 3;
@@ -1656,16 +1656,16 @@ function cargarMenuPrincipal() {
   const opciones = [
     {
       id: 1,
-      texto: "📦 Tengo la herramienta en mano",
+      texto: "Tengo la herramienta en mano",
       accion: () => {
         console.log('📦 opción seleccionada: herramienta en mano');
         setModoEscaneo('manual');
       },
-      clase: "btn-outline-success"
+      clase: "btn-outline-dark"
     },
     {
       id: 2,
-      texto: "🛠️ Quiero solicitar una herramienta",
+      texto: " Quiero solicitar una herramienta",
       accion: () => {
         const id_usuario = window.localStorage.getItem('id_usuario');
         if (!id_usuario) {
@@ -1700,11 +1700,11 @@ function cargarMenuPrincipal() {
           window.mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
         });
       },
-      clase: "btn-outline-primary"
+      clase: "btn-outline-dark"
     },
     {
       id: 3,
-      texto: "📋 Ver recursos asignados",
+      texto: " Ver recursos asignados",
       accion: () => {
         console.log('📋 opción seleccionada: ver recursos asignados');
         window.cargarRecursos().then(() => {
@@ -1712,16 +1712,16 @@ function cargarMenuPrincipal() {
         });
 
       },
-      clase: "btn-info"
+      clase: "btn-outline-dark"
     },
     {
       id: 4,
-      texto: "🔙 Volver",
+      texto: "Volver",
       accion: () => {
-        console.log('🔙 opción seleccionada: volver al inicio');
+        console.log('Volve opción seleccionada: volver al inicio');
         volverAInicio();
       },
-      clase: "btn-secondary"
+      clase: "btn-outline-dark"
     }
   ];
 
@@ -1915,7 +1915,7 @@ function iniciarReconocimientoGlobal() {
   recognitionGlobal.onstart = () => {
     recognitionRunning = true;
     console.log("🎤 Micrófono global activo");
-    window.mostrarMensajeKiosco('🎤 Micrófono activo: podés dar comandos por voz', 'info');
+    //window.mostrarMensajeKiosco('🎤 Micrófono activo: podés dar comandos por voz', 'info');
   };
 
   recognitionGlobal.onerror = (event) => {
