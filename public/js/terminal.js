@@ -2034,6 +2034,21 @@ function numeroDesdeToken(token) {
 
 function procesarComandoVoz(limpio) {
   const step = getStepActivo();
+
+  // 🧰 Cierre por voz del modal de recursos asignados
+const modalRecursos = document.getElementById('modalRecursos');
+const modalVisible = modalRecursos && modalRecursos.classList.contains('show');
+
+if (modalVisible && /\b(cerrar|cerrar recursos asignados)\b/.test(limpio)) {
+  console.log('🎤 Comando de voz: cerrar modal recursos asignados');
+  const modalInstance = bootstrap.Modal.getInstance(modalRecursos);
+  if (modalInstance) {
+    modalInstance.hide();
+    getRenderer('mostrarMensajeKiosco')('Modal cerrado por voz', 'info');
+  }
+  return;
+}
+
   console.log("👉 Texto reconocido (normalizado):", limpio, " | Step activo:", step);
 
   if (recognitionGlobalPaused) {
