@@ -130,10 +130,10 @@
         <div class="modal-body">
           <ul class="nav nav-tabs mb-3" id="recursosTabs" role="tablist">
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="tab-epp" data-bs-toggle="tab" data-bs-target="#panel-epp" type="button" role="tab">🦺 EPP</button>
+              <button class="nav-link" id="tab-epp" data-bs-toggle="tab" data-bs-target="#panel-epp" type="button" role="tab" aria-selected="true">🦺 EPP</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="tab-herramientas" data-bs-toggle="tab" data-bs-target="#panel-herramientas" type="button" role="tab">🔧 Herramientas</button>
+              <button class="nav-link" id="tab-herramientas" data-bs-toggle="tab" data-bs-target="#panel-herramientas" type="button" role="tab" aria-selected="false">🔧 Herramientas</button>
             </li>
            
           </ul>

@@ -1,5 +1,34 @@
+function getRenderer(name, fallback = () => {}) {
+  if (typeof window !== 'undefined' && typeof window[name] === 'function') return window[name];
+  if (typeof global !== 'undefined' && typeof global[name] === 'function') return global[name];
+  if (typeof module !== 'undefined' && module.exports && typeof module.exports[name] === 'function') return module.exports[name];
+  try {
+    const local = eval(name);
+    if (typeof local === 'function') return local;
+  } catch (e) {}
+  return fallback;
+}
 let scanner;
 let isScanning = false; // 👈 flag de estado
+
+// helper simple para detectar "volver" en variantes
+function esComandoVolver(limpio) {
+  if (!limpio) return false;
+  const s = normalizarTexto(String(limpio)).trim();
+
+  // coincidencias exactas o palabra dentro de frase (más tolerante)
+  if (/^(volver)$/.test(s)) return true;
+  if (/\b(volver)\b/.test(s)) return true;
+
+  // tolerancia a prefijos/partículas comunes: "a volver", "en volver", "ir a volver", "voy a volver"
+  if (/(?:\b(?:a|en|ir a|voy a|por favor)\b).*?\b(volver)\b/.test(s)) return true;
+
+  // catch common ASR partials like "volver a", "volver por", "vuelve" etc
+  //if (/\b(volver)\b/.test(s)) return true;
+
+  return false;
+}
+
 
 
 function mostrarMensajeKiosco(texto, tipo = 'info') {
@@ -76,7 +105,7 @@ function nextStep(n) {
 
   // Acciones específicas por step
   if (n === 2) cargarMenuPrincipal();
-  if (n === 5) cargarCategorias();
+  if (n === 5) window.cargarCategorias();
 }
 
 
@@ -86,21 +115,25 @@ function identificarTrabajador() {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/terminal/identificar', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+    const meta = document.querySelector('meta[name="csrf-token"]');
+const csrf = meta && meta.content ? meta.content : null;
+if (csrf) {
+  xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
+}
 
     xhr.onload = function () {
       try {
         const res = JSON.parse(xhr.responseText);
         if (res.success) {
           localStorage.setItem('id_usuario', res.usuario.id);
-          nextStep(2);
+          window.nextStep(2);
           document.getElementById('saludo-trabajador').textContent = `Hola ${res.usuario.name}`;
         } else {
-          mostrarMensajeKiosco(res.message || 'Error al identificar al trabajador', 'danger');
+      getRenderer('mostrarMensajeKiosco')(res.message || 'Error al identificar al trabajador', 'danger');
         }
         resolve(res);
       } catch (e) {
-        mostrarMensajeKiosco('Error al identificar al trabajador', 'danger');
+      getRenderer('mostrarMensajeKiosco')('Error al identificar al trabajador', 'danger');
         resolve({ success: false, error: e });
       }
     };
@@ -113,7 +146,7 @@ function identificarTrabajador() {
 function simularEscaneo() {
   //alert("Simulación de escaneo QR");
   console.log('🧪 simularEscaneo: simulación activada, avanzando a step5');
-  nextStep(5);
+  window.nextStep(5);
 }
 
 function cargarCategorias() {
@@ -140,7 +173,7 @@ function cargarCategorias() {
         contenedor.appendChild(btn);
       });
     } catch (e) {
-      mostrarMensajeKiosco('No se pudieron cargar las categorías', 'danger');
+  getRenderer('mostrarMensajeKiosco')('No se pudieron cargar las categorías', 'danger');
       console.log('No se pudieron cargar las categorías');
     }
   };
@@ -149,46 +182,64 @@ function cargarCategorias() {
 }
 
 function cargarRecursos() {
-  const id_usuario = localStorage.getItem('id_usuario');
-  if (!id_usuario) {
-    console.warn('⚠️ cargarRecursos: No hay id_usuario en localStorage');
-    return;
-  }
-
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', `/terminal/recursos-asignados/${id_usuario}`, true);
-
-  xhr.onload = function () {
-    try {
-      const recursos = JSON.parse(xhr.responseText || '[]');
-      const epp = [];
-      const herramientas = [];
-
-      recursos.forEach(r => {
-        const tipo = r.tipo?.toLowerCase();
-        const esEPP = tipo === 'epp' || (r.categoria && r.categoria.toLowerCase().includes('epp'));
-        (esEPP ? epp : herramientas).push(r);
-      });
-
-      renderTablaRecursos('tablaEPP', epp, 1, 'paginadorEPP');
-      renderTablaRecursos('tablaHerramientas', herramientas, 1, 'paginadorHerramientas');
-
-    } catch (e) {
-      console.error('❌ cargarRecursos: error procesando respuesta', e);
-      mostrarMensajeKiosco('Error al cargar recursos asignados', 'danger');
+  return new Promise((resolve) => {
+    const id_usuario = window.localStorage.getItem('id_usuario');
+    if (!id_usuario) {
+      console.warn('⚠️ cargarRecursos: No hay id_usuario en localStorage');
+      resolve();
+      return;
     }
-  };
 
-  xhr.onerror = function () {
-    mostrarMensajeKiosco('Error de red al cargar recursos asignados', 'danger');
-  };
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `/terminal/recursos-asignados/${id_usuario}`, true);
 
-  xhr.send();
+    xhr.onload = function () {
+      try {
+        const recursos = JSON.parse(xhr.responseText || '[]');
+        const epp = [];
+        const herramientas = [];
+
+        recursos.forEach(r => {
+          const tipo = r.tipo?.toLowerCase();
+          const esEPP = tipo === 'epp' || (r.categoria && r.categoria.toLowerCase().includes('epp'));
+          (esEPP ? epp : herramientas).push(r);
+        });
+
+        window.recursosEPP = epp;
+        window.recursosHerramientas = herramientas;
+        window.paginaEPPActual = 1;
+        window.paginaHerramientasActual = 1;
+
+        resolve();
+      } catch (e) {
+        console.error('❌ cargarRecursos: error procesando respuesta', e);
+  getRenderer('mostrarMensajeKiosco')('Error al cargar recursos asignados', 'danger');
+        resolve();
+      }
+    };
+
+    xhr.onerror = function () {
+  getRenderer('mostrarMensajeKiosco')('Error de red al cargar recursos asignados', 'danger');
+      resolve();
+    };
+
+    xhr.send();
+  });
 }
 
 
+// Función robusta para renderizar recursos
 function mostrarRecursosAsignados(recursos, pagina = 1) {
-  const contenedor = document.getElementById('contenedorRecursos');
+  console.log('[mostrarRecursosAsignados] recursos recibidos:', recursos);
+  console.log('[mostrarRecursosAsignados] página solicitada:', pagina);
+
+  let contenedor = document.getElementById('contenedorRecursos');
+  if (!contenedor) {
+    console.warn('[mostrarRecursosAsignados] contenedor no encontrado, creando...');
+    contenedor = document.createElement('div');
+    contenedor.id = 'contenedorRecursos';
+    document.body.appendChild(contenedor);
+  }
   contenedor.innerHTML = '';
 
   const porPagina = 5;
@@ -196,41 +247,101 @@ function mostrarRecursosAsignados(recursos, pagina = 1) {
   const inicio = (pagina - 1) * porPagina;
   const visibles = recursos.slice(inicio, inicio + porPagina);
 
-  visibles.forEach(r => {
+  console.log('[mostrarRecursosAsignados] recursos visibles:', visibles);
+
+  visibles.forEach((r, i) => {
     const card = document.createElement('div');
     card.className = 'card mb-3 shadow-sm';
 
-    card.innerHTML = `
+    const html = `
       <div class="card-body">
         <h5 class="card-title mb-1">${r.recurso}</h5>
         <p class="card-text mb-1">Serie: <strong>${r.serie}</strong></p>
         <p class="card-text mb-1">Subcategoría: ${r.subcategoria}</p>
         <p class="card-text mb-1">📅 Prestado: ${r.fecha_prestamo}</p>
-        <p class="card-text mb-1">📅 Devolución: ${r.fecha_devolucion}</p>
+        <p class="card-text mb-1">📅 Devolución: ${r.fecha_devolucion ?? ''}</p>
         <button class="btn btn-outline-danger btn-sm mt-2" onclick="devolverRecurso(${r.detalle_id})">
           Devolver recurso
         </button>
       </div>
     `;
-
+    card.innerHTML = html;
     contenedor.appendChild(card);
+
+    console.log(`[mostrarRecursosAsignados] tarjeta ${i} generada:`, html);
   });
 
-  renderPaginacionRecursos(recursos, pagina, totalPaginas);
+  if (typeof window.renderPaginacionRecursos === 'function') {
+    console.log('[mostrarRecursosAsignados] llamando renderPaginacionRecursos...');
+    window.renderPaginacionRecursos(recursos, pagina, totalPaginas);
+  } else {
+    console.warn('[mostrarRecursosAsignados] renderPaginacionRecursos no está definida');
+  }
+
+  console.log('[mostrarRecursosAsignados] renderizado completo');
 }
+
+// ✅ Exponer para entorno de tests (JSDOM)
+if (typeof window !== 'undefined') {
+  window.mostrarRecursosAsignados = mostrarRecursosAsignados;
+}
+
+// ✅ Exportar para Jest (CommonJS)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Object.assign(module.exports || {}, {
+    mostrarRecursosAsignados
+  });
+}
+
+
+// ✅ Exponer para entorno de tests (JSDOM)
+if (typeof window !== 'undefined') {
+  window.mostrarRecursosAsignados = mostrarRecursosAsignados;
+}
+
+// ✅ Exportar para Jest (CommonJS)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Object.assign(module.exports || {}, {
+    mostrarRecursosAsignados
+  });
+}
+
+
+if (typeof window !== 'undefined') {
+  window.mostrarRecursosAsignados = mostrarRecursosAsignados;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Object.assign(module.exports || {}, {
+    mostrarRecursosAsignados
+  });
+}
+
+
+// ✅ Exponer para entorno de tests (JSDOM)
+if (typeof window !== 'undefined') {
+  window.mostrarRecursosAsignados = mostrarRecursosAsignados;
+}
+
+// ✅ Exportar para Jest (CommonJS)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Object.assign(module.exports || {}, {
+    mostrarRecursosAsignados
+  });
+}
+
+
+
 
 function renderPaginacionRecursos(recursos, paginaActual, totalPaginas) {
   const paginador = document.getElementById('paginadorRecursos');
+  if (!paginador) return;
   paginador.innerHTML = '';
-
   for (let i = 1; i <= totalPaginas; i++) {
-    const btn = document.createElement('button');
-    btn.className = `btn btn-sm ${i === paginaActual ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
-    btn.textContent = i;
-    btn.onclick = () => mostrarRecursosAsignados(recursos, i);
-    paginador.appendChild(btn);
+    // ...
   }
 }
+
 
 function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
   const tabla = document.getElementById(tablaId);
@@ -269,39 +380,60 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
     const btn = document.createElement('button');
     btn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     btn.textContent = i;
-    btn.onclick = () => renderTablaRecursos(tablaId, recursos, i, paginadorId);
+  btn.onclick = () => getRenderer('renderTablaRecursos')(tablaId, recursos, i, paginadorId);
     paginador.appendChild(btn);
   }
+
+  if (tablaId === 'tablaEPP') {
+    window.paginaEPPActual = pagina;
+  }
+  if (tablaId === 'tablaHerramientas') {
+    window.paginaHerramientasActual = pagina;
+  }
+
 }
 
-
 function devolverRecurso(detalleId) {
-  if (!confirm('¿Confirmás que querés devolver este recurso?')) return Promise.resolve({ success: false, reason: 'cancelled' });
+  const id_usuario = localStorage.getItem('id_usuario');
+  if (!id_usuario) {
+    if (typeof window.mostrarMensajeKiosco === 'function') {
+  getRenderer('mostrarMensajeKiosco')('Sesión no válida. Iniciá sesión nuevamente.', 'warning');
+    }
+    return Promise.resolve({ success: false });
+  }
+
+  if (!window.confirm('¿Confirmás que querés devolver este recurso?')) {
+    return Promise.resolve({ success: false, reason: 'cancelled' });
+  }
+
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const csrf = meta && meta.content ? meta.content : null;
+  const headers = {};
+  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
 
   return fetch(`/terminal/devolver/${detalleId}`, {
     method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    }
+    headers
   })
-  .then(res => {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  })
-  .then(data => {
-    if (data.success) {
-      mostrarMensajeKiosco('✅ Recurso devuelto correctamente', 'success');
-      cargarRecursos();
-    } else {
-      mostrarMensajeKiosco(data.message || 'Error al devolver recurso', 'danger');
-    }
-    return data;
-  })
-  .catch(err => {
-    mostrarMensajeKiosco('Error de red al devolver recurso', 'danger');
-    return { success: false, error: err };
-  });
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      if (data.success) {
+  getRenderer('mostrarMensajeKiosco')('✅ Recurso devuelto correctamente', 'success');
+        window.cargarRecursos();
+      } else {
+  getRenderer('mostrarMensajeKiosco')(data.message || 'Error al devolver recurso', 'danger');
+      }
+      return data;
+    })
+    .catch(err => {
+  getRenderer('mostrarMensajeKiosco')('Error de red al devolver recurso', 'danger');
+      return { success: false, error: err };
+    });
 }
+
 
 
 function seleccionarCategoria(categoriaId) {
@@ -313,10 +445,10 @@ function seleccionarCategoria(categoriaId) {
       const subcategorias = JSON.parse(xhr.responseText);
       console.log('📁 seleccionarCategoria: subcategorías recibidas', subcategorias);
       window.subcategoriasActuales = subcategorias.filter(s => s.disponibles > 0);
-      renderSubcategoriasPaginadas(window.subcategoriasActuales, 1);
-      nextStep(6);
+  getRenderer('renderSubcategoriasPaginadas')(window.subcategoriasActuales, 1);
+      window.nextStep(6);
     } catch (e) {
-      mostrarMensajeKiosco('No se pudieron cargar las subcategorías', 'danger');
+  getRenderer('mostrarMensajeKiosco')('No se pudieron cargar las subcategorías', 'danger');
       console.log('❌ No se pudieron cargar las subcategorías');
     }
   };
@@ -352,7 +484,7 @@ function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
     const pagBtn = document.createElement('button');
     pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     pagBtn.textContent = i;
-    pagBtn.onclick = () => renderSubcategoriasPaginadas(subcategorias, i);
+  pagBtn.onclick = () => getRenderer('renderSubcategoriasPaginadas')(subcategorias, i);
     paginador.appendChild(pagBtn);
   }
 
@@ -370,10 +502,10 @@ function seleccionarSubcategoria(subcategoriaId) {
       const recursos = JSON.parse(xhr.responseText);
       console.log('📦 seleccionarSubcategoria: recursos recibidos', recursos);
       window.recursosActuales = recursos.filter(r => r.disponibles > 0);
-      renderRecursosPaginados(window.recursosActuales, 1);
-      nextStep(7);
+  getRenderer('renderRecursosPaginados')(window.recursosActuales, 1);
+      window.nextStep(7);
     } catch (e) {
-      mostrarMensajeKiosco('No se pudieron cargar los recursos', 'danger');
+  getRenderer('mostrarMensajeKiosco')('No se pudieron cargar los recursos', 'danger');
       console.log('❌ No se pudieron cargar los recursos', e);
     }
   };
@@ -409,7 +541,7 @@ function renderRecursosPaginados(recursos, pagina = 1) {
     const pagBtn = document.createElement('button');
     pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     pagBtn.textContent = i;
-    pagBtn.onclick = () => renderRecursosPaginados(recursos, i);
+  pagBtn.onclick = () => getRenderer('renderRecursosPaginados')(recursos, i);
     paginador.appendChild(pagBtn);
   }
 
@@ -426,16 +558,16 @@ function seleccionarRecurso(recursoId) {
       const series = JSON.parse(xhr.responseText);
       console.log('🔢 seleccionarRecurso: series recibidas', series);
       window.seriesActuales = series;
-      renderSeriesPaginadas(series, 1);
-      nextStep(8);
+  getRenderer('renderSeriesPaginadas')(series, 1);
+      window.nextStep(8);
     } catch (e) {
-      mostrarMensajeKiosco('No se pudieron cargar las series', 'danger');
+  getRenderer('mostrarMensajeKiosco')('No se pudieron cargar las series', 'danger');
       console.log('❌ No se pudieron cargar las series', e);
     }
   };
 
   xhr.onerror = function () {
-    mostrarMensajeKiosco('❌ Error de red al cargar las series', 'danger');
+  getRenderer('mostrarMensajeKiosco')('❌ Error de red al cargar las series', 'danger');
   };
 
   xhr.send();
@@ -471,7 +603,7 @@ function renderSeriesPaginadas(series, pagina = 1) {
     const pagBtn = document.createElement('button');
     pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     pagBtn.textContent = i;
-    pagBtn.onclick = () => renderSeriesPaginadas(series, i);
+  pagBtn.onclick = () => getRenderer('renderSeriesPaginadas')(series, i);
     paginador.appendChild(pagBtn);
   }
 
@@ -484,7 +616,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
   botonSerie = botonSerie || window.botonSerieSeleccionada || null;
 
   const registrar = options.registrarSerie || window.registrarSerie;
-  const mostrarMensaje = options.mostrarMensajeKiosco || window.mostrarMensajeKiosco;
+  const mostrarMensaje = options.mostrarMensajeKiosco || getRenderer('mostrarMensajeKiosco');
 
   const body = document.getElementById('modalConfirmarSerieBody');
   if (body) body.textContent = `¿Confirmás que querés solicitar el recurso "${serieTexto}"?`;
@@ -600,9 +732,16 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
 
 
 async function registrarSerie(serieId, boton = null) {
-  const id_usuario = localStorage.getItem('id_usuario');
+  const id_usuario = window.localStorage.getItem('id_usuario');
+  
+   // validaciones inline
+  if (!serieId) {
+  mostrarMensajeKiosco && getRenderer('mostrarMensajeKiosco')('Serie inválida', 'warning');
+    return { success: false, reason: 'invalid_series' };
+  }
+  
   if (!id_usuario) {
-    if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+  if (typeof window.mostrarMensajeKiosco === 'function') getRenderer('mostrarMensajeKiosco')('⚠️ No hay trabajador identificado', 'danger');
     return { success: false, reason: 'no_usuario' };
   }
 
@@ -622,7 +761,7 @@ async function registrarSerie(serieId, boton = null) {
       const statusText = res && res.status ? `HTTP ${res.status}` : 'network error';
       if (typeof window.mostrarMensajeKiosco === 'function') 
         {
-          window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+          getRenderer('mostrarMensajeKiosco')('Error de red al registrar recurso', 'danger');
           console.log('❌ Error de red al registrar recurso');
         }
       return { success: false, reason: 'http_error', status: res && res.status, statusText };
@@ -633,7 +772,7 @@ async function registrarSerie(serieId, boton = null) {
     if (data && data.success) {
       if (typeof window.mostrarMensajeKiosco === 'function') 
         {
-          window.mostrarMensajeKiosco('✅ Recurso asignado correctamente', 'success');
+          getRenderer('mostrarMensajeKiosco')('✅ Recurso asignado correctamente', 'success');
       console.log('✅ Recurso asignado correctamente');
         }
 
@@ -647,13 +786,13 @@ async function registrarSerie(serieId, boton = null) {
 
       return { success: true, data };
     } else {
-      if (typeof window.mostrarMensajeKiosco === 'function') window.mostrarMensajeKiosco((data && data.message) || 'Error al registrar recurso', 'danger');
+  if (typeof window.mostrarMensajeKiosco === 'function') getRenderer('mostrarMensajeKiosco')((data && data.message) || 'Error al registrar recurso', 'danger');
       return { success: false, reason: 'backend_error', data };
     }
   } catch (err) {
     if (typeof window.mostrarMensajeKiosco === 'function') 
       {
-      window.mostrarMensajeKiosco('Error de red al registrar recurso', 'danger');
+  getRenderer('mostrarMensajeKiosco')('Error de red al registrar recurso', 'danger');
         console.log('❌ Error de red al registrar recurso');
       }
     return { success: false, reason: 'exception', error: err && (err.message || String(err)) };
@@ -670,6 +809,20 @@ document.addEventListener('click', (e) => {
    .log('[DOC CLICK]', e.target, e);
 }, { capture: true });
 */
+
+const recursosTabs = document.getElementById('recursosTabs');
+if (recursosTabs) {
+  recursosTabs.addEventListener('shown.bs.tab', function (event) {
+    const tabId = event.target.id;
+    if (tabId === 'tab-epp') {
+  getRenderer('renderTablaRecursos')('tablaEPP', window.recursosEPP || [], window.paginaEPPActual || 1, 'paginadorEPP');
+    } else if (tabId === 'tab-herramientas') {
+  getRenderer('renderTablaRecursos')('tablaHerramientas', window.recursosHerramientas || [], window.paginaHerramientasActual || 1, 'paginadorHerramientas');
+    }
+  });
+}
+
+
 
 // Delegación para subcategorías
 const _subcatButtons = document.getElementById('subcategoria-buttons');
@@ -698,7 +851,7 @@ if (_serieButtons) {
     const serieTextoEl = btn.querySelector('.flex-grow-1');
     const serieTexto = serieTextoEl ? serieTextoEl.textContent.trim() : btn.textContent.trim();
     window.botonSerieSeleccionada = btn;
-    confirmarSerieModal(btn.dataset.serieId, serieTexto, { registrarSerie, mostrarMensajeKiosco }, btn);
+  confirmarSerieModal(btn.dataset.serieId, serieTexto, { registrarSerie, mostrarMensajeKiosco: getRenderer('mostrarMensajeKiosco') }, btn);
   });
 }
 
@@ -714,7 +867,7 @@ function activarEscaneoQR() {
 
   if (!qrContainer) {
     console.error('No se encontró el contenedor de escaneo QR')
-    mostrarMensajeKiosco('No se encontró el contenedor de escaneo QR', 'danger');
+  getRenderer('mostrarMensajeKiosco')('No se encontró el contenedor de escaneo QR', 'danger');
     return;
   }
 
@@ -741,7 +894,7 @@ function activarEscaneoQR() {
     }
   ).catch(err => {
     console.error('Error al iniciar escaneo:', err);
-    mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
+  getRenderer('mostrarMensajeKiosco')('No se pudo activar la cámara para escanear QR', 'danger');
     cleanupScanUI();
   });
 }
@@ -753,43 +906,52 @@ function cancelarEscaneoQR() {
 
 
 function registrarPorQR(codigoQR) {
-  const id_usuario = localStorage.getItem('id_usuario');
+  const id_usuario = window.localStorage.getItem('id_usuario');
   if (!id_usuario) {
-    mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+  getRenderer('mostrarMensajeKiosco')('⚠️ No hay trabajador identificado', 'danger');
     return Promise.resolve({ success: false, reason: 'no_usuario' });
   }
 
+  const meta = (typeof document !== 'undefined') && document.querySelector('meta[name="csrf-token"]');
+  const csrf = meta && meta.content ? meta.content : null;
+  const headers = { 'Content-Type': 'application/json' };
+  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+
   return fetch(`/terminal/registrar-por-qr`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    },
+    headers,
     body: JSON.stringify({ codigo_qr: codigoQR, id_usuario })
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res || (typeof res.ok === 'boolean' && !res.ok)) {
+      throw new Error(res ? `HTTP ${res.status}` : 'network error');
+    }
+    return res.json();
+  })
   .then(data => {
-    if (data.success) {
+    if (data && data.success) {
       const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
-      mostrarMensajeKiosco(mensaje, 'success');
-      nextStep(2);
+  if (typeof window.mostrarMensajeKiosco === 'function') getRenderer('mostrarMensajeKiosco')(mensaje, 'success');
+      if (typeof window.nextStep === 'function') window.nextStep(2);
     } else {
-      if (data.message === 'QR no encontrado') {
-        mostrarMensajeKiosco('❌ QR no encontrado en el sistema', 'danger');
-      } else if (data.message === 'Este recurso ya está asignado') {
-        mostrarMensajeKiosco(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
+      if (data && data.message === 'QR no encontrado') {
+  getRenderer('mostrarMensajeKiosco')('❌ QR no encontrado en el sistema', 'danger');
+      } else if (data && data.message === 'Este recurso ya está asignado') {
+  getRenderer('mostrarMensajeKiosco')(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
       } else {
-        mostrarMensajeKiosco(data.message || 'Error al registrar recurso por QR', 'danger');
+  getRenderer('mostrarMensajeKiosco')((data && data.message) || 'Error al registrar recurso por QR', 'danger');
       }
     }
     return data;
   })
   .catch(err => {
-    mostrarMensajeKiosco('Error de red al registrar recurso por QR', 'danger');
-    console.log('❌ Error de red al registrar recurso por QR');
+    window.mostrarMensajeKiosco('Error de red al registrar recurso por QR', 'danger');
+    console.log('❌ Error de red al registrar recurso por QR', err);
     return { success: false, error: err };
   });
 }
+
+
 
 
 function detenerEscaneoQR(next = null) {
@@ -806,7 +968,7 @@ function detenerEscaneoQR(next = null) {
       if (btnEscanear) btnEscanear.classList.remove('d-none');
       if (textoCamara) textoCamara.classList.add('d-none');
       isScanning = false;
-      if (next) nextStep(next); // 👈 avanzar al paso cuando termina
+      if (next) window.nextStep(next); // 👈 avanzar al paso cuando termina
       console.log('➡️ detenerEscaneoQR: avanzando a step', next);
     });
   } else {
@@ -815,7 +977,7 @@ function detenerEscaneoQR(next = null) {
     if (btnEscanear) btnEscanear.classList.remove('d-none');
     if (textoCamara) textoCamara.classList.add('d-none');
     isScanning = false;
-    if (next) nextStep(next);
+    if (next) window.nextStep(next);
   }
 }
 
@@ -874,7 +1036,7 @@ function activarEscaneoQRLogin() {
     }
   ).catch(err => {
     console.error('No se pudo iniciar escaneo login:', err);
-    mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
+    window.mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
     detenerEscaneoQRLogin();
   });
 }
@@ -899,12 +1061,13 @@ function detenerEscaneoQRLogin() {
 }
 
 function identificarPorQR(codigoQR) {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const csrf = meta && meta.content ? meta.content : null;
+  const headers = { 'Content-Type': 'application/json' };
+  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
   fetch('/terminal/identificar', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    },
+    headers,
     body: JSON.stringify({ codigo_qr: codigoQR })
   })
   .then(res => res.json())
@@ -914,28 +1077,28 @@ function identificarPorQR(codigoQR) {
     if (data.success) {
       // Usuario válido (rol trabajador + estado Alta)
       localStorage.setItem('id_usuario', data.usuario.id);
-      nextStep(2);
+      window.nextStep(2);
       document.getElementById('saludo-trabajador').textContent = `Hola ${data.usuario.name}`;
     } else {
       // Mensajes diferenciados según backend
       if (data.message === 'Usuario no encontrado') {
-        mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
+        window.mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
       console.log('❌ Usuario no encontrado en el sistema');
       } else if (data.message === 'Este usuario no tiene permisos para usar el kiosco') {
-        mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
+        window.mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
       console.log('⚠️ Este usuario no tiene permisos para usar el kiosco');
       } else if (data.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
-        mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
+        window.mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
       console.log('⛔ El usuario no está en estado Alta y no puede usar el kiosco');
       } else {
-        mostrarMensajeKiosco(data.message || 'Error al identificar por QR', 'danger');
+        window.mostrarMensajeKiosco(data.message || 'Error al identificar por QR', 'danger');
       console.log('Error al identificar por QR');
       }
     }
   })
   .catch(err => {
     console.error('Error en fetch login QR:', err);
-    mostrarMensajeKiosco('Error de red al identificar por QR', 'danger');
+    window.mostrarMensajeKiosco('Error de red al identificar por QR', 'danger');
   });
 }
 
@@ -946,7 +1109,7 @@ function volverAInicio() {
   console.log('🔙 volverAInicio: sesión limpiada');
 
   // Volvemos al paso 1
-  nextStep(1);
+  window.nextStep(1);
 
   // Opcional: limpiar el campo DNI por si quedó algo escrito
   const dniInput = document.getElementById('dni');
@@ -970,7 +1133,7 @@ function setModoEscaneo(modo) {
     activarEscaneoQR();
     // escaneo QR no cambia el target de step5
   }
-  nextStep(3);
+  window.nextStep(3);
 }
 
 function cargarMenuPrincipal() {
@@ -991,36 +1154,37 @@ function cargarMenuPrincipal() {
       id: 2,
       texto: "🛠️ Quiero solicitar una herramienta",
       accion: () => {
-        const id_usuario = localStorage.getItem('id_usuario');
+        const id_usuario = window.localStorage.getItem('id_usuario');
         if (!id_usuario) {
           console.warn('⚠️ cargarMenuPrincipal: no hay id_usuario para solicitar herramienta');
-          mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+          window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
           return;
         }
 
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        const csrf = meta && meta.content ? meta.content : null;
+        const headers = { 'Content-Type': 'application/json' };
+        if (csrf) headers['X-CSRF-TOKEN'] = csrf;
         fetch('/terminal/solicitar', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          },
+          headers,
           body: JSON.stringify({ id_usuario })
         })
         .then(res => res.json())
         .then(data => {
           if (!data.success) {
             console.warn('❌ No se puede solicitar herramientas:', data.message);
-            mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
+            window.mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
             return;
           }
 
           console.log('🛠️ opción seleccionada: solicitar herramienta');
           step5ReturnTarget = 2;
-          nextStep(5);
+          window.nextStep(5);
         })
         .catch(() => {
           console.error('❌ Error de red al validar EPP');
-          mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
+          window.mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
         });
       },
       clase: "btn-outline-primary"
@@ -1030,8 +1194,10 @@ function cargarMenuPrincipal() {
       texto: "📋 Ver recursos asignados",
       accion: () => {
         console.log('📋 opción seleccionada: ver recursos asignados');
-        cargarRecursos();
-        abrirModalRecursos(); // ✅ dispara log de apertura y cierre
+        window.cargarRecursos().then(() => {
+          abrirModalRecursos();
+        });
+
       },
       clase: "btn-info"
     },
@@ -1065,23 +1231,56 @@ function cargarMenuPrincipal() {
 
 // 👇 nuevo: función para botón Volver en step5
 function volverDesdeStep5() {
-  nextStep(step5ReturnTarget);
+  window.nextStep(step5ReturnTarget);
 }
 
 
 function abrirModalRecursos() {
   const modalEl = document.getElementById('modalRecursos');
   if (!modalEl) return;
+  if (!(window.bootstrap && bootstrap.Modal)) {
+    console.warn('abrirModalRecursos: bootstrap.Modal no disponible');
+    return;
+  }
   const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-  
-  console.log('📖 abrirModalRecursos: modal abierto');
   modalInstance.show();
 
-  modalEl.addEventListener('hidden.bs.modal', () => {
-  console.log('📖 cerrarModalRecursos: modal cerrado por interacción del usuario');
-});
+  const tabBtn = document.getElementById('tab-epp');
+  if (tabBtn && window.bootstrap && bootstrap.Tab) {
+    try {
+      const tabTrigger = new bootstrap.Tab(tabBtn);
+      tabTrigger.show();
+    } catch (e) { console.warn('abrirModalRecursos: error al activar tab-epp', e); }
+  }
 
+  // Elementos opcionales
+  const panelEPP = document.getElementById('panel-epp');
+  const panelHerr = document.getElementById('panel-herramientas');
+  const tabEPP = document.getElementById('tab-epp');
+  const tabHerr = document.getElementById('tab-herramientas');
+
+  if (tabEPP && tabEPP.classList) {
+    tabEPP.classList.add('active');
+    tabEPP.setAttribute('aria-selected', 'true');
+  }
+  if (tabHerr && tabHerr.classList) {
+    tabHerr.classList.remove('active');
+    tabHerr.setAttribute('aria-selected', 'false');
+  }
+  if (panelEPP && panelEPP.classList) panelEPP.classList.add('show','active');
+  if (panelHerr && panelHerr.classList) panelHerr.classList.remove('show','active');
+
+  // Usa guardas antes de renderizar
+  if (window.recursosEPP && document.getElementById('tablaEPP')) {
+    renderTablaRecursos('tablaEPP', window.recursosEPP || [], window.paginaEPPActual || 1, 'paginadorEPP');
+  } else {
+    const tabla = document.getElementById('tablaEPP');
+    const paginador = document.getElementById('paginadorEPP');
+    if (tabla) tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
+    if (paginador) paginador.innerHTML = '';
+  }
 }
+
 
 
 // 🔧 Normalizar texto (quita acentos)
@@ -1114,7 +1313,7 @@ let recognitionGlobalPaused = false; // <- nueva bandera
 function iniciarReconocimientoGlobal() {
   if (!('webkitSpeechRecognition' in window)) {
     console.warn('⚠️ Tu navegador no soporta reconocimiento de voz');
-    mostrarMensajeKiosco('⚠️ Tu navegador no soporta reconocimiento de voz', 'warning');
+    window.mostrarMensajeKiosco('⚠️ Tu navegador no soporta reconocimiento de voz', 'warning');
     return;
   }
 
@@ -1126,7 +1325,7 @@ function iniciarReconocimientoGlobal() {
   recognitionGlobal.onstart = () => {
     recognitionRunning = true;
     console.log("🎤 Micrófono global activo");
-    mostrarMensajeKiosco('🎤 Micrófono activo: podés dar comandos por voz', 'info');
+    window.mostrarMensajeKiosco('🎤 Micrófono activo: podés dar comandos por voz', 'info');
   };
 
   recognitionGlobal.onerror = (event) => {
@@ -1176,7 +1375,7 @@ let recognition;
 function iniciarReconocimientoVoz() {
   if (!('webkitSpeechRecognition' in window)) {
     console.warn('⚠️ Tu navegador no soporta reconocimiento de voz');
-    mostrarMensajeKiosco('⚠️ Tu navegador no soporta reconocimiento de voz', 'warning');
+    window.mostrarMensajeKiosco('⚠️ Tu navegador no soporta reconocimiento de voz', 'warning');
     return;
   }
 
@@ -1195,279 +1394,470 @@ function iniciarReconocimientoVoz() {
   console.log('🎤 iniciarReconocimientoVoz: reconocimiento iniciado');
 }
 
+// matchOpcion: si se pasa 'numero' devuelve el número (Number) cuando coincide, otherwise false
 function matchOpcion(limpio, numero, ...palabrasClave) {
-  const numerosPalabra = {
-    1:"uno", 2:"dos", 3:"tres", 4:"cuatro", 5:"cinco",
-    6:"seis", 7:"siete", 8:"ocho", 9:"nueve", 10:"diez",
-    11:"once", 12:"doce", 13:"trece", 14:"catorce", 15:"quince",
-    16:"dieciseis", 17:"diecisiete", 18:"dieciocho", 19:"diecinueve", 20:"veinte",
-    21:"veintiuno", 22:"veintidos", 23:"veintitres", 24:"veinticuatro", 25:"veinticinco",
-    26:"veintiseis", 27:"veintisiete", 28:"veintiocho", 29:"veintinueve", 30:"treinta"
-    // Podés seguir hasta 50 o más si querés
-  };
-
+  const numerosPalabra = MAPA_NUMEROS; // usa el mapa global
   const palabra = numerosPalabra[numero];
-
+  // logs opcionales para debug (puedes desactivar en producción)
   console.log('🎯 matchOpcion: evaluando coincidencia para opción', numero);
 
-  return (
-    limpio.includes(`opcion ${numero}`) ||
-    limpio.includes(`opción ${numero}`) ||
-    (palabra && (
-      limpio.includes(`opcion ${palabra}`) ||
-      limpio.includes(`opción ${palabra}`)
-    )) ||
-    limpio === `${numero}` ||
-    limpio === palabra ||
-    palabrasClave.some(p => limpio.includes(p))
-  );
+  // coincidencias explícitas
+  if (limpio.includes(`opcion ${numero}`) || limpio.includes(`opción ${numero}`)) return numero;
+  if (palabra && (limpio.includes(`opcion ${palabra}`) || limpio.includes(`opción ${palabra}`))) return numero;
+  // si el usuario habla solo el número ("tres" o "3")
+  if (limpio === `${numero}` || limpio === palabra) return numero;
+
+  // palabras clave (ej: "herramienta en mano")
+  if (palabrasClave.length && palabrasClave.some(p => limpio.includes(p))) return numero;
+
+  return false;
 }
 
-function matchTextoBoton(limpio, btn) {
-  const texto = normalizarTexto(btn.textContent)
-    .replace(/opcion\s*\d+/i, '')
-    .replace(/[\s-]/g, '')
-    .trim();
-  const comando = limpio.replace(/[\s-]/g, '');
 
+function matchTextoBoton(limpio, btn) {
+  if (!btn || !btn.textContent) return false;
+  const textoBtn = normalizarTexto(btn.textContent);
+  // eliminar prefijos tipo "opcion 1" y normalizar espacios y guiones
+  const texto = textoBtn.replace(/opcion\s*\d+/i, '').replace(/[\s-]/g, '').trim();
+  const comando = normalizarTexto(limpio).replace(/[\s-]/g, '').trim();
   console.log('🎯 matchTextoBoton: comparando comando vs botón', comando, texto);
   return texto.includes(comando) || comando.includes(texto);
 }
+
+
+// Conversión palabras -> número (siempre disponible antes de usarlo)
+const MAPA_NUMEROS = {
+  uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5,
+  seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10,
+  once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
+  dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20
+};
+
+// helper ya definido previamente (si no está, pegalo antes de procesar comandos)
+function numeroDesdeToken(token) {
+  if (!token && token !== 0) return NaN;
+  const n = parseInt(token, 10);
+  if (!isNaN(n)) return n;
+  const normal = normalizarTexto(String(token || '')).replace(/\s+/g, '');
+  return MAPA_NUMEROS[normal] || NaN;
+}
+
 
 
 function procesarComandoVoz(limpio) {
   const step = getStepActivo();
   console.log("👉 Texto reconocido (normalizado):", limpio, " | Step activo:", step);
 
-// === Step1: Identificación ===
-if (step === 'step1') {
-  let comandoEjecutado = false;
+  // === Step1: Identificación ===
+  if (step === 'step1') {
+    let comandoEjecutado = false;
 
-  if (matchOpcion(limpio, 0, "qr", "iniciar sesion con qr", "iniciar con qr", "sesion qr", "login qr")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Iniciar sesión con QR', 'success');
+    if (matchOpcion(limpio, 0, "qr", "iniciar sesion con qr", "iniciar con qr", "sesion qr", "login qr")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Iniciar sesión con QR', 'success');
       console.log('🎤 Comando reconocido: Iniciar sesión con QR');
-    activarEscaneoQRLogin();
-    comandoEjecutado = true;
-    return;
-  }
+      activarEscaneoQRLogin();
+      return;
+    }
 
-  if (limpio.includes("continuar")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Continuar con DNI', 'success');
+    if (limpio.includes("continuar")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Continuar con DNI', 'success');
       console.log('🎤 Comando reconocido: Continuar con DNI');
-    identificarTrabajador();
-    comandoEjecutado = true;
-    return;
-  }
+      identificarTrabajador();
+      return;
+    }
 
-  const numeros = limpio.replace(/\D/g, "");
-  if (numeros.length > 6) {
-    document.getElementById('dni').value = numeros;
-    mostrarMensajeKiosco(`🎤 DNI detectado: ${numeros}`, 'success');
-    console.log(`🎤 DNI detectado: ${numeros}`);
-    comandoEjecutado = true;
-    return;
-  }
+    const numeros = limpio.replace(/\D/g, "");
+    if (numeros.length > 6) {
+      const dniEl = document.getElementById('dni');
+      if (dniEl) dniEl.value = numeros;
+      window.mostrarMensajeKiosco(`🎤 DNI detectado: ${numeros}`, 'success');
+      console.log(`🎤 DNI detectado: ${numeros}`);
+      return;
+    }
 
-  if (!comandoEjecutado) {
     console.log("⚠️ Step1: No se reconoció comando válido");
+    return;
   }
-}
 
+  // === Step2: Menú principal y modal recursos ===
+  else if (step === 'step2') {
+    // Normalizar repeticiones ("tres tres" -> "tres")
+    limpio = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
 
-// === Step2: Menú principal ===
-else if (step === 'step2') {
-  let comandoEjecutado = false;
-
-  // 🔄 Limpieza de repeticiones (ej: "tres tres" → "tres")
-  limpio = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
-
-  if (matchOpcion(limpio, 1, "herramienta en mano")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
+    // Opciones del menú principal
+    if (matchOpcion(limpio, 1, "herramienta en mano")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
       console.log('🎤 Comando reconocido: Herramienta en mano');
-    setModoEscaneo('manual');
-    comandoEjecutado = true;
-    return;
-  }
+      setModoEscaneo('manual');
+      return;
+    }
 
-  if (matchOpcion(limpio, 2, "solicitar herramienta", "quiero solicitar", "pedir herramienta")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
+    if (matchOpcion(limpio, 2, "solicitar herramienta", "quiero solicitar", "pedir herramienta")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
       console.log('🎤 Comando reconocido: Solicitar herramienta');
-    step5ReturnTarget = 2;
-    nextStep(5);
-    comandoEjecutado = true;
-    return;
-  }
+      step5ReturnTarget = 2;
+      window.nextStep(5);
+      return;
+    }
 
-  if (matchOpcion(limpio, 3, "ver recursos", "recursos asignados", "mostrar recursos")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
+    if (matchOpcion(limpio, 3, "ver recursos", "recursos asignados", "mostrar recursos")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
       console.log('🎤 Comando reconocido: Ver recursos asignados');
-    cargarRecursos();
-    const modalEl = document.getElementById('modalRecursos');
-    const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-    modalInstance.show();
-    comandoEjecutado = true;
-    return;
-  }
+      window.cargarRecursos().then(() => {
+        abrirModalRecursos();
+      });
+      return;
+    }
 
-  if (matchOpcion(limpio, 4, "volver", "inicio", "regresar", "atrás", "cerrar")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
+
+    if (matchOpcion(limpio, 4, "volver", "inicio", "regresar", "atrás", "cerrar")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
       console.log('🎤 Comando reconocido: Volver al inicio');
-    volverAInicio();
-    comandoEjecutado = true;
-    return;
-  }
+      volverAInicio();
+      return;
+    }
 
-  if (!comandoEjecutado) {
+    // 🔁 Cambio de tab por voz usando Bootstrap.Tab
+    if (limpio === 'ver epp') {
+      const tabBtn = document.getElementById('tab-epp');
+      if (tabBtn) {
+        const tabTrigger = new bootstrap.Tab(tabBtn);
+        tabTrigger.show();
+        console.log('🎤 Tab activado por voz: EPP');
+      } else {
+        console.log('⚠️ tab-epp no encontrado');
+      }
+      return;
+    }
+
+    if (limpio === 'ver herramientas') {
+      const tabBtn = document.getElementById('tab-herramientas');
+      if (tabBtn) {
+        const tabTrigger = new bootstrap.Tab(tabBtn);
+        tabTrigger.show();
+        console.log('🎤 Tab activado por voz: Herramientas');
+      } else {
+        console.log('⚠️ tab-herramientas no encontrado');
+      }
+      return;
+    }
+
+    // 📄 Paginación específica por tab: "pagina epp 2" / "pagina herramientas 3"
+    const matchPaginaEPP = limpio.match(/^pagina\s*epp\s*(\d{1,2})$/i);
+    const matchPaginaHerr = limpio.match(/^pagina\s*herramientas\s*(\d{1,2})$/i);
+
+    if (matchPaginaEPP) {
+      const numero = parseInt(matchPaginaEPP[1], 10);
+      const total = Math.ceil((window.recursosEPP?.length || 0) / 5);
+      if (numero >= 1 && numero <= total) {
+        renderTablaRecursos('tablaEPP', window.recursosEPP, numero, 'paginadorEPP');
+      } else {
+        window.mostrarMensajeKiosco('Número de página inválido para EPP', 'warning');
+      }
+      return;
+    }
+
+    if (matchPaginaHerr) {
+      const numero = parseInt(matchPaginaHerr[1], 10);
+      const total = Math.ceil((window.recursosHerramientas?.length || 0) / 5);
+      if (numero >= 1 && numero <= total) {
+        renderTablaRecursos('tablaHerramientas', window.recursosHerramientas, numero, 'paginadorHerramientas');
+      } else {
+        window.mostrarMensajeKiosco('Número de página inválido para herramientas', 'warning');
+      }
+      return;
+    }
+
+    // 📄 Paginación genérica: "pagina 2" (según tab activo)
+    const matchPaginaGen = limpio.match(/^pagina\s*(\d{1,2})$/i);
+    if (matchPaginaGen) {
+      const numero = parseInt(matchPaginaGen[1], 10);
+      const eppActivo = document.getElementById('tab-epp')?.getAttribute('aria-selected') === 'true';
+      const herrActivo = document.getElementById('tab-herramientas')?.getAttribute('aria-selected') === 'true';
+
+      if (eppActivo) {
+        const total = Math.ceil((window.recursosEPP?.length || 0) / 5);
+        if (numero >= 1 && numero <= total) {
+          renderTablaRecursos('tablaEPP', window.recursosEPP, numero, 'paginadorEPP');
+        } else {
+          window.mostrarMensajeKiosco('Número de página inválido para EPP', 'warning');
+        }
+        return;
+      }
+
+      if (herrActivo) {
+        const total = Math.ceil((window.recursosHerramientas?.length || 0) / 5);
+        if (numero >= 1 && numero <= total) {
+          renderTablaRecursos('tablaHerramientas', window.recursosHerramientas, numero, 'paginadorHerramientas');
+        } else {
+          window.mostrarMensajeKiosco('Número de página inválido para herramientas', 'warning');
+        }
+        return;
+      }
+
+      window.mostrarMensajeKiosco('No se detectó el tab activo', 'warning');
+      return;
+    }
+
     console.log("⚠️ Step2: No se reconoció comando válido");
+    return;
   }
-}
 
-
-// === Step3: Escaneo QR ===
-else if (step === 'step3') {
-  let comandoEjecutado = false;
-
-  if (matchOpcion(limpio, 1, "qr", "escanear")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
+  // === Step3: Escaneo QR ===
+  else if (step === 'step3') {
+    if (matchOpcion(limpio, 1, "qr", "escanear")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
       console.log('🎤 Comando reconocido: Escanear QR');
-    activarEscaneoQR();
-    comandoEjecutado = true;
-    return;
-  }
+      activarEscaneoQR();
+      return;
+    }
 
-  if (limpio.includes("cancelar")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
+    if (limpio.includes("cancelar")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
       console.log('🎤 Comando reconocido: Cancelar escaneo');
-    cancelarEscaneoQR();
-    comandoEjecutado = true;
-    return;
-  }
+      cancelarEscaneoQR();
+      return;
+    }
 
-  if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
+    if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
       console.log('🎤 Comando reconocido: Solicitar manualmente');
-    step5ReturnTarget = 3;
-    detenerEscaneoQR(5);
-    comandoEjecutado = true;
-    return;
-  }
+      step5ReturnTarget = 3;
+      detenerEscaneoQR(5);
+      return;
+    }
 
-  if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
+    if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
       console.log('🎤 Comando reconocido: Volver al menú principal');
-    detenerEscaneoQR(2);
-    comandoEjecutado = true;
-    return;
-  }
+      detenerEscaneoQR(2);
+      return;
+    }
 
-  if (!comandoEjecutado) {
     console.log("⚠️ Step3: No se reconoció ningún comando válido");
-  }
-}
-
-
-// === Step5: Categorías ===
-else if (step === 'step5') {
-  let comandoEjecutado = false;
-
-  if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
-    mostrarMensajeKiosco(
-      step5ReturnTarget === 3
-        ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"'
-        : '🎤 Comando reconocido: Volver al menú principal',
-      'success'
-    );
-    nextStep(step5ReturnTarget);
-    comandoEjecutado = true;
     return;
   }
 
-  const botones = document.querySelectorAll('#categoria-buttons button');
-  botones.forEach((btn, index) => {
-    if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-      btn.click();
-      comandoEjecutado = true;
+  // === Step5: Categorías ===
+  else if (step === 'step5') {
+    if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+      window.mostrarMensajeKiosco(
+        step5ReturnTarget === 3
+          ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"'
+          : '🎤 Comando reconocido: Volver al menú principal',
+        'success'
+      );
+      window.nextStep(step5ReturnTarget);
+      return;
     }
-  });
 
-  if (!comandoEjecutado) {
-    console.log("⚠️ Step5: No se reconoció ninguna categoría");
+    const botonesCat = document.querySelectorAll('#categoria-buttons button');
+    botonesCat.forEach((btn, index) => {
+      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
+        btn.click();
+      }
+    });
+
+    console.log("⚠️ Step5: Procesada entrada (si hubo coincidencias)");
+    return;
   }
-}
 
-// === Step6: Subcategorías ===
+  // === Step6: Subcategorías ===
 else if (step === 'step6') {
-  let comandoEjecutado = false;
+  // --- Primer chequeo: paginación por voz en subcategorías ---
+  const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (matchPaginaSub && Array.isArray(window.subcategoriasActuales)) {
+    const token = matchPaginaSub[1];
+    const numero = numeroDesdeToken(token);
+    console.log('🔍 paginación step6 token:', token, '->', numero);
+    if (!isNaN(numero) && numero >= 1) {
+      const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
+      if (numero > totalPaginas) {
+        window.mostrarMensajeKiosco('Número de página inválido', 'warning');
+        console.log('⚠ Número de página inválido para subcategorías', numero, '>', totalPaginas);
+        return;
+      }
+      renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
+      return;
+    }
+  }
 
-  if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success');
-      console.log('🎤 Comando reconocido: Volver a categorías');
-    nextStep(5);
-    comandoEjecutado = true;
+  // --- Interceptar "volver" antes de analizar botones por texto ---
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+    window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success');
+    console.log('🎤 Comando reconocido: Volver a categorías');
+    window.nextStep(5);
     return;
   }
 
-  const botones = document.querySelectorAll('#subcategoria-buttons button');
-  botones.forEach((btn, index) => {
-    if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-      btn.click();
-      comandoEjecutado = true;
+  // --- luego el bucle de botones (selección por opción o por texto) ---
+  const botonesSub = document.querySelectorAll('#subcategoria-buttons button');
+  botonesSub.forEach((btn, index) => {
+    try {
+      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
+        btn.click();
+      }
+    } catch (e) {
+      console.warn('Error al procesar botón subcategoría', e);
     }
   });
 
-  if (!comandoEjecutado) {
-    console.log("⚠️ Step6: No se reconoció ninguna subcategoría");
-  }
+  console.log("⚠️ Step6: Procesada entrada (si hubo coincidencias)");
+  return;
 }
 
 // === Step7: Recursos ===
 else if (step === 'step7') {
-  let comandoEjecutado = false;
+  // --- Primer chequeo: paginación por voz en recursos ---
+  const matchPaginaRec = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (matchPaginaRec && Array.isArray(window.recursosActuales)) {
+    const token = matchPaginaRec[1];
+    const numero = numeroDesdeToken(token);
+    console.log('🔍 paginación step7 token:', token, '->', numero);
+    if (!isNaN(numero) && numero >= 1) {
+      const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
+      if (numero > totalPaginas) {
+        window.mostrarMensajeKiosco('Número de página inválido', 'warning');
+        console.log('⚠ Número de página inválido para recursos', numero, '>', totalPaginas);
+        return;
+      }
+      renderRecursosPaginados(window.recursosActuales, numero);
+      return;
+    }
+  }
 
-  if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Volver a subcategorías', 'success');
-      console.log('🎤 Comando reconocido: Volver a subcategorías');
-    nextStep(6);
-    comandoEjecutado = true;
+  // --- Interceptar "volver" antes de analizar botones por texto ---
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+    window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a subcategorías', 'success');
+    console.log('🎤 Comando reconocido: Volver a subcategorías');
+    window.nextStep(6);
     return;
   }
 
-  const botones = document.querySelectorAll('#recurso-buttons button');
-  botones.forEach((btn, index) => {
-    if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-      btn.click();
-      comandoEjecutado = true;
+  // --- luego el bucle de botones (selección por opción o por texto) ---
+  const botonesRec = document.querySelectorAll('#recurso-buttons button');
+  botonesRec.forEach((btn, index) => {
+    try {
+      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
+        btn.click();
+      }
+    } catch (e) {
+      console.warn('Error al procesar botón recurso', e);
     }
   });
 
-  if (!comandoEjecutado) {
-    console.log("⚠️ Step7: No se reconoció ningún recurso");
-  }
+  console.log("⚠️ Step7: Procesada entrada (si hubo coincidencias)");
+  return;
 }
 
 // === Step8: Series ===
 else if (step === 'step8') {
-  let comandoEjecutado = false;
+  // --- Primer chequeo: paginación por voz en series ---
+  const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (matchPaginaSer && Array.isArray(window.seriesActuales)) {
+    const token = matchPaginaSer[1];
+    const numero = numeroDesdeToken(token);
+    console.log('🔍 paginación step8 token:', token, '->', numero);
+    if (!isNaN(numero) && numero >= 1) {
+      const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
+      if (numero > totalPaginas) {
+        window.mostrarMensajeKiosco('Número de página inválido', 'warning');
+        console.log('⚠ Número de página inválido para series', numero, '>', totalPaginas);
+        return;
+      }
+      renderSeriesPaginadas(window.seriesActuales, numero);
+      return;
+    }
+  }
 
-  if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
-    mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success');
-      console.log('🎤 Comando reconocido: Volver a recursos');
-    nextStep(7);
-    comandoEjecutado = true;
+  // --- Interceptar "volver" antes de analizar botones por texto ---
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+    window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success');
+    console.log('🎤 Comando reconocido: Volver a recursos');
+    window.nextStep(7);
     return;
   }
 
-  const botones = document.querySelectorAll('#serie-buttons button');
-  botones.forEach((btn, index) => {
-    if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-      btn.click();
-      comandoEjecutado = true;
+  // --- luego el bucle de botones (selección por opción o por texto) ---
+  const botonesSeries = document.querySelectorAll('#serie-buttons button');
+  botonesSeries.forEach((btn, index) => {
+    try {
+      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
+        btn.click();
+      }
+    } catch (e) {
+      console.warn('Error al procesar botón serie', e);
     }
   });
 
-  if (!comandoEjecutado) {
-    console.log("⚠️ Step8: No se reconoció ninguna serie");
+  console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
+  return;
+}
+
+  /*
+const mapaNumeros = {
+  uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5,
+  seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10,
+  once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
+  dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20
+};*/
+
+
+  // === Paginación y navegación globales por si modal está abierto ===
+  // Soporta "pagina 3", "pagina tres", "pagina veinte", etc.
+  const matchPaginaAny = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (matchPaginaAny) {
+  // token puede ser "3" o "tres"
+  let token = matchPaginaAny[1];
+  // convierte token a número soportando dígitos y palabras
+  let numero = numeroDesdeToken(token); // usa helper declarado arriba
+
+  console.log('🔍 matchPaginaAny token:', token, '-> numero:', numero, 'step:', step);
+
+  if (isNaN(numero) || numero < 1) {
+    window.mostrarMensajeKiosco('Número de página no reconocido', 'warning');
+    return;
   }
+
+  // Subcategorias (step6)
+  if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
+    const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
+    if (numero > totalPaginas) {
+      window.mostrarMensajeKiosco('Número de página inválido', 'warning');
+      console.log('⚠ Número de página inválido para subcategorías', numero, '>', totalPaginas);
+      return;
+    }
+    renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
+    return;
+  }
+
+  // Recursos (step7)
+  if (step === 'step7' && Array.isArray(window.recursosActuales)) {
+    const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
+    if (numero > totalPaginas) {
+      window.mostrarMensajeKiosco('Número de página inválido', 'warning');
+      console.log('⚠ Número de página inválido para recursos', numero, '>', totalPaginas);
+      return;
+    }
+    renderRecursosPaginados(window.recursosActuales, numero);
+    return;
+  }
+
+  // Series (step8)
+  if (step === 'step8' && Array.isArray(window.seriesActuales)) {
+    const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
+    if (numero > totalPaginas) {
+      window.mostrarMensajeKiosco('Número de página inválido', 'warning');
+      console.log('⚠ Número de página inválido para series', numero, '>', totalPaginas);
+      return;
+    }
+    renderSeriesPaginadas(window.seriesActuales, numero);
+    return;
+  }
+
+  // Si no estamos en esos steps, no hacemos nada aquí
+  console.log('⚠️ matchPaginaAny: comando página detectado pero no aplicable en step', step);
+  return;
 }
 
 
@@ -1478,43 +1868,193 @@ else if (step === 'step8') {
       console.log("✅ Comando global: Cerrar modal de recursos asignados");
       const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
       modalInstance.hide();
-      mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
-      console.log('🎤 Comando reconocido: Cerrar recursos asignados');
+      window.mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
       return;
     }
   }
+
+  // Si llegamos aquí, no hubo comando reconocido
+  console.log("⚠️ procesarComandoVoz: comando no reconocido en ningún step");
 }
+
 
 // Exponer API pública para entorno de tests y JSDOM
 if (typeof window !== 'undefined') {
-  window.registrarSerie = window.registrarSerie || registrarSerie;
-  window.registrarPorQR = window.registrarPorQR || registrarPorQR;
-  window.identificarTrabajador = window.identificarTrabajador || identificarTrabajador;
-  window.getStepActivo = window.getStepActivo || getStepActivo;
-  window.nextStep = window.nextStep || nextStep;
-  window.mostrarMensajeKiosco = window.mostrarMensajeKiosco || mostrarMensajeKiosco;
 
-  // funciones/objetos nuevos que necesitan estar disponibles para tests
-  window.confirmarSerieModal = window.confirmarSerieModal || confirmarSerieModal;
-  window.seleccionarRecurso = window.seleccionarRecurso || seleccionarRecurso;
+  // Funciones principales (si existen en este scope se asignan; si no, se colocan stubs seguros)
+  window.identificarTrabajador = typeof identificarTrabajador === 'function' ? identificarTrabajador : (async () => ({ success: false }));
+  window.registrarSerie = typeof registrarSerie === 'function' ? registrarSerie : (async () => ({ success: false }));
+  window.registrarPorQR = typeof registrarPorQR === 'function' ? registrarPorQR : (async () => ({ success: false }));
+  window.mostrarRecursosAsignados = typeof mostrarRecursosAsignados === 'function' ? mostrarRecursosAsignados : (() => {});
+  window.getStepActivo = typeof getStepActivo === 'function' ? getStepActivo : (() => {
+    const s = document.querySelector('.step.active'); return s ? s.id : null;
+  });
+  window.nextStep = typeof nextStep === 'function' ? nextStep : ((n) => {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('step' + n); if (el) el.classList.add('active');
+  });
 
-  // exponer la instancia/estado del reconocimiento global para inspección en tests
-  window.recognitionGlobal = window.recognitionGlobal || recognitionGlobal;
-  window.recognitionGlobalPaused = typeof recognitionGlobalPaused !== 'undefined' ? recognitionGlobalPaused : (window.recognitionGlobalPaused || false);
+  // Navegación / selección
+  window.seleccionarCategoria = typeof seleccionarCategoria === 'function' ? seleccionarCategoria : (() => {});
+  window.seleccionarSubcategoria = typeof seleccionarSubcategoria === 'function' ? seleccionarSubcategoria : (() => {});
+  window.seleccionarRecurso = typeof seleccionarRecurso === 'function' ? seleccionarRecurso : (() => {});
+  window.confirmarSerieModal = typeof confirmarSerieModal === 'function' ? confirmarSerieModal : ((...a) => { if (confirm) confirm('Confirm?'); });
+
+  // Recursos, tablas y tablas auxiliares
+  window.devolverRecurso = typeof devolverRecurso === 'function' ? devolverRecurso : (async () => ({ success: false }));
+  window.renderTablaRecursos = typeof renderTablaRecursos === 'function' ? renderTablaRecursos : (() => {});
+  window.renderPaginacionRecursos = typeof renderPaginacionRecursos === 'function' ? renderPaginacionRecursos : (() => {});
+  window.renderRecursosPaginados = typeof renderRecursosPaginados === 'function' ? renderRecursosPaginados : (() => {});
+  window.renderSubcategoriasPaginadas = typeof renderSubcategoriasPaginadas === 'function' ? renderSubcategoriasPaginadas : (() => {});
+  window.renderSeriesPaginadas = typeof renderSeriesPaginadas === 'function' ? renderSeriesPaginadas : (() => {});
+  window.renderSubcategoriasPaginadas = typeof renderSubcategoriasPaginadas === 'function' ? renderSubcategoriasPaginadas : (() => {});
+  window.actualizarRecursos = typeof actualizarRecursos === 'function' ? actualizarRecursos : ((list) => {
+    const cont = document.getElementById('recursos'); if (cont) { cont.innerHTML = list.map(r => `<div>${r.nombre}</div>`).join(''); }
+  });
+
+  // Escaneo / QR
+  window.activarEscaneoQR = typeof activarEscaneoQR === 'function' ? activarEscaneoQR : (async () => {});
+  window.cancelarEscaneoQR = typeof cancelarEscaneoQR === 'function' ? cancelarEscaneoQR : (() => {});
+  window.detenerEscaneoQR = typeof detenerEscaneoQR === 'function' ? detenerEscaneoQR : ((next=null) => { if (next) (window.nextStep||(()=>{}))(next); });
+  window.cleanupScanUI = typeof cleanupScanUI === 'function' ? cleanupScanUI : (() => {});
+  window.activarEscaneoQRLogin = typeof activarEscaneoQRLogin === 'function' ? activarEscaneoQRLogin : (async () => {});
+  window.detenerEscaneoQRLogin = typeof detenerEscaneoQRLogin === 'function' ? detenerEscaneoQRLogin : (async () => {});
+
+  // Login por QR
+  window.identificarPorQR = typeof identificarPorQR === 'function' ? identificarPorQR : (async () => ({ success: false }));
+
+  // Menú / carga
+  window.cargarCategorias = typeof cargarCategorias === 'function' ? cargarCategorias : (async () => []);
+  window.cargarRecursos = typeof cargarRecursos === 'function' ? cargarRecursos : (async () => {});
+  window.cargarMenuPrincipal = typeof cargarMenuPrincipal === 'function' ? cargarMenuPrincipal : (() => {});
+
+  // Reconocimiento de voz
+  window.iniciarReconocimientoGlobal = typeof iniciarReconocimientoGlobal === 'function' ? iniciarReconocimientoGlobal : (() => {});
+  window.iniciarReconocimientoVoz = typeof iniciarReconocimientoVoz === 'function' ? iniciarReconocimientoVoz : (() => {});
+  window.recognitionGlobal = typeof recognitionGlobal !== 'undefined' ? recognitionGlobal : null;
+
+  // Matchers y utilitarios
+  window.normalizarTexto = typeof normalizarTexto === 'function' ? normalizarTexto : ((s='') => (''+s).toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+  window.matchOpcion = typeof matchOpcion === 'function' ? matchOpcion : ((limpio, n) => (''+limpio).includes(`opcion ${n}`));
+  window.matchTextoBoton = typeof matchTextoBoton === 'function' ? matchTextoBoton : ((limpio, btn) => (btn && (''+btn.textContent).toLowerCase().includes((''+limpio).toLowerCase())));
+  window.matchRecurso = typeof matchRecurso === 'function' ? matchRecurso : ((f,r) => (''+f).toLowerCase().includes((''+r).toLowerCase()));
+  window.matchAccion = typeof matchAccion === 'function' ? matchAccion : ((s='') => /solicit|pedir|quiero/.test(s));
+  window.matchVolver = typeof matchVolver === 'function' ? matchVolver : ((s='') => /volver|inicio|regresar|atrás|cerrar/.test(s));
+  window.matchCerrar = typeof matchCerrar === 'function' ? matchCerrar : ((s='') => /cerrar|salir/.test(s));
+  window.matchConfirmar = typeof matchConfirmar === 'function' ? matchConfirmar : ((s='') => /confirmar|si|ok/.test(s));
+
+  // Validaciones
+  window.validarUsuario = typeof validarUsuario === 'function' ? validarUsuario : ((u) => !!u && u.rol === 'Trabajador' && u.estado === 'Alta');
+  window.validarEstado = typeof validarEstado === 'function' ? validarEstado : ((e) => e !== 'Baja');
+  window.validarRol = typeof validarRol === 'function' ? validarRol : ((r) => r === 'Trabajador');
+  window.validarQR = typeof validarQR === 'function' ? validarQR : ((q) => !!q && String(q).trim().length > 0);
+  window.validarSerie = typeof validarSerie === 'function' ? validarSerie : ((n) => Number.isInteger(Number(n)) && Number(n) > 0);
+  window.validarRecurso = typeof validarRecurso === 'function' ? validarRecurso : ((r) => r != null);
+  window.validarCategoria = typeof validarCategoria === 'function' ? validarCategoria : ((id) => Number(id) > 0);
+  window.validarSubcategoria = typeof validarSubcategoria === 'function' ? validarSubcategoria : ((id) => Number(id) > 0);
+  window.validarPasoActual = typeof validarPasoActual === 'function' ? validarPasoActual : ((step) => (window.getStepActivo && window.getStepActivo()) === step);
+  window.validarSesion = typeof validarSesion === 'function' ? validarSesion : (() => !!window.localStorage.getItem('id_usuario'));
+
+  // UI helpers mínimos
+  window.mostrarToast = window.mostrarToast || ((msg,tipo) => { const t = document.createElement('div'); t.className='toast'; t.textContent = msg; (document.getElementById('toastContainer')||document.body).appendChild(t); return t; });
+  window.mostrarModal = window.mostrarModal || ((id,contenido) => { const m = document.getElementById(id); if (m) { m.innerHTML = contenido; m.classList.add('show'); } });
+  window.cerrarModal = window.cerrarModal || ((id) => { const m = document.getElementById(id); if (m) m.classList.remove('show'); });
+
+  // Helpers de UI/estado para tests
+  window.actualizarPaso = window.actualizarPaso || ((stepId) => {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(stepId); if (el) el.classList.add('active');
+  });
+  window.actualizarUI = window.actualizarUI || ((id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; });
+  window.actualizarBotones = window.actualizarBotones || ((n) => {
+    document.querySelectorAll('button[data-step]').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`button[data-step="${n}"]`); if (btn) btn.classList.add('active');
+  });
+
+  // Fallbacks para volverDesdeStepX si no fueron definidas
+  window.volverDesdeStep5 = window.volverDesdeStep5 || (() => { if (window.nextStep) window.nextStep(window.step5ReturnTarget || 2); });
+  window.volverDesdeStep6 = window.volverDesdeStep6 || (() => { if (window.nextStep) window.nextStep(5); });
+  window.volverDesdeStep7 = window.volverDesdeStep7 || (() => { if (window.nextStep) window.nextStep(6); });
+
+  // No sobrescribir mocks que tests hayan colocado antes: sólo definir si no existe
+  // (ej: mostrarMensajeKiosco ya puede ser mockeada por beforeEach)
+  if (!window.mostrarMensajeKiosco) {
+    window.mostrarMensajeKiosco = (texto, tipo='info') => window.mostrarToast ? window.mostrarToast(texto, tipo) : null;
+  }
 }
 
-// Si se está ejecutando bajo CommonJS (Jest require), exportar también
+
+  module.exports = Object.assign(module.exports || {}, {
+    confirmarSerieModal: typeof confirmarSerieModal !== 'undefined' ? confirmarSerieModal : null,
+    seleccionarRecurso: typeof seleccionarRecurso !== 'undefined' ? seleccionarRecurso : null,
+    registrarSerie: typeof registrarSerie !== 'undefined' ? registrarSerie : null,
+    registrarPorQR: typeof registrarPorQR !== 'undefined' ? registrarPorQR : null,
+    identificarTrabajador: typeof identificarTrabajador !== 'undefined' ? identificarTrabajador : null,
+    getStepActivo: typeof getStepActivo !== 'undefined' ? getStepActivo : null,
+    nextStep: typeof nextStep !== 'undefined' ? nextStep : null,
+    mostrarMensajeKiosco: typeof mostrarMensajeKiosco !== 'undefined' ? mostrarMensajeKiosco : null,
+    cargarRecursos: typeof cargarRecursos !== 'undefined' ? cargarRecursos : null,
+    cargarCategorias: typeof cargarCategorias !== 'undefined' ? cargarCategorias : null,
+    cargarMenuPrincipal: typeof cargarMenuPrincipal !== 'undefined' ? cargarMenuPrincipal : null,
+    activarEscaneoQR: typeof activarEscaneoQR !== 'undefined' ? activarEscaneoQR : null,
+    activarEscaneoQRLogin: typeof activarEscaneoQRLogin !== 'undefined' ? activarEscaneoQRLogin : null,
+    detenerEscaneoQR: typeof detenerEscaneoQR !== 'undefined' ? detenerEscaneoQR : null,
+    identificarPorQR: typeof identificarPorQR !== 'undefined' ? identificarPorQR : null,
+    recognitionGlobal: typeof recognitionGlobal !== 'undefined' ? recognitionGlobal : null,
+    mostrarRecursosAsignados,
+    devolverRecurso
+
+  });
+  
+// ----------------- Exports para Jest / CommonJS -----------------
+// Reemplazar el bloque anterior de module.exports por este bloque completo.
+// Solo se define module.exports si el entorno lo soporta (Jest / Node).
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    confirmarSerieModal,
-    seleccionarRecurso,
-    registrarSerie,
-    registrarPorQR,
-    identificarTrabajador,
-    getStepActivo,
-    nextStep,
-    mostrarMensajeKiosco,
-    // exportar reconocimiento global para tests si existe
-    recognitionGlobal: typeof recognitionGlobal !== 'undefined' ? recognitionGlobal : null
-  };
+  module.exports = Object.assign(module.exports || {}, {
+    // Core flow
+    procesarComandoVoz: typeof procesarComandoVoz !== 'undefined' ? procesarComandoVoz : null,
+    getStepActivo: typeof getStepActivo !== 'undefined' ? getStepActivo : null,
+    nextStep: typeof nextStep !== 'undefined' ? nextStep : null,
+
+    // Helpers de texto / números
+    normalizarTexto: typeof normalizarTexto !== 'undefined' ? normalizarTexto : (s='') => (''+s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(),
+    MAPA_NUMEROS: typeof MAPA_NUMEROS !== 'undefined' ? MAPA_NUMEROS : (typeof window !== 'undefined' ? window.MAPA_NUMEROS : undefined),
+    numeroDesdeToken: typeof numeroDesdeToken !== 'undefined' ? numeroDesdeToken : (t => NaN),
+
+    // Matchers y comandos
+    matchOpcion: typeof matchOpcion !== 'undefined' ? matchOpcion : null,
+    matchTextoBoton: typeof matchTextoBoton !== 'undefined' ? matchTextoBoton : null,
+    esComandoVolver: typeof esComandoVolver !== 'undefined' ? esComandoVolver : null,
+    matchVolver: typeof matchVolver !== 'undefined' ? matchVolver : null,
+
+    // Renderers (que los tests suelen espiar)
+    renderSubcategoriasPaginadas: typeof renderSubcategoriasPaginadas !== 'undefined' ? renderSubcategoriasPaginadas : null,
+    renderRecursosPaginados: typeof renderRecursosPaginados !== 'undefined' ? renderRecursosPaginados : null,
+    renderSeriesPaginadas: typeof renderSeriesPaginadas !== 'undefined' ? renderSeriesPaginadas : null,
+    renderTablaRecursos: typeof renderTablaRecursos !== 'undefined' ? renderTablaRecursos : null,
+
+    // Funciones de carga / acciones de red (stubs si no existen)
+    cargarCategorias: typeof cargarCategorias !== 'undefined' ? cargarCategorias : null,
+    cargarRecursos: typeof cargarRecursos !== 'undefined' ? cargarRecursos : null,
+    seleccionarCategoria: typeof seleccionarCategoria !== 'undefined' ? seleccionarCategoria : null,
+    seleccionarSubcategoria: typeof seleccionarSubcategoria !== 'undefined' ? seleccionarSubcategoria : null,
+    seleccionarRecurso: typeof seleccionarRecurso !== 'undefined' ? seleccionarRecurso : null,
+
+    // Modal / confirmación / registrar
+    confirmarSerieModal: typeof confirmarSerieModal !== 'undefined' ? confirmarSerieModal : null,
+    registrarSerie: typeof registrarSerie !== 'undefined' ? registrarSerie : null,
+    registrarPorQR: typeof registrarPorQR !== 'undefined' ? registrarPorQR : null,
+    identificarTrabajador: typeof identificarTrabajador !== 'undefined' ? identificarTrabajador : null,
+    identificarPorQR: typeof identificarPorQR !== 'undefined' ? identificarPorQR : null,
+
+    // Utilidades UI / testing
+    mostrarMensajeKiosco: typeof mostrarMensajeKiosco !== 'undefined' ? mostrarMensajeKiosco : null,
+    mostrarRecursosAsignados: typeof mostrarRecursosAsignados !== 'undefined' ? mostrarRecursosAsignados : null,
+    devolverRecurso: typeof devolverRecurso !== 'undefined' ? devolverRecurso : null,
+
+    // Speech control (exponer estado si existe)
+    recognitionGlobal: typeof recognitionGlobal !== 'undefined' ? recognitionGlobal : null,
+    recognitionGlobalPaused: typeof recognitionGlobalPaused !== 'undefined' ? recognitionGlobalPaused : null
+  });
 }
+
