@@ -514,7 +514,6 @@ function devolverRecurso(detalleId) {
 
 function confirmarDevolucionPorVoz(index) {
   console.log(`🎤 confirmarDevolucionPorVoz: pedido para opción ${index}`);
-  // determinar tab activo
   const eppActivo = document.getElementById('tab-epp')?.getAttribute('aria-selected') === 'true';
   const herrActivo = document.getElementById('tab-herramientas')?.getAttribute('aria-selected') === 'true';
   console.log('🔍 Tabs activo -> EPP:', eppActivo, 'Herr:', herrActivo);
@@ -535,14 +534,18 @@ function confirmarDevolucionPorVoz(index) {
   }
 
   const detalleId = btn.dataset.detalleId;
-  console.log(`➡️ confirmarDevolucionPorVoz: botón encontrado, detalleId=${detalleId}`);
+  const serie = btn.dataset.serie || ''; // <-- corregido: obtener serie del botón
+  console.log(`➡️ confirmarDevolucionPorVoz: botón encontrado, detalleId=${detalleId}, serie=${serie}`);
 
   // Abrir modal de confirmación (marcamos que la apertura vino por voz)
   window._modalConfirmedByVoice = true;
   safeStopRecognitionGlobal(); // pausamos global antes de abrir modal de confirmación
   console.log('🛑 confirmarDevolucionPorVoz: recognition global pausado, mostrando modal confirmación');
+
+  // Mostrar el paso de devolución: pasamos la serie desde el botón
   mostrarStepDevolucionQR(serie, detalleId);
 }
+
 
 
 
@@ -694,6 +697,9 @@ let serieEsperada = '';
 let detalleIdActual = null;
 
 function mostrarStepDevolucionQR(serie, detalleId) {
+
+  safeStopRecognitionGlobal(); // 🔧 esto es clave
+
   serieEsperada = serie;
   detalleIdActual = detalleId;
   window.modoActual = 'devolucion';
@@ -719,6 +725,10 @@ function mostrarStepDevolucionQR(serie, detalleId) {
       activarEscaneoQRDevolucion(); // ya implementado, escanea y llama a registrarPorQR()
     }, 250);
   });
+
+
+  activarReconocimientoConfirmacionQR();
+
 }
 
 function validarQRDevolucion(qrCode, idUsuario) {
@@ -776,6 +786,12 @@ function confirmarDevolucionActual() {
 function volverARecursosAsignados() {
   detenerEscaneoQR();
   nextStep(2); // o el paso donde están los recursos asignados
+
+  if (window._recogQRDevolucion) {
+  try { window._recogQRDevolucion.stop(); } catch(e){}
+  window._recogQRDevolucion = null;
+}
+
 }
 
 // Bind del botón de confirmación
@@ -855,6 +871,48 @@ function onScanSuccess(qrCodeMessage) {
       mostrarMensajeKiosco('❌ Error al validar QR', 'danger');
     });
 }
+
+function activarReconocimientoConfirmacionQR() {
+  if (!('webkitSpeechRecognition' in window)) return;
+
+  safeStopRecognitionGlobal(); // 🔧 detener el global antes de iniciar el local
+
+  const recog = new webkitSpeechRecognition();
+  recog.lang = 'es-ES';
+  recog.continuous = true;
+  recog.interimResults = false;
+
+  recog.onresult = function (event) {
+    const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+    console.log('🎤 Texto reconocido (devolución QR):', texto);
+
+    if (texto === 'confirmar' || texto === 'confirmar devolución') {
+      const btn = document.getElementById('btnConfirmarDevolucion');
+      if (btn && !btn.disabled) {
+        btn.click();
+        recog.stop();
+      }
+    } else if (texto === 'volver') {
+      volverARecursosAsignados();
+      recog.stop();
+    }
+  };
+
+  recog.onerror = function (e) {
+    console.warn('Reconocimiento devolución QR falló', e);
+  };
+
+  try {
+    recog.start();
+    console.log('🎤 Reconocimiento voz activo en paso 9');
+  } catch (e) {
+    console.warn('No se pudo iniciar reconocimiento QR', e);
+  }
+
+  window._recogQRDevolucion = recog;
+}
+
+
 
 
 
@@ -2295,7 +2353,38 @@ else if (step === 'step8') {
   return;
 }
 
+// Manejo explícito para step9 (Devolución por QR)
+if (step === 'step9') {
+  // Aceptar muchas variantes: "confirmar", "confirmar devolución", "aceptar", "confirm"
+  if (/\b(confirmar|confirm|aceptar|acept)\b/.test(limpio)) {
+    const btn = document.getElementById('btnConfirmarDevolucion');
+    if (btn && !btn.disabled) {
+      console.log('🎤 step9: comando confirmar detectado -> click confirmar');
+      try { btn.click(); } catch(e) { confirmarDevolucionActual(); }
+      return;
+    } else {
+      console.log('⚠️ step9: comando confirmar, pero botón deshabilitado');
+      getRenderer('mostrarMensajeKiosco')('Aún no se detectó un QR válido para confirmar', 'warning');
+      return;
+    }
+  }
+
+  // Volver: usar tu helper de tolerancia
+  if (esComandoVolver(limpio) || /\b(cancelar|salir|volver)\b/.test(limpio)) {
+    console.log('🎤 step9: comando volver detectado -> volverARecursosAsignados');
+    volverARecursosAsignados();
+    return;
+  }
+
+  // si no coincidió en step9, devolvemos control para logs o fallback
+  console.warn('⚠️ step9: comando no reconocido en devoluciones:', limpio);
+  getRenderer('mostrarMensajeKiosco')('No se reconoció el comando. Decí "confirmar" o "volver".', 'info');
+  return;
+}
+
+
   /*
+
 const mapaNumeros = {
   uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5,
   seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10,
