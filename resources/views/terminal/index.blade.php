@@ -203,6 +203,24 @@
     </div>
   </div>
 
+  <!-- Modal de confirmacion de devolucion -->
+  <div class="modal fade" id="modalConfirmarDevolucion" tabindex="-1" aria-labelledby="modalConfirmarDevolucionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalConfirmarDevolucionLabel">Confirmar devolución</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalConfirmarDevolucionBody">
+        ¿Confirmás que querés devolver este recurso?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCancelarDevolucion">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnAceptarDevolucion">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
