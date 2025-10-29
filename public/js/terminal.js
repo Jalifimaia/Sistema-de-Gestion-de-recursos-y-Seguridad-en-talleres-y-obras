@@ -2075,6 +2075,25 @@ if (modalVisible) {
     return;
   }
 
+  // === Step1: Login ===
+if (step === 'step1') {
+  if (/\b(continuar|aceptar|ingresar|confirmar)\b/.test(limpio)) {
+    console.log('🎤 Comando de voz: Continuar login');
+    identificarTrabajador();
+    return;
+  }
+
+  if (/\b(qr|iniciar sesión con qr|escanear qr|usar qr)\b/.test(limpio)) {
+    console.log('🎤 Comando de voz: Activar escaneo QR login');
+    activarEscaneoQRLogin();
+    return;
+  }
+
+  console.log('⚠️ Step1: Comando no reconocido');
+  return;
+}
+
+
   // === Step2: Menú principal y modal recursos ===
   if (step === 'step2') {
     limpio = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
