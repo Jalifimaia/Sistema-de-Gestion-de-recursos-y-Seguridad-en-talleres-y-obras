@@ -110,7 +110,7 @@
                           data-estado="{{ $estadoNombre }}"
                           data-talle="{{ $esEPP ? $serie->talle : '' }}"
                         >
-                          {{ $serie->nro_serie }}{{ $esEPP && $serie->talle ? ' T:' . $serie->talle : '' }}
+                          {{ $serie->codigo->codigo_base ?? 'SIN-CODIGO' }}-{{ str_pad($serie->correlativo, 2, '0', STR_PAD_LEFT) }}{{ $esEPP && $serie->talle ? ' T:' . $serie->talle : '' }}
                         </option>
                       @endforeach
                     </select>

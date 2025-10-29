@@ -14,6 +14,7 @@ use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\KioskoController;
+use App\Http\Controllers\ControlEPPController;
 use App\Http\Controllers\UsuarioController;
 
 
@@ -123,6 +124,25 @@ Route::get('/operario/epp', fn() => view('operario.epp'));
 Route::get('/supervisor/control-herramientas', fn() => view('supervisor.control_herramientas'));
 Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp'));
 
+Route::get('/checklist-epp', [ControlEPPController::class, 'create'])->name('checklist.epp.create');
+Route::post('/checklist-epp', [ControlEPPController::class, 'store'])->name('checklist.epp.store');
+
+Route::get('/asignar-epp', [ControlEPPController::class, 'createAsignacionEPP'])->name('epp.asignar.create');
+Route::post('/asignar-epp', [ControlEPPController::class, 'storeAsignacionEPP'])->name('epp.asignar.store');
+
+// Trabajadores con recursos faltantes
+Route::get('/control-epp/faltantes', [ControlEPPController::class, 'faltantes'])->name('controlEPP.faltantes');
+
+// Trabajadores sin checklist diario
+Route::get('/control-epp/sin-checklist', [ControlEPPController::class, 'sinChecklist'])->name('controlEPP.sinChecklist');
+
+Route::get('/checklist-epp/tabla', [ControlEPPController::class, 'index'])->name('checklist.epp.tabla');
+
+Route::get('/checklist-epp/tabla', [ControlEPPController::class, 'verSoloChecklist'])->name('checklist.epp.tabla');
+
+
+Route::post('/usuarios/{id}/activar', [ControlEPPController::class, 'activarTrabajador'])->name('usuarios.activar');
+
 /*
 |--------------------------------------------------------------------------
 | Rutas de Inventario
@@ -142,6 +162,11 @@ Route::get('/series-qr/{id}/pdf', [SerieRecursoController::class, 'exportQrPdf']
 Route::get('/series-qr-lote', [SerieRecursoController::class, 'qrLote'])->name('series.qr.lote');
 Route::get('/series-qr-lote/pdf', [SerieRecursoController::class, 'exportQrLotePdf'])
     ->name('series.qr.lote.pdf');
+
+
+// SERIES
+Route::post('/serie-recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])->name('serie_recurso.storeMultiple');
+Route::get('/serie-recurso/create/{id}', [SerieRecursoController::class, 'createConRecurso'])->name('serie_recurso.createConRecurso');
 
 /*
 |--------------------------------------------------------------------------
@@ -230,7 +255,10 @@ Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])
 */
 
 Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
-Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');
+Route::post('/usuarios/{id}/alta', [ControlEPPController::class, 'activarTrabajador'])->name('usuarios.alta');
+
+Route::post('/asignarEPP', [ControlEPPController::class, 'store'])->name('asignarEPP.store');
+Route::get('/series-epp', [ControlEPPController::class, 'buscarSeriesEPP']);
 
 
 Route::get('serie_recurso/create-con-recurso/{id}', [SerieRecursoController::class, 'createConRecurso'])

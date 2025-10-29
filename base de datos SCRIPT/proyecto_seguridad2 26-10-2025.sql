@@ -1,0 +1,1641 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 27-10-2025 a las 03:36:51
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de datos: `proyecto_seguridad2`
+--
+
+DELIMITER $$
+--
+-- Funciones
+--
+CREATE DEFINER=`root`@`localhost` FUNCTION `obtener_iniciales` (`texto` TEXT) RETURNS VARCHAR(20) CHARSET utf8mb4 COLLATE utf8mb4_general_ci DETERMINISTIC BEGIN
+  DECLARE resultado VARCHAR(20) DEFAULT '';
+  DECLARE palabra TEXT;
+  DECLARE i INT DEFAULT 1;
+
+  WHILE i <= CHAR_LENGTH(texto) DO
+    IF i = 1 OR SUBSTRING(texto, i - 1, 1) = ' ' THEN
+      SET resultado = CONCAT(resultado, UPPER(SUBSTRING(texto, i, 1)));
+    END IF;
+    SET i = i + 1;
+  END WHILE;
+
+  RETURN resultado;
+END$$
+
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cache`
+--
+
+CREATE TABLE `cache` (
+  `key` varchar(255) NOT NULL,
+  `value` mediumtext NOT NULL,
+  `expiration` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cache_locks`
+--
+
+CREATE TABLE `cache_locks` (
+  `key` varchar(255) NOT NULL,
+  `owner` varchar(255) NOT NULL,
+  `expiration` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `categoria`
+--
+
+CREATE TABLE `categoria` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nombre_categoria` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `categoria`
+--
+
+INSERT INTO `categoria` (`id`, `nombre_categoria`) VALUES
+(1, 'EPP'),
+(2, 'Herramienta');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `checklist`
+--
+
+CREATE TABLE `checklist` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `trabajador_id` int(10) UNSIGNED NOT NULL,
+  `supervisor_id` int(10) UNSIGNED NOT NULL,
+  `anteojos` tinyint(1) NOT NULL DEFAULT 0,
+  `botas` tinyint(1) NOT NULL DEFAULT 0,
+  `chaleco` tinyint(1) NOT NULL DEFAULT 0,
+  `guantes` tinyint(1) NOT NULL DEFAULT 0,
+  `arnes` tinyint(1) NOT NULL DEFAULT 0,
+  `es_en_altura` tinyint(1) NOT NULL DEFAULT 0,
+  `fecha` date NOT NULL,
+  `observaciones` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `hora` time DEFAULT NULL,
+  `critico` tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `checklist`
+--
+
+INSERT INTO `checklist` (`id`, `trabajador_id`, `supervisor_id`, `anteojos`, `botas`, `chaleco`, `guantes`, `arnes`, `es_en_altura`, `fecha`, `observaciones`, `created_at`, `updated_at`, `hora`, `critico`) VALUES
+(1, 7, 6, 1, 1, 1, 1, 1, 1, '2025-10-16', 'Checklist completo en altura', '2025-10-16 23:36:51', '2025-10-16 23:36:51', NULL, 0),
+(2, 9, 6, 1, 1, 1, 1, 0, 1, '2025-10-20', 'Falta arnés en trabajo en altura', '2025-10-16 23:52:21', '2025-10-21 02:07:57', NULL, 0),
+(3, 8, 6, 1, 1, 1, 1, 0, 0, '2025-10-16', 'Checklist completo en tarea de suelo', '2025-10-16 23:52:33', '2025-10-16 23:52:33', NULL, 0),
+(4, 7, 6, 1, 1, 1, 1, 1, 1, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(5, 8, 6, 1, 1, 1, 0, 0, 0, '2025-10-21', 'Faltan guantes y arnés', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(6, 9, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés pero trabaja en altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(7, 10, 6, 0, 1, 1, 1, 1, 0, '2025-10-21', 'Sin anteojos', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(8, 14, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(9, 23, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés en tarea de altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(10, 24, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(11, 26, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(12, 27, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés en tarea de altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(13, 28, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(14, 28, 5, 1, 1, 1, 1, 1, 1, '2025-10-22', NULL, '2025-10-22 06:57:11', '2025-10-22 06:57:11', NULL, 0),
+(15, 8, 5, 1, 1, 1, 1, 1, 1, '2025-10-22', NULL, '2025-10-22 07:00:55', '2025-10-22 07:00:55', NULL, 0),
+(16, 8, 5, 1, 1, 1, 1, 1, 1, '2025-10-22', NULL, '2025-10-22 07:07:53', '2025-10-22 07:07:53', NULL, 0),
+(17, 8, 5, 1, 1, 0, 1, 0, 0, '2025-10-22', NULL, '2025-10-22 07:08:25', '2025-10-22 07:08:25', NULL, 0),
+(18, 23, 5, 1, 1, 1, 1, 0, 1, '2025-10-22', NULL, '2025-10-22 07:17:26', '2025-10-22 07:17:26', '04:17:00', 1),
+(19, 14, 5, 1, 1, 1, 1, 1, 0, '2025-10-22', NULL, '2025-10-22 07:19:05', '2025-10-22 07:19:05', '04:19:00', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `color`
+--
+
+CREATE TABLE `color` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `color`
+--
+
+INSERT INTO `color` (`id`, `nombre`) VALUES
+(3, 'Amarillo'),
+(5, 'Marron'),
+(1, 'Naranja'),
+(4, 'Negro'),
+(2, 'Rojo');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `detalle_prestamo`
+--
+
+CREATE TABLE `detalle_prestamo` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_prestamo` int(10) UNSIGNED NOT NULL,
+  `id_serie` int(10) UNSIGNED NOT NULL,
+  `id_recurso` int(10) UNSIGNED NOT NULL,
+  `id_estado_prestamo` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_prestamo`
+--
+
+INSERT INTO `detalle_prestamo` (`id`, `id_prestamo`, `id_serie`, `id_recurso`, `id_estado_prestamo`, `created_at`, `updated_at`) VALUES
+(1, 2, 4, 4, 4, NULL, '2025-10-15 07:24:06'),
+(3, 4, 4, 4, 3, NULL, '2025-10-17 15:26:04'),
+(4, 6, 6, 6, 3, NULL, '2025-10-17 15:26:04'),
+(10, 12, 10, 8, 3, NULL, '2025-10-17 15:26:04'),
+(11, 16, 20, 10, 3, '2025-10-15 02:55:45', '2025-10-17 15:26:04'),
+(12, 17, 25, 10, 3, '2025-10-15 02:57:21', '2025-10-17 15:26:04'),
+(13, 17, 19, 10, 3, '2025-10-15 02:57:21', '2025-10-17 15:26:04'),
+(14, 18, 23, 10, 3, '2025-10-15 03:12:53', '2025-10-17 15:26:04'),
+(15, 18, 13, 9, 3, '2025-10-15 03:12:53', '2025-10-17 15:26:04'),
+(16, 4, 15, 9, 5, '2025-10-15 03:27:11', '2025-10-17 15:26:04'),
+(17, 17, 17, 9, 3, '2025-10-15 03:36:22', '2025-10-17 15:26:04'),
+(18, 19, 14, 9, 3, '2025-10-15 03:52:06', '2025-10-17 15:26:04'),
+(19, 20, 21, 10, 3, '2025-10-15 03:58:52', '2025-10-17 15:26:04'),
+(20, 20, 24, 10, 3, '2025-10-15 03:58:52', '2025-10-17 15:26:04'),
+(21, 21, 22, 10, 3, '2025-10-15 08:06:10', '2025-10-17 15:26:04'),
+(22, 22, 18, 10, 3, '2025-10-15 13:04:17', '2025-10-17 15:26:04'),
+(23, 22, 16, 9, 3, '2025-10-15 13:04:17', '2025-10-17 15:26:04'),
+(24, 23, 12, 8, 3, '2025-10-15 18:36:34', '2025-10-17 15:26:04'),
+(25, 24, 11, 8, 3, '2025-10-16 03:53:15', '2025-10-17 15:26:04'),
+(26, 25, 24, 10, 3, NULL, NULL),
+(27, 26, 7, 6, 3, NULL, NULL),
+(28, 27, 14, 9, 2, NULL, NULL),
+(29, 28, 10, 8, 2, NULL, NULL),
+(30, 31, 51, 4, 2, NULL, NULL),
+(31, 32, 40, 6, 2, NULL, NULL),
+(32, 33, 41, 6, 3, NULL, NULL),
+(33, 34, 25, 10, 2, NULL, NULL),
+(34, 35, 43, 4, 3, NULL, NULL),
+(35, 36, 43, 4, 3, NULL, NULL),
+(36, 37, 42, 4, 3, NULL, NULL),
+(37, 38, 44, 4, 2, NULL, NULL),
+(38, 39, 42, 4, 2, NULL, NULL),
+(39, 40, 47, 4, 2, NULL, NULL),
+(40, 41, 22, 10, 3, NULL, NULL),
+(41, 42, 41, 6, 3, NULL, NULL),
+(42, 43, 41, 6, 3, NULL, NULL),
+(43, 44, 12, 8, 2, NULL, NULL),
+(44, 45, 41, 6, 3, NULL, NULL),
+(45, 46, 41, 6, 3, NULL, NULL),
+(46, 47, 41, 6, 3, NULL, NULL),
+(47, 48, 41, 6, 3, NULL, NULL),
+(48, 49, 41, 6, 3, NULL, NULL),
+(49, 50, 41, 6, 3, NULL, NULL),
+(50, 51, 41, 6, 3, NULL, NULL),
+(51, 52, 41, 6, 2, NULL, NULL),
+(52, 53, 49, 4, 2, NULL, NULL),
+(53, 54, 9, 6, 2, NULL, NULL),
+(54, 55, 8, 6, 2, NULL, NULL),
+(55, 56, 45, 4, 2, NULL, NULL),
+(56, 57, 17, 9, 2, NULL, NULL),
+(57, 58, 50, 4, 3, NULL, NULL),
+(58, 59, 38, 4, 2, NULL, NULL),
+(59, 60, 43, 4, 5, NULL, NULL),
+(60, 61, 13, 9, 2, NULL, NULL),
+(61, 62, 20, 10, 2, NULL, NULL),
+(62, 63, 22, 10, 2, NULL, NULL),
+(63, 64, 16, 9, 2, NULL, NULL),
+(64, 65, 36, 4, 2, NULL, NULL),
+(65, 66, 23, 10, 2, NULL, NULL),
+(66, 67, 46, 4, 2, NULL, NULL),
+(67, 68, 7, 6, 2, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estado`
+--
+
+CREATE TABLE `estado` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nombre_estado` varchar(50) NOT NULL,
+  `descripcion_estado` varchar(140) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `estado`
+--
+
+INSERT INTO `estado` (`id`, `nombre_estado`, `descripcion_estado`) VALUES
+(1, 'Disponible', ''),
+(2, 'Baja', ''),
+(3, 'Prestado', ''),
+(4, 'Devuelto', ''),
+(5, 'Dañado', ''),
+(6, 'En Reparación', '');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estado_incidente`
+--
+
+CREATE TABLE `estado_incidente` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nombre_estado` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `estado_incidente`
+--
+
+INSERT INTO `estado_incidente` (`id`, `nombre_estado`) VALUES
+(2, 'En revisión'),
+(6, 'Escalado'),
+(4, 'Falso / descartado'),
+(1, 'Reportado'),
+(5, 'Resuelto'),
+(3, 'Validado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estado_prestamo`
+--
+
+CREATE TABLE `estado_prestamo` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nombre` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `estado_prestamo`
+--
+
+INSERT INTO `estado_prestamo` (`id`, `nombre`) VALUES
+(1, 'Pendiente'),
+(2, 'Activo'),
+(3, 'Devuelto'),
+(4, 'Vencido'),
+(5, 'Cancelado'),
+(6, 'En revisión'),
+(7, 'Rechazado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estado_usuario`
+--
+
+CREATE TABLE `estado_usuario` (
+  `id` int(10) NOT NULL,
+  `nombre` varchar(12) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `estado_usuario`
+--
+
+INSERT INTO `estado_usuario` (`id`, `nombre`) VALUES
+(1, 'Alta'),
+(2, 'Baja'),
+(3, 'stand by');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `failed_jobs`
+--
+
+CREATE TABLE `failed_jobs` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `uuid` varchar(255) NOT NULL,
+  `connection` text NOT NULL,
+  `queue` text NOT NULL,
+  `payload` longtext NOT NULL,
+  `exception` longtext NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `incidente`
+--
+
+CREATE TABLE `incidente` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_recurso` int(10) UNSIGNED DEFAULT NULL,
+  `id_serie_recurso` int(10) UNSIGNED DEFAULT NULL,
+  `id_supervisor` int(10) UNSIGNED NOT NULL,
+  `id_trabajador` int(10) UNSIGNED DEFAULT NULL,
+  `id_incidente_detalle` int(10) UNSIGNED DEFAULT NULL,
+  `id_usuario_creacion` int(10) UNSIGNED DEFAULT NULL,
+  `id_usuario_modificacion` int(10) UNSIGNED DEFAULT NULL,
+  `descripcion` varchar(250) DEFAULT NULL,
+  `fecha_incidente` datetime NOT NULL,
+  `fecha_creacion` datetime DEFAULT current_timestamp(),
+  `fecha_modificacion` datetime DEFAULT current_timestamp(),
+  `fecha_cierre_incidente` datetime DEFAULT NULL,
+  `resolucion` varchar(250) DEFAULT NULL,
+  `id_estado_incidente` int(10) UNSIGNED NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `incidente`
+--
+
+INSERT INTO `incidente` (`id`, `id_recurso`, `id_serie_recurso`, `id_supervisor`, `id_trabajador`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `descripcion`, `fecha_incidente`, `fecha_creacion`, `fecha_modificacion`, `fecha_cierre_incidente`, `resolucion`, `id_estado_incidente`) VALUES
+(29, NULL, NULL, 5, 8, NULL, NULL, NULL, '.', '2025-10-20 01:33:00', '2025-10-14 01:34:55', '2025-10-14 01:34:55', NULL, NULL, 2),
+(30, NULL, NULL, 5, 8, NULL, NULL, NULL, 'Se cayo', '2025-10-23 01:35:00', '2025-10-14 01:35:42', '2025-10-14 01:35:42', NULL, 'No hay', 1),
+(31, NULL, NULL, 5, 8, NULL, NULL, NULL, 'Se rompio el mango', '2025-10-28 13:51:00', '2025-10-14 13:51:50', '2025-10-14 13:51:50', NULL, '-', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `incidente_detalle`
+--
+
+CREATE TABLE `incidente_detalle` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_incidente` int(10) UNSIGNED DEFAULT NULL,
+  `id_serie` int(10) UNSIGNED NOT NULL,
+  `descripcion` varchar(140) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `incidente_detalle`
+--
+
+INSERT INTO `incidente_detalle` (`id`, `id_incidente`, `id_serie`, `descripcion`) VALUES
+(0, 1, 5, 'Corte de cable por sobrecalentamiento');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `incidente_recurso`
+--
+
+CREATE TABLE `incidente_recurso` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_incidente` int(10) UNSIGNED NOT NULL,
+  `id_recurso` int(10) UNSIGNED NOT NULL,
+  `id_serie_recurso` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `incidente_recurso`
+--
+
+INSERT INTO `incidente_recurso` (`id`, `id_incidente`, `id_recurso`, `id_serie_recurso`, `created_at`, `updated_at`) VALUES
+(1, 29, 8, 10, '2025-10-14 04:34:55', '2025-10-14 04:34:55'),
+(2, 29, 4, 4, '2025-10-14 04:34:55', '2025-10-14 04:34:55'),
+(6, 30, 4, 4, '2025-10-14 04:42:40', '2025-10-14 04:42:40'),
+(7, 30, 9, 14, '2025-10-14 04:42:40', '2025-10-14 04:42:40'),
+(8, 30, 8, 10, '2025-10-14 04:42:40', '2025-10-14 04:42:40'),
+(13, 31, 4, 4, '2025-10-15 21:30:05', '2025-10-15 21:30:05'),
+(14, 31, 8, 11, '2025-10-15 21:30:05', '2025-10-15 21:30:05');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `jobs`
+--
+
+CREATE TABLE `jobs` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `queue` varchar(255) NOT NULL,
+  `payload` longtext NOT NULL,
+  `attempts` tinyint(3) UNSIGNED NOT NULL,
+  `reserved_at` int(10) UNSIGNED DEFAULT NULL,
+  `available_at` int(10) UNSIGNED NOT NULL,
+  `created_at` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `job_batches`
+--
+
+CREATE TABLE `job_batches` (
+  `id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `total_jobs` int(11) NOT NULL,
+  `pending_jobs` int(11) NOT NULL,
+  `failed_jobs` int(11) NOT NULL,
+  `failed_job_ids` longtext NOT NULL,
+  `options` mediumtext DEFAULT NULL,
+  `cancelled_at` int(11) DEFAULT NULL,
+  `created_at` int(11) NOT NULL,
+  `finished_at` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `migrations`
+--
+
+CREATE TABLE `migrations` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `migration` varchar(255) NOT NULL,
+  `batch` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `migrations`
+--
+
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
+(1, '0001_01_01_000000_create_users_table', 1),
+(2, '0001_01_01_000001_create_cache_table', 1),
+(3, '0001_01_01_000002_create_jobs_table', 1),
+(4, '2025_10_02_161535_add_campos_personalizados_to_users_table', 1),
+(5, '2025_10_02_212636_add_ultimo_acceso_to_users_table', 1),
+(6, '2025_10_03_020124_remove_fecha_columns_from_recurso_table', 2),
+(7, '2025_10_16_205155_create_prestamo_terminal_table', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `password_reset_tokens`
+--
+
+CREATE TABLE `password_reset_tokens` (
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `prestamo`
+--
+
+CREATE TABLE `prestamo` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_usuario` int(10) UNSIGNED NOT NULL,
+  `id_usuario_creacion` int(10) UNSIGNED NOT NULL,
+  `id_usuario_modificacion` int(10) UNSIGNED NOT NULL,
+  `fecha_prestamo` datetime NOT NULL,
+  `fecha_devolucion` datetime DEFAULT NULL,
+  `estado` int(11) NOT NULL,
+  `fecha_creacion` datetime NOT NULL,
+  `fecha_modificacion` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `prestamo`
+--
+
+INSERT INTO `prestamo` (`id`, `id_usuario`, `id_usuario_creacion`, `id_usuario_modificacion`, `fecha_prestamo`, `fecha_devolucion`, `estado`, `fecha_creacion`, `fecha_modificacion`) VALUES
+(2, 8, 6, 5, '2025-10-07 00:00:00', '2025-10-29 00:00:00', 3, '2025-10-07 00:12:55', '2025-10-17 15:26:04'),
+(4, 7, 6, 5, '2025-10-16 00:00:00', '2025-10-29 00:00:00', 3, '2025-10-07 16:20:12', '2025-10-17 15:26:04'),
+(6, 7, 5, 5, '2025-10-03 00:00:00', '2025-10-15 00:00:00', 3, '2025-10-08 02:42:26', '2025-10-17 15:26:04'),
+(12, 14, 5, 5, '2025-10-08 00:00:00', '2025-10-16 00:00:00', 3, '2025-10-08 16:14:45', '2025-10-17 15:26:04'),
+(16, 5, 5, 5, '2025-10-16 00:00:00', '2025-10-22 00:00:00', 2, '2025-10-15 02:55:45', '2025-10-17 15:26:04'),
+(17, 5, 5, 5, '2025-10-22 00:00:00', '2025-10-30 00:00:00', 3, '2025-10-15 02:57:21', '2025-10-17 15:26:04'),
+(18, 14, 5, 5, '2025-10-17 00:00:00', '2025-10-29 00:00:00', 3, '2025-10-15 03:12:53', '2025-10-17 15:26:04'),
+(19, 14, 5, 5, '2025-10-17 00:00:00', '2025-10-22 00:00:00', 3, '2025-10-15 03:52:06', '2025-10-17 15:26:04'),
+(20, 23, 5, 5, '2025-10-10 00:00:00', '2025-10-21 00:00:00', 3, '2025-10-15 03:58:52', '2025-10-17 15:26:04'),
+(21, 23, 5, 5, '2025-10-16 00:00:00', '2025-10-22 00:00:00', 3, '2025-10-15 08:06:10', '2025-10-17 15:26:04'),
+(22, 14, 5, 5, '2025-10-16 00:00:00', '2025-10-22 00:00:00', 3, '2025-10-15 13:04:17', '2025-10-17 15:26:04'),
+(23, 14, 5, 5, '2025-10-02 00:00:00', '2025-10-23 00:00:00', 3, '2025-10-15 18:36:34', '2025-10-17 15:26:04'),
+(24, 14, 5, 5, '2025-10-09 00:00:00', '2025-10-15 00:00:00', 3, '2025-10-16 03:53:15', '2025-10-17 15:26:04'),
+(25, 8, 8, 8, '2025-10-17 18:48:34', '2025-10-18 18:48:34', 3, '2025-10-17 18:48:34', '2025-10-17 18:48:34'),
+(26, 8, 8, 8, '2025-10-17 18:50:38', '2025-10-18 18:50:38', 3, '2025-10-17 18:50:38', '2025-10-17 18:50:38'),
+(27, 14, 14, 14, '2025-10-17 18:51:42', '2025-10-18 18:51:42', 2, '2025-10-17 18:51:42', '2025-10-17 18:51:42'),
+(28, 8, 8, 8, '2025-10-17 21:38:14', '2025-10-18 21:38:14', 2, '2025-10-17 21:38:14', '2025-10-17 21:38:14'),
+(29, 8, 8, 8, '2025-10-18 17:54:19', NULL, 2, '2025-10-18 17:54:19', '2025-10-18 17:54:19'),
+(30, 8, 8, 8, '2025-10-18 18:01:46', NULL, 2, '2025-10-18 18:01:46', '2025-10-18 18:01:46'),
+(31, 8, 8, 8, '2025-10-18 18:11:56', NULL, 2, '2025-10-18 18:11:56', '2025-10-18 18:11:56'),
+(32, 8, 8, 8, '2025-10-18 18:12:33', NULL, 2, '2025-10-18 18:12:33', '2025-10-18 18:12:33'),
+(33, 8, 8, 8, '2025-10-18 19:08:30', NULL, 3, '2025-10-18 19:08:30', '2025-10-18 19:08:30'),
+(34, 8, 8, 8, '2025-10-18 19:15:06', '2025-10-19 19:15:06', 2, '2025-10-18 19:15:06', '2025-10-18 19:15:06'),
+(35, 8, 8, 8, '2025-10-18 19:15:22', NULL, 3, '2025-10-18 19:15:22', '2025-10-18 19:15:22'),
+(36, 8, 8, 8, '2025-10-18 19:15:46', NULL, 3, '2025-10-18 19:15:46', '2025-10-18 19:15:46'),
+(37, 8, 8, 8, '2025-10-18 19:29:29', NULL, 3, '2025-10-18 19:29:29', '2025-10-18 19:29:29'),
+(38, 8, 8, 8, '2025-10-18 19:31:10', NULL, 2, '2025-10-18 19:31:10', '2025-10-18 19:31:10'),
+(39, 8, 8, 8, '2025-10-18 20:16:26', NULL, 2, '2025-10-18 20:16:26', '2025-10-18 20:16:26'),
+(40, 8, 8, 8, '2025-10-18 20:17:07', NULL, 2, '2025-10-18 20:17:07', '2025-10-18 20:17:07'),
+(41, 8, 8, 8, '2025-10-18 20:21:12', '2025-10-19 20:21:12', 3, '2025-10-18 20:21:12', '2025-10-18 20:21:12'),
+(42, 8, 8, 8, '2025-10-18 20:24:52', '2025-10-19 20:24:52', 3, '2025-10-18 20:24:52', '2025-10-18 20:24:52'),
+(43, 8, 8, 8, '2025-10-18 20:25:18', NULL, 3, '2025-10-18 20:25:18', '2025-10-18 20:25:18'),
+(44, 8, 8, 8, '2025-10-18 20:32:30', '2025-10-19 20:32:30', 2, '2025-10-18 20:32:30', '2025-10-18 20:32:30'),
+(45, 8, 8, 8, '2025-10-18 20:32:58', NULL, 3, '2025-10-18 20:32:58', '2025-10-18 20:32:58'),
+(46, 8, 8, 8, '2025-10-18 20:33:18', NULL, 3, '2025-10-18 20:33:18', '2025-10-18 20:33:18'),
+(47, 8, 8, 8, '2025-10-18 20:40:45', '2025-10-19 20:40:45', 3, '2025-10-18 20:40:45', '2025-10-18 20:40:45'),
+(48, 8, 8, 8, '2025-10-18 20:41:04', '2025-10-19 20:41:04', 3, '2025-10-18 20:41:04', '2025-10-18 20:41:04'),
+(49, 8, 8, 8, '2025-10-18 20:41:15', '2025-10-19 20:41:15', 3, '2025-10-18 20:41:15', '2025-10-18 20:41:15'),
+(50, 8, 8, 8, '2025-10-18 20:45:13', '2025-10-19 20:45:13', 3, '2025-10-18 20:45:13', '2025-10-18 20:45:13'),
+(51, 8, 8, 8, '2025-10-18 20:46:01', '2025-10-19 20:46:01', 3, '2025-10-18 20:46:01', '2025-10-18 20:46:01'),
+(52, 8, 8, 8, '2025-10-18 20:46:12', '2025-10-19 20:46:12', 2, '2025-10-18 20:46:12', '2025-10-18 20:46:12'),
+(53, 8, 8, 8, '2025-10-18 20:46:57', '2025-10-19 20:46:57', 2, '2025-10-18 20:46:57', '2025-10-18 20:46:57'),
+(54, 8, 8, 8, '2025-10-20 05:46:33', '2025-10-21 05:46:33', 2, '2025-10-20 05:46:33', '2025-10-20 05:46:33'),
+(55, 8, 8, 8, '2025-10-20 05:46:57', '2025-10-21 05:46:57', 2, '2025-10-20 05:46:57', '2025-10-20 05:46:57'),
+(56, 8, 8, 8, '2025-10-20 05:54:34', '2025-10-21 05:54:34', 2, '2025-10-20 05:54:34', '2025-10-20 05:54:34'),
+(57, 23, 23, 23, '2025-10-20 05:55:19', '2025-10-21 05:55:19', 2, '2025-10-20 05:55:19', '2025-10-20 05:55:19'),
+(58, 14, 14, 14, '2025-10-20 06:22:19', '2025-10-21 06:22:19', 3, '2025-10-20 06:22:19', '2025-10-20 06:22:19'),
+(59, 14, 14, 14, '2025-10-20 06:49:57', '2025-10-21 06:49:57', 2, '2025-10-20 06:49:57', '2025-10-20 06:49:57'),
+(60, 28, 28, 28, '2025-10-20 16:41:55', '2025-10-21 16:41:55', 2, '2025-10-20 16:41:55', '2025-10-20 16:41:55'),
+(61, 8, 8, 8, '2025-10-20 23:44:45', '2025-10-21 23:44:45', 2, '2025-10-20 23:44:45', '2025-10-20 23:44:45'),
+(62, 8, 8, 8, '2025-10-20 23:49:53', '2025-10-21 23:49:53', 2, '2025-10-20 23:49:53', '2025-10-20 23:49:53'),
+(63, 8, 8, 8, '2025-10-20 23:51:12', '2025-10-21 23:51:12', 2, '2025-10-20 23:51:12', '2025-10-20 23:51:12'),
+(64, 8, 8, 8, '2025-10-21 00:04:44', '2025-10-22 00:04:44', 2, '2025-10-21 00:04:44', '2025-10-21 00:04:44'),
+(65, 8, 8, 8, '2025-10-21 02:33:48', '2025-10-22 02:33:48', 2, '2025-10-21 02:33:48', '2025-10-21 02:33:48'),
+(66, 8, 8, 8, '2025-10-21 02:38:40', '2025-10-22 02:38:40', 2, '2025-10-21 02:38:40', '2025-10-21 02:38:40'),
+(67, 26, 26, 26, '2025-10-21 02:42:15', '2025-10-22 02:42:15', 2, '2025-10-21 02:42:15', '2025-10-21 02:42:15'),
+(68, 28, 28, 28, '2025-10-22 03:59:20', '2025-10-23 03:59:20', 2, '2025-10-22 03:59:20', '2025-10-22 03:59:20');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `recurso`
+--
+
+CREATE TABLE `recurso` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `id_incidente_detalle` int(10) UNSIGNED DEFAULT NULL,
+  `id_usuario_creacion` int(10) UNSIGNED DEFAULT NULL,
+  `id_usuario_modificacion` int(10) UNSIGNED DEFAULT NULL,
+  `nombre` varchar(60) NOT NULL,
+  `descripcion` varchar(250) DEFAULT NULL,
+  `costo_unitario` float(10,2) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `id_subcategoria` int(11) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `recurso`
+--
+
+INSERT INTO `recurso` (`id`, `id_incidente_detalle`, `id_usuario_creacion`, `id_usuario_modificacion`, `nombre`, `descripcion`, `costo_unitario`, `created_at`, `updated_at`, `id_subcategoria`) VALUES
+(4, NULL, 5, 5, 'Chaleco Marca Pepito', 'Chaleco naranja', 52000.00, '2025-10-05 05:09:53', '2025-10-05 05:09:53', 2),
+(5, NULL, 5, 5, 'Casco  123', 'Casco Amarillo', 20000.00, '2025-10-05 05:30:11', '2025-10-05 05:30:11', 4),
+(6, NULL, 5, 5, 'Taladro XP', 'Taladro rojo', 20000.00, '2025-10-05 17:59:54', '2025-10-05 17:59:54', 6),
+(7, NULL, 5, 5, 'Taladro XP', 'Acero', 20000.00, '2025-10-08 03:06:55', '2025-10-08 03:06:55', 6),
+(8, NULL, 5, 5, 'Stanley', 'Azul, acero', 30000.00, '2025-10-08 03:08:01', '2025-10-08 03:08:01', 1),
+(9, NULL, 5, 5, 'Casco de prueba', 'Naranja', 10000.00, '2025-10-08 21:34:06', '2025-10-08 21:34:06', 4),
+(10, NULL, 5, 5, 'Termonimayc', '.', 2000.00, '2025-10-08 22:12:08', '2025-10-08 22:12:08', 1),
+(301, NULL, NULL, NULL, 'Casco Azul', 'Casco de seguridad tipo A', 15000.00, NULL, NULL, 4),
+(302, NULL, NULL, NULL, 'Casco Blanco', 'Casco de seguridad tipo B', 16000.00, NULL, NULL, 4),
+(303, NULL, NULL, NULL, 'Chaleco Reflectante', 'Alta visibilidad', 7000.00, NULL, NULL, 2),
+(304, NULL, NULL, NULL, 'Chaleco Térmico', 'Protección contra frío', 8000.00, NULL, NULL, 2),
+(305, NULL, NULL, NULL, 'Arnés Básico', 'Para tareas en altura', 25000.00, NULL, NULL, 5),
+(306, NULL, NULL, NULL, 'Arnés Doble Anclaje', 'Mayor seguridad', 27000.00, NULL, NULL, 5),
+(307, NULL, NULL, NULL, 'Guantes de Cuero', 'Resistentes al corte', 5000.00, NULL, NULL, 7),
+(308, NULL, NULL, NULL, 'Guantes Térmicos', 'Para bajas temperaturas', 5500.00, NULL, NULL, 7),
+(309, NULL, NULL, NULL, 'Lentes Transparentes', 'Protección ocular básica', 3000.00, NULL, NULL, 8),
+(310, NULL, NULL, NULL, 'Lentes Polarizados', 'Protección solar y ocular', 3500.00, NULL, NULL, 8),
+(311, NULL, NULL, NULL, 'Botas con Punta de Acero', 'Seguridad industrial', 18000.00, NULL, NULL, 9),
+(312, NULL, NULL, NULL, 'Botas Dieléctricas', 'Para trabajos eléctricos', 19000.00, NULL, NULL, 9);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `rol`
+--
+
+CREATE TABLE `rol` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nombre_rol` varchar(30) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `rol`
+--
+
+INSERT INTO `rol` (`id`, `nombre_rol`) VALUES
+(1, 'Administrador'),
+(2, 'Supervisor'),
+(3, 'Trabajador');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `serie_recurso`
+--
+
+CREATE TABLE `serie_recurso` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `id_recurso` int(10) UNSIGNED NOT NULL,
+  `id_serie_recurso_codigo` bigint(20) UNSIGNED DEFAULT NULL,
+  `id_incidente_detalle` int(10) UNSIGNED DEFAULT NULL,
+  `nro_serie` varchar(30) DEFAULT NULL,
+  `talle` varchar(10) DEFAULT NULL,
+  `id_color` int(11) DEFAULT NULL,
+  `fecha_adquisicion` datetime NOT NULL,
+  `fecha_vencimiento` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `id_estado` int(11) UNSIGNED NOT NULL,
+  `codigo_qr` varchar(255) DEFAULT NULL,
+  `id_talle` smallint(5) UNSIGNED DEFAULT NULL,
+  `correlativo` int(10) UNSIGNED DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `serie_recurso`
+--
+
+INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_serie_recurso_codigo`, `id_incidente_detalle`, `nro_serie`, `talle`, `id_color`, `fecha_adquisicion`, `fecha_vencimiento`, `created_at`, `updated_at`, `id_estado`, `codigo_qr`, `id_talle`, `correlativo`) VALUES
+(4, 4, 1, NULL, '78YT', '40', NULL, '2025-10-05 00:00:00', '2025-10-31 00:00:00', '2025-10-05 15:49:01', '2025-10-15 08:06:44', 1, 'QR-c6aecaf1-ac60-11f0-9639-00e070eec074', NULL, 1),
+(5, 6, 2, NULL, 'XP-001', NULL, NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-17 06:01:11', 3, 'QR-c6aed3e5-ac60-11f0-9639-00e070eec074', NULL, 1),
+(6, 6, 2, NULL, 'XP-002', NULL, NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-15 08:02:09', 6, 'QR-c6aeddb6-ac60-11f0-9639-00e070eec074', NULL, 2),
+(7, 6, 2, NULL, 'XP-003', NULL, NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3, 'QR-c6aede74-ac60-11f0-9639-00e070eec074', NULL, 3),
+(8, 6, 2, NULL, 'XP-004', NULL, NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3, 'QR-c6aedefa-ac60-11f0-9639-00e070eec074', NULL, 4),
+(9, 6, 2, NULL, 'XP-005', NULL, NULL, '2025-10-05 00:00:00', '2025-10-30 00:00:00', '2025-10-05 18:05:20', '2025-10-05 18:05:20', 3, 'QR-c6aedf79-ac60-11f0-9639-00e070eec074', NULL, 5),
+(10, 8, 3, NULL, 'GT001', NULL, NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-08 03:08:52', 3, 'QR-c6aedff4-ac60-11f0-9639-00e070eec074', NULL, 1),
+(11, 8, 3, NULL, 'GT002', NULL, NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-16 03:55:57', 1, 'QR-c6aee06f-ac60-11f0-9639-00e070eec074', NULL, 2),
+(12, 8, 3, NULL, 'GT003', NULL, NULL, '2025-10-11 00:00:00', '2025-10-24 00:00:00', '2025-10-08 03:08:52', '2025-10-15 18:36:34', 3, 'QR-c6aee0e3-ac60-11f0-9639-00e070eec074', NULL, 3),
+(13, 9, 4, NULL, 'GTR001', NULL, NULL, '2025-10-22 00:00:00', '2025-10-28 00:00:00', '2025-10-08 21:34:46', '2025-10-15 03:12:53', 3, 'QR-c6aee158-ac60-11f0-9639-00e070eec074', NULL, 1),
+(14, 9, 4, NULL, 'GTR002', NULL, NULL, '2025-10-22 00:00:00', '2025-10-28 00:00:00', '2025-10-08 21:34:46', '2025-10-15 07:50:11', 3, 'QR-c6aee1cd-ac60-11f0-9639-00e070eec074', NULL, 2),
+(15, 9, 4, NULL, 'GTR003', NULL, NULL, '2025-10-22 00:00:00', '2025-10-28 00:00:00', '2025-10-08 21:34:46', '2025-10-15 08:06:45', 4, 'QR-c6aee23f-ac60-11f0-9639-00e070eec074', NULL, 3),
+(16, 9, 4, NULL, 'GTR004', NULL, NULL, '2025-10-22 00:00:00', '2025-10-28 00:00:00', '2025-10-08 21:34:46', '2025-10-15 13:04:28', 3, 'QR-c6aee2b4-ac60-11f0-9639-00e070eec074', NULL, 4),
+(17, 9, 4, NULL, 'GTR005', NULL, NULL, '2025-10-22 00:00:00', '2025-10-28 00:00:00', '2025-10-08 21:34:46', '2025-10-15 07:50:31', 3, 'QR-c6aee327-ac60-11f0-9639-00e070eec074', NULL, 5),
+(18, 10, 5, NULL, 'GTRT001', NULL, NULL, '2025-10-16 00:00:00', '2025-10-21 00:00:00', '2025-10-08 22:12:41', '2025-10-15 18:36:59', 1, 'QR-c6aee3a2-ac60-11f0-9639-00e070eec074', NULL, 1),
+(19, 10, 5, NULL, 'GTRT002', NULL, NULL, '2025-10-16 00:00:00', '2025-10-21 00:00:00', '2025-10-08 22:12:41', '2025-10-15 07:50:49', 1, 'QR-c6aee420-ac60-11f0-9639-00e070eec074', NULL, 2),
+(20, 10, 5, NULL, 'GTRT003', NULL, NULL, '2025-10-16 00:00:00', '2025-10-21 00:00:00', '2025-10-08 22:12:41', '2025-10-15 02:55:45', 3, 'QR-c6af1d97-ac60-11f0-9639-00e070eec074', NULL, 3),
+(21, 10, 5, NULL, 'GTRT004', NULL, NULL, '2025-10-16 00:00:00', '2025-10-21 00:00:00', '2025-10-08 22:12:41', '2025-10-15 03:58:52', 1, 'QR-c6af1e72-ac60-11f0-9639-00e070eec074', NULL, 4),
+(22, 10, 5, NULL, 'GTRT005', NULL, NULL, '2025-10-16 00:00:00', '2025-10-21 00:00:00', '2025-10-08 22:12:41', '2025-10-15 08:06:17', 3, 'QR-c6af1f2a-ac60-11f0-9639-00e070eec074', NULL, 5),
+(23, 10, 5, NULL, 'GTRT006', NULL, NULL, '2025-10-16 00:00:00', '2025-10-21 00:00:00', '2025-10-08 22:12:41', '2025-10-15 08:00:13', 3, 'QR-c6af2028-ac60-11f0-9639-00e070eec074', NULL, 6),
+(24, 10, 5, NULL, 'GTRT007', NULL, NULL, '2025-10-16 00:00:00', '2025-10-21 00:00:00', '2025-10-08 22:12:41', '2025-10-15 18:09:18', 1, 'QR-c6af20ac-ac60-11f0-9639-00e070eec074', NULL, 7),
+(25, 10, 5, NULL, 'GTRT008', NULL, NULL, '2025-10-16 00:00:00', '2025-10-21 00:00:00', '2025-10-08 22:12:41', '2025-10-16 20:54:22', 3, 'QR-c6af212a-ac60-11f0-9639-00e070eec074', NULL, 8),
+(26, 11, NULL, NULL, 'GTRTk - 001', NULL, NULL, '2025-10-08 00:00:00', NULL, '2025-10-14 16:23:26', '2025-10-14 16:23:26', 1, 'QR-c6af21a6-ac60-11f0-9639-00e070eec074', NULL, 1),
+(27, 11, NULL, NULL, 'GTRTk - 002', NULL, NULL, '2025-10-08 00:00:00', NULL, '2025-10-14 16:23:26', '2025-10-14 16:23:26', 1, 'QR-c6af224f-ac60-11f0-9639-00e070eec074', NULL, 2),
+(28, 11, NULL, NULL, 'GTRTk - 003', NULL, NULL, '2025-10-08 00:00:00', NULL, '2025-10-14 16:23:26', '2025-10-14 16:23:26', 1, 'QR-c6af22c6-ac60-11f0-9639-00e070eec074', NULL, 3),
+(29, 11, NULL, NULL, 'GTRTk - 004', NULL, NULL, '2025-10-08 00:00:00', NULL, '2025-10-14 16:23:26', '2025-10-14 16:23:26', 1, 'QR-c6af2339-ac60-11f0-9639-00e070eec074', NULL, 4),
+(30, 11, NULL, NULL, 'GTRTk - 005', NULL, NULL, '2025-10-08 00:00:00', NULL, '2025-10-14 16:23:26', '2025-10-14 16:23:26', 1, 'QR-c6af23ab-ac60-11f0-9639-00e070eec074', NULL, 5),
+(31, 11, NULL, NULL, 'GTRTk - 006', NULL, NULL, '2025-10-08 00:00:00', NULL, '2025-10-14 16:23:26', '2025-10-14 16:23:26', 1, 'QR-c6af241f-ac60-11f0-9639-00e070eec074', NULL, 6),
+(32, 11, NULL, NULL, 'GTRTk - 007', NULL, NULL, '2025-10-08 00:00:00', NULL, '2025-10-14 16:23:26', '2025-10-14 16:23:26', 1, 'QR-c6af2492-ac60-11f0-9639-00e070eec074', NULL, 7),
+(33, 11, NULL, NULL, 'TH - 001', NULL, NULL, '2025-10-28 00:00:00', NULL, '2025-10-14 16:39:31', '2025-10-14 16:39:31', 1, 'QR-c6af2505-ac60-11f0-9639-00e070eec074', NULL, 8),
+(34, 11, NULL, NULL, 'TH - 002', NULL, NULL, '2025-10-28 00:00:00', NULL, '2025-10-14 16:39:31', '2025-10-14 16:39:31', 1, 'QR-c6af257b-ac60-11f0-9639-00e070eec074', NULL, 9),
+(35, 11, NULL, NULL, 'TH - 003', NULL, NULL, '2025-10-28 00:00:00', NULL, '2025-10-14 16:39:31', '2025-10-14 16:39:31', 1, 'QR-c6af25ee-ac60-11f0-9639-00e070eec074', NULL, 10),
+(36, 4, 1, NULL, 'GTRT - 001', 'XL', NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 3, 'QR-c6af2660-ac60-11f0-9639-00e070eec074', NULL, 1),
+(37, 4, 1, NULL, 'GTRT - 002', 'XL', NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 1, 'QR-c6af270b-ac60-11f0-9639-00e070eec074', NULL, 2),
+(38, 4, 1, NULL, 'GTRT - 003', 'XL', NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 3, 'QR-c6af2780-ac60-11f0-9639-00e070eec074', NULL, 3),
+(39, 4, 1, NULL, 'GTRT - 004', 'XL', NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 1, 'QR-c6af27f1-ac60-11f0-9639-00e070eec074', NULL, 4),
+(40, 6, 2, NULL, 'TH - 001', NULL, NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 2, 'QR-23ddeec7-d6c4-4d33-b1e2-9bcda3dd56e2', NULL, 6),
+(41, 6, 2, NULL, 'TH - 002', NULL, NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 3, 'QR-3d74950f-4862-446e-9991-37abeae9f3be', NULL, 7),
+(42, 4, 1, NULL, 'RX - 001', 'L', NULL, '2025-10-30 00:00:00', NULL, NULL, NULL, 2, 'QR-d14e73bb-83ea-4d4e-ac52-a75ab29e5a0c', NULL, 1),
+(43, 4, 1, NULL, 'RX - 001', 'LX', NULL, '2025-10-21 00:00:00', NULL, NULL, NULL, 4, 'QR-b0881062-8836-4b15-b44a-1c975fcd0f30', NULL, 1),
+(44, 4, 1, NULL, 'GT - 001', 'XL', NULL, '2025-10-21 00:00:00', NULL, NULL, NULL, 2, 'QR-ed509a8b-bae2-437c-8821-ea95ebc6746b', NULL, 5),
+(45, 4, 1, NULL, 'GT - 002', 'XL', NULL, '2025-10-21 00:00:00', NULL, NULL, NULL, 3, 'QR-c034c3a3-e5e6-413f-a8a8-72acb3d67f23', NULL, 6),
+(46, 4, 1, NULL, 'GT - 003', 'XL', NULL, '2025-10-21 00:00:00', NULL, NULL, NULL, 3, 'QR-b64f38fc-693a-4146-88a8-43d73b3b2797', NULL, 7),
+(47, 4, 1, NULL, 'GT - 004', 'XL', NULL, '2025-10-21 00:00:00', NULL, NULL, NULL, 2, 'QR-19f1cf16-ee18-4864-a35e-a3e0422f1484', NULL, 8),
+(48, 4, 1, NULL, 'GTRTk - 001', 'L', NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 1, 'QR-a8c00497-9ff9-45fd-a4b0-6dc21cb09e7c', NULL, 2),
+(49, 4, 1, NULL, 'GTRTk - 001', 'L', NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 3, 'QR-0b8f1d5a-8640-42ae-bc42-5b69f387e5fc', NULL, 3),
+(50, 4, 1, NULL, 'GTRTk - 001', 'L', NULL, '2025-10-22 00:00:00', NULL, NULL, NULL, 1, 'QR-35dff6bd-5dbf-4546-9ba4-275dea96779f', NULL, 4),
+(51, 4, 1, NULL, 'GTRT - 001', 'L', NULL, '2025-10-23 00:00:00', NULL, NULL, NULL, 2, 'QR-8c674814-f9e9-45f2-a4ad-e36ee8e65a1e', NULL, 5),
+(52, 301, 6, NULL, 'CASC-A001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(53, 302, 7, NULL, 'CASC-B001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(54, 303, 8, NULL, 'CHAL-R001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(55, 304, 9, NULL, 'CHAL-T001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(56, 305, 10, NULL, 'ARN-B001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(57, 306, 11, NULL, 'ARN-D001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(58, 307, 12, NULL, 'GUAN-C001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(59, 308, 13, NULL, 'GUAN-T001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(60, 309, 14, NULL, 'LENT-T001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(61, 310, 15, NULL, 'LENT-P001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(62, 311, 16, NULL, 'BOT-A001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(63, 312, 17, NULL, 'BOT-D001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(64, 4, 1, NULL, 'CL-V2-RL-23-02-01', 'M', NULL, '2025-10-23 00:00:00', NULL, NULL, NULL, 1, 'QR-88498d25-c48b-45ef-ba02-fce33d7cb106', NULL, 1),
+(65, 4, 1, NULL, 'CL-V2-RL-23-02-02', 'M', NULL, '2025-10-23 00:00:00', NULL, NULL, NULL, 1, 'QR-cb64543a-0a3c-4a49-9747-f7660aae32bf', NULL, 2),
+(66, 4, 1, NULL, 'CL-V2-RL-23-02-03', 'M', NULL, '2025-10-23 00:00:00', NULL, NULL, NULL, 1, 'QR-412c7270-264f-4988-b4c8-4ff3d1418505', NULL, 3),
+(67, 4, 1, NULL, 'CL-V2-RL-23-02-04', 'M', NULL, '2025-10-23 00:00:00', NULL, NULL, NULL, 1, 'QR-a06e8805-141f-466a-9b22-27ce77d53b22', NULL, 4),
+(68, 4, 1, NULL, 'CL-V2-RL-23-02-05', 'M', NULL, '2025-10-23 00:00:00', NULL, NULL, NULL, 1, 'QR-051edaf6-deba-4f2d-904c-de390e86225e', NULL, 5),
+(69, 4, 1, NULL, 'CMP-V1-C-N-01-01', 'L', 1, '2025-10-25 00:00:00', NULL, '2025-10-25 19:33:13', '2025-10-25 19:33:13', 1, 'QR-7b894bff-04f7-400d-bc37-6766ccf11c4b', NULL, 1),
+(70, 4, 1, NULL, 'CMP-V1-C-N-01-01', 'XXL', 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:05:59', '2025-10-25 20:05:59', 1, 'QR-0c96959a-5c08-4ebd-9385-4a01a0dd6a7f', NULL, 1),
+(71, 4, 1, NULL, 'CMP-V1-C-N-01-02', 'XXL', 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:05:59', '2025-10-25 20:05:59', 1, 'QR-adad940e-3c1f-4389-a61d-af65d8754b54', NULL, 2),
+(72, 6, 2, NULL, 'TX-V1-T-N-01-01', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:06:40', '2025-10-25 20:06:40', 1, 'QR-98077f64-d890-4d55-88f8-ad0c96081fb8', NULL, 1),
+(73, 6, 2, NULL, 'TX-V1-T-N-01-02', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:06:40', '2025-10-25 20:06:40', 1, 'QR-6baf9268-7406-4aec-9057-3a6f575c89d4', NULL, 2),
+(74, 6, 2, NULL, 'TX-V1-T-N-01-01', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-8b4016d8-83c2-4a14-a225-2dc6524b603e', NULL, 3),
+(75, 6, 2, NULL, 'TX-V1-T-N-01-02', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-1ca5575c-63c2-4b9a-98a3-109f65ddbef3', NULL, 4),
+(76, 6, 2, NULL, 'TX-V1-T-N-01-03', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-20238828-6570-47d7-9fbe-462b2eb6f8fb', NULL, 5),
+(77, 6, 2, NULL, 'TX-V1-T-N-01-04', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-d1910774-7728-40e4-8c10-3a1a5a5a79ee', NULL, 6),
+(78, 6, 2, NULL, 'TX-V1-T-N-01-05', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-3da479c9-f26f-4a63-a5c1-e3e80debd7f5', NULL, 7),
+(79, 6, 2, NULL, 'TX-V1-T-N-01-06', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-24017de5-9f58-4824-938b-1cd3a77c033b', NULL, 8),
+(80, 6, 2, NULL, 'TX-V1-T-N-01-07', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-94635da5-d9bc-4756-95ff-cdad4f95932b', NULL, 9),
+(81, 6, 2, NULL, 'TX-V1-T-N-01-08', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-ffdd96f8-bf9a-4ca7-8e27-3ed443a9e295', NULL, 10),
+(82, 6, 2, NULL, 'TX-V1-T-N-01-09', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-58c423ae-212a-4290-be46-a359a648761a', NULL, 11),
+(83, 6, 2, NULL, 'TX-V1-T-N-01-10', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:07:54', '2025-10-25 20:07:54', 1, 'QR-8c373da9-e0da-48e4-ad76-0e75a127c2eb', NULL, 12),
+(84, 6, 2, NULL, 'TX-V2-T-A-02-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:10:15', '2025-10-25 20:10:15', 1, 'QR-25e637e2-8f71-412f-9998-764feb832606', NULL, 1),
+(85, 6, 2, NULL, 'TX-V2-T-A-02-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:10:15', '2025-10-25 20:10:15', 1, 'QR-8a235196-6d6a-44a7-9e0a-a26445652a25', NULL, 2),
+(86, 6, 2, NULL, 'TX-V2-T-A-02-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:10:15', '2025-10-25 20:10:15', 1, 'QR-4f8987af-b51a-4c70-b910-0406b8044fed', NULL, 3),
+(87, 6, 2, NULL, 'TX-V2-T-A-02-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:10:15', '2025-10-25 20:10:15', 1, 'QR-6fc32c17-6ee8-40f1-b54c-bcdd80e02939', NULL, 4),
+(88, 6, 2, NULL, 'TX-V2-T-A-02-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:10:15', '2025-10-25 20:10:15', 1, 'QR-8abeb4bb-eadf-48ec-ad9d-9687f0a762ad', NULL, 5),
+(89, 6, 2, NULL, 'TX-V2-T-A-02-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:10:41', '2025-10-25 20:10:41', 1, 'QR-ece7a5e7-0477-47b8-b647-eebd546dc093', NULL, 6),
+(90, 6, 2, NULL, 'TX-V2-T-A-02-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:10:41', '2025-10-25 20:10:41', 1, 'QR-ec4f7aa1-276d-4a0c-b231-e2defc2b83ab', NULL, 7),
+(91, 8, 3, NULL, 'S-V1-A-A-01-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:17:02', '2025-10-25 20:17:02', 1, 'QR-611d4de4-3f19-4434-bfe4-55e4f9f02ddf', NULL, 1),
+(92, 8, 3, NULL, 'S-V1-A-A-01-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:17:35', '2025-10-25 20:17:35', 1, 'QR-e8d7b2b2-c660-4bc1-b08c-0f930d781f86', NULL, 2),
+(93, 8, 3, NULL, 'S-V1-A-A-01-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:17:35', '2025-10-25 20:17:35', 1, 'QR-6bcf0b03-d8a3-4a01-b99b-e1dcef745614', NULL, 3),
+(94, 8, 3, NULL, 'S-V1-A-A-01-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:17:35', '2025-10-25 20:17:35', 1, 'QR-3cae42fe-d362-40cf-9daa-19ffe0018567', NULL, 4),
+(95, 8, 3, NULL, 'S-V1-A-A-01-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:17:35', '2025-10-25 20:17:35', 1, 'QR-4a656fb2-6d97-4fb1-837d-326269f4201f', NULL, 5),
+(96, 8, 3, NULL, 'S-V1-A-A-01-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:17:35', '2025-10-25 20:17:35', 1, 'QR-e70cc333-3fba-498b-a64e-dac377aaa501', NULL, 6),
+(97, 8, 3, NULL, 'S-V1-A-A-01-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:18:13', '2025-10-25 20:18:13', 1, 'QR-84dbf78d-5958-4d80-97df-b0a40b4f0ad7', NULL, 7),
+(98, 8, 3, NULL, 'S-V1-A-A-01-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:18:13', '2025-10-25 20:18:13', 1, 'QR-71841f97-5128-4cb4-97d8-60bd34682d31', NULL, 8),
+(99, 8, 3, NULL, 'S-V1-A-A-01-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:18:13', '2025-10-25 20:18:13', 1, 'QR-27de2ee4-a476-451a-97cf-913df3ef970c', NULL, 9),
+(100, 8, 3, NULL, 'S-V1-A-A-01-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:18:13', '2025-10-25 20:18:13', 1, 'QR-c44123de-2d98-4412-88fd-8c52dbc27276', NULL, 10),
+(101, 8, 3, NULL, 'S-V1-A-A-01-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:18:13', '2025-10-25 20:18:13', 1, 'QR-3fbe71e7-725b-405a-93e4-b230a243b62b', NULL, 11),
+(102, 8, 3, NULL, 'S-V1-A-A-11-01-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:49:15', '2025-10-25 20:49:15', 1, 'QR-c6c96b93-049b-4f8a-a3c1-377c74e834b9', NULL, 12),
+(103, 8, 3, NULL, 'S-V1-A-A-11-01-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:49:15', '2025-10-25 20:49:15', 1, 'QR-53cf4561-c567-4831-a8c2-a63ecb86612d', NULL, 13),
+(104, 8, 3, NULL, 'S-V1-A-A-11-01-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:49:15', '2025-10-25 20:49:15', 1, 'QR-481e72b4-c5a1-4152-891d-7ab1a7a9f1e5', NULL, 14),
+(105, 8, 3, NULL, 'S-V1-A-A-11-01-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:49:15', '2025-10-25 20:49:15', 1, 'QR-bdb93c17-8862-4051-b573-51ca49df7009', NULL, 15),
+(106, 8, 3, NULL, 'S-V1-A-A-11-01-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:49:15', '2025-10-25 20:49:15', 1, 'QR-c83efe38-0105-4829-b436-17f8d9a3f7cd', NULL, 16),
+(107, 8, 3, NULL, 'S-V1-A-A-11-01-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:50:02', '2025-10-25 20:50:02', 1, 'QR-35da4117-509d-4593-89e0-4912c9d525ac', NULL, 17),
+(108, 8, 3, NULL, 'S-V1-A-A-11-01-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:50:02', '2025-10-25 20:50:02', 1, 'QR-54759f7c-2578-4f1f-bcc6-a3cbed0c1980', NULL, 18),
+(109, 8, 3, NULL, 'S-V1-A-A-11-01-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:50:02', '2025-10-25 20:50:02', 1, 'QR-e458cafa-2bb6-47b8-a04f-eb7e3c4a288d', NULL, 19),
+(110, 8, 3, NULL, 'S-V1-A-A-11-01-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:50:02', '2025-10-25 20:50:02', 1, 'QR-24e9ecd4-d9c1-40b1-b1d6-a271d678438c', NULL, 20),
+(111, 8, 3, NULL, 'S-V1-A-A-11-01-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 20:50:02', '2025-10-25 20:50:02', 1, 'QR-8e158bdc-57ea-4f14-b9cc-d537c8fc20a9', NULL, 21),
+(112, 8, 3, NULL, 'S-V1-A-A-11-01-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:06:37', '2025-10-25 21:06:37', 1, 'QR-08781658-9748-4b47-bb14-65b3ce800f5f', NULL, 22),
+(113, 8, 3, NULL, 'S-V1-A-A-11-01-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:06:38', '2025-10-25 21:06:38', 1, 'QR-64bf9382-1a31-46c8-9510-2f2b5095ddcc', NULL, 23),
+(114, 8, 3, NULL, 'S-V1-A-A-11-01-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:06:38', '2025-10-25 21:06:38', 1, 'QR-a0c4a643-8104-48a9-80d4-976debe58ae8', NULL, 24),
+(115, 8, 3, NULL, 'S-V1-A-A-11-01-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:06:38', '2025-10-25 21:06:38', 1, 'QR-97292d8f-4664-48b9-b77e-2425d176c43b', NULL, 25),
+(116, 8, 3, NULL, 'S-V1-A-A-11-01-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:06:38', '2025-10-25 21:06:38', 1, 'QR-74a5daa5-5b38-40fc-8b83-0993ae7c1c35', NULL, 26),
+(117, 8, 3, NULL, 'S-V1-A-A-11-01-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:07:10', '2025-10-25 21:07:10', 1, 'QR-0cdf38d2-06df-465f-ac5e-454263eb040a', NULL, 27),
+(118, 8, 3, NULL, 'S-V1-A-A-11-01-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:07:10', '2025-10-25 21:07:10', 1, 'QR-5ee02949-4323-4351-be31-1ce94004d968', NULL, 28),
+(119, 8, 3, NULL, 'S-V1-A-A-11-01-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:07:10', '2025-10-25 21:07:10', 1, 'QR-2d52d12c-e8c5-430b-9584-ab4fdfa4e861', NULL, 29),
+(120, 8, 3, NULL, 'S-V1-A-A-11-01-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:07:10', '2025-10-25 21:07:10', 1, 'QR-2df40612-2d3c-4137-831f-62424f023367', NULL, 30),
+(121, 8, 3, NULL, 'S-V1-A-A-11-01-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:07:10', '2025-10-25 21:07:10', 1, 'QR-5e86424b-6f7f-489b-9fea-7ff1439766b6', NULL, 31),
+(122, 301, 6, NULL, 'CA-V7-C-A-07-08-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:04', '2025-10-25 21:09:04', 1, 'QR-f686273d-fd64-4d7d-81c1-526787ee4e0d', NULL, 1),
+(123, 301, 6, NULL, 'CA-V7-C-A-07-08-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:04', '2025-10-25 21:09:04', 1, 'QR-8868d457-46c4-47f0-a7a8-0f127f7298dc', NULL, 2),
+(124, 301, 6, NULL, 'CA-V7-C-A-07-08-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:04', '2025-10-25 21:09:04', 1, 'QR-7e5324a8-ccd4-4fcb-bcea-78e3f84b9116', NULL, 3),
+(125, 301, 6, NULL, 'CA-V7-C-A-07-08-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:04', '2025-10-25 21:09:04', 1, 'QR-8e16c66d-0820-4145-b824-41609cd0cce6', NULL, 4),
+(126, 301, 6, NULL, 'CA-V7-C-A-07-08-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:04', '2025-10-25 21:09:04', 1, 'QR-ef073c08-c40b-4d51-a29b-5ca698510379', NULL, 5),
+(127, 301, 6, NULL, 'CA-V7-C-A-07-08-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-3cad334e-0819-4a9c-ba57-cbd5f081ddfe', NULL, 6),
+(128, 301, 6, NULL, 'CA-V7-C-A-07-08-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-23baab77-cbbd-4d25-b696-e8ad7655b671', NULL, 7),
+(129, 301, 6, NULL, 'CA-V7-C-A-07-08-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-26e9888d-bd33-401c-a0d0-22c7ebb7bc07', NULL, 8),
+(130, 301, 6, NULL, 'CA-V7-C-A-07-08-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-57130283-92d2-4643-9438-acc00f903e24', NULL, 9),
+(131, 301, 6, NULL, 'CA-V7-C-A-07-08-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-7b9f1688-1171-40f7-ba4b-5b43e23ed6ec', NULL, 10),
+(132, 301, 6, NULL, 'CA-V7-C-A-07-08-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:13:24', '2025-10-25 21:13:24', 1, 'QR-93b9c93e-7333-4d3d-a726-62c52f7da853', NULL, 11),
+(133, 301, 6, NULL, 'CA-V7-C-A-07-08-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:13:24', '2025-10-25 21:13:24', 1, 'QR-96800cd8-ad5e-46f3-b0c2-361e057d56b0', NULL, 12),
+(134, 301, 6, NULL, 'CA-V7-C-A-07-08-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:13:24', '2025-10-25 21:13:24', 1, 'QR-445a1404-1a7e-4a01-bf97-19adb3e77ed8', NULL, 13),
+(135, 301, 6, NULL, 'CA-V7-C-A-07-08-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:13:24', '2025-10-25 21:13:24', 1, 'QR-dea60718-a40a-42d8-8095-fcfad20a2456', NULL, 14),
+(136, 301, 6, NULL, 'CA-V7-C-A-07-08-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:13:24', '2025-10-25 21:13:24', 1, 'QR-167dfa5d-4e32-4e85-a965-0fe99d1280e0', NULL, 15),
+(137, 301, 6, NULL, 'CA-V7-C-A-07-08-06', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:13:24', '2025-10-25 21:13:24', 1, 'QR-245ec8a8-4061-4266-afd8-a457ceb09e37', NULL, 16),
+(138, 301, 6, NULL, 'CA-V7-C-A-07-08-01', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:14:04', '2025-10-25 21:14:04', 1, 'QR-78e0095d-e627-482a-9a97-b0f30284d689', NULL, 17),
+(139, 301, 6, NULL, 'CA-V7-C-A-07-08-02', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:14:04', '2025-10-25 21:14:04', 1, 'QR-95211838-7b19-4fe4-af31-5317a936a9c4', NULL, 18),
+(140, 301, 6, NULL, 'CA-V7-C-A-07-08-03', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:14:04', '2025-10-25 21:14:04', 1, 'QR-2ee9b395-b7f0-4aa4-bf0d-57a139642123', NULL, 19),
+(141, 301, 6, NULL, 'CA-V7-C-A-07-08-04', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:14:04', '2025-10-25 21:14:04', 1, 'QR-0c8bccfd-7c4b-4c77-8c21-f11cb2ab5a24', NULL, 20),
+(142, 301, 6, NULL, 'CA-V7-C-A-07-08-05', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:14:04', '2025-10-25 21:14:04', 1, 'QR-8f198d85-bfd7-4ea0-a429-b85e67c9051b', NULL, 21),
+(143, 301, 6, NULL, 'CA-V7-C-A-07-08-06', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:14:04', '2025-10-25 21:14:04', 1, 'QR-8e3dae87-9917-42fa-a2fd-d442df42c2a1', NULL, 22),
+(144, 4, 32, NULL, 'CMP-V4-CN-04-04-01', 'M', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 01:52:59', '2025-10-27 01:52:59', 1, 'QR-ffea9443-278d-44f3-bb82-e136a88f54f6', NULL, 1),
+(145, 4, 32, NULL, 'CMP-V4-CN-04-04-02', 'M', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 01:52:59', '2025-10-27 01:52:59', 1, 'QR-2ec2bef1-924d-47e3-9c30-797b7c16e691', NULL, 2),
+(146, 4, 32, NULL, 'CMP-V4-CN-04-04-03', 'M', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 01:52:59', '2025-10-27 01:52:59', 1, 'QR-ff8b6d87-895c-4b2b-bf8f-8431fbf5636f', NULL, 3),
+(147, 4, 32, NULL, 'CMP-V4-CN-04-04-04', 'M', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 01:52:59', '2025-10-27 01:52:59', 1, 'QR-357b85cb-bc66-4fca-ad22-7cc0777eac76', NULL, 4),
+(148, 4, 32, NULL, 'CMP-V4-CN-04-04-01', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:53:48', '2025-10-27 01:53:48', 1, 'QR-f398fca1-4335-4035-8161-14a931b28990', NULL, 1),
+(149, 4, 32, NULL, 'CMP-V4-CN-04-04-02', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:53:48', '2025-10-27 01:53:48', 1, 'QR-b22028e4-c917-48ef-ac09-2777c7b2de3a', NULL, 2),
+(150, 4, 32, NULL, 'CMP-V4-CN-04-04-03', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:53:48', '2025-10-27 01:53:48', 1, 'QR-4a34c134-3818-4ec0-8c22-14a5dd9dbc67', NULL, 3),
+(151, 4, 32, NULL, 'CMP-V4-CN-04-04-04', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:53:48', '2025-10-27 01:53:48', 1, 'QR-df3dad4a-afae-49a3-9d48-a777868eb435', NULL, 4),
+(152, 4, 32, NULL, 'CMP-V4-CN-04-04-05', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:53:48', '2025-10-27 01:53:48', 1, 'QR-6b7ff606-6297-42f6-8bc7-4352b52fc262', NULL, 5),
+(153, 4, 32, NULL, 'CMP-V4-CN-04-04-06', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:54:37', '2025-10-27 01:54:37', 1, 'QR-13b09e74-0efa-4327-a608-045fb8714633', NULL, 6),
+(154, 4, 32, NULL, 'CMP-V4-CN-04-04-07', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:54:37', '2025-10-27 01:54:37', 1, 'QR-27d06303-224e-48e6-8983-e99a03585bf1', NULL, 7),
+(155, 4, 32, NULL, 'CMP-V4-CN-04-04-08', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:54:37', '2025-10-27 01:54:37', 1, 'QR-1e6c21f0-b723-43c8-9a9c-7bfec1ec2b81', NULL, 8),
+(156, 4, 32, NULL, 'CMP-V4-CN-04-04-09', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:54:37', '2025-10-27 01:54:37', 1, 'QR-5d80cb11-e966-4690-9177-4e6d745d776d', NULL, 9),
+(157, 4, 32, NULL, 'CMP-V4-CN-04-04-10', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:55:24', '2025-10-27 01:55:24', 1, 'QR-815490b5-c623-4794-996a-014c4591bdac', NULL, 10),
+(158, 306, 33, NULL, 'ADA-V3-MS-03-03-01', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-10-27 01:56:03', 1, 'QR-733ad1a8-fdae-4e66-9b66-d02a0258361f', NULL, 1),
+(159, 306, 33, NULL, 'ADA-V3-MS-03-03-02', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-10-27 01:56:03', 1, 'QR-1c4a2a5f-96ef-4ee5-a347-4306df508165', NULL, 2),
+(160, 306, 33, NULL, 'ADA-V3-MS-03-03-03', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-10-27 01:56:03', 1, 'QR-285c9167-0e19-40a1-8170-b2c58adcde67', NULL, 3),
+(161, 306, 33, NULL, 'ADA-V3-MS-03-03-04', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-10-27 01:56:03', 1, 'QR-b5729ab0-8c6b-466e-a1b3-d93b90d0c48e', NULL, 4),
+(162, 306, 33, NULL, 'ADA-V3-MS-03-03-05', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:41', '2025-10-27 01:56:41', 1, 'QR-97dd1266-1286-414a-b84a-f9aa6657507f', NULL, 5),
+(163, 306, 33, NULL, 'ADA-V3-MS-03-03-06', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:41', '2025-10-27 01:56:41', 1, 'QR-d5df1bb1-51f1-49f6-b96e-53f7b4a14799', NULL, 6),
+(164, 306, 33, NULL, 'ADA-V3-MS-03-03-07', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:41', '2025-10-27 01:56:41', 1, 'QR-f21a4a68-ffec-4491-94de-0f9432952bdf', NULL, 7),
+(165, 305, 34, NULL, 'AB-V4-PTEA-10-04-01', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-1e445aac-d0f8-4635-95bf-d7ecb0325bad', NULL, 1),
+(166, 305, 34, NULL, 'AB-V4-PTEA-10-04-02', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-db67c4c3-0dd8-430a-ba60-510d25cd7ec8', NULL, 2),
+(167, 305, 34, NULL, 'AB-V4-PTEA-10-04-03', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-2ba5cfa7-2401-4420-83c4-8d18f7c7a91e', NULL, 3),
+(168, 305, 34, NULL, 'AB-V4-PTEA-10-04-04', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-3af5f51d-9882-49fa-9dfe-dce2e5a1c6e7', NULL, 4),
+(169, 305, 34, NULL, 'AB-V4-PTEA-10-04-05', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-bf249763-37b4-4c87-8d26-c179c306e19e', NULL, 5),
+(170, 305, 34, NULL, 'AB-V4-PTEA-10-04-06', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:07:05', '2025-10-27 02:07:05', 1, 'QR-aadfd06d-41c9-46b5-941c-92b99c8c8843', NULL, 6),
+(171, 305, 34, NULL, 'AB-V4-PTEA-10-04-07', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:07:05', '2025-10-27 02:07:05', 1, 'QR-73c197e1-346f-45e8-883d-313f370faa32', NULL, 7),
+(172, 305, 34, NULL, 'AB-V4-PTEA-10-04-08', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:07:05', '2025-10-27 02:07:05', 1, 'QR-4ced02fe-ecc8-48c3-95b9-3374d8e73fbe', NULL, 8),
+(173, 305, 34, NULL, 'AB-V4-PTEA-10-04-09', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:07:05', '2025-10-27 02:07:05', 1, 'QR-121645b9-775d-428d-83a2-f202cb5916cc', NULL, 9),
+(174, 305, 34, NULL, 'AB-V4-PTEA-10-04-10', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:07:05', '2025-10-27 02:07:05', 1, 'QR-3ebc0ef1-8733-4d6c-bdb8-3d3acc758fd9', NULL, 10),
+(175, 305, 34, NULL, 'AB-V4-PTEA-10-04-11', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:07:05', '2025-10-27 02:07:05', 1, 'QR-7058e8ab-6ccd-4430-b1d8-f053a22ef8bc', NULL, 11),
+(176, 305, 34, NULL, 'AB-V4-PTEA-10-04-12', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:07:05', '2025-10-27 02:07:05', 1, 'QR-e4b0b5ef-f497-4f50-ab0d-7123b289a11b', NULL, 12),
+(177, 305, 34, NULL, 'AB-V4-PTEA-10-04-13', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:07:05', '2025-10-27 02:07:05', 1, 'QR-c476a41a-d39b-4bdc-801c-e58e75157ce2', NULL, 13),
+(178, 311, 35, NULL, 'BCPDA-V5-SI-05-05-01', '35', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-b563e3e9-0fff-40dc-befc-a0da77278e3c', NULL, 1),
+(179, 311, 35, NULL, 'BCPDA-V5-SI-05-05-02', '35', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-0d5023a2-dc63-498e-af04-64ec559bf8bf', NULL, 2),
+(180, 311, 35, NULL, 'BCPDA-V5-SI-05-05-03', '35', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-6b6340e0-a225-479c-9981-050f382f2852', NULL, 3),
+(181, 311, 35, NULL, 'BCPDA-V5-SI-05-05-04', '35', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-8451a9bc-080e-4d3f-a3ae-6cdce58189e4', NULL, 4),
+(182, 311, 35, NULL, 'BCPDA-V5-SI-05-05-05', '35', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-8f035d28-73ea-47f3-8d40-566ad445b0f1', NULL, 5),
+(183, 311, 35, NULL, 'BCPDA-V5-SI-05-05-01', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-5bece884-5a39-43ef-b9ba-bce0d1e25a3e', NULL, 1),
+(184, 311, 35, NULL, 'BCPDA-V5-SI-05-05-02', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-53d1b151-9aa8-4115-a39d-5a44b6379bc6', NULL, 2),
+(185, 311, 35, NULL, 'BCPDA-V5-SI-05-05-03', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-66c7cc77-2bd4-4cc1-b6ba-92aeec033519', NULL, 3),
+(186, 311, 35, NULL, 'BCPDA-V5-SI-05-05-04', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-b449364b-00be-4439-89c4-59ff4398b185', NULL, 4),
+(187, 311, 35, NULL, 'BCPDA-V5-SI-05-05-05', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-da53da95-dcba-41b3-b90d-e69ce7b655fe', NULL, 5),
+(188, 311, 35, NULL, 'BCPDA-V5-SI-05-05-01', '38', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-95fd604f-d698-44f7-82b1-335a47ea01ba', NULL, 1),
+(189, 311, 35, NULL, 'BCPDA-V5-SI-05-05-02', '38', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-5575a029-9a18-4d70-bd4a-090b53a04310', NULL, 2),
+(190, 311, 35, NULL, 'BCPDA-V5-SI-05-05-01', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-e7a9ded5-7595-465a-bee1-d175876aecb4', NULL, 1),
+(191, 311, 35, NULL, 'BCPDA-V5-SI-05-05-02', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-4ef22c91-0e69-4c3e-a00b-9038bb7f38be', NULL, 2),
+(192, 311, 35, NULL, 'BCPDA-V5-SI-05-05-03', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-1f5599ff-f124-4751-8b3e-4bbcb3c2d56b', NULL, 3),
+(193, 311, 35, NULL, 'BCPDA-V5-SI-05-05-04', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-1c8ce20d-d64e-4c5c-814b-1a923fc4ad7c', NULL, 4),
+(194, 311, 35, NULL, 'BCPDA-V5-SI-05-05-05', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-875c120e-4927-447c-bbcb-8cf7bdac3463', NULL, 5),
+(195, 311, 35, NULL, 'BCPDA-V5-SI-05-05-06', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-358cf477-e949-4952-89a6-d1890997ad74', NULL, 6),
+(196, 311, 35, NULL, 'BCPDA-V5-SI-05-05-07', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-b6d62dd7-743e-4b95-9a04-e174a4f1d2ef', NULL, 7),
+(197, 303, 36, NULL, 'CR-V2-AV-02-02-01', 'S', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:14:54', '2025-10-27 02:14:54', 1, 'QR-b23a3844-99be-4dc4-90cd-090246df60d8', NULL, 1),
+(198, 303, 36, NULL, 'CR-V2-AV-02-02-02', 'S', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:14:54', '2025-10-27 02:14:54', 1, 'QR-ddef698f-bf65-47c6-beaa-1664edd59bb8', NULL, 2),
+(199, 303, 36, NULL, 'CR-V2-AV-02-02-01', 'M', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:14:54', '2025-10-27 02:14:54', 1, 'QR-c2a4060b-0782-4583-ac01-1328319c3eaa', NULL, 1),
+(200, 303, 36, NULL, 'CR-V2-AV-02-02-02', 'M', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:14:54', '2025-10-27 02:14:54', 1, 'QR-231fb250-360f-4879-88f8-24528f0302fc', NULL, 2),
+(201, 312, 37, NULL, 'BD-V6-PTE-06-06-01', '40', 5, '2025-10-26 00:00:00', NULL, '2025-10-27 02:27:44', '2025-10-27 02:27:44', 1, 'QR-614943c3-299a-40c0-b424-8612dd7d3146', NULL, 1),
+(202, 312, 37, NULL, 'BD-V6-PTE-06-06-02', '40', 5, '2025-10-26 00:00:00', NULL, '2025-10-27 02:27:44', '2025-10-27 02:27:44', 1, 'QR-33c9f259-ac17-4193-8cfd-6775307ee49c', NULL, 2),
+(203, 312, 37, NULL, 'BD-V6-PTE-06-06-01', '39', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 02:27:44', '2025-10-27 02:27:44', 1, 'QR-4ca6b4fd-1d51-4b8a-83d9-e101e508592d', NULL, 1),
+(204, 312, 37, NULL, 'BD-V6-PTE-06-06-02', '39', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 02:27:44', '2025-10-27 02:27:44', 1, 'QR-8c993a3b-d3fb-4cf4-9abd-262e414efd53', NULL, 2),
+(205, 312, 37, NULL, 'BD-V6-PTE-06-06-01', '44', 5, '2025-10-26 00:00:00', NULL, '2025-10-27 02:28:41', '2025-10-27 02:28:41', 1, 'QR-c43deed9-0b9a-46bf-a94a-d99f14b57079', NULL, 1),
+(206, 312, 37, NULL, 'BD-V6-PTE-06-06-02', '44', 5, '2025-10-26 00:00:00', NULL, '2025-10-27 02:28:41', '2025-10-27 02:28:41', 1, 'QR-b7a43ec4-01df-460e-b570-df7e8d9e6175', NULL, 2),
+(207, 312, 37, NULL, 'BD-V6-PTE-06-06-03', '44', 5, '2025-10-26 00:00:00', NULL, '2025-10-27 02:29:26', '2025-10-27 02:29:26', 1, 'QR-96fed89f-ee4b-48fd-baa7-c5858c9472ee', NULL, 3),
+(208, 312, 37, NULL, 'BD-V6-PTE-06-06-04', '44', 5, '2025-10-26 00:00:00', NULL, '2025-10-27 02:29:26', '2025-10-27 02:29:26', 1, 'QR-ade60124-65c4-4f40-bc5b-4d25de12bc23', NULL, 4),
+(209, 312, 38, NULL, 'BD-V3-PTE-10-07-01', '35', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:30:05', '2025-10-27 02:30:05', 1, 'QR-a673a40f-4bc0-4efa-b939-1bcb49599004', NULL, 1),
+(210, 312, 38, NULL, 'BD-V3-PTE-10-07-02', '35', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:30:05', '2025-10-27 02:30:05', 1, 'QR-c6954560-691f-4fd4-bf34-78a8eea049e2', NULL, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `serie_recurso_codigo`
+--
+
+CREATE TABLE `serie_recurso_codigo` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `id_recurso` int(10) UNSIGNED NOT NULL,
+  `version` smallint(6) NOT NULL,
+  `anio` smallint(6) NOT NULL,
+  `lote` smallint(6) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `codigo_base` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `serie_recurso_codigo`
+--
+
+INSERT INTO `serie_recurso_codigo` (`id`, `id_recurso`, `version`, `anio`, `lote`, `created_at`, `updated_at`, `codigo_base`) VALUES
+(1, 4, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'CMP-V1-CN-25-01'),
+(2, 6, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'TX-V1-TR-25-01'),
+(3, 8, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'S-V1-AA-25-01'),
+(4, 9, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'CDP-V1-N-25-01'),
+(5, 10, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'T-V1-.-25-01'),
+(6, 301, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'CA-V1-CDSTA-25-01'),
+(7, 302, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'CB-V1-CDSTB-25-01'),
+(8, 303, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'CR-V1-AV-25-01'),
+(9, 304, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'CT-V1-PCF-25-01'),
+(10, 305, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'AB-V1-PTEA-25-01'),
+(11, 306, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'ADA-V1-MS-25-01'),
+(12, 307, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'GDC-V1-RAC-25-01'),
+(13, 308, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'GT-V1-PBT-25-01'),
+(14, 309, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'LT-V1-POB-25-01'),
+(15, 310, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'LP-V1-PSYO-25-01'),
+(16, 311, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'BCPDA-V1-SI-25-01'),
+(17, 312, 1, 2025, 1, '2025-10-27 00:02:58', '2025-10-27 00:02:58', 'BD-V1-PTE-25-01'),
+(32, 4, 4, 2004, 4, '2025-10-27 04:52:57', '2025-10-27 04:52:57', 'CMP-V4-CN-04-04'),
+(33, 306, 3, 2003, 3, '2025-10-27 04:56:03', '2025-10-27 04:56:03', 'ADA-V3-MS-03-03'),
+(34, 305, 4, 2010, 4, '2025-10-27 05:06:29', '2025-10-27 05:06:29', 'AB-V4-PTEA-10-04'),
+(35, 311, 5, 2005, 5, '2025-10-27 05:09:41', '2025-10-27 05:09:41', 'BCPDA-V5-SI-05-05'),
+(36, 303, 2, 2002, 2, '2025-10-27 05:14:54', '2025-10-27 05:14:54', 'CR-V2-AV-02-02'),
+(37, 312, 6, 2006, 6, '2025-10-27 05:27:44', '2025-10-27 05:27:44', 'BD-V6-PTE-06-06'),
+(38, 312, 3, 2010, 7, '2025-10-27 05:30:05', '2025-10-27 05:30:05', 'BD-V3-PTE-10-07');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `sessions`
+--
+
+CREATE TABLE `sessions` (
+  `id` varchar(255) NOT NULL,
+  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `payload` longtext NOT NULL,
+  `last_activity` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `stock`
+--
+
+CREATE TABLE `stock` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_recurso` int(10) UNSIGNED NOT NULL,
+  `id_serie_recurso` int(10) UNSIGNED DEFAULT NULL,
+  `id_estado_recurso` int(10) UNSIGNED NOT NULL,
+  `id_usuario` int(10) UNSIGNED DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `stock`
+--
+
+INSERT INTO `stock` (`id`, `id_recurso`, `id_serie_recurso`, `id_estado_recurso`, `id_usuario`) VALUES
+(1, 10, 20, 3, 8),
+(2, 10, 25, 3, 8),
+(3, 10, 19, 1, 5),
+(4, 10, 23, 3, 8),
+(5, 9, 13, 3, 8),
+(6, 9, 15, 1, 5),
+(7, 9, 17, 3, 23),
+(8, 9, 14, 3, 14),
+(9, 10, 21, 1, 5),
+(10, 10, 24, 1, NULL),
+(11, 10, 22, 3, 8),
+(12, 10, 18, 1, 5),
+(13, 9, 16, 3, 8),
+(14, 8, 12, 3, 8),
+(15, 8, 11, 1, 5),
+(16, 6, 7, 3, 28),
+(17, 8, 10, 3, 8),
+(18, 6, 41, 3, 8),
+(19, 4, 49, 3, 8),
+(20, 6, 9, 3, 8),
+(21, 6, 8, 3, 8),
+(22, 4, 45, 3, 8),
+(23, 4, 50, 1, NULL),
+(24, 4, 38, 3, 14),
+(25, 4, 43, 3, 28),
+(26, 4, 36, 3, 8),
+(27, 4, 46, 3, 26);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `subcategoria`
+--
+
+CREATE TABLE `subcategoria` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `categoria_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `subcategoria`
+--
+
+INSERT INTO `subcategoria` (`id`, `nombre`, `categoria_id`) VALUES
+(1, 'Martillo', 2),
+(2, 'Chaleco', 1),
+(3, 'Test', 1),
+(4, 'Casco', 1),
+(5, 'Arnes', 1),
+(6, 'Taladro', 2),
+(7, 'guantes', 1),
+(8, 'lentes', 1),
+(9, 'botas', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `talle`
+--
+
+CREATE TABLE `talle` (
+  `id` smallint(5) UNSIGNED NOT NULL,
+  `tipo` enum('ropa','calzado','otro') DEFAULT 'otro',
+  `nombre` varchar(32) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `talle`
+--
+
+INSERT INTO `talle` (`id`, `tipo`, `nombre`) VALUES
+(7, 'ropa', '3XL'),
+(8, 'ropa', '4XL'),
+(4, 'ropa', 'L'),
+(3, 'ropa', 'M'),
+(2, 'ropa', 'S'),
+(5, 'ropa', 'XL'),
+(1, 'ropa', 'XS'),
+(6, 'ropa', 'XXL'),
+(9, 'calzado', '35'),
+(10, 'calzado', '36'),
+(11, 'calzado', '37'),
+(12, 'calzado', '38'),
+(13, 'calzado', '39'),
+(14, 'calzado', '40'),
+(15, 'calzado', '41'),
+(16, 'calzado', '42'),
+(17, 'calzado', '43'),
+(18, 'calzado', '44'),
+(19, 'calzado', '45'),
+(20, 'calzado', '46'),
+(22, 'otro', 'Adulto'),
+(23, 'otro', 'Grande'),
+(21, 'otro', 'Único');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tareas_diarias`
+--
+
+CREATE TABLE `tareas_diarias` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `trabajador_id` int(10) UNSIGNED NOT NULL,
+  `fecha` date NOT NULL,
+  `requiere_altura` tinyint(1) NOT NULL DEFAULT 0,
+  `asignado_por` int(10) UNSIGNED NOT NULL,
+  `observaciones` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `users`
+--
+
+CREATE TABLE `users` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `id_rol` bigint(20) UNSIGNED DEFAULT NULL,
+  `usuario_creacion` bigint(20) UNSIGNED DEFAULT NULL,
+  `usuario_modificacion` bigint(20) UNSIGNED DEFAULT NULL,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `ultimo_acceso` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuario`
+--
+
+CREATE TABLE `usuario` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_rol` int(10) UNSIGNED NOT NULL COMMENT 'rol del usuario, clave foranea',
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `usuario_creacion` int(10) UNSIGNED DEFAULT NULL,
+  `usuario_modificacion` int(10) UNSIGNED DEFAULT NULL,
+  `ultimo_acceso` datetime DEFAULT NULL,
+  `id_estado` int(10) DEFAULT NULL,
+  `fecha_nacimiento` datetime DEFAULT NULL,
+  `dni` varchar(15) DEFAULT NULL,
+  `telefono` varchar(30) DEFAULT NULL,
+  `nro_legajo` int(11) DEFAULT NULL,
+  `auth_key` varchar(255) DEFAULT NULL,
+  `access_token` varchar(255) DEFAULT NULL,
+  `codigo_qr` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+
+--
+-- Volcado de datos para la tabla `usuario`
+--
+
+INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`, `updated_at`, `usuario_creacion`, `usuario_modificacion`, `ultimo_acceso`, `id_estado`, `fecha_nacimiento`, `dni`, `telefono`, `nro_legajo`, `auth_key`, `access_token`, `codigo_qr`) VALUES
+(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-26 19:31:00', NULL, NULL, '2025-10-26 19:31:00', 1, NULL, '16', NULL, NULL, NULL, NULL, 'USR-722c6a13-ad73-11f0-a94d-00e070eec074'),
+(6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-13 18:29:09', 5, 5, '2025-10-11 15:18:10', 2, NULL, '2', NULL, NULL, NULL, NULL, 'USR-722c8102-ad73-11f0-a94d-00e070eec074'),
+(7, 3, 'trabajador', 'trabajador@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-13 18:19:12', 5, 5, '2025-10-03 21:44:20', 1, NULL, '4', NULL, NULL, NULL, NULL, 'USR-722c823c-ad73-11f0-a94d-00e070eec074'),
+(8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-17 02:15:53', 5, 5, '2025-10-17 02:15:53', 1, NULL, '1', NULL, NULL, NULL, NULL, 'USR-722c830f-ad73-11f0-a94d-00e070eec074'),
+(9, 3, 'Tuti', 'hola@gmail.com', '$2y$12$gsTfJ1SvZv23pMdPvMoPyevF1mU06rGVAXaXaH/mFLxGP7Jj3ltbO', '2025-10-04 02:04:56', '2025-10-12 23:06:57', 5, 5, '2025-10-04 02:04:56', 2, NULL, '5', NULL, NULL, NULL, NULL, 'USR-722c83a6-ad73-11f0-a94d-00e070eec074'),
+(10, 3, 'userprueba', 'user@gmail.com', '$2y$12$StRvDRhkkWWjZFSQgzmjcOueFq5mh2QXU5eV1RixsfqnScflf3vV.', '2025-10-04 02:07:02', '2025-10-13 18:43:35', 5, 5, '2025-10-04 02:07:02', 2, NULL, '6', NULL, NULL, NULL, NULL, 'USR-722c8504-ad73-11f0-a94d-00e070eec074'),
+(11, 2, 'user2', 'user2@gmail.com', '$2y$12$SRAh1tdXbYlz8o64bcx/muoTzwWpW9fbaXBpDr4N7InI8fOamUHBi', '2025-10-04 02:08:49', '2025-10-04 02:08:49', 5, 5, '2025-10-04 02:08:49', 2, NULL, '7', NULL, NULL, NULL, NULL, 'USR-722c8584-ad73-11f0-a94d-00e070eec074'),
+(12, 2, 'aaaa3', 'eee@gmail.com', '$2y$12$6PXfvfB4iNUZpnE.DV.gd.tgzhEEjO4zUjSx0KM8zpf6o.fYQ0Yem', '2025-10-04 02:09:24', '2025-10-13 18:31:44', 5, 5, '2025-10-04 02:09:24', 2, NULL, '9', NULL, NULL, NULL, NULL, 'USR-722cc890-ad73-11f0-a94d-00e070eec074'),
+(13, 1, 'miki', 'miki@gmail.com', '$2y$12$34yPOTEHJiOkR/XO5H4q1eq1t9LHam0HyNt8T9kH65HuwrrwdF0Yu', '2025-10-04 02:13:01', '2025-10-13 18:55:55', 5, 5, '2025-10-04 02:13:01', 3, NULL, '10', NULL, NULL, NULL, NULL, 'USR-722cca7d-ad73-11f0-a94d-00e070eec074'),
+(14, 3, 'mimi', 'mimi@gmail.com', '$2y$12$AqMIKF5KyQt0EuMwAVYKtOfnog5xPuZi9pz1i.duy8X4REbhmzfza', '2025-10-04 02:15:12', '2025-10-13 21:14:32', 5, 5, '2025-10-04 02:15:12', 1, NULL, '3', NULL, NULL, NULL, NULL, 'USR-722ccb66-ad73-11f0-a94d-00e070eec074'),
+(19, 1, 'test13-10', 'test13@empresa.com', '$2y$12$yOiNgGpcZYCJ.gRcjqxKeuKQbncs.ydJIh2EXBlSNHO0AbogJvmr.', '2025-10-13 19:49:08', '2025-10-13 22:56:25', 5, 5, '2025-10-13 19:49:08', 2, NULL, '15', NULL, NULL, NULL, NULL, 'USR-722ccc31-ad73-11f0-a94d-00e070eec074'),
+(20, 2, 'test15', 'test15@empresa.com', '$2y$12$eljJDNiHnzO5ubrXtoZOsekSgNUICJC00GrK8tyEmUE0S2DxD93k2', '2025-10-13 19:50:06', '2025-10-13 22:42:54', 5, 5, '2025-10-13 19:50:06', 2, NULL, '13', NULL, NULL, NULL, NULL, 'USR-722cccfa-ad73-11f0-a94d-00e070eec074'),
+(21, 2, 'gestion8', 'gestion66@empresa.com', '$2y$12$doXQ8vbMZSPWEXgsz8G/G.AkfQ/Xpq.oof09wyHZdjvzQLaGTy.0i', '2025-10-13 20:10:36', '2025-10-13 22:40:32', 5, 5, '2025-10-13 20:10:36', 2, NULL, '11', NULL, NULL, NULL, NULL, 'USR-722ccdbe-ad73-11f0-a94d-00e070eec074'),
+(22, 1, 'Jaun', 'r@gmail.com', '$2y$12$Bc4NsElMD8hJUx0eEbgZi.oa.EwU2vEuFzl7CixDZR3tgQw4k15eO', '2025-10-14 17:17:03', '2025-10-14 17:17:03', 5, 5, '2025-10-14 17:17:03', 3, NULL, '14', NULL, NULL, NULL, NULL, 'USR-722cce74-ad73-11f0-a94d-00e070eec074'),
+(23, 3, 'Jaun288', 'jaun6@empresa.com', '$2y$12$L9.YD/HxvdZ2TF2bBwucBunV2e58j4Q4x3Bb9skIdN4o9MBGa48pu', '2025-10-14 17:17:47', '2025-10-14 17:20:49', 5, 5, '2025-10-14 17:17:47', 1, NULL, '12', NULL, NULL, NULL, NULL, 'USR-722ccf2d-ad73-11f0-a94d-00e070eec074'),
+(24, 3, 'Hernesto', 'Hernesto@empresa.com', '$2y$12$//y/nkrr7bNUYL8rUxVqR.ZTmd49srApQXs4EhTaes9pS6tMGPAEm', '2025-10-14 17:26:03', '2025-10-14 17:26:03', 5, 5, '2025-10-14 17:26:03', 3, NULL, '17', NULL, NULL, NULL, NULL, 'USR-722ccff0-ad73-11f0-a94d-00e070eec074'),
+(26, 3, 'testqr2', 'testQr2@empresa.com', '$2y$12$8hKNYGv2kKwLeBoRfuMYKOE.ISJFDrfxq5FiHWkowYAlHXHj/An/.', '2025-10-20 07:03:30', '2025-10-20 07:04:44', 5, 5, '2025-10-20 07:03:30', 1, NULL, '999', NULL, NULL, NULL, NULL, 'USR-cc126312-73d8-4c7c-98ab-3fd54eebe2e8'),
+(27, 3, 'testqr3', 'testQr3@empresa.com', '$2y$12$5RE/QFYnmGkhLX2h4aOdpuXthJBIzPW5SbuVhIYv13ODKgJE8/kaa', '2025-10-20 07:06:08', '2025-10-20 07:06:08', 5, 5, '2025-10-20 07:06:08', 3, NULL, '9999', NULL, NULL, NULL, NULL, 'USR-ebb10c71-fb9b-42a8-863b-290d4cbf5398'),
+(28, 3, 'Micaelita', 'micaelita@gmail.com', '$2y$12$ECR7zv8MhgzTxD04gClUB.1opI58Qa7HjUNKqsyeEdBM6f8/hC91m', '2025-10-20 16:35:27', '2025-10-20 16:40:48', 5, 5, '2025-10-20 16:35:26', 1, NULL, '77894879', NULL, NULL, NULL, NULL, 'USR-3db5a98c-27aa-4637-a70e-a6d4d580543d'),
+(29, 2, 'Anabelita', 'anabelita@gmail.com', '$2y$12$WMu9093DUE.q9AAcxQoqkO9U/DhJFU7TDCPqhar10U8/M5F97eRKO', '2025-10-20 16:36:03', '2025-10-20 16:43:17', 5, 5, '2025-10-20 16:36:03', 1, NULL, '89784521', NULL, NULL, NULL, NULL, 'USR-35214c6b-b0a0-48bb-88b5-198f7a13ffdb'),
+(30, 1, 'Maita', 'maita@gmail.com', '$2y$12$oPN2RoIi9zLAlYHPgYh21u7AOKzqFETq6CcKXMtXpEv3I99vgrwDW', '2025-10-20 16:36:39', '2025-10-20 16:36:39', 5, 5, '2025-10-20 16:36:39', 3, NULL, '87945621', NULL, NULL, NULL, NULL, 'USR-32398859-3d75-4fca-ba52-a310f48a3a46');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuario_recurso`
+--
+
+CREATE TABLE `usuario_recurso` (
+  `id` int(10) NOT NULL,
+  `id_usuario` int(10) NOT NULL,
+  `id_recurso` int(10) NOT NULL,
+  `id_serie_recurso` int(10) UNSIGNED DEFAULT NULL,
+  `fecha_asignacion` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `usuario_recurso`
+--
+
+INSERT INTO `usuario_recurso` (`id`, `id_usuario`, `id_recurso`, `id_serie_recurso`, `fecha_asignacion`) VALUES
+(1, 24, 301, 52, '2025-10-22 00:00:00'),
+(2, 24, 307, 58, '2025-10-22 00:00:00'),
+(3, 24, 309, 60, '2025-10-22 00:00:00'),
+(4, 24, 311, 62, '2025-10-22 00:00:00'),
+(5, 24, 4, 48, '2025-10-22 00:00:00'),
+(6, 24, 306, 57, '2025-10-22 00:00:00'),
+(7, 27, 302, 53, '2025-10-22 00:00:00'),
+(8, 27, 308, 59, '2025-10-22 00:00:00'),
+(9, 27, 310, 61, '2025-10-22 00:00:00'),
+(10, 27, 312, 63, '2025-10-22 00:00:00'),
+(11, 27, 4, 50, '2025-10-22 00:00:00'),
+(12, 27, 305, 56, '2025-10-22 00:00:00');
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `cache`
+--
+ALTER TABLE `cache`
+  ADD PRIMARY KEY (`key`);
+
+--
+-- Indices de la tabla `cache_locks`
+--
+ALTER TABLE `cache_locks`
+  ADD PRIMARY KEY (`key`);
+
+--
+-- Indices de la tabla `categoria`
+--
+ALTER TABLE `categoria`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `checklist`
+--
+ALTER TABLE `checklist`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `color`
+--
+ALTER TABLE `color`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre` (`nombre`);
+
+--
+-- Indices de la tabla `detalle_prestamo`
+--
+ALTER TABLE `detalle_prestamo`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_prestamo` (`id_prestamo`),
+  ADD KEY `id_serie` (`id_serie`),
+  ADD KEY `id_recurso` (`id_recurso`),
+  ADD KEY `fk_detalle_estado_prestamo` (`id_estado_prestamo`);
+
+--
+-- Indices de la tabla `estado`
+--
+ALTER TABLE `estado`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `estado_incidente`
+--
+ALTER TABLE `estado_incidente`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre_estado` (`nombre_estado`);
+
+--
+-- Indices de la tabla `estado_prestamo`
+--
+ALTER TABLE `estado_prestamo`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `estado_usuario`
+--
+ALTER TABLE `estado_usuario`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `failed_jobs`
+--
+ALTER TABLE `failed_jobs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
+
+--
+-- Indices de la tabla `incidente`
+--
+ALTER TABLE `incidente`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_recurso` (`id_recurso`),
+  ADD KEY `id_supervisor` (`id_supervisor`),
+  ADD KEY `id_incidente_detalle` (`id_incidente_detalle`),
+  ADD KEY `id_usuario_creacion` (`id_usuario_creacion`),
+  ADD KEY `id_usuario_modificacion` (`id_usuario_modificacion`),
+  ADD KEY `fk_incidente_trabajador` (`id_trabajador`),
+  ADD KEY `fk_incidente_serie` (`id_serie_recurso`);
+
+--
+-- Indices de la tabla `incidente_detalle`
+--
+ALTER TABLE `incidente_detalle`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_incidente` (`id_incidente`),
+  ADD KEY `id_serie` (`id_serie`);
+
+--
+-- Indices de la tabla `incidente_recurso`
+--
+ALTER TABLE `incidente_recurso`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_incidente` (`id_incidente`),
+  ADD KEY `id_recurso` (`id_recurso`),
+  ADD KEY `id_serie_recurso` (`id_serie_recurso`);
+
+--
+-- Indices de la tabla `jobs`
+--
+ALTER TABLE `jobs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `jobs_queue_index` (`queue`);
+
+--
+-- Indices de la tabla `job_batches`
+--
+ALTER TABLE `job_batches`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `migrations`
+--
+ALTER TABLE `migrations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD PRIMARY KEY (`email`);
+
+--
+-- Indices de la tabla `prestamo`
+--
+ALTER TABLE `prestamo`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_usuario_creacion` (`id_usuario_creacion`),
+  ADD KEY `id_usuario_modificacion` (`id_usuario_modificacion`);
+
+--
+-- Indices de la tabla `recurso`
+--
+ALTER TABLE `recurso`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_incidente_detalle` (`id_incidente_detalle`),
+  ADD KEY `id_usuario_creacion` (`id_usuario_creacion`),
+  ADD KEY `id_usuario_modificacion` (`id_usuario_modificacion`),
+  ADD KEY `fk_subcategoria` (`id_subcategoria`);
+
+--
+-- Indices de la tabla `rol`
+--
+ALTER TABLE `rol`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `serie_recurso`
+--
+ALTER TABLE `serie_recurso`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `codigo_qr` (`codigo_qr`),
+  ADD UNIQUE KEY `codigo_qr_2` (`codigo_qr`),
+  ADD KEY `id_recurso` (`id_recurso`),
+  ADD KEY `id_incidente_detalle` (`id_incidente_detalle`),
+  ADD KEY `index_estado` (`id_estado`),
+  ADD KEY `fk_serie_color` (`id_color`),
+  ADD KEY `ix_codigo_correlativo` (`id_serie_recurso_codigo`,`id_color`,`id_talle`,`correlativo`),
+  ADD KEY `fk_serie_talle` (`id_talle`);
+
+--
+-- Indices de la tabla `serie_recurso_codigo`
+--
+ALTER TABLE `serie_recurso_codigo`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ux_recurso_version_anio_lote` (`id_recurso`,`version`,`anio`,`lote`);
+
+--
+-- Indices de la tabla `sessions`
+--
+ALTER TABLE `sessions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sessions_user_id_index` (`user_id`),
+  ADD KEY `sessions_last_activity_index` (`last_activity`);
+
+--
+-- Indices de la tabla `stock`
+--
+ALTER TABLE `stock`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_recurso` (`id_recurso`),
+  ADD KEY `idx_serie_recurso` (`id_serie_recurso`),
+  ADD KEY `idx_estado_recurso` (`id_estado_recurso`);
+
+--
+-- Indices de la tabla `subcategoria`
+--
+ALTER TABLE `subcategoria`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `index_subcategoria` (`categoria_id`);
+
+--
+-- Indices de la tabla `talle`
+--
+ALTER TABLE `talle`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ux_talle_tipo_nombre` (`tipo`,`nombre`);
+
+--
+-- Indices de la tabla `tareas_diarias`
+--
+ALTER TABLE `tareas_diarias`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `trabajador_id` (`trabajador_id`),
+  ADD KEY `asignado_por` (`asignado_por`);
+
+--
+-- Indices de la tabla `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `users_email_unique` (`email`);
+
+--
+-- Indices de la tabla `usuario`
+--
+ALTER TABLE `usuario`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `dni_unique` (`dni`),
+  ADD UNIQUE KEY `legajo_unique` (`nro_legajo`),
+  ADD UNIQUE KEY `codigo_qr` (`codigo_qr`),
+  ADD KEY `id_rol` (`id_rol`),
+  ADD KEY `idx_usuario_creacion` (`usuario_creacion`),
+  ADD KEY `idx_usuario_modificacion` (`usuario_modificacion`),
+  ADD KEY `id_estado` (`id_estado`);
+
+--
+-- Indices de la tabla `usuario_recurso`
+--
+ALTER TABLE `usuario_recurso`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `index_usuario` (`id_usuario`,`id_recurso`),
+  ADD KEY `fk_usuario_recurso_serie` (`id_serie_recurso`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `checklist`
+--
+ALTER TABLE `checklist`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT de la tabla `color`
+--
+ALTER TABLE `color`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de la tabla `detalle_prestamo`
+--
+ALTER TABLE `detalle_prestamo`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+
+--
+-- AUTO_INCREMENT de la tabla `estado_incidente`
+--
+ALTER TABLE `estado_incidente`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `estado_prestamo`
+--
+ALTER TABLE `estado_prestamo`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `estado_usuario`
+--
+ALTER TABLE `estado_usuario`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `failed_jobs`
+--
+ALTER TABLE `failed_jobs`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `incidente`
+--
+ALTER TABLE `incidente`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+
+--
+-- AUTO_INCREMENT de la tabla `incidente_recurso`
+--
+ALTER TABLE `incidente_recurso`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT de la tabla `jobs`
+--
+ALTER TABLE `jobs`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `migrations`
+--
+ALTER TABLE `migrations`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `prestamo`
+--
+ALTER TABLE `prestamo`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+
+--
+-- AUTO_INCREMENT de la tabla `recurso`
+--
+ALTER TABLE `recurso`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=313;
+
+--
+-- AUTO_INCREMENT de la tabla `serie_recurso`
+--
+ALTER TABLE `serie_recurso`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=211;
+
+--
+-- AUTO_INCREMENT de la tabla `serie_recurso_codigo`
+--
+ALTER TABLE `serie_recurso_codigo`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+
+--
+-- AUTO_INCREMENT de la tabla `stock`
+--
+ALTER TABLE `stock`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+
+--
+-- AUTO_INCREMENT de la tabla `subcategoria`
+--
+ALTER TABLE `subcategoria`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT de la tabla `talle`
+--
+ALTER TABLE `talle`
+  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+
+--
+-- AUTO_INCREMENT de la tabla `tareas_diarias`
+--
+ALTER TABLE `tareas_diarias`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `usuario`
+--
+ALTER TABLE `usuario`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT de la tabla `usuario_recurso`
+--
+ALTER TABLE `usuario_recurso`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `detalle_prestamo`
+--
+ALTER TABLE `detalle_prestamo`
+  ADD CONSTRAINT `detalle_prestamo_ibfk_1` FOREIGN KEY (`id_prestamo`) REFERENCES `prestamo` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `detalle_prestamo_ibfk_2` FOREIGN KEY (`id_serie`) REFERENCES `serie_recurso` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `detalle_prestamo_ibfk_3` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_detalle_estado_prestamo` FOREIGN KEY (`id_estado_prestamo`) REFERENCES `estado_prestamo` (`id`);
+
+--
+-- Filtros para la tabla `incidente`
+--
+ALTER TABLE `incidente`
+  ADD CONSTRAINT `fk_incidente_serie` FOREIGN KEY (`id_serie_recurso`) REFERENCES `serie_recurso` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_incidente_trabajador` FOREIGN KEY (`id_trabajador`) REFERENCES `usuario` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_incidente_usuario_creacion` FOREIGN KEY (`id_usuario_creacion`) REFERENCES `usuario` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_incidente_usuario_modificacion` FOREIGN KEY (`id_usuario_modificacion`) REFERENCES `usuario` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `incidente_ibfk_1` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `incidente_ibfk_2` FOREIGN KEY (`id_incidente_detalle`) REFERENCES `incidente_detalle` (`id`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `incidente_recurso`
+--
+ALTER TABLE `incidente_recurso`
+  ADD CONSTRAINT `incidente_recurso_ibfk_1` FOREIGN KEY (`id_incidente`) REFERENCES `incidente` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `incidente_recurso_ibfk_2` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `incidente_recurso_ibfk_3` FOREIGN KEY (`id_serie_recurso`) REFERENCES `serie_recurso` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `prestamo`
+--
+ALTER TABLE `prestamo`
+  ADD CONSTRAINT `fk_prestamo_usuario_creacion` FOREIGN KEY (`id_usuario_creacion`) REFERENCES `usuario` (`id`),
+  ADD CONSTRAINT `fk_prestamo_usuario_modificacion` FOREIGN KEY (`id_usuario_modificacion`) REFERENCES `usuario` (`id`);
+
+--
+-- Filtros para la tabla `serie_recurso`
+--
+ALTER TABLE `serie_recurso`
+  ADD CONSTRAINT `fk_serie_codigo` FOREIGN KEY (`id_serie_recurso_codigo`) REFERENCES `serie_recurso_codigo` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_serie_color` FOREIGN KEY (`id_color`) REFERENCES `color` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_serie_talle` FOREIGN KEY (`id_talle`) REFERENCES `talle` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `serie_recurso_codigo`
+--
+ALTER TABLE `serie_recurso_codigo`
+  ADD CONSTRAINT `fk_src_recurso` FOREIGN KEY (`id_recurso`) REFERENCES `recurso` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `subcategoria`
+--
+ALTER TABLE `subcategoria`
+  ADD CONSTRAINT `fk_subcategoria_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `categoria` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `tareas_diarias`
+--
+ALTER TABLE `tareas_diarias`
+  ADD CONSTRAINT `tareas_diarias_ibfk_1` FOREIGN KEY (`trabajador_id`) REFERENCES `usuario` (`id`),
+  ADD CONSTRAINT `tareas_diarias_ibfk_2` FOREIGN KEY (`asignado_por`) REFERENCES `usuario` (`id`);
+
+--
+-- Filtros para la tabla `usuario_recurso`
+--
+ALTER TABLE `usuario_recurso`
+  ADD CONSTRAINT `fk_usuario_recurso_serie` FOREIGN KEY (`id_serie_recurso`) REFERENCES `serie_recurso` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

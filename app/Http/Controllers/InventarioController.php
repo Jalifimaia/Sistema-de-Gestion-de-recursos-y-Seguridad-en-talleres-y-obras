@@ -14,7 +14,7 @@ class InventarioController extends Controller
 
     public function index()
     {
-        $recursos = Recurso::with(['serieRecursos', 'subcategoria.categoria'])->get();
+        $recursos = Recurso::with(['serieRecursos.codigo', 'subcategoria.categoria'])->get();
 
         $herramientasTotales = DB::table('serie_recurso')
             ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
