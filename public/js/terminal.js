@@ -70,23 +70,18 @@ function safeStartRecognitionGlobal() {
 let scanner;
 let isScanning = false; // 👈 flag de estado
 
-// helper simple para detectar "volver" en variantes
 function esComandoVolver(limpio) {
   if (!limpio) return false;
   const s = normalizarTexto(String(limpio)).trim();
 
-  // coincidencias exactas o palabra dentro de frase (más tolerante)
-  if (/^(volver)$/.test(s)) return true;
-  if (/\b(volver)\b/.test(s)) return true;
-
-  // tolerancia a prefijos/partículas comunes: "a volver", "en volver", "ir a volver", "voy a volver"
-  if (/(?:\b(?:a|en|ir a|voy a|por favor)\b).*?\b(volver)\b/.test(s)) return true;
-
-  // catch common ASR partials like "volver a", "volver por", "vuelve" etc
-  //if (/\b(volver)\b/.test(s)) return true;
-
-  return false;
+  return (
+    s === 'volver' ||
+    s === 'opcion volver' ||
+    /\bvolver\b/.test(s) ||
+    /\bopcion volver\b/.test(s)
+  );
 }
+
 
 
 
@@ -171,6 +166,18 @@ function nextStep(n) {
   // Acciones específicas por step
   if (n === 2) cargarMenuPrincipal();
   if (n === 5) window.cargarCategorias();
+
+  // Reiniciar reconocimiento global al cambiar de step
+try {
+  safeStopRecognitionGlobal();
+  setTimeout(() => {
+    safeStartRecognitionGlobal();
+    console.log('🎤 Reconocimiento reiniciado tras cambio de step');
+  }, 300); // pequeño delay para evitar conflictos
+} catch (e) {
+  console.warn('⚠️ No se pudo reiniciar reconocimiento tras cambio de step', e);
+}
+
 }
 
 
@@ -2226,31 +2233,37 @@ if (modalVisible) {
 
   // === Step5: Categorías ===
   else if (step === 'step5') {
-    if (matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
-      window.mostrarMensajeKiosco(
-        step5ReturnTarget === 3
-          ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"'
-          : '🎤 Comando reconocido: Volver al menú principal',
-        'success'
-      );
-      window.nextStep(step5ReturnTarget);
-      return;
-    }
-
-    const botonesCat = document.querySelectorAll('#categoria-buttons button');
-    botonesCat.forEach((btn, index) => {
-      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-        btn.click();
-      }
-    });
-
-    console.log("⚠️ Step5: Procesada entrada (si hubo coincidencias)");
+  // ✅ Priorizar comando "volver" antes de evaluar botones
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
+    window.mostrarMensajeKiosco(
+      step5ReturnTarget === 3
+        ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"'
+        : '🎤 Comando reconocido: Volver al menú principal',
+      'success'
+    );
+    window.nextStep(step5ReturnTarget);
     return;
   }
 
+  // ✅ Solo si no fue "volver", evaluar botones
+  const botonesCat = document.querySelectorAll('#categoria-buttons button');
+  for (let i = 0; i < botonesCat.length; i++) {
+    const btn = botonesCat[i];
+    if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) {
+      btn.click();
+      return;
+    }
+  }
+
+  console.log("⚠️ Step5: Procesada entrada (si hubo coincidencias)");
+  return;
+}
+
+
+
   // === Step6: Subcategorías ===
 else if (step === 'step6') {
-  // --- Primer chequeo: paginación por voz en subcategorías ---
+  // --- Paginación por voz ---
   const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
   if (matchPaginaSub && Array.isArray(window.subcategoriasActuales)) {
     const token = matchPaginaSub[1];
@@ -2260,7 +2273,6 @@ else if (step === 'step6') {
       const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
       if (numero > totalPaginas) {
         window.mostrarMensajeKiosco('Número de página inválido', 'warning');
-        console.log('⚠ Número de página inválido para subcategorías', numero, '>', totalPaginas);
         return;
       }
       renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
@@ -2268,29 +2280,28 @@ else if (step === 'step6') {
     }
   }
 
-  // --- Interceptar "volver" antes de analizar botones por texto ---
-  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+  // ✅ Priorizar "volver" antes de evaluar botones
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
     window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success');
     console.log('🎤 Comando reconocido: Volver a categorías');
     window.nextStep(5);
     return;
   }
 
-  // --- luego el bucle de botones (selección por opción o por texto) ---
+  // ✅ Evaluar botones solo si no fue "volver"
   const botonesSub = document.querySelectorAll('#subcategoria-buttons button');
-  botonesSub.forEach((btn, index) => {
-    try {
-      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-        btn.click();
-      }
-    } catch (e) {
-      console.warn('Error al procesar botón subcategoría', e);
+  for (let i = 0; i < botonesSub.length; i++) {
+    const btn = botonesSub[i];
+    if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) {
+      btn.click();
+      return;
     }
-  });
+  }
 
   console.log("⚠️ Step6: Procesada entrada (si hubo coincidencias)");
   return;
 }
+
 
 // === Step7: Recursos ===
 else if (step === 'step7') {
