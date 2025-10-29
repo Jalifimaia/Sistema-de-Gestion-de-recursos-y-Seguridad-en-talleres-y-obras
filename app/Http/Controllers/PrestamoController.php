@@ -202,75 +202,90 @@ public function edit($id): View
 
 
     public function update(PrestamoRequest $request, $id)
-    {
-        $request->validate([
-            'id_trabajador' => 'required|integer|exists:usuario,id',
-            'fecha_prestamo' => 'required|date',
-            'fecha_devolucion' => 'nullable|date|after_or_equal:fecha_prestamo',
-            'series' => 'nullable|array',
-            'series.*' => 'integer|exists:serie_recurso,id',
+{
+    $request->validate([
+        'id_trabajador' => 'required|integer|exists:usuario,id',
+        'fecha_prestamo' => 'required|date',
+        'fecha_devolucion' => 'nullable|date|after_or_equal:fecha_prestamo',
+        'series' => 'nullable|array',
+        'series.*' => 'integer|exists:serie_recurso,id',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        DB::table('prestamo')->where('id', $id)->update([
+            'id_usuario' => $request->id_trabajador,
+            'fecha_prestamo' => $request->fecha_prestamo,
+            'fecha_devolucion' => $request->fecha_devolucion,
+            'estado' => $request->estado,
+            'fecha_modificacion' => now(),
+            'id_usuario_modificacion' => Auth::id(),
         ]);
 
-        DB::beginTransaction();
-        try {
-            DB::table('prestamo')->where('id', $id)->update([
-                'id_usuario' => $request->id_trabajador,
-                'fecha_prestamo' => $request->fecha_prestamo,
-                'fecha_devolucion' => $request->fecha_devolucion,
-                'estado' => $request->estado,
-                'fecha_modificacion' => now(),
-                'id_usuario_modificacion' => Auth::id(),
-            ]);
+        // 🔄 Si el préstamo fue cancelado, liberar las series
+        if ($request->estado == 1) {
+            $detalles = DetallePrestamo::where('id_prestamo', $id)->get();
 
-            if ($request->filled('series')) {
-                $seriesExistentes = DetallePrestamo::where('id_prestamo', $id)->pluck('id_serie')->toArray();
+            foreach ($detalles as $detalle) {
+                SerieRecurso::where('id', $detalle->id_serie)->update(['id_estado' => 1]);
 
-                foreach ($request->series as $idSerie) {
-                    if (in_array($idSerie, $seriesExistentes)) {
-                        continue;
-                    }
-
-                    $serie = SerieRecurso::findOrFail($idSerie);
-
-                    $yaPrestada = DetallePrestamo::where('id_serie', $idSerie)
-                        ->where('id_estado_prestamo', 2)
-                        ->where('id_prestamo', '!=', $id)
-                        ->exists();
-
-                    if ($serie->id_estado != 1 || $yaPrestada) {
-                        throw new \Exception("La serie $serie->nro_serie no está disponible o ya está prestada.");
-                    }
-
-                    DetallePrestamo::create([
-                        'id_prestamo' => $id,
-                        'id_serie' => $idSerie,
-                        'id_recurso' => $serie->id_recurso,
-                        'id_estado_prestamo' => 2,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-
-                    $serie->update(['id_estado' => 3]);
-
-                    DB::table('stock')->updateOrInsert(
-                        ['id_serie_recurso' => $idSerie],
-                        [
-                            'id_recurso' => $serie->id_recurso,
-                            'id_estado_recurso' => 3,
-                            'id_usuario' => $request->id_trabajador,
-                        ]
-                    );
-                }
+                DB::table('stock')->where('id_serie_recurso', $detalle->id_serie)->update([
+                    'id_estado_recurso' => 1,
+                    'id_usuario' => null,
+                ]);
             }
-
-            DB::commit();
-            return redirect()->route('prestamos.index')->with('success', 'Préstamo actualizado correctamente.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al actualizar préstamo: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'No se pudo actualizar el préstamo. ' . $e->getMessage()]);
         }
+
+        if ($request->filled('series')) {
+            $seriesExistentes = DetallePrestamo::where('id_prestamo', $id)->pluck('id_serie')->toArray();
+
+            foreach ($request->series as $idSerie) {
+                if (in_array($idSerie, $seriesExistentes)) {
+                    continue;
+                }
+
+                $serie = SerieRecurso::findOrFail($idSerie);
+
+                $yaPrestada = DetallePrestamo::where('id_serie', $idSerie)
+                    ->where('id_estado_prestamo', 2)
+                    ->where('id_prestamo', '!=', $id)
+                    ->exists();
+
+                if ($serie->id_estado != 1 || $yaPrestada) {
+                    throw new \Exception("La serie $serie->nro_serie no está disponible o ya está prestada.");
+                }
+
+                DetallePrestamo::create([
+                    'id_prestamo' => $id,
+                    'id_serie' => $idSerie,
+                    'id_recurso' => $serie->id_recurso,
+                    'id_estado_prestamo' => 2,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $serie->update(['id_estado' => 3]);
+
+                DB::table('stock')->updateOrInsert(
+                    ['id_serie_recurso' => $idSerie],
+                    [
+                        'id_recurso' => $serie->id_recurso,
+                        'id_estado_recurso' => 3,
+                        'id_usuario' => $request->id_trabajador,
+                    ]
+                );
+            }
+        }
+
+        DB::commit();
+        return redirect()->route('prestamos.index')->with('success', 'Préstamo actualizado correctamente.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al actualizar préstamo: ' . $e->getMessage());
+        return back()->withErrors(['error' => 'No se pudo actualizar el préstamo. ' . $e->getMessage()]);
     }
+}
+
 
       public function devolver($id)
     {

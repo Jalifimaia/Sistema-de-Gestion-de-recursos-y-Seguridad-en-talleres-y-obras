@@ -117,7 +117,40 @@
 
     </div>
 
+  <!-- Paso 9: Devolución con escaneo QR -->
+    <div id="step9" class="step d-none">
+      <h3 class="mb-3 text-center">📦 Devolución de recurso</h3>
+      <p class="text-center">Muestre el QR del recurso con serie <strong id="serieEsperadaQR"></strong></p>
+
+      <!-- Contenedor del escáner QR -->
+      <div class="d-flex justify-content-center">
+        <div id="qr-reader-devolucion" style="width: 300px; height: 300px; margin: auto;"></div>
+
+      </div>
+
+      <!-- Indicador de cámara activa -->
+      <div id="texto-camara-activa-devolucion" class="text-muted text-center mt-2 d-none">📷 Cámara activa</div>
+
+      <!-- Botón para cancelar escaneo -->
+      <div class="text-center mt-2">
+        <button id="btn-cancelar-qr" class="btn btn-outline-secondary d-none" onclick="cancelarEscaneoQR()">Cancelar escaneo</button>
+      </div>
+
+      <!-- Feedback del QR -->
+      <div id="qrFeedback" class="mt-3 text-center fw-bold text-danger"></div>
+
+      <!-- Botones de acción -->
+      <div class="text-center mt-4">
+        <button id="btnConfirmarDevolucion" class="btn btn-success" disabled>✅ Confirmar devolución</button>
+        <button class="btn btn-secondary ms-2" onclick="volverARecursosAsignados()">Volver</button>
+      </div>
+    </div>
+
+
   </div>
+
+  
+
 
   <!-- Modal de recursos asignados -->
   <div class="modal fade" id="modalRecursos" tabindex="-1" aria-labelledby="modalRecursosLabel" aria-hidden="true">
@@ -203,24 +236,36 @@
     </div>
   </div>
 
-  <!-- Modal de confirmacion de devolucion -->
+  <!-- Modal de devolución con escaneo QR 
   <div class="modal fade" id="modalConfirmarDevolucion" tabindex="-1" aria-labelledby="modalConfirmarDevolucionLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalConfirmarDevolucionLabel">Confirmar devolución</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="modalConfirmarDevolucionBody">
-        ¿Confirmás que querés devolver este recurso?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btnCancelarDevolucion">Cancelar</button>
-        <button type="button" class="btn btn-danger" id="btnAceptarDevolucion">Aceptar</button>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalConfirmarDevolucionLabel">Confirmar devolución</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body text-center">
+          <p>Muestre el QR del recurso con serie <strong id="serieEsperadaQR"></strong></p>
+
+          < Escáner QR -
+          <div id="qr-reader" style="width: 250px; margin: auto;"></div>
+          <div id="texto-camara-activa" class="text-muted d-none">📷 Cámara activa</div>
+          <button id="btn-cancelar-qr" class="btn btn-outline-secondary d-none" onclick="cancelarEscaneoQR()">Cancelar escaneo</button>
+
+          <div id="qrFeedback" class="mt-3 text-danger fw-bold"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" id="btnAceptarDevolucion" disabled>Aceptar devolución</button>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+  </div>-->
+
+
+
 
 
 

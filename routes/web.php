@@ -57,16 +57,10 @@ Route::get('/reportes', function () {
 Route::prefix('terminal')->group(function () {
     Route::get('/', [KioskoController::class, 'index'])->name('terminal.index');
 
-    // Identificación de trabajador
     Route::post('/identificar', [KioskoController::class, 'identificarTrabajador']);
-
-    // Registro manual de préstamo (usa PrestamoService)
     Route::post('/registrar-manual', [KioskoController::class, 'registrarManual']);
-
-    // Solicitud genérica (placeholder)
     Route::post('/solicitar', [KioskoController::class, 'solicitarRecurso']);
 
-    // Flujo jerárquico real
     Route::get('/categorias', [KioskoController::class, 'getCategorias']);
     Route::get('/subcategorias/{categoriaId}', [KioskoController::class, 'getSubcategorias']);
     Route::get('/recursos/{subcategoriaId}', [KioskoController::class, 'getRecursos']);
@@ -74,19 +68,18 @@ Route::prefix('terminal')->group(function () {
     Route::get('/recursos-disponibles/{subcategoriaId}', [KioskoController::class, 'getRecursosConDisponibles']);
     Route::get('/subcategorias-disponibles/{categoriaId}', [KioskoController::class, 'getSubcategoriasConDisponibles']);
     Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
-
-    // Recursos asignados al usuario
     Route::get('/recursos-asignados/{usuarioId}', [KioskoController::class, 'recursosAsignados']);
 
-    // Devolución
-    Route::post('/devolver/{detalleId}', [KioskoController::class, 'devolverRecurso']);
+    // ✅ Devolución
+    Route::post('/validar-qr-devolucion', [PrestamoTerminalController::class, 'validarQRDevolucion']);
+    Route::post('/devolver/{detalleId}', [PrestamoTerminalController::class, 'devolverRecurso']);
+    Route::post('/devolver-recurso', [PrestamoTerminalController::class, 'devolverPorQR']);
 
-    // 🚀 Rutas oficiales de préstamos (PrestamoTerminalController)
-    Route::post('/prestamos/{id_usuario}', [PrestamoTerminalController::class, 'store'])
-        ->name('terminal.prestamos.store');
-
+    // 🚀 Préstamos
+    Route::post('/prestamos/{id_usuario}', [PrestamoTerminalController::class, 'store'])->name('terminal.prestamos.store');
     Route::post('/registrar-por-qr', [PrestamoTerminalController::class, 'registrarPorQR']);
 });
+
 /*
 | Rutas de Reportes de Recursos
 |--------------------------------------------------------------------------

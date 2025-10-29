@@ -153,10 +153,16 @@ function nextStep(n) {
     try { detenerEscaneoQR(); } catch (e) { /* no bloquear flujo por errores en stop */ }
   }
 
-  // Cambiar step activo con guardas
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  // Ocultar todos los steps
+  document.querySelectorAll('.step').forEach(s => {
+    s.classList.remove('active');
+    s.classList.add('d-none');
+  });
+
+  // Activar el step deseado
   const stepEl = document.getElementById('step' + n);
   if (stepEl && stepEl.classList) {
+    stepEl.classList.remove('d-none');
     stepEl.classList.add('active');
   } else {
     console.warn('nextStep: step element not found:', 'step' + n);
@@ -323,7 +329,7 @@ function mostrarRecursosAsignados(recursos, pagina = 1) {
       <span class="badge-opcion">Opción ${i + 1}</span>
       <span class="flex-grow-1 text-start">Devolver</span>
     `;
-    btn.onclick = () => mostrarModalConfirmarDevolucion(r.detalle_id, index + 1);
+    btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id);
 
     const html = `
       <div class="card-body">
@@ -442,7 +448,7 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
     btn.dataset.detalleId = r.detalle_id;
     btn.dataset.opcionIndex = index + 1;
     btn.innerHTML = `Opción ${index + 1}`;
-    btn.onclick = () => mostrarModalConfirmarDevolucion(r.detalle_id, index + 1);
+    btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id);
 
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -475,63 +481,35 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
 
 
 function devolverRecurso(detalleId) {
-  const id_usuario = localStorage.getItem('id_usuario');
-  if (!id_usuario) {
-    getRenderer('mostrarMensajeKiosco')('Sesión no válida. Iniciá sesión nuevamente.', 'warning');
-    return Promise.resolve({ success: false });
+  if (!confirm('¿Confirmás que querés devolver este recurso?')) {
+    return Promise.resolve({ success: false, reason: 'cancelled' });
   }
-
-  // Si confirmationByVoice fue seteado por el modal, lo respetamos; si viene de UI clic normal, confirmationByVoice será false/undefined
-  const byVoice = !!window.confirmationByVoice;
-  // limpiamos bandera para la próxima operación
-  window.confirmationByVoice = false;
-
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  const csrf = meta && meta.content ? meta.content : null;
-  const headers = {};
-  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
 
   return fetch(`/terminal/devolver/${detalleId}`, {
     method: 'POST',
-    headers
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    }
   })
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      if (data.success) {
-        getRenderer('mostrarMensajeKiosco')('✅ Recurso devuelto correctamente', 'success');
-        // recargar recursos y re-renderizar el modal/tab activo
-        return window.cargarRecursos().then(() => {
-          const tabEPP = document.getElementById('tab-epp');
-          const tabHerr = document.getElementById('tab-herramientas');
-          const eppActivo = tabEPP?.getAttribute('aria-selected') === 'true';
-          const herrActivo = tabHerr?.getAttribute('aria-selected') === 'true';
-
-          if (eppActivo) {
-            renderTablaRecursos('tablaEPP', window.recursosEPP || [], window.paginaEPPActual || 1, 'paginadorEPP');
-          } else if (herrActivo) {
-            renderTablaRecursos('tablaHerramientas', window.recursosHerramientas || [], window.paginaHerramientasActual || 1, 'paginadorHerramientas');
-          } else {
-            // si no hay tab activo, actualizar contenedor de recursos si existe
-            if (document.getElementById('contenedorRecursos')) {
-              mostrarRecursosAsignados((window.recursosEPP || []).concat(window.recursosHerramientas || []), 1);
-            }
-          }
-          return data;
-        });
-      } else {
-        getRenderer('mostrarMensajeKiosco')(data.message || 'Error al devolver recurso', 'danger');
-        return data;
-      }
-    })
-    .catch(err => {
-      getRenderer('mostrarMensajeKiosco')('Error de red al devolver recurso', 'danger');
-      console.error('devolverRecurso error', err);
-      return { success: false, error: err };
-    });
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  })
+  .then(data => {
+    if (data.success) {
+      mostrarMensajeKiosco('✅ Recurso devuelto correctamente', 'success');
+      cargarRecursos(); // actualiza el modal
+    } else {
+      mostrarMensajeKiosco(data.message || 'Error al devolver recurso', 'danger');
+    }
+    return data;
+  })
+  .catch(err => {
+    mostrarMensajeKiosco('Error de red al devolver recurso', 'danger');
+    return { success: false, error: err };
+  });
 }
+
 
 
 function confirmarDevolucionPorVoz(index) {
@@ -563,7 +541,7 @@ function confirmarDevolucionPorVoz(index) {
   window._modalConfirmedByVoice = true;
   safeStopRecognitionGlobal(); // pausamos global antes de abrir modal de confirmación
   console.log('🛑 confirmarDevolucionPorVoz: recognition global pausado, mostrando modal confirmación');
-  mostrarModalConfirmarDevolucion(detalleId, index);
+  mostrarStepDevolucionQR(serie, detalleId);
 }
 
 
@@ -710,8 +688,173 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
 
 
 
+// === Módulo: Devolución por QR ===
+
+let serieEsperada = '';
+let detalleIdActual = null;
+
+function mostrarStepDevolucionQR(serie, detalleId) {
+  serieEsperada = serie;
+  detalleIdActual = detalleId;
+  window.modoActual = 'devolucion';
+
+  document.getElementById('serieEsperadaQR').textContent = serie;
+  document.getElementById('qrFeedback').textContent = '';
+  document.getElementById('btnConfirmarDevolucion').disabled = true;
+
+  nextStep(9); // activa el step visualmente
+
+  // Espera doble: render + layout
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      const qrContainer = document.getElementById('qr-reader-devolucion');
+      const bounds = qrContainer?.getBoundingClientRect();
+
+      if (!qrContainer || bounds.width < 100 || bounds.height < 100) {
+        console.warn('❌ Contenedor QR no tiene dimensiones válidas');
+        mostrarMensajeKiosco('No se pudo activar la cámara. Intente nuevamente.', 'danger');
+        return;
+      }
+
+      activarEscaneoQRDevolucion(); // ya implementado, escanea y llama a registrarPorQR()
+    }, 250);
+  });
+}
+
+function validarQRDevolucion(qrCode, idUsuario) {
+  return fetch('/terminal/validar-qr-devolucion', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ codigo_qr: qrCode, id_usuario: idUsuario })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  });
+}
 
 
+
+
+
+
+function confirmarDevolucionActual() {
+  if (!detalleIdActual) {
+    mostrarMensajeKiosco('No se puede confirmar devolución: falta el recurso.', 'danger');
+    return;
+  }
+
+  fetch('/terminal/devolver-recurso', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ id_detalle: detalleIdActual })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      mostrarMensajeKiosco('✅ Recurso devuelto correctamente.', 'success');
+      nextStep(2); // volver al menú principal o recursos asignados
+    } else {
+      mostrarMensajeKiosco(data.message || '❌ Error al devolver recurso.', 'danger');
+    }
+  })
+  .catch(err => {
+    mostrarMensajeKiosco('❌ Error de red al devolver recurso.', 'danger');
+    console.error(err);
+  });
+}
+
+
+
+function volverARecursosAsignados() {
+  detenerEscaneoQR();
+  nextStep(2); // o el paso donde están los recursos asignados
+}
+
+// Bind del botón de confirmación
+document.getElementById('btnConfirmarDevolucion').addEventListener('click', confirmarDevolucionActual);
+
+
+
+function activarEscaneoQRDevolucion() {
+  const contenedorId = 'qr-reader-devolucion';
+  const qrContainer = document.getElementById(contenedorId);
+  if (!qrContainer) {
+    console.warn(`Contenedor QR no encontrado: ${contenedorId}`);
+    mostrarMensajeKiosco('No se encontró el área de escaneo.', 'danger');
+    return;
+  }
+
+  const idUsuario = localStorage.getItem('id_usuario');
+  if (!idUsuario) {
+    mostrarMensajeKiosco('⚠️ Usuario no identificado', 'danger');
+    return;
+  }
+
+  try {
+    const html5QrCode = new Html5Qrcode(contenedorId);
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      (decodedText) => {
+        validarQRDevolucion(decodedText, idUsuario)
+          .then(res => {
+            html5QrCode.stop().catch(e => console.warn('Error al detener escáner', e));
+
+            if (res.success && res.coincide) {
+              detalleIdActual = res.id_detalle;
+              document.getElementById('btnConfirmarDevolucion').disabled = false;
+              document.getElementById('qrFeedback').textContent = '';
+              mostrarMensajeKiosco('✅ QR válido, listo para confirmar devolución', 'success');
+            } else {
+              document.getElementById('qrFeedback').textContent = res.message || 'QR no válido';
+              mostrarMensajeKiosco(res.message || '❌ QR no válido para devolución', 'warning');
+            }
+          })
+          .catch(err => {
+            html5QrCode.stop().catch(e => console.warn('Error al detener escáner', e));
+            console.error('Error validando QR:', err);
+            mostrarMensajeKiosco('❌ Error al validar QR', 'danger');
+          });
+      },
+      (errorMessage) => {
+        console.log("Error de escaneo (devolución):", errorMessage);
+      }
+    );
+  } catch (e) {
+    console.error('Error al iniciar escaneo QR de devolución:', e);
+    mostrarMensajeKiosco('No se pudo activar la cámara.', 'danger');
+  }
+}
+
+
+function onScanSuccess(qrCodeMessage) {
+  const idUsuario = localStorage.getItem('id_usuario');
+  if (!idUsuario) {
+    mostrarMensajeKiosco('⚠️ Usuario no identificado', 'danger');
+    return;
+  }
+
+  validarQRDevolucion(qrCodeMessage, idUsuario)
+    .then(res => {
+      if (res.success && res.coincide) {
+        devolverRecurso(res.id_detalle);
+      } else {
+        mostrarMensajeKiosco(res.message || '❌ QR no válido para devolución', 'warning');
+      }
+    })
+    .catch(err => {
+      console.error('Error validando QR:', err);
+      mostrarMensajeKiosco('❌ Error al validar QR', 'danger');
+    });
+}
 
 
 
@@ -1090,6 +1233,21 @@ async function registrarSerie(serieId, boton = null) {
 }
 
 
+document.addEventListener('DOMContentLoaded', () => {
+  const idUsuario = localStorage.getItem('id_usuario');
+  if (!idUsuario) {
+    mostrarMensajeKiosco('⚠️ Usuario no identificado', 'danger');
+    return;
+  }
+
+  // Inicializar escáner QR
+  const qrScanner = new Html5Qrcode("qr-reader-devolucion");
+  qrScanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    onScanSuccess
+  );
+});
 
 
 
@@ -2300,7 +2458,7 @@ if (typeof window !== 'undefined') {
   window.validarSesion = typeof validarSesion === 'function' ? validarSesion : (() => !!window.localStorage.getItem('id_usuario'));
 
   // UI helpers mínimos
-  window.mostrarToast = window.mostrarToast || ((msg,tipo) => { const t = document.createElement('div'); t.className='toast'; t.textContent = msg; (document.getElementById('toastContainer')||document.body).appendChild(t); return t; });
+  window.mostrarMensajeKiosco = window.mostrarMensajeKiosco || ((msg,tipo) => { const t = document.createElement('div'); t.className='toast'; t.textContent = msg; (document.getElementById('toastContainer')||document.body).appendChild(t); return t; });
   window.mostrarModal = window.mostrarModal || ((id,contenido) => { const m = document.getElementById(id); if (m) { m.innerHTML = contenido; m.classList.add('show'); } });
   window.cerrarModal = window.cerrarModal || ((id) => { const m = document.getElementById(id); if (m) m.classList.remove('show'); });
 
@@ -2323,7 +2481,7 @@ if (typeof window !== 'undefined') {
   // No sobrescribir mocks que tests hayan colocado antes: sólo definir si no existe
   // (ej: mostrarMensajeKiosco ya puede ser mockeada por beforeEach)
   if (!window.mostrarMensajeKiosco) {
-    window.mostrarMensajeKiosco = (texto, tipo='info') => window.mostrarToast ? window.mostrarToast(texto, tipo) : null;
+    window.mostrarMensajeKiosco = (texto, tipo='info') => window.mostrarMensajeKiosco ? window.mostrarMensajeKiosco(texto, tipo) : null;
   }
 }
 
