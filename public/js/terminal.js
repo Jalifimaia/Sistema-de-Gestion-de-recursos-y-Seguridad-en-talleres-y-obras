@@ -1984,22 +1984,30 @@ function iniciarReconocimientoVoz() {
 
 // matchOpcion: si se pasa 'numero' devuelve el número (Number) cuando coincide, otherwise false
 function matchOpcion(limpio, numero, ...palabrasClave) {
-  const numerosPalabra = MAPA_NUMEROS; // usa el mapa global
-  const palabra = numerosPalabra[numero];
-  // logs opcionales para debug (puedes desactivar en producción)
+  const palabra = Object.keys(MAPA_NUMEROS).find(k => MAPA_NUMEROS[k] === numero);
+
   console.log('🎯 matchOpcion: evaluando coincidencia para opción', numero);
 
-  // coincidencias explícitas
+  // Coincidencias explícitas
   if (limpio.includes(`opcion ${numero}`) || limpio.includes(`opción ${numero}`)) return numero;
   if (palabra && (limpio.includes(`opcion ${palabra}`) || limpio.includes(`opción ${palabra}`))) return numero;
-  // si el usuario habla solo el número ("tres" o "3")
+
+  // Coincidencia exacta con solo el número o palabra
   if (limpio === `${numero}` || limpio === palabra) return numero;
 
-  // palabras clave (ej: "herramienta en mano")
+  // Coincidencia por token aislado
+  const tokens = limpio.split(/\s+/);
+  for (const token of tokens) {
+    const n = numeroDesdeToken(token);
+    if (n === numero) return numero;
+  }
+
+  // Palabras clave adicionales
   if (palabrasClave.length && palabrasClave.some(p => limpio.includes(p))) return numero;
 
   return false;
 }
+
 
 
 function matchTextoBoton(limpio, btn) {
@@ -2039,15 +2047,19 @@ function procesarComandoVoz(limpio) {
 const modalRecursos = document.getElementById('modalRecursos');
 const modalVisible = modalRecursos && modalRecursos.classList.contains('show');
 
-if (modalVisible && /\b(cerrar|cerrar recursos asignados)\b/.test(limpio)) {
-  console.log('🎤 Comando de voz: cerrar modal recursos asignados');
-  const modalInstance = bootstrap.Modal.getInstance(modalRecursos);
-  if (modalInstance) {
-    modalInstance.hide();
-    getRenderer('mostrarMensajeKiosco')('Modal cerrado por voz', 'info');
+if (modalVisible) {
+  if (/\b(cerrar|cerrar recursos asignados|cerrar modal)\b/.test(limpio)) {
+    console.log('🎤 Comando de voz: cerrar modal recursos asignados');
+    const modalInstance = bootstrap.Modal.getInstance(modalRecursos);
+    if (modalInstance) {
+      modalInstance.hide();
+      getRenderer('mostrarMensajeKiosco')('Modal cerrado por voz', 'info');
+    }
+    return;
   }
-  return;
+  // ⚠️ Si el modal está abierto pero el comando no fue "cerrar", seguimos evaluando el resto
 }
+
 
   console.log("👉 Texto reconocido (normalizado):", limpio, " | Step activo:", step);
 
