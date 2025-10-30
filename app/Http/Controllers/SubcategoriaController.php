@@ -27,18 +27,24 @@ class SubcategoriaController extends Controller
         'categoria_id' => 'required|exists:categoria,id',
     ]);
 
-    // Evitar duplicados
-    $existing = Subcategoria::where('nombre', $validated['nombre'])
+    $nombreNormalizado = strtolower(trim($validated['nombre']));
+
+    $existe = Subcategoria::whereRaw('LOWER(TRIM(nombre)) = ?', [$nombreNormalizado])
         ->where('categoria_id', $validated['categoria_id'])
         ->first();
 
-    if ($existing) {
-        return response()->json($existing);
+    if ($existe) {
+        return response()->json([
+            'error' => 'Ya existe una subcategoría con ese nombre en esta categoría.',
+            'subcategoria' => $existe
+        ], 409);
     }
 
     $subcategoria = Subcategoria::create($validated);
     return response()->json($subcategoria);
 }
+
+
 
 
     public function edit(Subcategoria $subcategoria)
@@ -64,4 +70,11 @@ class SubcategoriaController extends Controller
         $subcategoria->delete();
         return redirect()->route('subcategorias.index')->with('success', 'Subcategoría eliminada.');
     }
+    public function byCategoria($categoriaId)
+{
+    return Subcategoria::where('categoria_id', $categoriaId)
+        ->orderBy('nombre')
+        ->get(['id', 'nombre']);
+}
+
 }

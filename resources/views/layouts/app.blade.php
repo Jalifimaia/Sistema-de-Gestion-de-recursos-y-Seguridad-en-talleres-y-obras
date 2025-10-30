@@ -140,5 +140,6 @@
   <!-- Livewire y scripts inyectados -->
   @livewireScripts
   @stack('scripts')
+  
 </body>
 </html>

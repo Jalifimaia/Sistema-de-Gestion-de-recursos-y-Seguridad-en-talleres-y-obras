@@ -10,6 +10,7 @@ class UsuarioRecurso extends Model
     'id_serie_recurso',
     'id_recurso',
     'fecha_asignacion',
+    'tipo_epp'
     ];
 
 
@@ -20,6 +21,7 @@ class UsuarioRecurso extends Model
     {
         return $this->belongsTo(Usuario::class, 'id_usuario');
     }
+    
 
 
     public function serie()
@@ -33,4 +35,9 @@ class UsuarioRecurso extends Model
         return $this->belongsTo(Recurso::class, 'id_recurso');
     }
     
+    public function serieRecurso()
+{
+    return $this->belongsTo(SerieRecurso::class, 'id_serie_recurso');
+}
+
 }

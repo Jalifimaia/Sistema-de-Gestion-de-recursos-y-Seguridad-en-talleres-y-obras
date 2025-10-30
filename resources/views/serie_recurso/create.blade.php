@@ -64,7 +64,7 @@
 
         <div class="mb-3">
             <label for="lote" class="form-label">Lote</label>
-            <input type="number" name="lote" id="lote" class="form-control" min="1" required>
+            <input type="number" name="lote" id="lote" class="form-control" placeholder="Ingrese el N° de lote" min="1" required>
         </div>
 
         <div class="mb-3">
@@ -77,14 +77,8 @@
             <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="form-control">
         </div>
 
-        <div class="mb-3">
-            <label for="id_estado" class="form-label">Estado</label>
-            <select name="id_estado" id="id_estado" class="form-select">
-                @foreach($estados as $estado)
-                    <option value="{{ $estado->id }}">{{ $estado->nombre_estado }}</option>
-                @endforeach
-            </select>
-        </div>
+            <input type="hidden" name="id_estado" value="{{ $estadoDisponible->id }}">
+
 
         <div class="mb-4">
             <h5>Series por {{ $requiereTalle ? 'Talle y Color' : 'Color' }}</h5>
@@ -116,7 +110,7 @@
 
 @push('scripts')
 <script>
-    window.colores = @json($colores);
+    window.colores = @json($colores->map(fn($c) => ['id' => $c->id, 'nombre' => $c->nombre]));
     window.nombreRecurso = @json($recurso->nombre);
     window.descripcionRecurso = @json($recurso->descripcion);
     window.requiereTalle = @json($requiereTalle);

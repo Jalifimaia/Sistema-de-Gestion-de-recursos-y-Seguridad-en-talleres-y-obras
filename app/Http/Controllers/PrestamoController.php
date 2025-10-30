@@ -115,39 +115,51 @@ public function store(PrestamoRequest $request)
 {
     $validated = $request->validated();
     $adminId = Auth::id();
+    $series = $validated['series'] ?? [];
+
+    if (empty($series)) {
+        return back()->withErrors(['series' => 'No se enviaron series para prestar.']);
+    }
 
     DB::beginTransaction();
     try {
-        // Crear el préstamo principal
+        $workerId = $validated['id_trabajador'];
+        $fechaPrestamo = Carbon::today();
+        $fechaDevolucion = Carbon::tomorrow();
+
         $idPrestamo = DB::table('prestamo')->insertGetId([
-            'id_usuario'              => $validated['id_trabajador'], // trabajador
-            'id_usuario_creacion'     => $adminId,                    // admin logueado
+            'id_usuario'              => $workerId,
+            'id_usuario_creacion'     => $adminId,
             'id_usuario_modificacion' => $adminId,
-            'fecha_prestamo'          => $validated['fecha_prestamo'],
-            'fecha_devolucion'        => $validated['fecha_devolucion'] ?? null,
+            'fecha_prestamo'          => $fechaPrestamo,
+            'fecha_devolucion'        => $fechaDevolucion,
             'estado'                  => 2, // Activo
-            'fecha_creacion'          => Carbon::now(),
-            'fecha_modificacion'      => Carbon::now(),
+            'fecha_creacion'          => now(),
+            'fecha_modificacion'      => now(),
         ]);
 
-        // Crear los detalles del préstamo
-        foreach ($validated['series'] as $idSerie) {
-            $serie = SerieRecurso::findOrFail($idSerie);
-
-            if ($serie->id_estado != 1) {
-                throw new \Exception("La serie {$serie->nro_serie} no está disponible.");
+        foreach ($series as $idSerie) {
+            // Validar que la serie esté disponible
+            $serie = SerieRecurso::where('id', $idSerie)->where('id_estado', 1)->first();
+            if (! $serie) {
+                throw new \Exception("La serie con id {$idSerie} ya no está disponible.");
             }
 
-            DetallePrestamo::create([
+            // Registrar el detalle del préstamo
+            $detalle = DetallePrestamo::create([
                 'id_prestamo'        => $idPrestamo,
                 'id_serie'           => $idSerie,
                 'id_recurso'         => $serie->id_recurso,
-                'id_estado_prestamo' => 2, // Asignado
+                'id_estado_prestamo' => 2, // Asignado / Activo
                 'created_at'         => now(),
                 'updated_at'         => now(),
             ]);
 
-            // Actualizar estado de la serie
+            if (! $detalle) {
+                throw new \Exception("No se pudo registrar el préstamo para la serie {$idSerie}.");
+            }
+
+            // Marcar la serie como prestada
             $serie->update(['id_estado' => 3]);
 
             // Actualizar stock
@@ -156,7 +168,7 @@ public function store(PrestamoRequest $request)
                 [
                     'id_recurso'        => $serie->id_recurso,
                     'id_estado_recurso' => 3,
-                    'id_usuario'        => $validated['id_trabajador'],
+                    'id_usuario'        => $workerId,
                 ]
             );
         }
@@ -165,10 +177,14 @@ public function store(PrestamoRequest $request)
         return Redirect::route('prestamos.index')->with('success', 'Préstamo registrado correctamente.');
     } catch (\Exception $e) {
         DB::rollBack();
-        Log::error('Error al registrar préstamo: ' . $e->getMessage());
+        Log::warning('Error al registrar préstamo: ' . $e->getMessage(), [
+            'user' => $adminId,
+            'request_series' => $series
+        ]);
         return back()->withErrors(['error' => 'No se pudo registrar el préstamo. ' . $e->getMessage()]);
     }
 }
+
 
 
 public function edit($id): View

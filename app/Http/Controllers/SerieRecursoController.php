@@ -44,30 +44,49 @@ public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorServic
 {
     $data = $request->validated();
 
+    if (\Carbon\Carbon::parse($data['fecha_adquisicion'])->isAfter(now())) {
+    throw \Illuminate\Validation\ValidationException::withMessages([
+        'fecha_adquisicion' => 'La fecha de adquisición no puede ser mayor a la fecha actual.'
+    ]);
+    }
+
     $recurso = Recurso::with('subcategoria')->findOrFail($data['id_recurso']);
     $combinaciones = json_decode($data['combinaciones'], true) ?? [];
 
     $requiereTalle = in_array(strtolower($recurso->subcategoria->nombre ?? ''), ['chaleco', 'botas']);
 
-    foreach ($combinaciones as $combo) {
-        if (empty($combo['color_nombre'])) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'combinaciones' => 'Falta color en una combinación.'
-            ]);
-        }
+    $tipoEsperado = match (strtolower($recurso->subcategoria->nombre ?? '')) {
+        'chaleco' => 'Ropa',
+        'botas' => 'Calzado',
+        default => null,
+    };
 
-        if ($requiereTalle && (empty($combo['talle']) || empty($combo['tipo_talle']))) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'combinaciones' => 'Falta talle o tipo en una combinación.'
-            ]);
-        }
 
-        if (empty($combo['cantidad']) || $combo['cantidad'] < 1) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'combinaciones' => 'Cantidad inválida en una combinación.'
-            ]);
-        }
+foreach ($combinaciones as $combo) {
+    if (empty($combo['color_nombre'])) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'combinaciones' => 'Falta color en una combinación.'
+        ]);
     }
+
+    if ($requiereTalle && (empty($combo['talle']) || empty($combo['tipo_talle']))) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'combinaciones' => 'Falta talle o tipo en una combinación.'
+        ]);
+    }
+
+    if ($requiereTalle && $tipoEsperado && !in_array(strtolower($combo['tipo_talle']), [strtolower($tipoEsperado), 'otro'])) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'combinaciones' => "El tipo de talle debe ser '{$tipoEsperado}' u 'Otro' para el recurso seleccionado."
+        ]);
+    }
+
+    if (empty($combo['cantidad']) || $combo['cantidad'] < 1) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'combinaciones' => 'Cantidad inválida en una combinación.'
+        ]);
+    }
+}
 
     foreach ($combinaciones as $combo) {
         $generator->createForCombination(
@@ -81,7 +100,7 @@ public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorServic
             [
                 'fecha_adquisicion' => $data['fecha_adquisicion'],
                 'fecha_vencimiento' => $data['fecha_vencimiento'] ?? null,
-                'id_estado' => $data['id_estado'],
+                'id_estado' => Estado::where('nombre_estado', 'Disponible')->value('id') ?? 1,
             ]
         );
     }
@@ -94,16 +113,23 @@ public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorServic
 public function createConRecurso($id)
 {
     $recurso = Recurso::findOrFail($id);
-    $estados = Estado::all();
-    $colores = Color::all();
+    $colores = Color::select('id', 'nombre')
+    ->whereRaw("nombre REGEXP '^[^0-9]+$'") // excluye nombres numéricos
+    ->orderBy('nombre')
+    ->get();
+
 
     // ✅ Agrupar talles por tipo
     $talles = \App\Models\Talle::all()
         ->groupBy('tipo')
         ->map(fn($group) => $group->pluck('nombre')->values());
 
-    return view('serie_recurso.create', compact('recurso', 'estados', 'colores', 'talles'));
+    // ✅ Obtener estado "Disponible"
+    $estadoDisponible = Estado::where('nombre_estado', 'Disponible')->firstOrFail();
+
+    return view('serie_recurso.create', compact('recurso', 'colores', 'talles', 'estadoDisponible'));
 }
+
 
     /**
      * Display the specified resource.

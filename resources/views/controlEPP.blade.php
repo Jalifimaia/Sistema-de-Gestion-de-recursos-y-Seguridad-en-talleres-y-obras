@@ -67,7 +67,7 @@
         <div class="card-body d-flex flex-column">
           <h5 class="card-title"><i class="bi bi-clipboard-check card-icon"></i> Checklist Diario</h5>
           <p class="card-text">Registrar cumplimiento de EPP por trabajador.</p>
-          <a href="{{ route('checklist.epp.create') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ir a checklist</a>
+          <a href="{{ route('checklist.epp') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ir a checklist</a>
         </div>
       </div>
     </div>
@@ -77,7 +77,7 @@
       <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title"><i class="bi bi-person-plus card-icon"></i> Asignar EPP</h5>
-          <p class="card-text">Asignar recursos a trabajadores en stand by.</p>
+          <p class="card-text">Asignar recursos a trabajadores.</p>
           <a href="{{ route('epp.asignar.create') }}" class="btn btn-outline-success btn-sm mt-auto w-100">Asignar EPP</a>
         </div>
       </div>
@@ -89,7 +89,7 @@
         <div class="card-body d-flex flex-column">
           <h5 class="card-title"><i class="bi bi-exclamation-circle card-icon"></i> Recursos Faltantes</h5>
           <p class="card-text">Trabajadores sin todos los EPP obligatorios asignados.</p>
-          <a href="{{ route('controlEPP.faltantes') }}" class="btn btn-outline-warning btn-sm mt-auto w-100">Ver faltantes</a>
+          <a href="{{ route('epp.faltantes') }}" class="btn btn-outline-warning btn-sm mt-auto w-100">Ver faltantes</a>
         </div>
       </div>
     </div>
