@@ -3,11 +3,22 @@
 @section('title', 'Control de EPP y Seguridad')
 
 @section('content')
-<div class="container py-5">
+<div class="container py-4">
+  <!-- Fecha arriba a la derecha -->
+  <div class="row mb-2">
+      <div class="col-12 text-end text-muted small pt-1">
+          Fecha: <strong id="today" class="text-nowrap"></strong>
+      </div>
+  </div>
 
-  <!-- 🔶 Encabezado -->
-  <h1 class="mb-4 text-center text-orange">🛡️ Control de EPP y Seguridad</h1>
-  <p class="text-muted text-center mb-5">Supervisión diaria de cumplimiento, asignaciones y checklist de seguridad</p>
+  <!-- Título -->  
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="text-center text-orange">🛡️ Control de EPP y Seguridad</h1>
+      <p class="text-center text-muted small">Gestión de equipos de protección personal y checklist de seguridad</p>
+    </div>
+  </div>
+
 
   <!-- 🔶 Tarjetas resumen -->
   <div class="row g-3 mb-4">

@@ -16,7 +16,7 @@
   </header>
 
   <!-- Estado del Inventario -->
-  <section id="estado-inventario">
+  <section id="estado-inventario" class="mb-4">
     <div class="card shadow border mt-4">
       <div class="card-header bg-white border-bottom">
         <h5 class="fw-bold mb-0">📊 Estado del Inventario</h5>
@@ -136,12 +136,12 @@
                 <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" class="d-inline eliminar-recurso-form" data-nombre="{{ $recurso->nombre }}" data-id="{{ $recurso->id }}">
                   @csrf
                   @method('DELETE')
-                  <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" data-id="{{ $recurso->id }}">
+                  <button type="button" class="btn btn-sm btn-danger btn-eliminar" data-id="{{ $recurso->id }}">
                     <i class="bi bi-trash"></i>
                   </button>
                 </form>
 
-                <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-outline-info">
+                <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-secondary">
                   <i class="bi bi-plus-circle"> Agregar serie</i>
                 </a>
               </td>
