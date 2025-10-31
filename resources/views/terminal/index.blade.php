@@ -266,6 +266,25 @@
 
 
 
+<!-- Microfono flotante -->
+<div id="micStatusButton" style="
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 9999;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+  padding: 8px 12px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+">
+  <span id="micStatusIcon">🎤</span>
+  <span id="micStatusText" class="badge text-bg-success">Micrófono activo</span>
+</div>
 
 
 
@@ -275,6 +294,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ asset('js/terminal.js') }}"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
+
 
 </body>
 </html>

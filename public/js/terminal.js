@@ -9,12 +9,21 @@ function getRenderer(name, fallback = () => {}) {
   return fallback;
 }
 
+let mostrarMensajesMicrofono = false
+const mostrarMic = false; // mostrar microfono flotante
+
+const micButton = document.getElementById('micStatusButton');
+if (micButton) {
+  micButton.style.display = mostrarMic ? 'inline-block' : 'none';
+}
+
 
 let recognitionGlobalWasRunning = false;
 
 function safeStopRecognitionGlobal() {
   try {
     if (recognitionGlobal && recognitionRunning) {
+          actualizarEstadoMicrofono(false); // 👈 Aquí
       recognitionGlobalWasRunning = true;
       if (typeof recognitionGlobal.abort === 'function') {
         recognitionGlobal.abort();
@@ -47,12 +56,14 @@ function safeStartRecognitionGlobal() {
     try {
       recognitionGlobal.start();
       console.log('safeStartRecognitionGlobal: start solicitado');
+        actualizarEstadoMicrofono(true); // 👈 Aquí
     } catch (err) {
       // Ignorar error si el estado ya está started o si es InvalidStateError
       const isAlreadyStarted = err && (err.name === 'InvalidStateError' || /recognition has already started/i.test(err.message || ''));
       if (isAlreadyStarted) {
         console.log('safeStartRecognitionGlobal: start ignorado, reconocimiento ya iniciado');
         recognitionRunning = true;
+            actualizarEstadoMicrofono(true); // 👈 Aquí también
       } else {
         console.warn('safeStartRecognitionGlobal: start() falló', err);
         // si falla por otro motivo, intentar recrear
@@ -64,6 +75,21 @@ function safeStartRecognitionGlobal() {
   }
 }
 
+function actualizarEstadoMicrofono(activo = true) {
+  const icon = document.getElementById('micStatusIcon');
+  const text = document.getElementById('micStatusText');
+  if (!icon || !text) return;
+
+  if (activo) {
+    icon.textContent = '🎤';
+    text.textContent = 'Micrófono activo';
+    text.className = 'badge text-bg-success';
+  } else {
+    icon.textContent = '🔄';
+    text.textContent = 'Reiniciando...';
+    text.className = 'badge text-bg-primary';
+  }
+}
 
 
 
@@ -428,9 +454,14 @@ function renderPaginacionRecursos(recursos, paginaActual, totalPaginas) {
 
 
 function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderTablaRecursos: safeStop falló', e); }
+
   const tabla = document.getElementById(tablaId);
   const paginador = document.getElementById(paginadorId);
-  if (!tabla || !paginador) return;
+  if (!tabla || !paginador) {
+    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+    return;
+  }
 
   const porPagina = 5;
   const totalPaginas = Math.ceil(recursos.length / porPagina);
@@ -442,6 +473,7 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
   if (visibles.length === 0) {
     tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
     paginador.innerHTML = '';
+    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
     return;
   }
 
@@ -474,7 +506,10 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
     const btn = document.createElement('button');
     btn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     btn.textContent = i;
-    btn.onclick = () => getRenderer('renderTablaRecursos')(tablaId, recursos, i, paginadorId);
+    btn.onclick = () => {
+      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('paginador click stop failed', e); }
+      setTimeout(() => getRenderer('renderTablaRecursos')(tablaId, recursos, i, paginadorId), 60);
+    };
     paginador.appendChild(btn);
   }
 
@@ -484,7 +519,12 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
   if (tablaId === 'tablaHerramientas') {
     window.paginaHerramientasActual = pagina;
   }
+
+  try {
+    setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 safeStart tras renderTablaRecursos'); }, 80);
+  } catch (e) { console.warn('renderTablaRecursos safeStart failed', e); }
 }
+
 
 
 function devolverRecurso(detalleId) {
@@ -955,8 +995,14 @@ function seleccionarCategoria(categoriaId) {
 }
 
 function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderSubcategoriasPaginadas: safeStop failed', e); }
+
   const contenedor = document.getElementById('subcategoria-buttons');
   const paginador = document.getElementById('paginadorSubcategorias');
+  if (!contenedor || !paginador) {
+    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+    return;
+  }
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
@@ -982,12 +1028,18 @@ function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
     const pagBtn = document.createElement('button');
     pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     pagBtn.textContent = i;
-  pagBtn.onclick = () => getRenderer('renderSubcategoriasPaginadas')(subcategorias, i);
+    pagBtn.onclick = () => {
+      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('pag sub stop failed', e); }
+      setTimeout(() => getRenderer('renderSubcategoriasPaginadas')(subcategorias, i), 60);
+    };
     paginador.appendChild(pagBtn);
   }
 
   window.paginaSubcategoriasActual = pagina;
+
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) { console.warn('renderSubcategorias safeStart failed', e); }
 }
+
 
 
 
@@ -1012,8 +1064,14 @@ function seleccionarSubcategoria(subcategoriaId) {
 }
 
 function renderRecursosPaginados(recursos, pagina = 1) {
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderRecursosPaginados: safeStop failed', e); }
+
   const contenedor = document.getElementById('recurso-buttons');
   const paginador = document.getElementById('paginadorRecursos');
+  if (!contenedor || !paginador) {
+    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+    return;
+  }
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
@@ -1039,12 +1097,18 @@ function renderRecursosPaginados(recursos, pagina = 1) {
     const pagBtn = document.createElement('button');
     pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     pagBtn.textContent = i;
-  pagBtn.onclick = () => getRenderer('renderRecursosPaginados')(recursos, i);
+    pagBtn.onclick = () => {
+      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('pag recursos stop failed', e); }
+      setTimeout(() => getRenderer('renderRecursosPaginados')(recursos, i), 60);
+    };
     paginador.appendChild(pagBtn);
   }
 
   window.paginaRecursosActual = pagina;
+
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) { console.warn('renderRecursosPaginados safeStart failed', e); }
 }
+
 
 
 function seleccionarRecurso(recursoId) {
@@ -1073,8 +1137,14 @@ function seleccionarRecurso(recursoId) {
 
 
 function renderSeriesPaginadas(series, pagina = 1) {
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderSeriesPaginadas: safeStop failed', e); }
+
   const contenedor = document.getElementById('serie-buttons');
   const paginador = document.getElementById('paginadorSeries');
+  if (!contenedor || !paginador) {
+    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+    return;
+  }
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
@@ -1101,12 +1171,18 @@ function renderSeriesPaginadas(series, pagina = 1) {
     const pagBtn = document.createElement('button');
     pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     pagBtn.textContent = i;
-  pagBtn.onclick = () => getRenderer('renderSeriesPaginadas')(series, i);
+    pagBtn.onclick = () => {
+      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('pag series stop failed', e); }
+      setTimeout(() => getRenderer('renderSeriesPaginadas')(series, i), 60);
+    };
     paginador.appendChild(pagBtn);
   }
 
   window.paginaSeriesActual = pagina;
+
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) { console.warn('renderSeriesPaginadas safeStart failed', e); }
 }
+
 
 
 
@@ -1327,13 +1403,21 @@ const recursosTabs = document.getElementById('recursosTabs');
 if (recursosTabs) {
   recursosTabs.addEventListener('shown.bs.tab', function (event) {
     const tabId = event.target.id;
+    try { safeStopRecognitionGlobal(); } catch (e) { console.warn('recursosTabs shown stop failed', e); }
+
     if (tabId === 'tab-epp') {
-  getRenderer('renderTablaRecursos')('tablaEPP', window.recursosEPP || [], window.paginaEPPActual || 1, 'paginadorEPP');
+      getRenderer('renderTablaRecursos')('tablaEPP', window.recursosEPP || [], window.paginaEPPActual || 1, 'paginadorEPP');
     } else if (tabId === 'tab-herramientas') {
-  getRenderer('renderTablaRecursos')('tablaHerramientas', window.recursosHerramientas || [], window.paginaHerramientasActual || 1, 'paginadorHerramientas');
+      getRenderer('renderTablaRecursos')('tablaHerramientas', window.recursosHerramientas || [], window.paginaHerramientasActual || 1, 'paginadorHerramientas');
     }
+
+    // Reiniciar micrófono tras re-render del tab con pequeño delay
+    try {
+      setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 safeStart tras cambiar tab recursos'); }, 120);
+    } catch (e) { console.warn('recursosTabs safeStart failed', e); }
   });
 }
+
 
 
 
@@ -1756,7 +1840,6 @@ function abrirModalRecursos() {
     return;
   }
 
-  // Evitar reentradas durante la apertura
   if (modalEl._opening) {
     console.log('abrirModalRecursos: ya en proceso de apertura, ignorando llamada');
     return;
@@ -1785,10 +1868,12 @@ function abrirModalRecursos() {
     recognitionGlobalPaused = false;
 
     // Intentar arrancar el recognition global de forma segura para que procesarComandoVoz
-    // reciba comandos mientras el modal está visible
+    // reciba comandos mientras el modal está visible. Dejamos un pequeño delay para estabilidad.
     try {
-      safeStartRecognitionGlobal();
-      console.log('🎤 safeStartRecognitionGlobal llamado desde shown.bs.modal (modal recursos)');
+      setTimeout(() => {
+        safeStartRecognitionGlobal();
+        console.log('🎤 safeStartRecognitionGlobal llamado desde shown.bs.modal (modal recursos)');
+      }, 120);
     } catch (e) {
       console.warn('abrirModalRecursos: no se pudo iniciar recognitionGlobal en shown.bs.modal', e);
     }
@@ -1812,10 +1897,12 @@ function abrirModalRecursos() {
     modalEl._opening = false;
     recognitionGlobalPaused = false;
 
+    // re-activar de forma segura con un pequeño delay
     try {
-      // Intentar arrancar siempre de forma segura; safeStart gestiona recreación y errores
-      safeStartRecognitionGlobal();
-      console.log('🎤 safeStartRecognitionGlobal llamado tras cerrar modal recursos');
+      setTimeout(() => {
+        safeStartRecognitionGlobal();
+        console.log('🎤 safeStartRecognitionGlobal llamado tras cerrar modal recursos');
+      }, 120);
     } catch (e) {
       console.warn('abrirModalRecursos hidden: safeStartRecognitionGlobal falló (ignored)', e);
     }
@@ -1873,6 +1960,7 @@ function abrirModalRecursos() {
 
 
 
+
 // 🔧 Normalizar texto (quita acentos)
 function normalizarTexto(str) {
   console.log('🔤 normalizarTexto: texto original →', str);
@@ -1915,7 +2003,9 @@ function iniciarReconocimientoGlobal() {
   recognitionGlobal.onstart = () => {
     recognitionRunning = true;
     console.log("🎤 Micrófono global activo");
-    //window.mostrarMensajeKiosco('🎤 Micrófono activo: podés dar comandos por voz', 'info');
+
+    if (mostrarMensajesMicrofono)
+      window.mostrarMensajeKiosco('🎤 Micrófono activo: podés dar comandos por voz', 'info');
   };
 
   recognitionGlobal.onerror = (event) => {
