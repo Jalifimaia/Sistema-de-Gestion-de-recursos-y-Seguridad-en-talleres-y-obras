@@ -56,7 +56,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end mt-2">
           <li>
-            <a href="{{ url('perfil') }}" class="dropdown-item">
+            <a href="{{ route('usuarios.show', auth()->user()->id) }}" class="dropdown-item">
               <i class="bi bi-person me-2"></i> Ver perfil
             </a>
           </li>
