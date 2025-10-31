@@ -341,3 +341,40 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 });
+document.addEventListener('DOMContentLoaded', function () {
+  const btnGuardar = document.getElementById('btnGuardar');
+  const tbody = document.getElementById('combinacionesBody');
+
+  function validarCombinaciones() {
+    const filas = tbody.querySelectorAll('tr');
+    let habilitar = false;
+
+    filas.forEach(fila => {
+      const color = fila.querySelector('[name="color[]"]');
+      const cantidad = fila.querySelector('[name="cantidad[]"]');
+
+      const tieneColor = color && color.value.trim() !== '';
+      const tieneCantidad = cantidad && parseInt(cantidad.value) > 0;
+
+      if (tieneColor && tieneCantidad) {
+        habilitar = true;
+      }
+    });
+
+    btnGuardar.disabled = !habilitar;
+  }
+
+  // Escuchar cambios en color y cantidad
+  tbody.addEventListener('input', function (e) {
+    if (e.target.name === 'color[]' || e.target.name === 'cantidad[]') {
+      validarCombinaciones();
+    }
+  });
+
+  // También validar al agregar una nueva fila
+  window.agregarFila = function () {
+    // Tu lógica actual para agregar la fila...
+    // Al final de esa función, llamá:
+    validarCombinaciones();
+  };
+});

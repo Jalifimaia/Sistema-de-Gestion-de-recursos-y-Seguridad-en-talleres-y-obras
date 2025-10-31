@@ -25,7 +25,7 @@ class RecursoRequest extends FormRequest
         'id_subcategoria' => 'required|exists:subcategoria,id',
         'nombre' => 'required|string|max:255',
         'descripcion' => 'nullable|string|max:1000',
-        'costo_unitario' => 'nullable|numeric|min:0',
+        'costo_unitario' => 'required|numeric|min:0',
 
         'id_usuario_creacion' => 'nullable',
         'id_usuario_modificacion' => 'nullable',

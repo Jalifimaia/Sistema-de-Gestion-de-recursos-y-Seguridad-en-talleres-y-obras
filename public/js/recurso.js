@@ -85,71 +85,173 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // 🔹 Agregar nueva subcategoría con validación contra duplicados
-  agregarBtn.addEventListener('click', function () {
-    const nombre = nuevaSubInput.value.trim();
-    const categoriaId = categoriaSelect.value;
+agregarBtn.addEventListener('click', function () {
+  const nombre = nuevaSubInput.value.trim();
+  const categoriaId = categoriaSelect.value;
 
-    if (!nombre || !categoriaId) {
-      mensaje.innerHTML = `<div class="alert alert-warning">Escribí un nombre y seleccioná una categoría.</div>`;
-      return;
-    }
-
-    // Validación: evitar duplicados en la categoría actual
-    const nombreNormalizado = nombre.toLowerCase();
-    const yaExiste = Array.from(subcategoriaSelect.options).some(opt =>
-      opt.textContent.trim().toLowerCase() === nombreNormalizado
-    );
-
-    if (yaExiste) {
-      mensaje.innerHTML = `<div class="alert alert-warning">⚠️ Esa subcategoría ya existe en esta categoría.</div>`;
-      return;
-    }
-
-    fetch('/subcategorias', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-      },
-      body: JSON.stringify({ nombre, categoria_id: categoriaId }),
-    })
-    .then(async res => {
-      const contentType = res.headers.get('content-type');
-      if (res.ok && contentType && contentType.includes('application/json')) {
-        return res.json();
-      } else if (res.status === 409) {
-        const data = await res.json();
-        throw new Error(data.error || 'Ya existe una subcategoría con ese nombre.');
-      } else if (res.status === 422) {
-        const data = await res.json();
-        const errores = Object.values(data.errors).flat().join('<br>');
-        throw new Error(errores);
-      } else {
-        const text = await res.text();
-        throw new Error(`Respuesta inesperada del servidor. Código ${res.status}`);
-      }
-    })
-    .then(data => {
-      categoriaSelect.dispatchEvent(new Event('change'));
-      setTimeout(() => {
-        subcategoriaSelect.value = data.id;
-      }, 300);
-
-      nuevaSubInput.value = '';
-      mensaje.innerHTML = `<div class="alert alert-success">Subcategoría agregada.</div>`;
-    })
-    .catch(error => {
-      console.error('Error al agregar subcategoría:', error.message);
-      mensaje.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
-    });
-  });
-
-  // 🔹 Mostrar modal si existe
-  const modalEl = document.getElementById('modalRecursoCreado');
-  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-    new bootstrap.Modal(modalEl).show();
+  if (!nombre || !categoriaId) {
+    mensaje.innerHTML = `<div class="alert alert-warning">Escribí un nombre y seleccioná una categoría.</div>`;
+    return;
   }
 
-  console.log('✅ recurso.js cargado');
+  // Validación: evitar duplicados en la categoría actual
+  const nombreNormalizado = nombre.toLowerCase();
+  const yaExiste = Array.from(subcategoriaSelect.options).some(opt =>
+    opt.textContent.trim().toLowerCase() === nombreNormalizado
+  );
+
+  if (yaExiste) {
+    mensaje.innerHTML = `<div class="alert alert-warning">⚠️ Esa subcategoría ya existe en esta categoría.</div>`;
+    return;
+  }
+
+  fetch('/subcategorias', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+    },
+    body: JSON.stringify({ nombre, categoria_id: categoriaId }),
+  })
+  .then(async res => {
+    const contentType = res.headers.get('content-type');
+    if (res.ok && contentType && contentType.includes('application/json')) {
+      return res.json();
+    } else if (res.status === 409) {
+      const data = await res.json();
+      throw new Error(data.error || 'Ya existe una subcategoría con ese nombre.');
+    } else if (res.status === 422) {
+      const data = await res.json();
+      const errores = Object.values(data.errors).flat().join('<br>');
+      throw new Error(errores);
+    } else {
+      const text = await res.text();
+      throw new Error(`Respuesta inesperada del servidor. Código ${res.status}`);
+    }
+  })
+  .then(data => {
+    categoriaSelect.dispatchEvent(new Event('change'));
+    setTimeout(() => {
+      subcategoriaSelect.value = data.id;
+    }, 300);
+
+    nuevaSubInput.value = '';
+    mensaje.innerHTML = `<div class="alert alert-success">Subcategoría agregada.</div>`;
+  })
+  .catch(error => {
+    console.error('Error al agregar subcategoría:', error.message);
+    mensaje.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+  });
 });
+
+// 🔹 Mostrar modal si existe
+const modalEl = document.getElementById('modalRecursoCreado');
+if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+  new bootstrap.Modal(modalEl).show();
+}
+
+// 🔹 Validación al presionar Enter en cualquier campo
+form.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+
+    const requiredFields = form.querySelectorAll('[required]');
+    let firstInvalid = null;
+
+    requiredFields.forEach(field => {
+      const container = field.closest('.mb-3') || field.parentElement;
+      const errorId = 'error-' + field.id;
+
+      // Eliminar errores previos
+      const prevError = document.getElementById(errorId);
+      if (prevError) prevError.remove();
+
+      if (!field.value.trim()) {
+        if (!firstInvalid) firstInvalid = field;
+
+        const error = document.createElement('div');
+        error.className = 'text-danger small mt-1';
+        error.id = errorId;
+        error.textContent = 'Este campo es obligatorio.';
+        container.appendChild(error);
+      }
+    });
+
+    if (firstInvalid) {
+      firstInvalid.focus();
+    } else {
+      form.submit();
+    }
+  }
+});
+
+// 🔹 Envío del formulario con validación visual desde backend
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const payload = {
+    id_subcategoria: subcategoriaSelect.value,
+    nombre: document.getElementById('nombre').value,
+    descripcion: document.getElementById('descripcion').value,
+    costo_unitario: document.getElementById('costo_unitario').value,
+  };
+
+  fetch('/recursos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+    },
+    body: JSON.stringify(payload),
+  })
+  .then(async res => {
+    const contentType = res.headers.get('content-type');
+    if (res.ok && contentType && contentType.includes('application/json')) {
+      return res.json();
+    } else if (res.status === 422) {
+      const data = await res.json();
+
+      // Limpiar errores previos
+      form.querySelectorAll('.text-danger.small.mt-1').forEach(el => el.remove());
+
+      let firstInvalid = null;
+
+      Object.entries(data.errors).forEach(([field, messages]) => {
+        const input = document.getElementById(field);
+        if (!input) return;
+
+        const container = input.closest('.mb-3') || input.parentElement;
+        const error = document.createElement('div');
+        error.className = 'text-danger small mt-1';
+        error.textContent = messages[0];
+        container.appendChild(error);
+
+        if (!firstInvalid) firstInvalid = input;
+      });
+
+      if (firstInvalid) firstInvalid.focus();
+
+      throw new Error('Hay errores en el formulario.');
+    } else {
+      const text = await res.text();
+      throw new Error(`Respuesta inesperada del servidor. Código ${res.status}`);
+    }
+  })
+  .then(data => {
+    mensaje.innerHTML = `<div class="alert alert-success">Recurso creado correctamente.</div>`;
+    form.reset();
+    subcategoriaSelect.innerHTML = '<option value="">Seleccione una subcategoría</option>';
+    subcategoriaSelect.disabled = true;
+  })
+  .catch(error => {
+    console.error('Error al guardar el recurso:', error.message);
+    mensaje.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+  });
+});
+
+console.log('✅ recurso.js cargado');
+
+});
+

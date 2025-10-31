@@ -68,14 +68,20 @@
         </div>
 
         <div class="mb-3">
-            <label for="fecha_adquisicion" class="form-label">Fecha de Adquisición</label>
+        <label for="fecha_adquisicion" class="form-label">Fecha de Adquisición</label>
+        <div class="input-group" onclick="this.querySelector('input').showPicker()">
             <input type="date" name="fecha_adquisicion" id="fecha_adquisicion" class="form-control" required>
         </div>
+        </div>
+
 
         <div class="mb-3">
-            <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento (opcional)</label>
+        <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento (opcional)</label>
+        <div class="input-group" onclick="this.querySelector('input').showPicker()">
             <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="form-control">
         </div>
+        </div>
+
 
             <input type="hidden" name="id_estado" value="{{ $estadoDisponible->id }}">
 
@@ -102,7 +108,7 @@
             <button type="button" class="btn btn-outline-primary" onclick="agregarFila()">+ Agregar combinación</button>
         </div>
 
-        <button type="submit" class="btn btn-success" id="btnGuardar">Guardar Series</button>
+        <button type="submit" class="btn btn-success" id="btnGuardar" disabled>Guardar Series</button>
         <a href="{{ route('inventario') }}" class="btn btn-secondary ms-2">Volver</a>
     </form>
 </div>
@@ -119,4 +125,76 @@
 <script src="{{ asset('js/serieRecurso.js') }}"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('formSeries');
+
+  // 🔹 Validación al presionar Enter
+  form.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+
+      const requiredFields = form.querySelectorAll('[required]');
+      let firstInvalid = null;
+
+      requiredFields.forEach(field => {
+        const container = field.closest('.mb-3') || field.parentElement;
+        const errorId = 'error-' + field.id;
+
+        // Eliminar errores previos
+        const prevError = document.getElementById(errorId);
+        if (prevError) prevError.remove();
+
+        if (!field.value.trim()) {
+          if (!firstInvalid) firstInvalid = field;
+
+          const error = document.createElement('div');
+          error.className = 'text-danger small mt-1';
+          error.id = errorId;
+          error.textContent = 'Este campo es obligatorio.';
+          container.appendChild(error);
+        }
+      });
+
+      if (firstInvalid) {
+        firstInvalid.focus();
+      } else {
+        form.submit();
+      }
+    }
+  });
+
+  // 🔹 Validación visual al enviar el formulario
+  form.addEventListener('submit', function (e) {
+    const requiredFields = form.querySelectorAll('[required]');
+    let firstInvalid = null;
+    let hasErrors = false;
+
+    // Limpiar errores previos
+    form.querySelectorAll('.text-danger.small.mt-1').forEach(el => el.remove());
+
+    requiredFields.forEach(field => {
+      const container = field.closest('.mb-3') || field.parentElement;
+      const errorId = 'error-' + field.id;
+
+      if (!field.value.trim()) {
+        hasErrors = true;
+        if (!firstInvalid) firstInvalid = field;
+
+        const error = document.createElement('div');
+        error.className = 'text-danger small mt-1';
+        error.id = errorId;
+        error.textContent = 'Este campo es obligatorio.';
+        container.appendChild(error);
+      }
+    });
+
+    if (hasErrors) {
+      e.preventDefault();
+      if (firstInvalid) firstInvalid.focus();
+    }
+  });
+});
+</script>
+
 @endpush
