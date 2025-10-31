@@ -287,14 +287,44 @@
   <span id="micStatusText" class="badge text-bg-success">Micrófono activo</span>
 </div>
 
+<!-- Botón fijo inferior izquierda (Menu principal) -->
+<button id="boton-flotante-menu-principal" type="button" title="Menu principal" aria-label="Menu principal" style="
+  position: fixed;
+  bottom: 18px;
+  left: 18px;
+  z-index: 2147483646;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  font-size: 15px;
+  cursor: pointer;
+">Menu principal</button>
 
+<!-- Botón fijo inferior derecha (Cerrar sesión) -->
+<button id="boton-flotante-cerrar-sesion" type="button" title="Cerrar sesión" aria-label="Cerrar sesión" style="
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 2147483647;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  font-size: 14px;
+  cursor: pointer;
+">Cerrar sesión</button>
 
   <!-- Contenedor de Toasts -->
 <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="{{ asset('js/terminal.js') }}"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="{{ asset('js/terminal.js') }}"></script>
 
 
 </body>

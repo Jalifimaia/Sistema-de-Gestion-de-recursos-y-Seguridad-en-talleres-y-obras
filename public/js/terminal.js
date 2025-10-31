@@ -2135,6 +2135,421 @@ function numeroDesdeToken(token) {
   return MAPA_NUMEROS[normal] || NaN;
 }
 
+// --- Modal Cerrar Sesion: creación segura (si ya existe en HTML, lo usa) ---
+function asegurarModalCerrarSesion() {
+  let modalEl = document.getElementById('modalCerrarSesion');
+  if (!modalEl) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <div class="modal fade" id="modalCerrarSesion" tabindex="-1" aria-labelledby="modalCerrarSesionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="z-index:2147483650;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalCerrarSesionLabel">Confirmación</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalCerrarSesionBody">
+              ¿Desea cerrar sesion
+            </div>
+            <div class="modal-footer">
+              <button id="btnCancelarCerrarSesion" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button id="btnAceptarCerrarSesion" type="button" class="btn btn-danger">Aceptar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(wrapper);
+    modalEl = document.getElementById('modalCerrarSesion');
+  }
+  return modalEl;
+}
+
+// --- Acción que ejecuta el cierre real de sesión (sin UI) ---
+function ejecutarCerrarSesion() {
+  try {
+    recognitionGlobalPaused = true;
+    safeStopRecognitionGlobal();
+  } catch (e) {
+    console.warn('⚠️ ejecutarCerrarSesion: safeStopRecognitionGlobal falló', e);
+  }
+
+  try {
+    localStorage.removeItem('id_usuario');
+    console.log('🔓 Sesión cerrada (ejecutarCerrarSesion), volviendo a step1');
+  } catch (e) {
+    console.warn('⚠️ ejecutarCerrarSesion: error limpiando localStorage', e);
+  }
+
+  try { window.nextStep && window.nextStep(1); } catch (e) { console.warn('⚠️ ejecutarCerrarSesion: nextStep(1) falló', e); }
+
+  // reintentar levantar reconocimiento después de un pequeño delay (opcional)
+  try {
+    recognitionGlobalPaused = false;
+    setTimeout(() => {
+      safeStartRecognitionGlobal();
+      console.log('🎤 recognitionGlobal: intento de reinicio tras logout');
+    }, 120);
+  } catch (e) {
+    console.warn('⚠️ ejecutarCerrarSesion: safeStartRecognitionGlobal falló', e);
+  }
+}
+
+// --- Mostrar modal y conectar botones (idempotente) ---
+function mostrarModalCerrarSesion() {
+  const modalEl = asegurarModalCerrarSesion();
+  if (!modalEl) return;
+
+  if (modalEl._opening) return;
+  modalEl._opening = true;
+
+  recognitionGlobalPaused = true;
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ mostrarModalCerrarSesion: safeStop falló', e); }
+
+  const aceptarBtn = modalEl.querySelector('#btnAceptarCerrarSesion');
+  const cancelarBtn = modalEl.querySelector('#btnCancelarCerrarSesion');
+
+  function onAceptar() {
+    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
+    modalEl._opening = false;
+    ejecutarCerrarSesion();
+    setTimeout(() => {
+      recognitionGlobalPaused = false;
+      safeStartRecognitionGlobal();
+      console.log('🎤 recognitionGlobal: reiniciado tras aceptar cierre de sesión');
+    }, 120);
+  }
+
+  function onCancelar() {
+    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
+    modalEl._opening = false;
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+    console.log('🎤 recognitionGlobal: reiniciado tras cancelar cierre de sesión');
+  }
+
+  try { aceptarBtn && aceptarBtn.removeEventListener('click', onAceptar); } catch (e) {}
+  try { cancelarBtn && cancelarBtn.removeEventListener('click', onCancelar); } catch (e) {}
+  if (aceptarBtn) aceptarBtn.addEventListener('click', onAceptar);
+  if (cancelarBtn) cancelarBtn.addEventListener('click', onCancelar);
+
+  try {
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  } catch (e) {
+    if (confirm('¿Desea cerrar sesion')) {
+      onAceptar();
+    } else {
+      onCancelar();
+    }
+  }
+
+  // 🎤 Reconocimiento de voz local dentro del modal
+  try {
+    if ('webkitSpeechRecognition' in window) {
+      const recog = new webkitSpeechRecognition();
+      recog.lang = 'es-ES';
+      recog.continuous = true;
+      recog.interimResults = false;
+
+      recog.onresult = function (event) {
+  const textoRec = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+  console.log('🎤 Texto reconocido (modal cerrar sesión):', textoRec);
+  if (modalEl._actionTaken) return;
+
+  if (textoRec.includes('acept') || textoRec.includes('confirm')) {
+    modalEl._actionTaken = true;
+    console.log('🟢 cerrar sesión: voz reconocida como aceptar');
+    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch(e){}
+    ejecutarCerrarSesion();
+    setTimeout(() => {
+      recognitionGlobalPaused = false;
+      safeStartRecognitionGlobal();
+      console.log('🎤 recognitionGlobal: reiniciado tras aceptar por voz');
+    }, 120);
+    try { recog.stop(); } catch(e){}
+  } else if (textoRec.includes('cancel')) {
+    modalEl._actionTaken = true;
+    console.log('🔴 cerrar sesión: voz reconocida como cancelar');
+    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch(e){}
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+    try { recog.stop(); } catch(e){}
+  } else {
+    console.log('⚠️ cerrar sesión: voz reconocida pero no válida → ignorada');
+    
+    try {
+  recog.stop();
+  setTimeout(() => {
+    try {
+      recog.start();
+      console.log('🔁 reconocimiento local (modal cerrar sesión) reiniciado tras comando no válido');
+    } catch (err) {
+      if (err.name === 'InvalidStateError') {
+        console.log('⚠️ recog.start() ignorado: ya estaba iniciado');
+      } else {
+        console.warn('⚠️ recog.start() falló:', err);
+      }
+    }
+  }, 200);
+} catch (e) {
+  console.warn('⚠️ recog.stop() falló antes de reiniciar:', e);
+}
+
+  }
+};
+
+
+
+      recog.onerror = function (e) {
+        console.warn('Reconocimiento modal cerrar sesión falló', e);
+      };
+
+      modalEl._recogInstance = recog;
+      try {
+        recog.start();
+        console.log('🎤 reconocimiento local (modal cerrar sesión) iniciado');
+      } catch (e) {
+        console.warn('No se pudo iniciar recog modal cerrar sesión', e);
+      }
+    }
+  } catch (e) {
+    console.warn('No se pudo crear reconocimiento modal cerrar sesión', e);
+  }
+
+  // 🧼 Limpieza al cerrar el modal
+  const onHidden = () => {
+    modalEl.removeEventListener('hidden.bs.modal', onHidden);
+    modalEl._opening = false;
+    try {
+      const recog = modalEl._recogInstance;
+      if (recog) {
+        recog.onresult = null;
+        recog.onerror = null;
+        recog.stop();
+      }
+    } catch (e) {
+      console.warn('No se pudo limpiar recog modal cerrar sesión', e);
+    }
+    modalEl._recogInstance = null;
+    modalEl._actionTaken = false;
+    recognitionGlobalPaused = false;
+    try {
+      safeStartRecognitionGlobal();
+      console.log('🎤 recognitionGlobal: reiniciado tras cerrar modal de sesión');
+    } catch (e) {
+      console.warn('⚠️ No se pudo reiniciar reconocimiento tras cerrar modal de sesión', e);
+    }
+  };
+  modalEl.addEventListener('hidden.bs.modal', onHidden, { once: true });
+}
+
+
+// --- Asegurar y conectar botones flotantes y comportamiento (idempotente) ---
+function asegurarYConectarBotonesFlotantes() {
+  // wrapper (no bloqueante)
+  let wrapper = document.getElementById('floating-controls');
+  if (!wrapper) {
+    wrapper = document.createElement('div');
+    wrapper.id = 'floating-controls';
+    wrapper.style.pointerEvents = 'none';
+    document.body.appendChild(wrapper);
+  }
+
+  // boton Cerrar Sesion
+  let btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
+  if (!btnCerrar) {
+    btnCerrar = document.createElement('button');
+    btnCerrar.id = 'boton-flotante-cerrar-sesion';
+    btnCerrar.type = 'button';
+    btnCerrar.title = 'Cerrar sesión';
+    btnCerrar.style.position = 'fixed';
+    btnCerrar.style.top = '12px';
+    btnCerrar.style.right = '12px';
+    btnCerrar.style.zIndex = '2147483647';
+    btnCerrar.style.background = '#dc3545';
+    btnCerrar.style.color = '#fff';
+    btnCerrar.style.border = 'none';
+    btnCerrar.style.padding = '10px 14px';
+    btnCerrar.style.borderRadius = '6px';
+    btnCerrar.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)';
+    btnCerrar.style.fontSize = '14px';
+    btnCerrar.style.cursor = 'pointer';
+    btnCerrar.style.pointerEvents = 'auto';
+    btnCerrar.textContent = 'Cerrar sesión';
+    btnCerrar.setAttribute('aria-label', 'Cerrar sesión');
+    wrapper.appendChild(btnCerrar);
+  }
+
+  // boton Menu Principal
+  let btnMenu = document.getElementById('boton-flotante-menu-principal');
+  if (!btnMenu) {
+    btnMenu = document.createElement('button');
+    btnMenu.id = 'boton-flotante-menu-principal';
+    btnMenu.type = 'button';
+    btnMenu.title = 'Menu principal';
+    btnMenu.style.position = 'fixed';
+    btnMenu.style.bottom = '18px';
+    btnMenu.style.left = '50%';
+    btnMenu.style.transform = 'translateX(-50%)';
+    btnMenu.style.zIndex = '2147483646';
+    btnMenu.style.background = '#0d6efd';
+    btnMenu.style.color = '#fff';
+    btnMenu.style.border = 'none';
+    btnMenu.style.padding = '10px 16px';
+    btnMenu.style.borderRadius = '8px';
+    btnMenu.style.boxShadow = '0 4px 10px rgba(0,0,0,0.12)';
+    btnMenu.style.fontSize = '15px';
+    btnMenu.style.cursor = 'pointer';
+    btnMenu.style.pointerEvents = 'auto';
+    btnMenu.textContent = 'Menu principal';
+    btnMenu.setAttribute('aria-label', 'Menu principal');
+    wrapper.appendChild(btnMenu);
+  }
+
+  // listeners (idempotentes)
+  if (!btnCerrar._listenerAttached) {
+    btnCerrar.addEventListener('click', () => {
+      console.log('🔒 Cerrar sesión: botón flotante pulsado');
+      mostrarModalCerrarSesion();
+    });
+    btnCerrar._listenerAttached = true;
+  }
+
+  if (!btnMenu._listenerAttached) {
+    btnMenu.addEventListener('click', () => {
+      console.log('📋 Menu principal: botón pulsado');
+      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ Menu principal: safeStop falló', e); }
+      try {
+        window.nextStep && window.nextStep(2);
+        try { cargarMenuPrincipal && cargarMenuPrincipal(); } catch (e) {}
+        console.log('➡️ Navegando a step2 (¿Qué querés hacer?)');
+      } catch (e) { console.warn('⚠️ Menu principal: nextStep(2) falló', e); }
+      try { setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 recognitionGlobal: intento reinicio tras ir a menu principal'); }, 120); } catch(e){}
+    });
+    btnMenu._listenerAttached = true;
+  }
+
+  return { btnCerrar, btnMenu };
+}
+
+// --- Control de visibilidad: ocultar en step1 ---
+function actualizarVisibilidadBotonesPorStep(stepId) {
+  const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
+  const btnMenu = document.getElementById('boton-flotante-menu-principal');
+  if (!btnCerrar || !btnMenu) return;
+  const ocultar = (stepId === 'step1' || stepId === 1);
+  btnCerrar.style.display = ocultar ? 'none' : 'inline-block';
+  btnMenu.style.display = ocultar ? 'none' : 'inline-block';
+  console.log(ocultar ? '👀 Botones ocultos (step1)' : '👀 Botones visibles (no-step1)');
+}
+
+// --- DOMContentLoaded actualizado: inicia QR devolucion, crea botones y wrap nextStep ---
+document.addEventListener('DOMContentLoaded', () => {
+  // Inicializar escáner QR de devolución (como antes)
+  try {
+    const qrScanner = new Html5Qrcode("qr-reader-devolucion");
+    qrScanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      onScanSuccess
+    );
+    console.log('📷 QR devolucion: escáner iniciado (DOMContentLoaded)');
+  } catch (e) {
+    console.warn('⚠️ QR devolucion: no se pudo iniciar escáner en DOMContentLoaded', e);
+  }
+
+  // Asegurar modal y botones
+  asegurarModalCerrarSesion();
+  asegurarYConectarBotonesFlotantes();
+
+  // Wrap nextStep para mantener visibilidad sin romper lógica existente
+  try {
+    const originalNextStep = window.nextStep && typeof window.nextStep === 'function' ? window.nextStep : null;
+    if (originalNextStep) {
+      window.nextStep = function (n) {
+        try { originalNextStep(n); } catch (e) { console.warn('⚠️ nextStep (original) falló desde wrapper', e); }
+        const stepId = typeof n === 'number' ? 'step' + n : String(n);
+        setTimeout(() => actualizarVisibilidadBotonesPorStep(stepId), 40);
+      };
+      console.log('🔧 nextStep envuelto para controlar visibilidad de botones flotantes');
+    } else {
+      setTimeout(() => {
+        const current = getStepActivo();
+        actualizarVisibilidadBotonesPorStep(current);
+      }, 60);
+    }
+  } catch (e) {
+    console.warn('⚠️ No se pudo wrappear nextStep', e);
+  }
+
+  // Aplicar visibilidad inicial
+  try {
+    const current = getStepActivo();
+    actualizarVisibilidadBotonesPorStep(current);
+  } catch (e) {
+    console.warn('⚠️ No se pudo determinar step activo para visibilidad inicial', e);
+  }
+});
+
+// Defensive guards: evitar errores si elementos no existen o librerías no cargadas
+(function safeBindings() {
+  // Guardar referencias seguras para elementos que se usan fuera de DOMContentLoaded
+  if (typeof document !== 'undefined') {
+    // btnConfirmarDevolucion se usa en varios sitios; aseguramos binding seguro
+    const btnConfirmar = document.getElementById('btnConfirmarDevolucion');
+    if (btnConfirmar && !btnConfirmar._safeClickAttached) {
+      try {
+        btnConfirmar.addEventListener('click', confirmarDevolucionActual);
+        btnConfirmar._safeClickAttached = true;
+        console.log('✅ safeBindings: btnConfirmarDevolucion conectado de forma segura');
+      } catch (e) {
+        console.warn('⚠️ safeBindings: no se pudo conectar btnConfirmarDevolucion', e);
+      }
+    }
+  }
+
+  // Asegurar existencia de bootstrap antes de usarlo en cualquier lugar inicial
+  if (typeof window !== 'undefined' && typeof window.bootstrap === 'undefined') {
+    console.log('ℹ️ safeBindings: bootstrap no disponible todavía');
+  }
+})();
+
+// Patch idempotente para asegurar que los botones del modal "Cerrar sesión" reaccionen
+(function asegurarConexionModalCerrarSesion() {
+  function info(...args){ console.log('🔧 modal-patch:', ...args); }
+  function warn(...args){ console.warn('🔧 modal-patch:', ...args); }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(() => {
+      const modalEl = document.getElementById('modalCerrarSesion');
+      if (!modalEl) { warn('modalCerrarSesion no encontrado en el DOM'); return; }
+      const aceptarBtn = modalEl.querySelector('#btnAceptarCerrarSesion');
+      const cancelarBtn = modalEl.querySelector('#btnCancelarCerrarSesion');
+
+      if (!aceptarBtn) warn('btnAceptarCerrarSesion no encontrado');
+      if (!cancelarBtn) warn('btnCancelarCerrarSesion no encontrado');
+
+      function onAceptar() {
+        info('Aceptar pulsado (patch). Ejecutando cerrar sesión.');
+        try { ejecutarCerrarSesion && ejecutarCerrarSesion(); } catch(e){ console.warn(e); }
+      }
+      function onCancelar() {
+        info('Cancelar pulsado (patch). Cerrando modal y reanudando reconocimiento.');
+        try { const inst = bootstrap.Modal.getInstance(modalEl); inst && inst.hide && inst.hide(); } catch(e){}
+        recognitionGlobalPaused = false;
+        try { safeStartRecognitionGlobal && safeStartRecognitionGlobal(); } catch (e) { warn('safeStartRecognitionGlobal fallo:', e); }
+      }
+
+      try { aceptarBtn && aceptarBtn.removeEventListener('click', onAceptar); } catch(e){}
+      try { cancelarBtn && cancelarBtn.removeEventListener('click', onCancelar); } catch(e){}
+      if (aceptarBtn) aceptarBtn.addEventListener('click', onAceptar);
+      if (cancelarBtn) cancelarBtn.addEventListener('click', onCancelar);
+
+      info('Patch conectado: aceptar:', !!aceptarBtn, 'cancelar:', !!cancelarBtn, 'bootstrap:', typeof window.bootstrap === 'object');
+    }, 50);
+  }, { once: true });
+})();
 
 
 function procesarComandoVoz(limpio) {
@@ -2164,6 +2579,27 @@ if (modalVisible) {
     console.log('⚠️ Reconocimiento global pausado, ignorando comando:', limpio);
     return;
   }
+
+// PRIORIDAD: comando exacto cerrar sesion (sin variaciones)
+if (limpio === 'cerrar sesion') {
+  console.log('🔐 Comando de voz exacto detectado: cerrar sesion');
+  mostrarModalCerrarSesion();
+  return;
+}
+
+// Manejo por voz EXACTO: "menu principal" -> ir a step2 y cargar menú principal
+if (limpio === 'menu principal') {
+  console.log('📋 Comando de voz exacto detectado: menu principal');
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ menu principal: safeStop falló', e); }
+  try {
+    window.nextStep && window.nextStep(2);
+    try { cargarMenuPrincipal && cargarMenuPrincipal(); } catch (e) {}
+    console.log('➡️ Navegando a step2 (¿Qué querés hacer?) por comando de voz "menu principal"');
+  } catch (e) { console.warn('⚠️ menu principal: nextStep(2) falló', e); }
+  try { setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 recognitionGlobal: intento reinicio tras menu principal (voz)'); }, 120); } catch(e){}
+  return;
+}
+
 
   // === Step1: Login ===
 if (step === 'step1') {
