@@ -240,6 +240,11 @@ class ControlEPPController extends Controller
         'arnes' => 'nullable|boolean',
     ]);
 
+    $request->merge([
+    'observaciones' => $request->observaciones ?: 'Sin observaciones',
+    ]);
+
+
     // 🔎 Buscar si ya existe un checklist del mismo trabajador hoy
     $checklist = Checklist::where('trabajador_id', $request->trabajador_id)
         ->whereDate('fecha', Carbon::today())

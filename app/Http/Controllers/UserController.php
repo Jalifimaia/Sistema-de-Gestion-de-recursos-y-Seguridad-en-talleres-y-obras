@@ -190,21 +190,35 @@ public function update(UserRequest $request, $id): RedirectResponse
      * Cambiar estado a Alta.
      */
     public function porEstado($estado)
-    {
-        $estadoModelo = EstadoUsuario::where('nombre', $estado)->first();
+{
+    // Mapear el valor recibido desde el frontend al nombre exacto en la base
+    $estadoNombre = match($estado) {
+        'alta' => 'Alta',
+        'standby' => 'stand by',
+        default => null,
+    };
 
-        if (! $estadoModelo) {
-            return response()->json([], 404);
-        }
-
-        $usuarios = User::where('id_estado', $estadoModelo->id)
-            ->where('id_rol', 3) // Solo trabajadores
-            ->select('id', 'name') // 👈 Solo ID y nombre
-            ->orderBy('name')
-            ->get();
-
-        return response()->json($usuarios);
+    if (! $estadoNombre) {
+        return response()->json([], 404);
     }
+
+    // Buscar el modelo de estado por nombre exacto
+    $estadoModelo = EstadoUsuario::where('nombre', $estadoNombre)->first();
+
+    if (! $estadoModelo) {
+        return response()->json([], 404);
+    }
+
+    // Filtrar solo trabajadores con ese estado
+    $usuarios = User::where('id_estado', $estadoModelo->id)
+        ->where('id_rol', 3) // Solo trabajadores
+        ->select('id', 'name')
+        ->orderBy('name')
+        ->get();
+
+    return response()->json($usuarios);
+}
+
 
 
     public function darDeAlta($id): RedirectResponse
