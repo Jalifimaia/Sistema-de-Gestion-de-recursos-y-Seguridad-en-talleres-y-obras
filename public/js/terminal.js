@@ -1375,11 +1375,11 @@ async function registrarSerie(serieId, boton = null) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const idUsuario = localStorage.getItem('id_usuario');
+ /* const idUsuario = localStorage.getItem('id_usuario');
   if (!idUsuario) {
     mostrarMensajeKiosco('⚠️ Usuario no identificado', 'danger');
     return;
-  }
+  }*/
 
   // Inicializar escáner QR
   const qrScanner = new Html5Qrcode("qr-reader-devolucion");
