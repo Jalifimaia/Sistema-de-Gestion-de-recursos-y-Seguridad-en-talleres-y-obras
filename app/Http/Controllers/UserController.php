@@ -87,7 +87,7 @@ public function store(UserRequest $request): RedirectResponse
      */
     public function edit($id): View
     {
-        $usuario = User::with('estado')->findOrFail($id);
+        $usuario = User::with(['estado', 'usuarioRecursos'])->findOrFail($id);
         $roles = Rol::all();
         $estados = EstadoUsuario::all();
 

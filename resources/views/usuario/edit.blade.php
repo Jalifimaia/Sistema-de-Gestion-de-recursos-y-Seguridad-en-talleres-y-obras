@@ -104,16 +104,17 @@
                     <div class="mt-3">
                         <h6>EPP asignado:</h6>
                         <ul>
-                            @foreach (['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'] as $tipo)
-                            <li>
-                                {{ ucfirst($tipo) }}:
-                                @if ($usuario->usuarioRecursos->where('tipo_epp', $tipo)->isNotEmpty())
-                                ✅
-                                @else
-                                ❌
-                                @endif
-                            </li>
+                           @foreach (['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'] as $tipo)
+                                <li>
+                                    {{ ucfirst($tipo) }}:
+                                    @if (optional($usuario->usuarioRecursos)->where('tipo_epp', $tipo)->isNotEmpty())
+                                        ✅
+                                    @else
+                                        ❌
+                                    @endif
+                                </li>
                             @endforeach
+
                         </ul>
                         </div>
 
