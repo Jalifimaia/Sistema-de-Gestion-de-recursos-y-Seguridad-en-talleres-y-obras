@@ -281,6 +281,7 @@
   align-items: center;
   gap: 8px;
   pointer-events: none;
+  display:none
 ">
   <span id="micStatusIcon">🎤</span>
   <span id="micStatusText" class="badge text-bg-success">Micrófono activo</span>
