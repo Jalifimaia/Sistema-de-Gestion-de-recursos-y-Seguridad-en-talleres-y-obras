@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('template_title')
-    Agregar Serie a {{ $recurso->nombre }}
+    Agregar Series a {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
 @endsection
 
 @section('content')
 <div class="container py-4">
-    <h3 class="mb-4">Agregar Serie para: {{ $recurso->nombre }}</h3>
+    <h3 class="mb-4">
+        Agregar Series para: {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
+    </h3>
 
     @if ($errors->any())
       <div class="alert alert-danger">
@@ -18,25 +20,51 @@
       </div>
     @endif
 
-    <form method="POST" action="{{ route('serie_recurso.storeMultiple') }}">
+    @if (session('success'))
+      <div class="alert alert-success">
+        {{ session('success') }}
+      </div>
+    @endif
+
+    @php
+        // Requiere talle si la SUBCATEGORÍA es Chaleco o Botas
+        $sub = strtolower($recurso->subcategoria->nombre ?? '');
+        $requiereTalle = in_array($sub, ['chaleco', 'botas']);
+    @endphp
+
+    <form method="POST" action="{{ route('serie_recurso.storeMultiple') }}" id="formSeries">
         @csrf
-
-        <!-- Campo oculto para enviar el id del recurso -->
         <input type="hidden" name="id_recurso" value="{{ $recurso->id }}">
+        <input type="hidden" name="combinaciones" id="combinaciones">
 
         <div class="mb-3">
-            <label for="nro_serie" class="form-label">Prefijo de Serie</label>
-            <input type="text" name="nro_serie" id="nro_serie" class="form-control" required>
+            <label for="descripcion" class="form-label">Descripción del recurso</label>
+            <input type="text" id="descripcion" class="form-control" value="{{ $recurso->descripcion }}" disabled>
         </div>
 
         <div class="mb-3">
-            <label for="cantidad" class="form-label">Cantidad de series</label>
-            <input type="number" name="cantidad" id="cantidad" class="form-control" min="1" required>
+            <label for="version" class="form-label">Versión</label>
+            <select name="version" id="version" class="form-select" required>
+                <option value="" disabled selected>Seleccione versión</option>
+                @for($i = 1; $i <= 10; $i++)
+                    <option value="{{ $i }}">{{ $i }}</option>
+                @endfor
+            </select>
         </div>
 
-        <div id="campoTalle" class="mb-3">
-            <label for="talle" class="form-label">Talle</label>
-            <input type="text" name="talle" id="talle" class="form-control" placeholder="Ej: M, L, XL">
+        <div class="mb-3">
+            <label for="anio" class="form-label">Año</label>
+            <select name="anio" id="anio" class="form-select" required>
+                <option value="" disabled selected>Seleccione año</option>
+                @for($y = 2000; $y <= now()->year; $y++)
+                    <option value="{{ $y }}">{{ $y }}</option>
+                @endfor
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="lote" class="form-label">Lote</label>
+            <input type="number" name="lote" id="lote" class="form-control" placeholder="Ingrese el N° de lote" min="1" required>
         </div>
 
         <div class="mb-3">
@@ -49,63 +77,46 @@
             <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="form-control">
         </div>
 
-        <div class="mb-3">
-            <label for="id_estado" class="form-label">Estado</label>
-            <select name="id_estado" id="id_estado" class="form-select">
-                @foreach($estados as $estado)
-                    <option value="{{ $estado->id }}">{{ $estado->nombre_estado }}</option>
-                @endforeach
-            </select>
+            <input type="hidden" name="id_estado" value="{{ $estadoDisponible->id }}">
+
+
+        <div class="mb-4">
+            <h5>Series por {{ $requiereTalle ? 'Talle y Color' : 'Color' }}</h5>
+            <table class="table table-bordered text-center">
+                <thead class="table-light">
+                    <tr>
+                        @if($requiereTalle)
+                            <th>Tipo de Talle</th>
+                            <th>Talle</th>
+                        @endif
+                        <th>Color</th>
+                        <th>Cantidad</th>
+                        <th>Código</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="combinacionesBody">
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-outline-primary" onclick="agregarFila()">+ Agregar combinación</button>
         </div>
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success">Guardar Serie</button>
-            <a href="{{ route('inventario') }}" class="btn btn-secondary">Volver</a>
-        </div>
+        <button type="submit" class="btn btn-success" id="btnGuardar">Guardar Series</button>
+        <a href="{{ route('inventario') }}" class="btn btn-secondary ms-2">Volver</a>
     </form>
 </div>
-
-<!-- Modal: serie guardada -->
-@if(session('success'))
-<div class="modal fade" id="modalSerieGuardada" tabindex="-1" aria-labelledby="modalSerieGuardadaLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title" id="modalSerieGuardadaLabel">Serie guardada</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        {{ session('success') }}
-      </div>
-      <div class="modal-footer">
-        <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
-      </div>
-    </div>
-  </div>
-</div>
-@endif
 @endsection
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  // Mostrar modal de éxito si existe en DOM
-  const modalEl = document.getElementById('modalSerieGuardada');
-  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-    new bootstrap.Modal(modalEl).show();
-  }
-
-  // (Opcional) ejemplo sencillo para ocultar campo talle según categoría
-  try {
-    const categoriaRecurso = "{{ strtolower($recurso->categoria->nombre_categoria ?? '') }}";
-    const campoTalle = document.getElementById('campoTalle');
-    if (categoriaRecurso && !['epp','ropa','vestimenta'].includes(categoriaRecurso)) {
-      // ocultar talle para categorías que no aplican
-      campoTalle.style.display = 'none';
-    }
-  } catch(e) {
-    console.debug('No se aplicó lógica de talle:', e);
-  }
-});
+    window.colores = @json($colores->map(fn($c) => ['id' => $c->id, 'nombre' => $c->nombre]));
+    window.nombreRecurso = @json($recurso->nombre);
+    window.descripcionRecurso = @json($recurso->descripcion);
+    window.requiereTalle = @json($requiereTalle);
+    window.tallesPorTipo = @json($talles); // 👈 ahora viene de la BD
 </script>
+<script src="{{ asset('js/serieRecurso.js') }}"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 @endpush

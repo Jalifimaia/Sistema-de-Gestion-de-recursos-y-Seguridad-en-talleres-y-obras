@@ -18,6 +18,9 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use Spatie\Browsershot\Browsershot;
+use App\Models\Color;
+use App\Services\SerieGeneratorService;
+
 
 class SerieRecursoController extends Controller
 {
@@ -37,38 +40,72 @@ class SerieRecursoController extends Controller
      */
 
 
-public function storeMultiple(Request $request): RedirectResponse
+public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorService $generator)
 {
-    \Log::info('QR generado: ' . 'QR-' . Str::uuid());
+    $data = $request->validated();
 
-    $request->validate([
-        'id_recurso' => 'required|exists:recurso,id',
-        'cantidad' => 'required|integer|min:1|max:100',
-        'nro_serie' => 'required|string',
-        'talle' => 'nullable|string|max:50',
-        'fecha_adquisicion' => 'required|date',
-        'fecha_vencimiento' => 'nullable|date|after_or_equal:fecha_adquisicion',
-        'id_estado' => 'required|exists:estado,id',
+    if (\Carbon\Carbon::parse($data['fecha_adquisicion'])->isAfter(now())) {
+    throw \Illuminate\Validation\ValidationException::withMessages([
+        'fecha_adquisicion' => 'La fecha de adquisición no puede ser mayor a la fecha actual.'
     ]);
+    }
 
-for ($i = 1; $i <= $request->cantidad; $i++) {
-    $serie = SerieRecurso::create([
-        'id_recurso'        => $request->id_recurso,
-        'nro_serie'         => $request->nro_serie . ' - ' . str_pad($i, 3, '0', STR_PAD_LEFT),
-        'talle'             => $request->talle,
-        'fecha_adquisicion' => $request->fecha_adquisicion,
-        'fecha_vencimiento' => $request->fecha_vencimiento,
-        'id_estado'         => $request->id_estado,
-        'codigo_qr'         => 'QR-' . Str::uuid(), // 👈 Generación automática
-    ]);
+    $recurso = Recurso::with('subcategoria')->findOrFail($data['id_recurso']);
+    $combinaciones = json_decode($data['combinaciones'], true) ?? [];
 
-    \Log::info('Serie creada con QR: ' . $serie->codigo_qr);
+    $requiereTalle = in_array(strtolower($recurso->subcategoria->nombre ?? ''), ['chaleco', 'botas']);
+
+    $tipoEsperado = match (strtolower($recurso->subcategoria->nombre ?? '')) {
+        'chaleco' => 'Ropa',
+        'botas' => 'Calzado',
+        default => null,
+    };
+
+
+foreach ($combinaciones as $combo) {
+    if (empty($combo['color_nombre'])) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'combinaciones' => 'Falta color en una combinación.'
+        ]);
+    }
+
+    if ($requiereTalle && (empty($combo['talle']) || empty($combo['tipo_talle']))) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'combinaciones' => 'Falta talle o tipo en una combinación.'
+        ]);
+    }
+
+    if ($requiereTalle && $tipoEsperado && !in_array(strtolower($combo['tipo_talle']), [strtolower($tipoEsperado), 'otro'])) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'combinaciones' => "El tipo de talle debe ser '{$tipoEsperado}' u 'Otro' para el recurso seleccionado."
+        ]);
+    }
+
+    if (empty($combo['cantidad']) || $combo['cantidad'] < 1) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'combinaciones' => 'Cantidad inválida en una combinación.'
+        ]);
+    }
 }
 
+    foreach ($combinaciones as $combo) {
+        $generator->createForCombination(
+            $recurso,
+            $data['version'],
+            $data['anio'],
+            $data['lote'],
+            $combo['color_nombre'],
+            $requiereTalle ? $combo['talle'] : null,
+            (int) $combo['cantidad'],
+            [
+                'fecha_adquisicion' => $data['fecha_adquisicion'],
+                'fecha_vencimiento' => $data['fecha_vencimiento'] ?? null,
+                'id_estado' => Estado::where('nombre_estado', 'Disponible')->value('id') ?? 1,
+            ]
+        );
+    }
 
-    // redirigir a la misma vista de creación con mensaje en sesión para mostrar modal
-    return redirect()->route('serie_recurso.createConRecurso', $request->id_recurso)
-        ->with('success', 'Serie(s) guardada(s) correctamente.');
+    return redirect()->route('inventario')->with('success', 'Series creadas correctamente.');
 }
 
 
@@ -76,12 +113,22 @@ for ($i = 1; $i <= $request->cantidad; $i++) {
 public function createConRecurso($id)
 {
     $recurso = Recurso::findOrFail($id);
-    $estados = Estado::all(); 
+    $colores = Color::select('id', 'nombre')
+    ->whereRaw("nombre REGEXP '^[^0-9]+$'") // excluye nombres numéricos
+    ->orderBy('nombre')
+    ->get();
 
-    return view('serie_recurso.create', compact('recurso', 'estados'));
+
+    // ✅ Agrupar talles por tipo
+    $talles = \App\Models\Talle::all()
+        ->groupBy('tipo')
+        ->map(fn($group) => $group->pluck('nombre')->values());
+
+    // ✅ Obtener estado "Disponible"
+    $estadoDisponible = Estado::where('nombre_estado', 'Disponible')->firstOrFail();
+
+    return view('serie_recurso.create', compact('recurso', 'colores', 'talles', 'estadoDisponible'));
 }
-
-
 
 
     /**
@@ -132,10 +179,6 @@ public function createConRecurso($id)
     $series = SerieRecurso::with('recurso')->orderByDesc('id')->get();
     return view('serie_recurso.qrindex', compact('series'));
 }
-
-
-
-
 
 public function exportQrPdf($id)
 {

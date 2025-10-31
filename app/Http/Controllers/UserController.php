@@ -189,6 +189,24 @@ public function update(UserRequest $request, $id): RedirectResponse
     /**
      * Cambiar estado a Alta.
      */
+    public function porEstado($estado)
+    {
+        $estadoModelo = EstadoUsuario::where('nombre', $estado)->first();
+
+        if (! $estadoModelo) {
+            return response()->json([], 404);
+        }
+
+        $usuarios = User::where('id_estado', $estadoModelo->id)
+            ->where('id_rol', 3) // Solo trabajadores
+            ->select('id', 'name') // 👈 Solo ID y nombre
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($usuarios);
+    }
+
+
     public function darDeAlta($id): RedirectResponse
     {
         $usuario = User::findOrFail($id);

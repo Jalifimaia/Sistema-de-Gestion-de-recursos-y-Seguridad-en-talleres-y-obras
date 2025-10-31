@@ -14,7 +14,11 @@ use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\OperarioHerramientaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\KioskoController;
+use App\Http\Controllers\ControlEPPController;
+use App\Http\Controllers\ColorController;
 use App\Http\Controllers\UsuarioController;
+use App\Models\Recurso;
+use App\Models\SerieRecurso;
 
 
 use App\Models\Subcategoria;
@@ -116,12 +120,66 @@ Route::get('/operario/epp', fn() => view('operario.epp'));
 Route::get('/supervisor/control-herramientas', fn() => view('supervisor.control_herramientas'));
 Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp'));
 
+Route::get('/checklist-epp', [ControlEPPController::class, 'create'])->name('checklist.epp.create');
+Route::post('/checklist-epp', [ControlEPPController::class, 'store'])->name('checklist.epp.store');
+
+Route::get('/asignar-epp', [ControlEPPController::class, 'createAsignacionEPP'])->name('epp.asignar.create');
+Route::post('/asignar-epp', [ControlEPPController::class, 'storeAsignacionEPP'])->name('epp.asignar.store');
+
+// Trabajadores con recursos faltantes
+Route::get('/control-epp/faltantes', [ControlEPPController::class, 'faltantes'])->name('controlEPP.faltantes');
+
+// Trabajadores sin checklist diario
+Route::get('/control-epp/sin-checklist', [ControlEPPController::class, 'sinChecklist'])->name('controlEPP.sinChecklist');
+
+Route::get('/checklist-epp/tabla', [ControlEPPController::class, 'index'])->name('checklist.epp.tabla');
+
+Route::get('/checklist-epp/tabla', [ControlEPPController::class, 'verSoloChecklist'])->name('checklist.epp.tabla');
+
+Route::get('/checklist-epp', [ControlEPPController::class, 'create'])->name('checklist.epp');
+Route::post('/checklist-epp', [ControlEPPController::class, 'store'])->name('checklist.epp.store');
+
+//Color
+Route::post('/colores/crear', [ColorController::class, 'storeAjax'])->name('colores.storeAjax');
+
+
+Route::post('/usuarios/{id}/activar', [ControlEPPController::class, 'activarTrabajador'])->name('usuarios.activar');
+
+Route::get('/epp/faltantes', [ControlEPPController::class, 'faltantes'])->name('epp.faltantes');
+Route::get('/epp/sin-checklist', [ControlEPPController::class, 'sinChecklist'])->name('epp.sin_checklist');
+
+Route::get('/epp/asignados/{id}', function ($id) {
+    try {
+        $usuario = \App\Models\Usuario::with('usuarioRecursos.serieRecurso.recurso.subcategoria')->findOrFail($id);
+
+        $epps = $usuario->usuarioRecursos->map(function ($ur) {
+            return [
+                'tipo' => $ur->tipo_epp ?? ($ur->recurso->subcategoria->nombre ?? 'Sin tipo'),
+                'serie' => $ur->serieRecurso->nro_serie ?? 'Sin serie',
+                'fecha' => optional($ur->fecha_asignacion)->format('d/m/Y'),
+            ];
+        });
+
+        return response()->json($epps);
+    } catch (\Throwable $e) {
+        \Log::error("Error en /epp/asignados/{$id}: " . $e->getMessage());
+        return response()->json(['error' => 'Error interno del servidor'], 500);
+    }
+});
+
+
+
+Route::get('/trabajadores/por-estado/{estado}', [UserController::class, 'porEstado']);
+Route::get('/epp/disponibles/{tipo}', [ControlEPPController::class, 'buscarSeriesEPP']);
+
 /*
 |--------------------------------------------------------------------------
 | Rutas de Inventario
 |--------------------------------------------------------------------------
 */
 Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
+Route::get('/inventario/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
+Route::get('/inventario/ajax/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::resource('recursos', RecursoController::class);
 
 //QR de inventario
@@ -136,29 +194,33 @@ Route::get('/series-qr-lote', [SerieRecursoController::class, 'qrLote'])->name('
 Route::get('/series-qr-lote/pdf', [SerieRecursoController::class, 'exportQrLotePdf'])
     ->name('series.qr.lote.pdf');
 
+
+// SERIES
+Route::post('/serie-recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])->name('serie_recurso.storeMultiple');
+Route::get('/serie-recurso/create/{id}', [SerieRecursoController::class, 'createConRecurso'])->name('serie_recurso.createConRecurso');
+
 /*
 |--------------------------------------------------------------------------
 | Rutas AJAX para Préstamos
 |--------------------------------------------------------------------------
 */
 
-Route::get('/subcategorias/{categoriaId}', function ($categoriaId) {
+//Para Préstamos
+// 🔹 Subcategorías por categoría (para préstamos)
+Route::get('/prestamo/subcategorias/{categoriaId}', function ($categoriaId) {
     return Subcategoria::where('categoria_id', $categoriaId)->get(['id', 'nombre']);
 });
 
-
-Route::get('/prestamo/subcategorias/{categoriaId}', function ($categoriaId) {
-    return Subcategoria::where('categoria_id', $categoriaId)->get();
-});
-
+// 🔹 Recursos por subcategoría (para préstamos)
 Route::get('/prestamo/recursos/{subcategoriaId}', function ($subcategoriaId) {
-    return \App\Models\Recurso::where('id_subcategoria', $subcategoriaId)->get();
+    return Recurso::where('id_subcategoria', $subcategoriaId)->get(['id', 'nombre']);
 });
 
+// 🔹 Series disponibles por recurso (para préstamos)
 Route::get('/prestamo/series/{recursoId}', function ($recursoId) {
-    return \App\Models\SerieRecurso::where('id_recurso', $recursoId)
+    return SerieRecurso::where('id_recurso', $recursoId)
         ->where('id_estado', 1)
-        ->get();
+        ->get(['id', 'nro_serie']);
 });
 
 Route::post('/subcategorias', [SubcategoriaController::class, 'store']);
@@ -223,7 +285,10 @@ Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])
 */
 
 Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
-Route::post('/usuarios/{id}/alta', [UserController::class, 'darDeAlta'])->name('usuarios.alta');
+Route::post('/usuarios/{id}/alta', [ControlEPPController::class, 'activarTrabajador'])->name('usuarios.alta');
+
+Route::post('/asignarEPP', [ControlEPPController::class, 'store'])->name('asignarEPP.store');
+Route::get('/series-epp', [ControlEPPController::class, 'buscarSeriesEPP']);
 
 
 Route::get('serie_recurso/create-con-recurso/{id}', [SerieRecursoController::class, 'createConRecurso'])

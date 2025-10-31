@@ -56,7 +56,7 @@
 
   <!-- Botones superiores -->
   <div class="d-flex flex-wrap gap-2 mb-3">
-    <a href="{{ route('recursos.create') }}" class="btn btn-orange">Agregar Elemento</a>
+    <a href="{{ route('recursos.create') }}" class="btn btn-orange">Agregar recurso</a>
     <a href="{{ url('/series-qr') }}" class="btn btn-outline-secondary">📑 Ver todos los códigos QR</a>
   </div>
 
@@ -103,14 +103,14 @@
                       @foreach ($recurso->serieRecursos as $serie)
                         @php
                           $estadoNombre = $serie->estado->nombre_estado ?? 'Sin estado';
-                          $esEPP = strtolower($recurso->categoria->nombre_categoria) === 'epp';
+                          $esEPP = strtolower(optional($recurso->categoria)->nombre_categoria ?? '') === 'epp';
                         @endphp
                         <option 
                           value="{{ $serie->id }}"
                           data-estado="{{ $estadoNombre }}"
                           data-talle="{{ $esEPP ? $serie->talle : '' }}"
                         >
-                          {{ $serie->nro_serie }}{{ $esEPP && $serie->talle ? ' T:' . $serie->talle : '' }}
+                          {{ $serie->codigo->codigo_base ?? 'SIN-CODIGO' }}-{{ str_pad($serie->correlativo, 2, '0', STR_PAD_LEFT) }}{{ $esEPP && $serie->talle ? ' T:' . $serie->talle : '' }}
                         </option>
                       @endforeach
                     </select>
@@ -126,7 +126,7 @@
                      style="min-width: 160px; display: none;"></div>
               </td>
     
-              <td>{{ $recurso->categoria->nombre_categoria ?? 'Sin categoría' }}</td>
+              <td>{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
               <td>{{ $recurso->descripcion }}</td>
               <td class="text-nowrap">
                 <a href="{{ route('recursos.edit', $recurso->id) }}" class="btn btn-sm btn-orange">

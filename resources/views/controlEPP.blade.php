@@ -3,19 +3,13 @@
 @section('title', 'Control de EPP y Seguridad')
 
 @section('content')
-<div class="container py-4">
-  <!-- Encabezado -->
-  <header class="row mb-4">
-    <div class="col-md-8">
-      <h1 class="h4 fw-bold mb-1">Control de EPP y Seguridad</h1>
-      <p class="text-muted small">Gestión de equipos de protección personal y checklist de seguridad</p>
-    </div>
-    <div class="col-md-4 text-md-end text-muted small">
-      Fecha: <strong id="today" class="text-nowrap"></strong>
-    </div>
-  </header>
+<div class="container py-5">
 
-  <!-- Tarjetas resumen -->
+  <!-- 🔶 Encabezado -->
+  <h1 class="mb-4 text-center text-orange">🛡️ Control de EPP y Seguridad</h1>
+  <p class="text-muted text-center mb-5">Supervisión diaria de cumplimiento, asignaciones y checklist de seguridad</p>
+
+  <!-- 🔶 Tarjetas resumen -->
   <div class="row g-3 mb-4">
     <div class="col-md-3">
       <div class="card shadow-sm text-center h-100">
@@ -57,142 +51,73 @@
     </div>
   </div>
 
-<!-- ✅ Buscador -->
-<div class="mb-4 d-flex gap-2 flex-wrap">
-  <input type="text" class="form-control" style="min-width: 240px;" placeholder="Buscar por nombre de Trabajador/EPP...">
-  <!--<select class="form-select" style="min-width: 200px;">
-    <option>Todos los sectores</option>
-  </select>-->
-</div>
-
-<!-- ✅ Tabla de checklist diario -->
-<div class="card shadow-sm mb-4">
-  <div class="card-body">
-    <h5 class="card-title fw-bold">Checklist Diario</h5>
-    <p class="text-muted small">Cumplimiento de EPP por trabajador hoy</p>
-    <div class="table-responsive">
-      <table id="tablaChecklistDiario" class="table table-bordered text-center">
-        <thead>
-          <tr>
-            <th>Trabajador</th>
-            <th>Anteojos</th>
-            <th>Botas</th>
-            <th>Chaleco</th>
-            <th>Guantes</th>
-            <th>Arnés</th>
-            <th>Altura</th>
-            <th>Observaciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach($checklists as $c)
-          <tr>
-            <td>{{ $c->trabajador->name }}</td>
-            <td>{!! $c->anteojos ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
-            <td>{!! $c->botas ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
-            <td>{!! $c->chaleco ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
-            <td>{!! $c->guantes ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
-            <td>{!! $c->arnes ? '<span style="color:green;">&#10004;</span>' : '<span style="color:red;">&#10006;</span>' !!}</td>
-            <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
-            <td>{{ $c->observaciones }}</td>
-          </tr>
-          @endforeach
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <!-- 🔶 Botón para ver tabla completa del checklist -->
+<div class="text-start mb-4">
+  <a href="{{ route('checklist.epp.tabla') }}" class="btn btn-outline-secondary">
+    <i class="bi bi-table"></i> Ver tabla de checklist diario
+  </a>
 </div>
 
 
-<div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Detalle del Trabajador</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <!-- 🔶 Cards funcionales estilo reportes -->
+  <div class="row g-4 mb-5">
+    <!-- Checklist Diario -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title"><i class="bi bi-clipboard-check card-icon"></i> Checklist Diario</h5>
+          <p class="card-text">Registrar cumplimiento de EPP por trabajador.</p>
+          <a href="{{ route('checklist.epp') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ir a checklist</a>
+        </div>
       </div>
-      <div class="modal-body" id="detalleContenido">
-        Cargando...
+    </div>
+
+    <!-- Asignar EPP -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title"><i class="bi bi-person-plus card-icon"></i> Asignar EPP</h5>
+          <p class="card-text">Asignar recursos a trabajadores.</p>
+          <a href="{{ route('epp.asignar.create') }}" class="btn btn-outline-success btn-sm mt-auto w-100">Asignar EPP</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recursos faltantes -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title"><i class="bi bi-exclamation-circle card-icon"></i> Recursos Faltantes</h5>
+          <p class="card-text">Trabajadores sin todos los EPP obligatorios asignados.</p>
+          <a href="{{ route('epp.faltantes') }}" class="btn btn-outline-warning btn-sm mt-auto w-100">Ver faltantes</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist no registrado -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title"><i class="bi bi-calendar-x card-icon"></i> Checklist No Registrado</h5>
+          <p class="card-text">Trabajadores sin registro de checklist en el día.</p>
+          <a href="{{ route('controlEPP.sinChecklist') }}" class="btn btn-outline-danger btn-sm mt-auto w-100">Ver pendientes</a>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
+</div>
 @endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const inputBuscar = document.querySelector('input[placeholder="Buscar por nombre de Trabajador/EPP..."]');
-  const tablaDiario = document.querySelector('#tablaChecklistDiario tbody');
-
-  inputBuscar.addEventListener('keyup', function () {
-    const filtro = inputBuscar.value.toLowerCase().trim();
-
-    // Filtrar tabla checklist diario
-    if (tablaDiario) {
-      const filas = tablaDiario.querySelectorAll('tr');
-      filas.forEach(fila => {
-        const texto = fila.textContent.toLowerCase();
-        fila.style.display = texto.includes(filtro) ? '' : 'none';
-      });
-    }
-
-    // Ya existente: búsqueda dinámica para la tabla generada por JS
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      fetch("{{ route('matrizChecklist') }}", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ nombre: filtro })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.success) return;
-
-        const epps = data.epps;
-        const matriz = data.data;
-
-        let html = `
-          <table class="table table-bordered text-center">
-            <thead>
-              <tr>
-                <th style="background-color: #E36137; color: white;">Trabajador</th>
-                ${epps.map(eppNombre => `<th style="background-color: #E36137; color: white;">${eppNombre}</th>`).join('')}
-                <th style="background-color: #E36137; color: white;"> Acciones </th>
-              </tr>
-            </thead>
-            <tbody>
-              ${matriz.map(fila => `
-                <tr>
-                  <td>${fila.trabajador}</td>
-                  ${epps.map(eppNombre => `
-                    <td>
-                      ${fila[eppNombre] === '✅'
-                        ? '<span style="color: green;">&#10004;</span>'
-                        : '<span style="color: red;">&#10006;</span>'}
-                    </td>                  
-                  `).join('')}
-                    <td>
-                      <button class="btn btn-sm btn-primary ver-detalle" data-id="${fila.id}">
-                        VER
-                      </button>
-                    </td>                        
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        `;
-
-        document.querySelector('#tablaChecklistContainer').innerHTML = html;
-      });
-    }, 500);
-  });
-});
-</script>
-
-
-@endpush
+@section('styles')
+<style>
+  .card-icon {
+    font-size: 1.6rem;
+    margin-right: 0.5rem;
+    color: #f57c00;
+  }
+  .text-orange {
+    color: #f57c00;
+  }
+</style>
+@endsection

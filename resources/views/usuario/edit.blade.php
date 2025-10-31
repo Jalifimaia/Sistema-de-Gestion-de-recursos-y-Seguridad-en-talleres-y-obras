@@ -101,6 +101,23 @@
                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
                     </form>
 
+                    <div class="mt-3">
+                        <h6>EPP asignado:</h6>
+                        <ul>
+                            @foreach (['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'] as $tipo)
+                            <li>
+                                {{ ucfirst($tipo) }}:
+                                @if ($usuario->usuarioRecursos->where('tipo_epp', $tipo)->isNotEmpty())
+                                ✅
+                                @else
+                                ❌
+                                @endif
+                            </li>
+                            @endforeach
+                        </ul>
+                        </div>
+
+
                     {{-- Bloque de acciones de estado --}}
                     <div class="d-flex gap-2 mt-4">
 
