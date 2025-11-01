@@ -5,12 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const subcategoriaSelect = document.getElementById('id_subcategoria');
   const nuevaSubInput = document.getElementById('nuevaSubcategoria');
   const agregarBtn = document.getElementById('agregarSubcategoria');
+  const descripcion = document.getElementById('descripcion');
 
   // 🔹 Cargar subcategorías dinámicamente al cambiar categoría
   categoriaSelect.addEventListener('change', function () {
     const categoriaId = this.value;
-    console.log('Categoría seleccionada:', categoriaId);
-
     subcategoriaSelect.innerHTML = '<option>Cargando...</option>';
     subcategoriaSelect.disabled = true;
 
@@ -33,36 +32,47 @@ document.addEventListener('DOMContentLoaded', function () {
         subcategoriaSelect.disabled = false;
       })
       .catch(error => {
-        console.error('Error al cargar subcategorías:', error.message);
         subcategoriaSelect.innerHTML = '<option>Error al cargar</option>';
         subcategoriaSelect.disabled = true;
       });
   });
 
-  // 🔹 Envío del formulario de recurso
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
+  // 🔹 Agregar nueva subcategoría con validación contra duplicados
+  agregarBtn.addEventListener('click', function () {
+    const nombre = nuevaSubInput.value.trim();
+    const categoriaId = categoriaSelect.value;
 
-    const payload = {
-      id_subcategoria: subcategoriaSelect.value,
-      nombre: document.getElementById('nombre').value,
-      descripcion: document.getElementById('descripcion').value,
-      costo_unitario: document.getElementById('costo_unitario').value,
-    };
+    if (!nombre || !categoriaId) {
+      mensaje.innerHTML = `<div class="alert alert-warning">Escribí un nombre y seleccioná una categoría.</div>`;
+      return;
+    }
 
-    fetch('/recursos', {
+    const nombreNormalizado = nombre.toLowerCase();
+    const yaExiste = Array.from(subcategoriaSelect.options).some(opt =>
+      opt.textContent.trim().toLowerCase() === nombreNormalizado
+    );
+
+    if (yaExiste) {
+      mensaje.innerHTML = `<div class="alert alert-warning">⚠️ Esa subcategoría ya existe en esta categoría.</div>`;
+      return;
+    }
+
+    fetch('/subcategorias', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ nombre, categoria_id: categoriaId }),
     })
     .then(async res => {
       const contentType = res.headers.get('content-type');
       if (res.ok && contentType && contentType.includes('application/json')) {
         return res.json();
+      } else if (res.status === 409) {
+        const data = await res.json();
+        throw new Error(data.error || 'Ya existe una subcategoría con ese nombre.');
       } else if (res.status === 422) {
         const data = await res.json();
         const errores = Object.values(data.errors).flat().join('<br>');
@@ -73,127 +83,64 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     })
     .then(data => {
-      mensaje.innerHTML = `<div class="alert alert-success">Recurso creado correctamente.</div>`;
-      form.reset();
-      subcategoriaSelect.innerHTML = '<option value="">Seleccione una subcategoría</option>';
-      subcategoriaSelect.disabled = true;
+      categoriaSelect.dispatchEvent(new Event('change'));
+      setTimeout(() => {
+        subcategoriaSelect.value = data.id;
+      }, 300);
+
+      nuevaSubInput.value = '';
+      mensaje.innerHTML = `<div class="alert alert-success">Subcategoría agregada.</div>`;
     })
     .catch(error => {
-      console.error('Error al guardar el recurso:', error.message);
       mensaje.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
     });
   });
-
-  // 🔹 Agregar nueva subcategoría con validación contra duplicados
-agregarBtn.addEventListener('click', function () {
-  const nombre = nuevaSubInput.value.trim();
-  const categoriaId = categoriaSelect.value;
-
-  if (!nombre || !categoriaId) {
-    mensaje.innerHTML = `<div class="alert alert-warning">Escribí un nombre y seleccioná una categoría.</div>`;
-    return;
-  }
-
-  // Validación: evitar duplicados en la categoría actual
-  const nombreNormalizado = nombre.toLowerCase();
-  const yaExiste = Array.from(subcategoriaSelect.options).some(opt =>
-    opt.textContent.trim().toLowerCase() === nombreNormalizado
-  );
-
-  if (yaExiste) {
-    mensaje.innerHTML = `<div class="alert alert-warning">⚠️ Esa subcategoría ya existe en esta categoría.</div>`;
-    return;
-  }
-
-  fetch('/subcategorias', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-    },
-    body: JSON.stringify({ nombre, categoria_id: categoriaId }),
-  })
-  .then(async res => {
-    const contentType = res.headers.get('content-type');
-    if (res.ok && contentType && contentType.includes('application/json')) {
-      return res.json();
-    } else if (res.status === 409) {
-      const data = await res.json();
-      throw new Error(data.error || 'Ya existe una subcategoría con ese nombre.');
-    } else if (res.status === 422) {
-      const data = await res.json();
-      const errores = Object.values(data.errors).flat().join('<br>');
-      throw new Error(errores);
-    } else {
-      const text = await res.text();
-      throw new Error(`Respuesta inesperada del servidor. Código ${res.status}`);
-    }
-  })
-  .then(data => {
-    categoriaSelect.dispatchEvent(new Event('change'));
-    setTimeout(() => {
-      subcategoriaSelect.value = data.id;
-    }, 300);
-
-    nuevaSubInput.value = '';
-    mensaje.innerHTML = `<div class="alert alert-success">Subcategoría agregada.</div>`;
-  })
-  .catch(error => {
-    console.error('Error al agregar subcategoría:', error.message);
-    mensaje.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
-  });
-});
-
-// 🔹 Mostrar modal si existe
-const modalEl = document.getElementById('modalRecursoCreado');
-if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-  new bootstrap.Modal(modalEl).show();
-}
-
-// 🔹 Validación al presionar Enter en cualquier campo
-form.addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-
-    const requiredFields = form.querySelectorAll('[required]');
-    let firstInvalid = null;
-
-    requiredFields.forEach(field => {
-      const container = field.closest('.mb-3') || field.parentElement;
-      const errorId = 'error-' + field.id;
-
-      // Eliminar errores previos
-      const prevError = document.getElementById(errorId);
-      if (prevError) prevError.remove();
-
-      if (!field.value.trim()) {
-        if (!firstInvalid) firstInvalid = field;
-
-        const error = document.createElement('div');
-        error.className = 'text-danger small mt-1';
-        error.id = errorId;
-        error.textContent = 'Este campo es obligatorio.';
-        container.appendChild(error);
-      }
-    });
-
-    if (firstInvalid) {
-      firstInvalid.focus();
-    } else {
-      form.submit();
-    }
-  }
-});
-
-// 🔹 Envío del formulario con validación visual desde backend
-form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', function (e) {
   e.preventDefault();
 
+  // 🔹 Limpiar errores previos
+  form.querySelectorAll('.text-danger.small.mt-1').forEach(el => el.remove());
+
+  let firstInvalid = null;
+
+  // 🔹 Validar campos requeridos
+  const requiredFields = form.querySelectorAll('[required]');
+  requiredFields.forEach(field => {
+    const container = field.closest('.mb-3') || field.parentElement;
+    const errorId = 'error-' + field.id;
+
+    if (!field.value.trim()) {
+      const error = document.createElement('div');
+      error.className = 'text-danger small mt-1';
+      error.id = errorId;
+      error.textContent = 'Este campo es obligatorio.';
+      container.appendChild(error);
+      if (!firstInvalid) firstInvalid = field;
+    }
+  });
+
+  // 🔹 Validar descripción: máximo 4 palabras
+  const palabras = descripcion.value.trim().split(/\s+/);
+  if (palabras.length > 4) {
+    const container = descripcion.closest('.mb-3');
+    const error = document.createElement('div');
+    error.className = 'text-danger small mt-1';
+    error.id = 'error-descripcion';
+    error.textContent = '⚠️ Te pasaste de las 4 palabras.';
+    container.appendChild(error);
+    if (!firstInvalid) firstInvalid = descripcion;
+  }
+
+  if (firstInvalid) {
+    firstInvalid.focus();
+    return; // No enviar si hay errores
+  }
+
+  // 🔹 Enviar formulario por fetch
   const payload = {
     id_subcategoria: subcategoriaSelect.value,
     nombre: document.getElementById('nombre').value,
-    descripcion: document.getElementById('descripcion').value,
+    descripcion: descripcion.value,
     costo_unitario: document.getElementById('costo_unitario').value,
   };
 
@@ -213,10 +160,7 @@ form.addEventListener('submit', function (e) {
     } else if (res.status === 422) {
       const data = await res.json();
 
-      // Limpiar errores previos
-      form.querySelectorAll('.text-danger.small.mt-1').forEach(el => el.remove());
-
-      let firstInvalid = null;
+      let firstBackendError = null;
 
       Object.entries(data.errors).forEach(([field, messages]) => {
         const input = document.getElementById(field);
@@ -228,10 +172,10 @@ form.addEventListener('submit', function (e) {
         error.textContent = messages[0];
         container.appendChild(error);
 
-        if (!firstInvalid) firstInvalid = input;
+        if (!firstBackendError) firstBackendError = input;
       });
 
-      if (firstInvalid) firstInvalid.focus();
+      if (firstBackendError) firstBackendError.focus();
 
       throw new Error('Hay errores en el formulario.');
     } else {
@@ -240,18 +184,31 @@ form.addEventListener('submit', function (e) {
     }
   })
   .then(data => {
-    mensaje.innerHTML = `<div class="alert alert-success">Recurso creado correctamente.</div>`;
-    form.reset();
-    subcategoriaSelect.innerHTML = '<option value="">Seleccione una subcategoría</option>';
-    subcategoriaSelect.disabled = true;
-  })
+  form.reset();
+  subcategoriaSelect.innerHTML = '<option value="">Seleccione una subcategoría</option>';
+  subcategoriaSelect.disabled = true;
+
+  // 🔹 Mostrar el modal de éxito
+  const modalEl = document.getElementById('modalRecursoCreado');
+  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    new bootstrap.Modal(modalEl).show();
+  }
+})
+
   .catch(error => {
-    console.error('Error al guardar el recurso:', error.message);
     mensaje.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
   });
 });
 
-console.log('✅ recurso.js cargado');
+form.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
 
+    // Simular envío del formulario para que se dispare el único submit que tenemos
+    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+  }
 });
 
+
+  console.log('✅ recurso.js cargado');
+});

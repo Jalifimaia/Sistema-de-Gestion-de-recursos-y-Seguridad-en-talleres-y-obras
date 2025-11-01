@@ -32,6 +32,10 @@
         $requiereTalle = in_array($sub, ['chaleco', 'botas']);
     @endphp
 
+    <!-- Añadir para que el JS local pueda leer la subcategoría -->
+<span id="subcategoriaNombre" class="d-none">{{ $recurso->subcategoria->nombre ?? '' }}</span>
+
+
     <form method="POST" action="{{ route('serie_recurso.storeMultiple') }}" id="formSeries">
         @csrf
         <input type="hidden" name="id_recurso" value="{{ $recurso->id }}">
@@ -108,10 +112,51 @@
             <button type="button" class="btn btn-outline-primary" onclick="agregarFila()">+ Agregar combinación</button>
         </div>
 
+        
+
         <button type="submit" class="btn btn-success" id="btnGuardar" disabled>Guardar Series</button>
         <a href="{{ route('inventario') }}" class="btn btn-secondary ms-2">Volver</a>
     </form>
+    
 </div>
+
+<!-- Modal de éxito -->
+<div class="modal fade" id="modalSeriesAgregadas" tabindex="-1" aria-labelledby="modalSeriesAgregadasLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalSeriesAgregadasLabel">Series agregadas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Las series fueron agregadas correctamente.
+      </div>
+      <div class="modal-footer">
+        <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
+        <a href="{{ url()->current() }}" class="btn btn-success">Agregar más series</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de error de tipo de talle -->
+<div class="modal fade" id="modalErrorTipoTalle" tabindex="-1" aria-labelledby="modalErrorTipoTalleLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalErrorTipoTalleLabel">Error en tipo de talle</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        El tipo de talle debe ser <strong>"{{ $requiereTalle ? ($recurso->subcategoria->nombre === 'Botas' ? 'Calzado' : 'Ropa') : '' }}"</strong> o <strong>"Otro"</strong> para el recurso seleccionado.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
