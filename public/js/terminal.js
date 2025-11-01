@@ -111,50 +111,44 @@ function esComandoVolver(limpio) {
 
 
 
-function mostrarMensajeKiosco(texto, tipo = 'info') {
-  // Asegurar contenedor, si no existe lo creamos (tests o entornos headless)
-  let container = document.getElementById('toastContainer');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toastContainer';
-    document.body.appendChild(container);
+function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  // Verificar si ya existe un toast con el mismo mensaje
+  const toasts = container.querySelectorAll('.toast');
+  for (const toast of toasts) {
+    const body = toast.querySelector('.toast-body');
+    if (body && body.textContent.trim() === mensaje.trim()) {
+      return; // Ya existe, no lo mostramos de nuevo
+    }
   }
 
-  // Crear elemento toast
-  const toastEl = document.createElement('div');
-  toastEl.className = 'toast align-items-center border-0 mb-2';
-  toastEl.setAttribute('role', 'alert');
+  // Crear nuevo toast
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center text-white bg-${tipo} border-0 show`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+  toast.setAttribute('aria-atomic', 'true');
+  toast.style.marginBottom = '0.5rem';
 
-  // Colores según tipo
-  if (tipo === 'success') {
-    toastEl.classList.add('text-bg-success');
-  } else if (tipo === 'danger') {
-    toastEl.classList.add('text-bg-danger');
-  } else if (tipo === 'warning') {
-    toastEl.classList.add('text-bg-warning', 'text-dark');
-  } else {
-    toastEl.classList.add('text-bg-info');
-  }
-
-  // Contenido del toast
-  toastEl.innerHTML = `
+  toast.innerHTML = `
     <div class="d-flex">
-      <div class="toast-body">${texto}</div>
-      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+      <div class="toast-body">${mensaje}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
   `;
 
-  // Agregar al contenedor y mostrar
-  container.appendChild(toastEl);
-  try {
-    const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
-    toast.show();
-    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-  } catch (e) {
-    // En entornos de test sin bootstrap, simplemente mantener el elemento y removerlo luego
-    setTimeout(() => { if (toastEl && toastEl.remove) toastEl.remove(); }, 4000);
-  }
+  container.appendChild(toast);
+
+  // Auto-remover después de duración
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 500);
+  }, duracion);
 }
+
 
 
 function nextStep(n) {
@@ -936,7 +930,7 @@ function activarEscaneoDevolucionQR() {
           })
           .catch(err => {
             console.error('Error validando QR de devolución:', err);
-            mostrarMensajeKiosco('❌ Error de red al validar el QR', 'danger');
+            //mostrarMensajeKiosco('❌ Error de red al validar el QR', 'danger');
           });
       },
       (errorMessage) => {
