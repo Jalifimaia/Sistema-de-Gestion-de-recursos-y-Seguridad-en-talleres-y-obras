@@ -786,6 +786,8 @@ function mostrarStepDevolucionQR(serie, detalleId) {
 }
 
 function validarDevolucionQR(qrCode, idUsuario) {
+  const serieEsperada = document.getElementById('serieEsperadaQR').textContent.trim();
+
   return fetch('/terminal/validar-qr-devolucion', {
     method: 'POST',
     credentials: 'same-origin',
@@ -793,13 +795,35 @@ function validarDevolucionQR(qrCode, idUsuario) {
       'Content-Type': 'application/json',
       'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
     },
-    body: JSON.stringify({ codigo_qr: qrCode, id_usuario: idUsuario })
+    body: JSON.stringify({
+      codigo_qr: qrCode,
+      id_usuario: idUsuario,
+      serie_esperada: serieEsperada
+    })
   })
-  .then(res => {
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+  .then(async res => {
+    const data = await res.json();
+
+    if (!res.ok) {
+      // No lanzar excepción: devolver respuesta con success false
+      return {
+        success: false,
+        message: data.message || `Error HTTP ${res.status}`
+      };
+    }
+
+    return data;
+  })
+  .catch(err => {
+    console.error('Error de red en fetch:', err);
+    return {
+      success: false,
+      message: 'Error de red al validar el QR'
+    };
   });
 }
+
+
 
 function confirmarDevolucionQRActual() {
   if (!detalleIdActual) {
@@ -884,30 +908,35 @@ function activarEscaneoDevolucionQR() {
   }
 
   try {
-    // 💡 Guardamos la instancia globalmente para poder detenerla luego
     window.html5QrCodeDevolucion = new Html5Qrcode(contenedorId);
 
     window.html5QrCodeDevolucion.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       (decodedText) => {
+        const serieEsperada = document.getElementById('serieEsperadaQR').textContent.trim();
+
         validarDevolucionQR(decodedText, idUsuario)
           .then(res => {
             window.html5QrCodeDevolucion.stop().catch(e => console.warn('Error al detener escáner', e));
 
             if (res.success && res.coincide) {
+              if (res.message) console.log('ℹ️ Backend message:', res.message);
               detalleIdActual = res.id_detalle;
               document.getElementById('btnConfirmarDevolucion').disabled = false;
               document.getElementById('qrFeedback').textContent = '';
               mostrarMensajeKiosco('✅ QR válido, listo para confirmar devolución', 'success');
+            } else if (res.success === false) {
+              document.getElementById('qrFeedback').textContent = '❌ QR inválido';
+              mostrarMensajeKiosco(res.message || '❌ Error al validar el QR', 'danger');
             } else {
               document.getElementById('qrFeedback').textContent = '❌ QR no coincide con el recurso esperado';
-              mostrarMensajeKiosco('❌ QR no coincide con el recurso esperado', 'danger');
+              mostrarMensajeKiosco(res.message || '❌ QR no coincide con el recurso esperado', 'danger');
             }
           })
           .catch(err => {
             console.error('Error validando QR de devolución:', err);
-            mostrarMensajeKiosco('❌ Error al validar el QR', 'danger');
+            mostrarMensajeKiosco('❌ Error de red al validar el QR', 'danger');
           });
       },
       (errorMessage) => {

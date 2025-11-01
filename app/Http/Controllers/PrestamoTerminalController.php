@@ -103,37 +103,16 @@ class PrestamoTerminalController extends Controller
             ], 500);
         }
     }
-/*
- public function validarQRDevolucion(Request $request)
-{
-    $serie = SerieRecurso::where('codigo_qr', $request->codigo_qr)->first();
-    if (! $serie) {
-        return response()->json(['success' => false, 'message' => 'QR no válido']);
-    }
 
-    $detalle = DetallePrestamo::where('id_serie', $serie->id)
-        ->where('id_estado_prestamo', 2) // asignado
-        ->whereHas('prestamo', function ($q) use ($request) {
-            $q->where('id_usuario', $request->id_usuario)
-              ->where('estado', 2); // préstamo activo
-        })
-        ->first();
-
-    if (! $detalle) {
-        return response()->json(['success' => true, 'coincide' => false, 'message' => 'El recurso ya fue devuelto o no está asignado']);
-    }
-
-    return response()->json(['success' => true, 'coincide' => true, 'id_detalle' => $detalle->id]);
-}
-*/
 
 
     public function validarQRDevolucion(Request $request)
     {
         $codigoQR = $request->input('codigo_qr');
         $idUsuario = $request->input('id_usuario');
+        $serieEsperada = $request->input('serie_esperada');
 
-        if (! $codigoQR || ! $idUsuario) {
+        if (! $codigoQR || ! $idUsuario || ! $serieEsperada) {
             return response()->json([
                 'success' => false,
                 'message' => 'Faltan datos para validar el QR'
@@ -153,7 +132,7 @@ class PrestamoTerminalController extends Controller
             ->where('id_estado_prestamo', 2)
             ->whereHas('prestamo', function ($q) use ($idUsuario) {
                 $q->where('id_usuario', $idUsuario)
-                  ->where('estado', 2);
+                ->where('estado', 2);
             })
             ->first();
 
@@ -165,12 +144,20 @@ class PrestamoTerminalController extends Controller
             ]);
         }
 
+        if ($detalle->serieRecurso->nro_serie !== $serieEsperada) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El QR escaneado no coincide con el recurso que se está devolviendo'
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'coincide' => true,
             'id_detalle' => $detalle->id
         ]);
     }
+
 
 
 
