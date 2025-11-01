@@ -872,13 +872,16 @@ function detenerEscaneoQRDevolucionSegura() {
 
 
 function volverARecursosAsignadosDesdeDevolucionQR() {
-  detenerEscaneoQRDevolucion();
-  nextStep(2);
-  if (window._recogQRDevolucion) {
-    try { window._recogQRDevolucion.stop(); } catch(e){}
-    window._recogQRDevolucion = null;
+  try {
+    detenerEscaneoQRDevolucionSegura(); // 🔧 usa la versión segura
+    nextStep(2);
+    const btn = document.getElementById('btnVolverDevolucionQR');
+    if (btn) btn.disabled = false; // por si quedó bloqueado
+  } catch (e) {
+    console.warn('⚠️ Error al ejecutar volver desde devolución QR', e);
   }
 }
+
 
 
 // Bind del botón de confirmación
@@ -921,9 +924,15 @@ function activarEscaneoDevolucionQR() {
               document.getElementById('qrFeedback').textContent = '';
               mostrarMensajeKiosco('✅ QR válido, listo para confirmar devolución', 'success');
             } else if (res.success === false) {
+              detenerEscaneoQRDevolucionSegura(); // 🔧 clave
               document.getElementById('qrFeedback').textContent = '❌ QR inválido';
               mostrarMensajeKiosco(res.message || '❌ Error al validar el QR', 'danger');
-            } else {
+
+              // 🔧 aseguramos que el botón volver esté activo
+              const btnVolver = document.getElementById('btnVolverDevolucionQR');
+              if (btnVolver) btnVolver.disabled = false;
+            }
+            else {
               document.getElementById('qrFeedback').textContent = '❌ QR no coincide con el recurso esperado';
               mostrarMensajeKiosco(res.message || '❌ QR no coincide con el recurso esperado', 'danger');
             }

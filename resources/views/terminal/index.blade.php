@@ -141,7 +141,7 @@
       <!-- Botones de acción -->
       <div class="text-center mt-4">
         <button id="btnConfirmarDevolucion" class="btn btn-primary" disabled>Confirmar devolución</button>
-        <button class="btn btn-primary ms-2" onclick="volverARecursosAsignadosDesdeDevolucionQR()">Volver</button>
+        <button id="btnVolverDevolucionQR" class="btn btn-primary ms-2" onclick="volverARecursosAsignadosDesdeDevolucionQR()">Volver</button>
       </div>
     </div>
 
