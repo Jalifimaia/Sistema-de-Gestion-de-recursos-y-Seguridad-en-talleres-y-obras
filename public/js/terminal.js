@@ -483,7 +483,7 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
     btn.dataset.recurso = r.recurso || '';
     btn.dataset.serie = r.serie || '';
 
-    btn.className = 'btn btn-sm btn-outline-primary';
+    btn.className = 'btn btn-sm btn-primary';
     btn.dataset.detalleId = r.detalle_id;
     btn.dataset.opcionIndex = index + 1;
     btn.innerHTML = `Opción ${index + 1}`;
@@ -1738,91 +1738,97 @@ function cargarMenuPrincipal() {
   contenedor.innerHTML = '';
 
   const opciones = [
-    {
-      id: 1,
-      texto: "Tengo la herramienta en mano",
-      accion: () => {
-        console.log('📦 opción seleccionada: herramienta en mano');
-        setModoEscaneo('manual');
-      },
-      clase: "btn-outline-dark"
+  {
+    id: 1,
+    texto: "Tengo la herramienta en mano",
+    accion: () => {
+      console.log('📦 opción seleccionada: herramienta en mano');
+      setModoEscaneo('manual');
     },
-    {
-      id: 2,
-      texto: " Quiero solicitar una herramienta",
-      accion: () => {
-        const id_usuario = window.localStorage.getItem('id_usuario');
-        if (!id_usuario) {
-          console.warn('⚠️ cargarMenuPrincipal: no hay id_usuario para solicitar herramienta');
-          window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+    clase: "btn-outline-dark"
+  },
+  {
+    id: 2,
+    texto: " Quiero solicitar una herramienta",
+    accion: () => {
+      const id_usuario = window.localStorage.getItem('id_usuario');
+      if (!id_usuario) {
+        console.warn('⚠️ cargarMenuPrincipal: no hay id_usuario para solicitar herramienta');
+        window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+        return;
+      }
+
+      const meta = document.querySelector('meta[name="csrf-token"]');
+      const csrf = meta && meta.content ? meta.content : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+      fetch('/terminal/solicitar', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ id_usuario })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          console.warn('❌ No se puede solicitar herramientas:', data.message);
+          window.mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
           return;
         }
 
-        const meta = document.querySelector('meta[name="csrf-token"]');
-        const csrf = meta && meta.content ? meta.content : null;
-        const headers = { 'Content-Type': 'application/json' };
-        if (csrf) headers['X-CSRF-TOKEN'] = csrf;
-        fetch('/terminal/solicitar', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ id_usuario })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (!data.success) {
-            console.warn('❌ No se puede solicitar herramientas:', data.message);
-            window.mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
-            return;
-          }
-
-          console.log('🛠️ opción seleccionada: solicitar herramienta');
-          step5ReturnTarget = 2;
-          window.nextStep(5);
-        })
-        .catch(() => {
-          console.error('❌ Error de red al validar EPP');
-          window.mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
-        });
-      },
-      clase: "btn-outline-dark"
+        console.log('🛠️ opción seleccionada: solicitar herramienta');
+        step5ReturnTarget = 2;
+        window.nextStep(5);
+      })
+      .catch(() => {
+        console.error('❌ Error de red al validar EPP');
+        window.mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
+      });
     },
-    {
-      id: 3,
-      texto: " Ver recursos asignados",
-      accion: () => {
-        console.log('📋 opción seleccionada: ver recursos asignados');
-        window.cargarRecursos().then(() => {
-          abrirModalRecursos();
-        });
-
-      },
-      clase: "btn-outline-dark"
+    clase: "btn-outline-dark"
+  },
+  {
+    id: 3,
+    texto: " Ver recursos asignados",
+    accion: () => {
+      console.log('📋 opción seleccionada: ver recursos asignados');
+      window.cargarRecursos().then(() => {
+        abrirModalRecursos();
+      });
     },
-    {
-      id: 4,
-      texto: "Volver",
-      accion: () => {
-        console.log('Volve opción seleccionada: volver al inicio');
-        volverAInicio();
-      },
-      clase: "btn-outline-dark"
-    }
-  ];
+    clase: "btn-outline-dark"
+  },
+  {
+  id: 4,
+  texto: "Volver",
+  accion: () => volverAInicio(),
+  clase: "btn-primary mt-3 simple"
+}
+
+];
+
 
   console.log('📋 cargarMenuPrincipal: opciones generadas', opciones);
 
   opciones.forEach(op => {
-    const btn = document.createElement('button');
-    btn.className = `btn ${op.clase} btn-lg d-flex align-items-center justify-content-start m-2 w-100`;
-    btn.onclick = op.accion;
+  const btn = document.createElement('button');
 
+  if (op.clase.includes('simple')) {
+    // Botón limpio sin badge ni layout flex
+    btn.className = `btn btn-primary btn-lg mt-3`;
+    btn.textContent = op.texto;
+  } else {
+    // Botones con badge y layout horizontal
+    btn.className = `btn ${op.clase} btn-lg d-flex align-items-center justify-content-start m-2 w-100`;
     btn.innerHTML = `
       <span class="badge-opcion">Opción ${op.id}</span>
       <span class="ms-2 flex-grow-1 text-start">${op.texto}</span>
     `;
+  }
 
-    contenedor.appendChild(btn);
-  });
+  btn.onclick = op.accion;
+  contenedor.appendChild(btn);
+});
+
 }
 
 

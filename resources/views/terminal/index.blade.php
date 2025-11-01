@@ -25,7 +25,7 @@
       <button class="btn btn-primary btn-lg mb-3" onclick="identificarTrabajador()">Continuar</button>
 
       <div class="text-center mt-4">
-        <button class="btn btn-outline-primary btn-lg" onclick="activarEscaneoQRLogin()">
+        <button class="btn btn-primary btn-lg" onclick="activarEscaneoQRLogin()">
            Iniciar sesión con QR
         </button>
       </div>
@@ -53,7 +53,7 @@
   <div id="qr-reader" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
 
   <div class="text-center mt-3">
-    <button id="btn-escanear-qr" class="btn btn-outline-primary btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="activarEscaneoQR()">
+    <button id="btn-escanear-qr" class="btn btn-outline-dark btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="activarEscaneoQR()">
       <span class="badge-opcion">Opción 1</span>
       <span class="ms-2 flex-grow-1 text-start">Escanear QR</span>
     </button>
@@ -63,17 +63,16 @@
     </button>
   </div>
 
-  <p class="text-center mt-4">Si no tiene QR, podés solicitar la herramienta manualmente.</p>
   <div class="text-center">
     <button class="btn btn-outline-dark btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQR(5)">
       <span class="badge-opcion">Opción 2</span>
       <span class="ms-2 flex-grow-1 text-start">Solicitar manualmente</span>
     </button>
 
-    <button class="btn btn-primary btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQR(2)">
-      <span class="badge-opcion">Opción 3</span>
-      <span class="ms-2 flex-grow-1 text-start">Volver</span>
-    </button>
+    <div class="text-start">
+      <button class="btn btn-primary btn-lg mt-3" onclick="detenerEscaneoQR(2)">Volver</button>
+    </div>
+
   </div>
 </div>
 
@@ -156,20 +155,21 @@
   <div class="modal fade" id="modalRecursos" tabindex="-1" aria-labelledby="modalRecursosLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header d-flex justify-content-between align-items-center">
           <h5 class="modal-title" id="modalRecursosLabel">Recursos asignados</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Cerrar</button>
         </div>
         <div class="modal-body">
-          <ul class="nav nav-tabs mb-3" id="recursosTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="tab-epp" data-bs-toggle="tab" data-bs-target="#panel-epp" type="button" role="tab" aria-selected="true">EPP</button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="tab-herramientas" data-bs-toggle="tab" data-bs-target="#panel-herramientas" type="button" role="tab" aria-selected="false"> Herramientas</button>
-            </li>
-           
-          </ul>
+
+        <ul class="nav nav-tabs mb-3" id="recursosTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="btn btn-primary me-2" id="tab-epp" data-bs-toggle="tab" data-bs-target="#panel-epp" type="button" role="tab" aria-selected="true">Ver EPP</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="btn btn-primary" id="tab-herramientas" data-bs-toggle="tab" data-bs-target="#panel-herramientas" type="button" role="tab" aria-selected="false">Ver herramientas</button>
+          </li>
+        </ul>
+
 
           <div class="tab-content" id="recursosTabContent">
             <!-- Tabla EPP -->
@@ -182,7 +182,7 @@
                       <th>Serie</th>
                       <th>Fecha de préstamo</th>
                       <th>Fecha de devolución</th>
-                      <th></th>
+                      <th>Devolver</th>
                     </tr>
                   </thead>
                   <tbody id="tablaEPP"></tbody>
@@ -201,7 +201,7 @@
                       <th>Serie</th>
                       <th>Fecha de préstamo</th>
                       <th>Fecha de devolución</th>
-                      <th></th>
+                      <th>Devolver</th>
                     </tr>
                   </thead>
                   <tbody id="tablaHerramientas"></tbody>
@@ -209,13 +209,13 @@
               </div>
               <div id="paginadorHerramientas" class="d-flex flex-wrap justify-content-center mt-3"></div>
             </div>
-
-
           </div>
         </div>
       </div>
     </div>
   </div>
+
+
 
   <!-- Modal de confirmacion de serie de recurso -->
   <div class="modal fade" id="modalConfirmarSerie" tabindex="-1" aria-labelledby="modalConfirmarSerieLabel" aria-hidden="true">
@@ -281,7 +281,7 @@
   align-items: center;
   gap: 8px;
   pointer-events: none;
-  display:none
+  display:none;
 ">
   <span id="micStatusIcon">🎤</span>
   <span id="micStatusText" class="badge text-bg-success">Micrófono activo</span>
@@ -301,6 +301,7 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.12);
   font-size: 15px;
   cursor: pointer;
+  display:none;
 ">Menu principal</button>
 
 <!-- Botón fijo inferior derecha (Cerrar sesión) -->
@@ -317,6 +318,7 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   font-size: 14px;
   cursor: pointer;
+  display:none;
 ">Cerrar sesión</button>
 
   <!-- Contenedor de Toasts -->
