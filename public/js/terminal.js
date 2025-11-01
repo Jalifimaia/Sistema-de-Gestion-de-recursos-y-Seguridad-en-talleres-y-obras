@@ -170,9 +170,15 @@ function nextStep(n) {
   }
 
   // Detener escaneo QR si no estamos en step3
-  if (n !== 3) {
-    try { detenerEscaneoQR(); } catch (e) { /* no bloquear flujo por errores en stop */ }
-  }
+ // if (n !== 3) {
+    try { 
+      detenerEscaneoQRregistroRecursos(); 
+      cancelarEscaneoQRregistroRecursos();
+      detenerEscaneoQRLogin();
+      detenerEscaneoQRDevolucion();
+      console.log('🛑 Escaneo QR detenido en nextStep');
+    } catch (e) { /* no bloquear flujo por errores en stop */ }
+ // }
 
   // Ocultar todos los steps
   document.querySelectorAll('.step').forEach(s => {
@@ -738,7 +744,7 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
 
 
 
-// === Módulo: Devolución por QR ===
+// === paso 9: Devolución por QR ===
 
 let serieEsperada = '';
 let detalleIdActual = null;
@@ -769,16 +775,16 @@ function mostrarStepDevolucionQR(serie, detalleId) {
         return;
       }
 
-      activarEscaneoQRDevolucion(); // ya implementado, escanea y llama a registrarPorQR()
+      activarEscaneoDevolucionQR(); // ya implementado, escanea y llama a registrarPorQRregistroRecursos()
     }, 250);
   });
 
 
-  activarReconocimientoConfirmacionQR();
+  activarReconocimientoDevolucionQR();
 
 }
 
-function validarQRDevolucion(qrCode, idUsuario) {
+function validarDevolucionQR(qrCode, idUsuario) {
   return fetch('/terminal/validar-qr-devolucion', {
     method: 'POST',
     credentials: 'same-origin',
@@ -794,12 +800,7 @@ function validarQRDevolucion(qrCode, idUsuario) {
   });
 }
 
-
-
-
-
-
-function confirmarDevolucionActual() {
+function confirmarDevolucionQRActual() {
   if (!detalleIdActual) {
     mostrarMensajeKiosco('No se puede confirmar devolución: falta el recurso.', 'danger');
     return;
@@ -828,25 +829,32 @@ function confirmarDevolucionActual() {
   });
 }
 
+function detenerEscaneoQRDevolucion() {
+  const qrContainer = document.getElementById('qr-reader-devolucion');
+  if (qrContainer && window.html5QrCodeDevolucion) {
+    window.html5QrCodeDevolucion.stop().catch(() => {}).then(() => {
+      qrContainer.innerHTML = '';
+    });
+  }
+}
 
 
-function volverARecursosAsignados() {
-  detenerEscaneoQR();
-  nextStep(2); // o el paso donde están los recursos asignados
-
+function volverARecursosAsignadosDesdeDevolucionQR() {
+  detenerEscaneoQRDevolucion();
+  nextStep(2);
   if (window._recogQRDevolucion) {
-  try { window._recogQRDevolucion.stop(); } catch(e){}
-  window._recogQRDevolucion = null;
+    try { window._recogQRDevolucion.stop(); } catch(e){}
+    window._recogQRDevolucion = null;
+  }
 }
 
-}
 
 // Bind del botón de confirmación
-document.getElementById('btnConfirmarDevolucion').addEventListener('click', confirmarDevolucionActual);
+document.getElementById('btnConfirmarDevolucion').addEventListener('click', confirmarDevolucionQRActual);
 
 
 
-function activarEscaneoQRDevolucion() {
+function activarEscaneoDevolucionQR() {
   const contenedorId = 'qr-reader-devolucion';
   const qrContainer = document.getElementById(contenedorId);
   if (!qrContainer) {
@@ -867,7 +875,7 @@ function activarEscaneoQRDevolucion() {
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       (decodedText) => {
-        validarQRDevolucion(decodedText, idUsuario)
+        validarDevolucionQR(decodedText, idUsuario)
           .then(res => {
             html5QrCode.stop().catch(e => console.warn('Error al detener escáner', e));
 
@@ -898,14 +906,14 @@ function activarEscaneoQRDevolucion() {
 }
 
 
-function onScanSuccess(qrCodeMessage) {
+function ExitoDevolucionQR(qrCodeMessage) {
   const idUsuario = localStorage.getItem('id_usuario');
   if (!idUsuario) {
     mostrarMensajeKiosco('⚠️ Usuario no identificado', 'danger');
     return;
   }
 
-  validarQRDevolucion(qrCodeMessage, idUsuario)
+  validarDevolucionQR(qrCodeMessage, idUsuario)
     .then(res => {
       if (res.success && res.coincide) {
         devolverRecurso(res.id_detalle);
@@ -919,7 +927,7 @@ function onScanSuccess(qrCodeMessage) {
     });
 }
 
-function activarReconocimientoConfirmacionQR() {
+function activarReconocimientoDevolucionQR() {
   if (!('webkitSpeechRecognition' in window)) return;
 
   safeStopRecognitionGlobal(); // 🔧 detener el global antes de iniciar el local
@@ -940,7 +948,7 @@ function activarReconocimientoConfirmacionQR() {
         recog.stop();
       }
     } else if (texto === 'volver') {
-      volverARecursosAsignados();
+      volverARecursosAsignadosDesdeDevolucionQR();
       recog.stop();
     }
   };
@@ -961,7 +969,257 @@ function activarReconocimientoConfirmacionQR() {
 
 
 
+// === Paso 3: Escaneo QR para registrar recursos ===
+function activarEscaneoQRregistroRecursos() {
+  const qrContainer = document.getElementById('qr-reader');
+  const btnEscanear = document.getElementById('btn-escanear-qr');
+  const btnCancelar = document.getElementById('btn-cancelar-qr');
+  const textoCamara = document.getElementById('texto-camara-activa');
 
+  if (!qrContainer) {
+    console.error('No se encontró el contenedor de escaneo QR')
+  getRenderer('mostrarMensajeKiosco')('No se encontró el contenedor de escaneo QR', 'danger');
+    return;
+  }
+
+  if (isScanning) return; // ya está activo
+
+  qrContainer.innerHTML = '';
+  if (btnEscanear) btnEscanear.classList.add('d-none');
+  if (btnCancelar) btnCancelar.classList.remove('d-none');
+  if (textoCamara) textoCamara.classList.remove('d-none');
+
+  scanner = new Html5Qrcode("qr-reader");
+  isScanning = true;
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 400, height: 400 } },
+    qrCodeMessage => {
+      console.log('QR detectado:', qrCodeMessage);
+      limpiarQRregistroRecursos();
+      registrarPorQRregistroRecursos(qrCodeMessage);
+    },
+    errorMessage => {
+      console.warn('Error de escaneo:', errorMessage);
+    }
+  ).catch(err => {
+    console.error('Error al iniciar escaneo:', err);
+  getRenderer('mostrarMensajeKiosco')('No se pudo activar la cámara para escanear QR', 'danger');
+    limpiarQRregistroRecursos();
+  });
+}
+
+function cancelarEscaneoQRregistroRecursos() {
+  limpiarQRregistroRecursos();
+}
+
+function registrarPorQRregistroRecursos(codigoQR) {
+  const id_usuario = window.localStorage.getItem('id_usuario');
+  if (!id_usuario) {
+  getRenderer('mostrarMensajeKiosco')('⚠️ No hay trabajador identificado', 'danger');
+    return Promise.resolve({ success: false, reason: 'no_usuario' });
+  }
+
+  const meta = (typeof document !== 'undefined') && document.querySelector('meta[name="csrf-token"]');
+  const csrf = meta && meta.content ? meta.content : null;
+  const headers = { 'Content-Type': 'application/json' };
+  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+
+  return fetch(`/terminal/registrar-por-qr`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ codigo_qr: codigoQR, id_usuario })
+  })
+  .then(res => {
+    if (!res || (typeof res.ok === 'boolean' && !res.ok)) {
+      throw new Error(res ? `HTTP ${res.status}` : 'network error');
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (data && data.success) {
+      const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
+  if (typeof window.mostrarMensajeKiosco === 'function') getRenderer('mostrarMensajeKiosco')(mensaje, 'success');
+      if (typeof window.nextStep === 'function') window.nextStep(2);
+    } else {
+      if (data && data.message === 'QR no encontrado') {
+  getRenderer('mostrarMensajeKiosco')('❌ QR no encontrado en el sistema', 'danger');
+      } else if (data && data.message === 'Este recurso ya está asignado') {
+  getRenderer('mostrarMensajeKiosco')(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
+      } else {
+  getRenderer('mostrarMensajeKiosco')((data && data.message) || 'Error al registrar recurso por QR', 'danger');
+      }
+    }
+    return data;
+  })
+  .catch(err => {
+    window.mostrarMensajeKiosco('Error de red al registrar recurso por QR', 'danger');
+    console.log('❌ Error de red al registrar recurso por QR', err);
+    return { success: false, error: err };
+  });
+}
+
+function detenerEscaneoQRregistroRecursos(next = null) {
+  const qrContainer = document.getElementById('qr-reader');
+  const btnEscanear = document.getElementById('btn-escanear-qr');
+  const btnCancelar = document.getElementById('btn-cancelar-qr');
+  const textoCamara = document.getElementById('texto-camara-activa');
+
+  if (scanner && isScanning) {
+    console.log('📴 detenerEscaneoQRregistroRecursos: deteniendo escaneo activo');
+    scanner.stop().catch(() => {}).then(() => {
+      qrContainer.innerHTML = '';
+      if (btnCancelar) btnCancelar.classList.add('d-none');
+      if (btnEscanear) btnEscanear.classList.remove('d-none');
+      if (textoCamara) textoCamara.classList.add('d-none');
+      isScanning = false;
+      if (next) window.nextStep(next); // 👈 avanzar al paso cuando termina
+      console.log('➡️ detenerEscaneoQRregistroRecursos: avanzando a step', next);
+    });
+  } else {
+    qrContainer.innerHTML = '';
+    if (btnCancelar) btnCancelar.classList.add('d-none');
+    if (btnEscanear) btnEscanear.classList.remove('d-none');
+    if (textoCamara) textoCamara.classList.add('d-none');
+    isScanning = false;
+    if (next) window.nextStep(next);
+  }
+}
+
+function limpiarQRregistroRecursos() {
+  const qrContainer = document.getElementById('qr-reader');
+  const btnEscanear = document.getElementById('btn-escanear-qr');
+  const btnCancelar = document.getElementById('btn-cancelar-qr');
+  const textoCamara = document.getElementById('texto-camara-activa');
+
+  if (scanner && isScanning) {
+    scanner.stop().catch(() => {}).then(() => {
+      qrContainer.innerHTML = '';
+      if (btnCancelar) btnCancelar.classList.add('d-none');
+      if (btnEscanear) btnEscanear.classList.remove('d-none');
+      if (textoCamara) textoCamara.classList.add('d-none');
+      isScanning = false;
+    });
+  } else {
+    qrContainer.innerHTML = '';
+    if (btnCancelar) btnCancelar.classList.add('d-none');
+    if (btnEscanear) btnEscanear.classList.remove('d-none');
+    if (textoCamara) textoCamara.classList.add('d-none');
+    isScanning = false;
+  }
+}
+
+// === Paso 1: Escaneo QR para login o inicio de sesión === 
+function activarEscaneoQRLogin() {
+  const qrContainer = document.getElementById('qr-login-reader');
+  const wrapper = document.getElementById('qr-login-container');
+
+  if (!qrContainer || !wrapper || isScanning) {
+    console.error('❌ activarEscaneoQRLogin: contenedor o wrapper no disponible, o escaneo ya activo');
+    return;
+  }
+
+  wrapper.style.display = 'block';
+  qrContainer.innerHTML = '';
+  scanner = new Html5Qrcode("qr-login-reader");
+  isScanning = true;
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    qrCodeMessage => {
+      console.log('QR de login detectado:', qrCodeMessage);
+
+      // 👉 detenemos el escaneo para liberar la cámara
+      detenerEscaneoQRLogin();
+
+      // 👉 llamamos al método corregido que envía { codigo_qr: ... }
+      identificarPorQRLogin(qrCodeMessage);
+    },
+    errorMessage => {
+      console.warn('Error escaneo login:', errorMessage);
+    }
+  ).catch(err => {
+    console.error('No se pudo iniciar escaneo login:', err);
+    window.mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
+    detenerEscaneoQRLogin();
+  });
+}
+
+function detenerEscaneoQRLogin() {
+  const qrContainer = document.getElementById('qr-login-reader');
+  const wrapper = document.getElementById('qr-login-container');
+
+  if (scanner && isScanning) {
+    scanner.stop().catch(() => {}).then(() => {
+      qrContainer.innerHTML = '';
+      wrapper.style.display = 'none';
+      console.log('📴 detenerEscaneoQRLogin: escaneo login detenido y UI oculta');
+      isScanning = false;
+    });
+  } else {
+    qrContainer.innerHTML = '';
+    wrapper.style.display = 'none';
+    isScanning = false;
+  }
+}
+
+function identificarPorQRLogin(codigoQR) {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const csrf = meta && meta.content ? meta.content : null;
+  const headers = { 'Content-Type': 'application/json' };
+  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+  fetch('/terminal/identificar', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ codigo_qr: codigoQR })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log('Respuesta login QR:', data);
+
+    if (data.success) {
+      // Usuario válido (rol trabajador + estado Alta)
+      localStorage.setItem('id_usuario', data.usuario.id);
+      window.nextStep(2);
+      document.getElementById('saludo-trabajador').textContent = `Hola ${data.usuario.name}`;
+    } else {
+      // Mensajes diferenciados según backend
+      if (data.message === 'Usuario no encontrado') {
+        window.mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
+      console.log('❌ Usuario no encontrado en el sistema');
+      } else if (data.message === 'Este usuario no tiene permisos para usar el kiosco') {
+        window.mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
+      console.log('⚠️ Este usuario no tiene permisos para usar el kiosco');
+      } else if (data.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
+        window.mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
+      console.log('⛔ El usuario no está en estado Alta y no puede usar el kiosco');
+      } else {
+        window.mostrarMensajeKiosco(data.message || 'Error al identificar por QR', 'danger');
+      console.log('Error al identificar por QR');
+      }
+    }
+  })
+  .catch(err => {
+    console.error('Error en fetch login QR:', err);
+    window.mostrarMensajeKiosco('Error de red al identificar por QR', 'danger');
+  });
+}
+
+// Función para botón Volver en step3
+function volverAInicio() {
+  // Limpiamos la sesión del trabajador
+  localStorage.removeItem('id_usuario');
+  console.log('volverAInicio: sesión limpiada');
+
+  // Volvemos al paso 1
+  window.nextStep(1);
+
+  // Opcional: limpiar el campo DNI por si quedó algo escrito
+  const dniInput = document.getElementById('dni');
+  if (dniInput) dniInput.value = '';
+}
 
 
 /*
@@ -1041,8 +1299,6 @@ function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
 }
 
 
-
-
 function seleccionarSubcategoria(subcategoriaId) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', `/terminal/recursos-disponibles/${subcategoriaId}`, true);
@@ -1109,8 +1365,6 @@ function renderRecursosPaginados(recursos, pagina = 1) {
   try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) { console.warn('renderRecursosPaginados safeStart failed', e); }
 }
 
-
-
 function seleccionarRecurso(recursoId) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', `/terminal/series/${recursoId}`, true);
@@ -1134,7 +1388,6 @@ function seleccionarRecurso(recursoId) {
 
   xhr.send();
 }
-
 
 function renderSeriesPaginadas(series, pagina = 1) {
   try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderSeriesPaginadas: safeStop failed', e); }
@@ -1182,9 +1435,6 @@ function renderSeriesPaginadas(series, pagina = 1) {
 
   try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) { console.warn('renderSeriesPaginadas safeStart failed', e); }
 }
-
-
-
 
 function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie = null) {
   botonSerie = botonSerie || window.botonSerieSeleccionada || null;
@@ -1300,11 +1550,6 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
   modal.show();
 }
 
-
-
-
-
-
 async function registrarSerie(serieId, boton = null) {
   const id_usuario = window.localStorage.getItem('id_usuario');
   
@@ -1373,7 +1618,6 @@ async function registrarSerie(serieId, boton = null) {
   }
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
  /* const idUsuario = localStorage.getItem('id_usuario');
   if (!idUsuario) {
@@ -1386,18 +1630,10 @@ document.addEventListener('DOMContentLoaded', () => {
   qrScanner.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
-    onScanSuccess
+    ExitoDevolucionQR
   );
 });
 
-
-
-/*
-// Listener global para debug de clicks
-document.addEventListener('click', (e) => {
-   .log('[DOC CLICK]', e.target, e);
-}, { capture: true });
-*/
 
 const recursosTabs = document.getElementById('recursosTabs');
 if (recursosTabs) {
@@ -1417,9 +1653,6 @@ if (recursosTabs) {
     } catch (e) { console.warn('recursosTabs safeStart failed', e); }
   });
 }
-
-
-
 
 // Delegación para subcategorías
 const _subcatButtons = document.getElementById('subcategoria-buttons');
@@ -1453,266 +1686,6 @@ if (_serieButtons) {
 }
 
 
-
-
-
-function activarEscaneoQR() {
-  const qrContainer = document.getElementById('qr-reader');
-  const btnEscanear = document.getElementById('btn-escanear-qr');
-  const btnCancelar = document.getElementById('btn-cancelar-qr');
-  const textoCamara = document.getElementById('texto-camara-activa');
-
-  if (!qrContainer) {
-    console.error('No se encontró el contenedor de escaneo QR')
-  getRenderer('mostrarMensajeKiosco')('No se encontró el contenedor de escaneo QR', 'danger');
-    return;
-  }
-
-  if (isScanning) return; // ya está activo
-
-  qrContainer.innerHTML = '';
-  if (btnEscanear) btnEscanear.classList.add('d-none');
-  if (btnCancelar) btnCancelar.classList.remove('d-none');
-  if (textoCamara) textoCamara.classList.remove('d-none');
-
-  scanner = new Html5Qrcode("qr-reader");
-  isScanning = true;
-
-  scanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 400, height: 400 } },
-    qrCodeMessage => {
-      console.log('QR detectado:', qrCodeMessage);
-      cleanupScanUI();
-      registrarPorQR(qrCodeMessage);
-    },
-    errorMessage => {
-      console.warn('Error de escaneo:', errorMessage);
-    }
-  ).catch(err => {
-    console.error('Error al iniciar escaneo:', err);
-  getRenderer('mostrarMensajeKiosco')('No se pudo activar la cámara para escanear QR', 'danger');
-    cleanupScanUI();
-  });
-}
-
-
-function cancelarEscaneoQR() {
-  cleanupScanUI();
-}
-
-
-function registrarPorQR(codigoQR) {
-  const id_usuario = window.localStorage.getItem('id_usuario');
-  if (!id_usuario) {
-  getRenderer('mostrarMensajeKiosco')('⚠️ No hay trabajador identificado', 'danger');
-    return Promise.resolve({ success: false, reason: 'no_usuario' });
-  }
-
-  const meta = (typeof document !== 'undefined') && document.querySelector('meta[name="csrf-token"]');
-  const csrf = meta && meta.content ? meta.content : null;
-  const headers = { 'Content-Type': 'application/json' };
-  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
-
-  return fetch(`/terminal/registrar-por-qr`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ codigo_qr: codigoQR, id_usuario })
-  })
-  .then(res => {
-    if (!res || (typeof res.ok === 'boolean' && !res.ok)) {
-      throw new Error(res ? `HTTP ${res.status}` : 'network error');
-    }
-    return res.json();
-  })
-  .then(data => {
-    if (data && data.success) {
-      const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
-  if (typeof window.mostrarMensajeKiosco === 'function') getRenderer('mostrarMensajeKiosco')(mensaje, 'success');
-      if (typeof window.nextStep === 'function') window.nextStep(2);
-    } else {
-      if (data && data.message === 'QR no encontrado') {
-  getRenderer('mostrarMensajeKiosco')('❌ QR no encontrado en el sistema', 'danger');
-      } else if (data && data.message === 'Este recurso ya está asignado') {
-  getRenderer('mostrarMensajeKiosco')(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
-      } else {
-  getRenderer('mostrarMensajeKiosco')((data && data.message) || 'Error al registrar recurso por QR', 'danger');
-      }
-    }
-    return data;
-  })
-  .catch(err => {
-    window.mostrarMensajeKiosco('Error de red al registrar recurso por QR', 'danger');
-    console.log('❌ Error de red al registrar recurso por QR', err);
-    return { success: false, error: err };
-  });
-}
-
-
-
-
-function detenerEscaneoQR(next = null) {
-  const qrContainer = document.getElementById('qr-reader');
-  const btnEscanear = document.getElementById('btn-escanear-qr');
-  const btnCancelar = document.getElementById('btn-cancelar-qr');
-  const textoCamara = document.getElementById('texto-camara-activa');
-
-  if (scanner && isScanning) {
-    console.log('📴 detenerEscaneoQR: deteniendo escaneo activo');
-    scanner.stop().catch(() => {}).then(() => {
-      qrContainer.innerHTML = '';
-      if (btnCancelar) btnCancelar.classList.add('d-none');
-      if (btnEscanear) btnEscanear.classList.remove('d-none');
-      if (textoCamara) textoCamara.classList.add('d-none');
-      isScanning = false;
-      if (next) window.nextStep(next); // 👈 avanzar al paso cuando termina
-      console.log('➡️ detenerEscaneoQR: avanzando a step', next);
-    });
-  } else {
-    qrContainer.innerHTML = '';
-    if (btnCancelar) btnCancelar.classList.add('d-none');
-    if (btnEscanear) btnEscanear.classList.remove('d-none');
-    if (textoCamara) textoCamara.classList.add('d-none');
-    isScanning = false;
-    if (next) window.nextStep(next);
-  }
-}
-
-
-function cleanupScanUI() {
-  const qrContainer = document.getElementById('qr-reader');
-  const btnEscanear = document.getElementById('btn-escanear-qr');
-  const btnCancelar = document.getElementById('btn-cancelar-qr');
-  const textoCamara = document.getElementById('texto-camara-activa');
-
-  if (scanner && isScanning) {
-    scanner.stop().catch(() => {}).then(() => {
-      qrContainer.innerHTML = '';
-      if (btnCancelar) btnCancelar.classList.add('d-none');
-      if (btnEscanear) btnEscanear.classList.remove('d-none');
-      if (textoCamara) textoCamara.classList.add('d-none');
-      isScanning = false;
-    });
-  } else {
-    qrContainer.innerHTML = '';
-    if (btnCancelar) btnCancelar.classList.add('d-none');
-    if (btnEscanear) btnEscanear.classList.remove('d-none');
-    if (textoCamara) textoCamara.classList.add('d-none');
-    isScanning = false;
-  }
-}
-
-function activarEscaneoQRLogin() {
-  const qrContainer = document.getElementById('qr-login-reader');
-  const wrapper = document.getElementById('qr-login-container');
-
-  if (!qrContainer || !wrapper || isScanning) {
-    console.error('❌ activarEscaneoQRLogin: contenedor o wrapper no disponible, o escaneo ya activo');
-    return;
-  }
-
-  wrapper.style.display = 'block';
-  qrContainer.innerHTML = '';
-  scanner = new Html5Qrcode("qr-login-reader");
-  isScanning = true;
-
-  scanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 250, height: 250 } },
-    qrCodeMessage => {
-      console.log('QR de login detectado:', qrCodeMessage);
-
-      // 👉 detenemos el escaneo para liberar la cámara
-      detenerEscaneoQRLogin();
-
-      // 👉 llamamos al método corregido que envía { codigo_qr: ... }
-      identificarPorQR(qrCodeMessage);
-    },
-    errorMessage => {
-      console.warn('Error escaneo login:', errorMessage);
-    }
-  ).catch(err => {
-    console.error('No se pudo iniciar escaneo login:', err);
-    window.mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
-    detenerEscaneoQRLogin();
-  });
-}
-
-
-function detenerEscaneoQRLogin() {
-  const qrContainer = document.getElementById('qr-login-reader');
-  const wrapper = document.getElementById('qr-login-container');
-
-  if (scanner && isScanning) {
-    scanner.stop().catch(() => {}).then(() => {
-      qrContainer.innerHTML = '';
-      wrapper.style.display = 'none';
-      console.log('📴 detenerEscaneoQRLogin: escaneo login detenido y UI oculta');
-      isScanning = false;
-    });
-  } else {
-    qrContainer.innerHTML = '';
-    wrapper.style.display = 'none';
-    isScanning = false;
-  }
-}
-
-function identificarPorQR(codigoQR) {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  const csrf = meta && meta.content ? meta.content : null;
-  const headers = { 'Content-Type': 'application/json' };
-  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
-  fetch('/terminal/identificar', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ codigo_qr: codigoQR })
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log('Respuesta login QR:', data);
-
-    if (data.success) {
-      // Usuario válido (rol trabajador + estado Alta)
-      localStorage.setItem('id_usuario', data.usuario.id);
-      window.nextStep(2);
-      document.getElementById('saludo-trabajador').textContent = `Hola ${data.usuario.name}`;
-    } else {
-      // Mensajes diferenciados según backend
-      if (data.message === 'Usuario no encontrado') {
-        window.mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
-      console.log('❌ Usuario no encontrado en el sistema');
-      } else if (data.message === 'Este usuario no tiene permisos para usar el kiosco') {
-        window.mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
-      console.log('⚠️ Este usuario no tiene permisos para usar el kiosco');
-      } else if (data.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
-        window.mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
-      console.log('⛔ El usuario no está en estado Alta y no puede usar el kiosco');
-      } else {
-        window.mostrarMensajeKiosco(data.message || 'Error al identificar por QR', 'danger');
-      console.log('Error al identificar por QR');
-      }
-    }
-  })
-  .catch(err => {
-    console.error('Error en fetch login QR:', err);
-    window.mostrarMensajeKiosco('Error de red al identificar por QR', 'danger');
-  });
-}
-
-
-function volverAInicio() {
-  // Limpiamos la sesión del trabajador
-  localStorage.removeItem('id_usuario');
-  console.log('volverAInicio: sesión limpiada');
-
-  // Volvemos al paso 1
-  window.nextStep(1);
-
-  // Opcional: limpiar el campo DNI por si quedó algo escrito
-  const dniInput = document.getElementById('dni');
-  if (dniInput) dniInput.value = '';
-}
-
 // 👇 nuevo: target de retorno para step5
 let step5ReturnTarget = 2; // default: menú principal
 
@@ -1721,13 +1694,13 @@ function setModoEscaneo(modo) {
   if (modo === 'manual') {
     console.log('🔄 setModoEscaneo: modo manual activado');
     titulo.textContent = 'Tengo la herramienta en mano';
-    detenerEscaneoQR();
+    detenerEscaneoQRregistroRecursos();
     // 👇 si luego vamos a solicitar manualmente (step5), el volver debe regresar acá (step3)
     step5ReturnTarget = 3;
   } else {
     console.log('🔄 setModoEscaneo: modo escaneo QR activado');
     titulo.textContent = '📷 Escanear Recurso';
-    activarEscaneoQR();
+    activarEscaneoQRregistroRecursos();
     // escaneo QR no cambia el target de step5
   }
   window.nextStep(3);
@@ -1958,14 +1931,6 @@ function abrirModalRecursos() {
     if (paginador) paginador.innerHTML = '';
   }
 }
-
-
-
-
-
-
-
-
 
 // 🔧 Normalizar texto (quita acentos)
 function normalizarTexto(str) {
@@ -2458,7 +2423,7 @@ document.addEventListener('DOMContentLoaded', () => {
     qrScanner.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
-      onScanSuccess
+      ExitoDevolucionQR
     );
     console.log('📷 QR devolucion: escáner iniciado (DOMContentLoaded)');
   } catch (e) {
@@ -2506,7 +2471,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnConfirmar = document.getElementById('btnConfirmarDevolucion');
     if (btnConfirmar && !btnConfirmar._safeClickAttached) {
       try {
-        btnConfirmar.addEventListener('click', confirmarDevolucionActual);
+        btnConfirmar.addEventListener('click', confirmarDevolucionQRActual);
         btnConfirmar._safeClickAttached = true;
         console.log('✅ safeBindings: btnConfirmarDevolucion conectado de forma segura');
       } catch (e) {
@@ -2752,14 +2717,14 @@ if (step === 'step1') {
     if (matchOpcion(limpio, 1, "qr", "escanear")) {
       window.mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
       console.log('🎤 Comando reconocido: Escanear QR');
-      activarEscaneoQR();
+      activarEscaneoQRregistroRecursos();
       return;
     }
 
     if (limpio.includes("cancelar")) {
       window.mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
       console.log('🎤 Comando reconocido: Cancelar escaneo');
-      cancelarEscaneoQR();
+      cancelarEscaneoQRregistroRecursos();
       return;
     }
 
@@ -2767,14 +2732,14 @@ if (step === 'step1') {
       window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
       console.log('🎤 Comando reconocido: Solicitar manualmente');
       step5ReturnTarget = 3;
-      detenerEscaneoQR(5);
+      detenerEscaneoQRregistroRecursos(5);
       return;
     }
 
     if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
       window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
       console.log('🎤 Comando reconocido: Volver al menú principal');
-      detenerEscaneoQR(2);
+      detenerEscaneoQRregistroRecursos(2);
       return;
     }
 
@@ -2949,7 +2914,7 @@ if (step === 'step9') {
     const btn = document.getElementById('btnConfirmarDevolucion');
     if (btn && !btn.disabled) {
       console.log('🎤 step9: comando confirmar detectado -> click confirmar');
-      try { btn.click(); } catch(e) { confirmarDevolucionActual(); }
+      try { btn.click(); } catch(e) { confirmarDevolucionQRActual(); }
       return;
     } else {
       console.log('⚠️ step9: comando confirmar, pero botón deshabilitado');
@@ -2960,8 +2925,8 @@ if (step === 'step9') {
 
   // Volver: usar tu helper de tolerancia
   if (esComandoVolver(limpio) || /\b(cancelar|salir|volver)\b/.test(limpio)) {
-    console.log('🎤 step9: comando volver detectado -> volverARecursosAsignados');
-    volverARecursosAsignados();
+    console.log('🎤 step9: comando volver detectado -> volverARecursosAsignadosDesdeDevolucionQR');
+    volverARecursosAsignadosDesdeDevolucionQR();
     return;
   }
 
@@ -3056,185 +3021,3 @@ const mapaNumeros = {
   console.log("⚠️ procesarComandoVoz: comando no reconocido en ningún step");
 }
 
-
-/*
-// Exponer API pública para entorno de tests y JSDOM
-if (typeof window !== 'undefined') {
-
-  // Funciones principales (si existen en este scope se asignan; si no, se colocan stubs seguros)
-  window.identificarTrabajador = typeof identificarTrabajador === 'function' ? identificarTrabajador : (async () => ({ success: false }));
-  window.registrarSerie = typeof registrarSerie === 'function' ? registrarSerie : (async () => ({ success: false }));
-  window.registrarPorQR = typeof registrarPorQR === 'function' ? registrarPorQR : (async () => ({ success: false }));
-  window.mostrarRecursosAsignados = typeof mostrarRecursosAsignados === 'function' ? mostrarRecursosAsignados : (() => {});
-  window.getStepActivo = typeof getStepActivo === 'function' ? getStepActivo : (() => {
-    const s = document.querySelector('.step.active'); return s ? s.id : null;
-  });
-  window.nextStep = typeof nextStep === 'function' ? nextStep : ((n) => {
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    const el = document.getElementById('step' + n); if (el) el.classList.add('active');
-  });
-
-  // Navegación / selección
-  window.seleccionarCategoria = typeof seleccionarCategoria === 'function' ? seleccionarCategoria : (() => {});
-  window.seleccionarSubcategoria = typeof seleccionarSubcategoria === 'function' ? seleccionarSubcategoria : (() => {});
-  window.seleccionarRecurso = typeof seleccionarRecurso === 'function' ? seleccionarRecurso : (() => {});
-  window.confirmarSerieModal = typeof confirmarSerieModal === 'function' ? confirmarSerieModal : ((...a) => { if (confirm) confirm('Confirm?'); });
-
-  // Recursos, tablas y tablas auxiliares
-  window.devolverRecurso = typeof devolverRecurso === 'function' ? devolverRecurso : (async () => ({ success: false }));
-  window.renderTablaRecursos = typeof renderTablaRecursos === 'function' ? renderTablaRecursos : (() => {});
-  window.renderPaginacionRecursos = typeof renderPaginacionRecursos === 'function' ? renderPaginacionRecursos : (() => {});
-  window.renderRecursosPaginados = typeof renderRecursosPaginados === 'function' ? renderRecursosPaginados : (() => {});
-  window.renderSubcategoriasPaginadas = typeof renderSubcategoriasPaginadas === 'function' ? renderSubcategoriasPaginadas : (() => {});
-  window.renderSeriesPaginadas = typeof renderSeriesPaginadas === 'function' ? renderSeriesPaginadas : (() => {});
-  window.renderSubcategoriasPaginadas = typeof renderSubcategoriasPaginadas === 'function' ? renderSubcategoriasPaginadas : (() => {});
-  window.actualizarRecursos = typeof actualizarRecursos === 'function' ? actualizarRecursos : ((list) => {
-    const cont = document.getElementById('recursos'); if (cont) { cont.innerHTML = list.map(r => `<div>${r.nombre}</div>`).join(''); }
-  });
-
-  // Escaneo / QR
-  window.activarEscaneoQR = typeof activarEscaneoQR === 'function' ? activarEscaneoQR : (async () => {});
-  window.cancelarEscaneoQR = typeof cancelarEscaneoQR === 'function' ? cancelarEscaneoQR : (() => {});
-  window.detenerEscaneoQR = typeof detenerEscaneoQR === 'function' ? detenerEscaneoQR : ((next=null) => { if (next) (window.nextStep||(()=>{}))(next); });
-  window.cleanupScanUI = typeof cleanupScanUI === 'function' ? cleanupScanUI : (() => {});
-  window.activarEscaneoQRLogin = typeof activarEscaneoQRLogin === 'function' ? activarEscaneoQRLogin : (async () => {});
-  window.detenerEscaneoQRLogin = typeof detenerEscaneoQRLogin === 'function' ? detenerEscaneoQRLogin : (async () => {});
-
-  // Login por QR
-  window.identificarPorQR = typeof identificarPorQR === 'function' ? identificarPorQR : (async () => ({ success: false }));
-
-  // Menú / carga
-  window.cargarCategorias = typeof cargarCategorias === 'function' ? cargarCategorias : (async () => []);
-  window.cargarRecursos = typeof cargarRecursos === 'function' ? cargarRecursos : (async () => {});
-  window.cargarMenuPrincipal = typeof cargarMenuPrincipal === 'function' ? cargarMenuPrincipal : (() => {});
-
-  // Reconocimiento de voz
-  window.iniciarReconocimientoGlobal = typeof iniciarReconocimientoGlobal === 'function' ? iniciarReconocimientoGlobal : (() => {});
-  window.iniciarReconocimientoVoz = typeof iniciarReconocimientoVoz === 'function' ? iniciarReconocimientoVoz : (() => {});
-  window.recognitionGlobal = typeof recognitionGlobal !== 'undefined' ? recognitionGlobal : null;
-
-  // Matchers y utilitarios
-  window.normalizarTexto = typeof normalizarTexto === 'function' ? normalizarTexto : ((s='') => (''+s).toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-  window.matchOpcion = typeof matchOpcion === 'function' ? matchOpcion : ((limpio, n) => (''+limpio).includes(`opcion ${n}`));
-  window.matchTextoBoton = typeof matchTextoBoton === 'function' ? matchTextoBoton : ((limpio, btn) => (btn && (''+btn.textContent).toLowerCase().includes((''+limpio).toLowerCase())));
-  window.matchRecurso = typeof matchRecurso === 'function' ? matchRecurso : ((f,r) => (''+f).toLowerCase().includes((''+r).toLowerCase()));
-  window.matchAccion = typeof matchAccion === 'function' ? matchAccion : ((s='') => /solicit|pedir|quiero/.test(s));
-  window.matchVolver = typeof matchVolver === 'function' ? matchVolver : ((s='') => /volver|inicio|regresar|atrás|cerrar/.test(s));
-  window.matchCerrar = typeof matchCerrar === 'function' ? matchCerrar : ((s='') => /cerrar|salir/.test(s));
-  window.matchConfirmar = typeof matchConfirmar === 'function' ? matchConfirmar : ((s='') => /confirmar|si|ok/.test(s));
-
-  // Validaciones
-  window.validarUsuario = typeof validarUsuario === 'function' ? validarUsuario : ((u) => !!u && u.rol === 'Trabajador' && u.estado === 'Alta');
-  window.validarEstado = typeof validarEstado === 'function' ? validarEstado : ((e) => e !== 'Baja');
-  window.validarRol = typeof validarRol === 'function' ? validarRol : ((r) => r === 'Trabajador');
-  window.validarQR = typeof validarQR === 'function' ? validarQR : ((q) => !!q && String(q).trim().length > 0);
-  window.validarSerie = typeof validarSerie === 'function' ? validarSerie : ((n) => Number.isInteger(Number(n)) && Number(n) > 0);
-  window.validarRecurso = typeof validarRecurso === 'function' ? validarRecurso : ((r) => r != null);
-  window.validarCategoria = typeof validarCategoria === 'function' ? validarCategoria : ((id) => Number(id) > 0);
-  window.validarSubcategoria = typeof validarSubcategoria === 'function' ? validarSubcategoria : ((id) => Number(id) > 0);
-  window.validarPasoActual = typeof validarPasoActual === 'function' ? validarPasoActual : ((step) => (window.getStepActivo && window.getStepActivo()) === step);
-  window.validarSesion = typeof validarSesion === 'function' ? validarSesion : (() => !!window.localStorage.getItem('id_usuario'));
-
-  // UI helpers mínimos
-  window.mostrarMensajeKiosco = window.mostrarMensajeKiosco || ((msg,tipo) => { const t = document.createElement('div'); t.className='toast'; t.textContent = msg; (document.getElementById('toastContainer')||document.body).appendChild(t); return t; });
-  window.mostrarModal = window.mostrarModal || ((id,contenido) => { const m = document.getElementById(id); if (m) { m.innerHTML = contenido; m.classList.add('show'); } });
-  window.cerrarModal = window.cerrarModal || ((id) => { const m = document.getElementById(id); if (m) m.classList.remove('show'); });
-
-  // Helpers de UI/estado para tests
-  window.actualizarPaso = window.actualizarPaso || ((stepId) => {
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    const el = document.getElementById(stepId); if (el) el.classList.add('active');
-  });
-  window.actualizarUI = window.actualizarUI || ((id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; });
-  window.actualizarBotones = window.actualizarBotones || ((n) => {
-    document.querySelectorAll('button[data-step]').forEach(b => b.classList.remove('active'));
-    const btn = document.querySelector(`button[data-step="${n}"]`); if (btn) btn.classList.add('active');
-  });
-
-  // Fallbacks para volverDesdeStepX si no fueron definidas
-  window.volverDesdeStep5 = window.volverDesdeStep5 || (() => { if (window.nextStep) window.nextStep(window.step5ReturnTarget || 2); });
-  window.volverDesdeStep6 = window.volverDesdeStep6 || (() => { if (window.nextStep) window.nextStep(5); });
-  window.volverDesdeStep7 = window.volverDesdeStep7 || (() => { if (window.nextStep) window.nextStep(6); });
-
-  // No sobrescribir mocks que tests hayan colocado antes: sólo definir si no existe
-  // (ej: mostrarMensajeKiosco ya puede ser mockeada por beforeEach)
-  if (!window.mostrarMensajeKiosco) {
-    window.mostrarMensajeKiosco = (texto, tipo='info') => window.mostrarMensajeKiosco ? window.mostrarMensajeKiosco(texto, tipo) : null;
-  }
-}
-
-
-  module.exports = Object.assign(module.exports || {}, {
-    confirmarSerieModal: typeof confirmarSerieModal !== 'undefined' ? confirmarSerieModal : null,
-    seleccionarRecurso: typeof seleccionarRecurso !== 'undefined' ? seleccionarRecurso : null,
-    registrarSerie: typeof registrarSerie !== 'undefined' ? registrarSerie : null,
-    registrarPorQR: typeof registrarPorQR !== 'undefined' ? registrarPorQR : null,
-    identificarTrabajador: typeof identificarTrabajador !== 'undefined' ? identificarTrabajador : null,
-    getStepActivo: typeof getStepActivo !== 'undefined' ? getStepActivo : null,
-    nextStep: typeof nextStep !== 'undefined' ? nextStep : null,
-    mostrarMensajeKiosco: typeof mostrarMensajeKiosco !== 'undefined' ? mostrarMensajeKiosco : null,
-    cargarRecursos: typeof cargarRecursos !== 'undefined' ? cargarRecursos : null,
-    cargarCategorias: typeof cargarCategorias !== 'undefined' ? cargarCategorias : null,
-    cargarMenuPrincipal: typeof cargarMenuPrincipal !== 'undefined' ? cargarMenuPrincipal : null,
-    activarEscaneoQR: typeof activarEscaneoQR !== 'undefined' ? activarEscaneoQR : null,
-    activarEscaneoQRLogin: typeof activarEscaneoQRLogin !== 'undefined' ? activarEscaneoQRLogin : null,
-    detenerEscaneoQR: typeof detenerEscaneoQR !== 'undefined' ? detenerEscaneoQR : null,
-    identificarPorQR: typeof identificarPorQR !== 'undefined' ? identificarPorQR : null,
-    recognitionGlobal: typeof recognitionGlobal !== 'undefined' ? recognitionGlobal : null,
-    mostrarRecursosAsignados,
-    devolverRecurso
-
-  });
-  
-// ----------------- Exports para Jest / CommonJS -----------------
-// Reemplazar el bloque anterior de module.exports por este bloque completo.
-// Solo se define module.exports si el entorno lo soporta (Jest / Node).
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = Object.assign(module.exports || {}, {
-    // Core flow
-    procesarComandoVoz: typeof procesarComandoVoz !== 'undefined' ? procesarComandoVoz : null,
-    getStepActivo: typeof getStepActivo !== 'undefined' ? getStepActivo : null,
-    nextStep: typeof nextStep !== 'undefined' ? nextStep : null,
-
-    // Helpers de texto / números
-    normalizarTexto: typeof normalizarTexto !== 'undefined' ? normalizarTexto : (s='') => (''+s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(),
-    MAPA_NUMEROS: typeof MAPA_NUMEROS !== 'undefined' ? MAPA_NUMEROS : (typeof window !== 'undefined' ? window.MAPA_NUMEROS : undefined),
-    numeroDesdeToken: typeof numeroDesdeToken !== 'undefined' ? numeroDesdeToken : (t => NaN),
-
-    // Matchers y comandos
-    matchOpcion: typeof matchOpcion !== 'undefined' ? matchOpcion : null,
-    matchTextoBoton: typeof matchTextoBoton !== 'undefined' ? matchTextoBoton : null,
-    esComandoVolver: typeof esComandoVolver !== 'undefined' ? esComandoVolver : null,
-    matchVolver: typeof matchVolver !== 'undefined' ? matchVolver : null,
-
-    // Renderers (que los tests suelen espiar)
-    renderSubcategoriasPaginadas: typeof renderSubcategoriasPaginadas !== 'undefined' ? renderSubcategoriasPaginadas : null,
-    renderRecursosPaginados: typeof renderRecursosPaginados !== 'undefined' ? renderRecursosPaginados : null,
-    renderSeriesPaginadas: typeof renderSeriesPaginadas !== 'undefined' ? renderSeriesPaginadas : null,
-    renderTablaRecursos: typeof renderTablaRecursos !== 'undefined' ? renderTablaRecursos : null,
-
-    // Funciones de carga / acciones de red (stubs si no existen)
-    cargarCategorias: typeof cargarCategorias !== 'undefined' ? cargarCategorias : null,
-    cargarRecursos: typeof cargarRecursos !== 'undefined' ? cargarRecursos : null,
-    seleccionarCategoria: typeof seleccionarCategoria !== 'undefined' ? seleccionarCategoria : null,
-    seleccionarSubcategoria: typeof seleccionarSubcategoria !== 'undefined' ? seleccionarSubcategoria : null,
-    seleccionarRecurso: typeof seleccionarRecurso !== 'undefined' ? seleccionarRecurso : null,
-
-    // Modal / confirmación / registrar
-    confirmarSerieModal: typeof confirmarSerieModal !== 'undefined' ? confirmarSerieModal : null,
-    registrarSerie: typeof registrarSerie !== 'undefined' ? registrarSerie : null,
-    registrarPorQR: typeof registrarPorQR !== 'undefined' ? registrarPorQR : null,
-    identificarTrabajador: typeof identificarTrabajador !== 'undefined' ? identificarTrabajador : null,
-    identificarPorQR: typeof identificarPorQR !== 'undefined' ? identificarPorQR : null,
-
-    // Utilidades UI / testing
-    mostrarMensajeKiosco: typeof mostrarMensajeKiosco !== 'undefined' ? mostrarMensajeKiosco : null,
-    mostrarRecursosAsignados: typeof mostrarRecursosAsignados !== 'undefined' ? mostrarRecursosAsignados : null,
-    devolverRecurso: typeof devolverRecurso !== 'undefined' ? devolverRecurso : null,
-
-    // Speech control (exponer estado si existe)
-    recognitionGlobal: typeof recognitionGlobal !== 'undefined' ? recognitionGlobal : null,
-    recognitionGlobalPaused: typeof recognitionGlobalPaused !== 'undefined' ? recognitionGlobalPaused : null
-  });
-}
-*/

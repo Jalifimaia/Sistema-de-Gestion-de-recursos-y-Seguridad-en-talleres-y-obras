@@ -53,24 +53,24 @@
   <div id="qr-reader" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
 
   <div class="text-center mt-3">
-    <button id="btn-escanear-qr" class="btn btn-outline-dark btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="activarEscaneoQR()">
+    <button id="btn-escanear-qr" class="btn btn-outline-dark btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="activarEscaneoQRregistroRecursos()">
       <span class="badge-opcion">Opción 1</span>
       <span class="ms-2 flex-grow-1 text-start">Escanear QR</span>
     </button>
 
-    <button id="btn-cancelar-qr" class="btn btn-outline-danger btn-lg d-none m-2 w-100" onclick="cancelarEscaneoQR()">
+    <button id="btn-cancelar-qr" class="btn btn-outline-danger btn-lg d-none m-2 w-100" onclick="cancelarEscaneoQRregistroRecursos()">
       Cancelar escaneo
     </button>
   </div>
 
   <div class="text-center">
-    <button class="btn btn-outline-dark btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQR(5)">
+    <button class="btn btn-outline-dark btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(5)">
       <span class="badge-opcion">Opción 2</span>
       <span class="ms-2 flex-grow-1 text-start">Solicitar manualmente</span>
     </button>
 
     <div class="text-start">
-      <button class="btn btn-primary btn-lg mt-3" onclick="detenerEscaneoQR(2)">Volver</button>
+      <button class="btn btn-primary btn-lg mt-3" onclick="detenerEscaneoQRregistroRecursos(2)">Volver</button>
     </div>
 
   </div>
@@ -132,7 +132,7 @@
 
       <!-- Botón para cancelar escaneo -->
       <div class="text-center mt-2">
-        <button id="btn-cancelar-qr" class="btn btn-outline-primary d-none" onclick="cancelarEscaneoQR()">Cancelar escaneo</button>
+        <button id="btn-cancelar-qr" class="btn btn-outline-primary d-none" onclick="cancelarEscaneoQRregistroRecursos()">Cancelar escaneo</button>
       </div>
 
       <!-- Feedback del QR -->
@@ -141,7 +141,7 @@
       <!-- Botones de acción -->
       <div class="text-center mt-4">
         <button id="btnConfirmarDevolucion" class="btn btn-primary" disabled>Confirmar devolución</button>
-        <button class="btn btn-primary ms-2" onclick="volverARecursosAsignados()">Volver</button>
+        <button class="btn btn-primary ms-2" onclick="volverARecursosAsignadosDesdeDevolucionQR()">Volver</button>
       </div>
     </div>
 
@@ -235,35 +235,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Modal de devolución con escaneo QR 
-  <div class="modal fade" id="modalConfirmarDevolucion" tabindex="-1" aria-labelledby="modalConfirmarDevolucionLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-light">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalConfirmarDevolucionLabel">Confirmar devolución</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-
-        <div class="modal-body text-center">
-          <p>Muestre el QR del recurso con serie <strong id="serieEsperadaQR"></strong></p>
-
-          < Escáner QR -
-          <div id="qr-reader" style="width: 250px; margin: auto;"></div>
-          <div id="texto-camara-activa" class="text-muted d-none">📷 Cámara activa</div>
-          <button id="btn-cancelar-qr" class="btn btn-outline-primary d-none" onclick="cancelarEscaneoQR()">Cancelar escaneo</button>
-
-          <div id="qrFeedback" class="mt-3 text-danger fw-bold"></div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-success" id="btnAceptarDevolucion" disabled>Aceptar devolución</button>
-        </div>
-      </div>
-    </div>
-  </div>-->
-
 
 
 <!-- Microfono flotante -->
