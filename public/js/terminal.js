@@ -176,6 +176,7 @@ function nextStep(n) {
       cancelarEscaneoQRregistroRecursos();
       detenerEscaneoQRLogin();
       detenerEscaneoQRDevolucion();
+      detenerEscaneoQRDevolucionSegura(); // 👈 usa la versión robusta
       console.log('🛑 Escaneo QR detenido en nextStep');
     } catch (e) { /* no bloquear flujo por errores en stop */ }
  // }
@@ -838,6 +839,19 @@ function detenerEscaneoQRDevolucion() {
   }
 }
 
+function detenerEscaneoQRDevolucionSegura() {
+  try {
+    detenerEscaneoQRDevolucion();
+    if (window._recogQRDevolucion) {
+      window._recogQRDevolucion.stop();
+      window._recogQRDevolucion = null;
+    }
+    console.log('🛑 Escaneo QR de devolución detenido desde botón externo');
+  } catch (e) {
+    console.warn('⚠️ Error al detener escaneo QR devolución', e);
+  }
+}
+
 
 function volverARecursosAsignadosDesdeDevolucionQR() {
   detenerEscaneoQRDevolucion();
@@ -870,14 +884,16 @@ function activarEscaneoDevolucionQR() {
   }
 
   try {
-    const html5QrCode = new Html5Qrcode(contenedorId);
-    html5QrCode.start(
+    // 💡 Guardamos la instancia globalmente para poder detenerla luego
+    window.html5QrCodeDevolucion = new Html5Qrcode(contenedorId);
+
+    window.html5QrCodeDevolucion.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       (decodedText) => {
         validarDevolucionQR(decodedText, idUsuario)
           .then(res => {
-            html5QrCode.stop().catch(e => console.warn('Error al detener escáner', e));
+            window.html5QrCodeDevolucion.stop().catch(e => console.warn('Error al detener escáner', e));
 
             if (res.success && res.coincide) {
               detalleIdActual = res.id_detalle;
@@ -885,25 +901,28 @@ function activarEscaneoDevolucionQR() {
               document.getElementById('qrFeedback').textContent = '';
               mostrarMensajeKiosco('✅ QR válido, listo para confirmar devolución', 'success');
             } else {
-              document.getElementById('qrFeedback').textContent = res.message || 'QR no válido';
-              mostrarMensajeKiosco(res.message || '❌ QR no válido para devolución', 'warning');
+              document.getElementById('qrFeedback').textContent = '❌ QR no coincide con el recurso esperado';
+              mostrarMensajeKiosco('❌ QR no coincide con el recurso esperado', 'danger');
             }
           })
           .catch(err => {
-            html5QrCode.stop().catch(e => console.warn('Error al detener escáner', e));
-            console.error('Error validando QR:', err);
-            mostrarMensajeKiosco('❌ Error al validar QR', 'danger');
+            console.error('Error validando QR de devolución:', err);
+            mostrarMensajeKiosco('❌ Error al validar el QR', 'danger');
           });
       },
       (errorMessage) => {
-        console.log("Error de escaneo (devolución):", errorMessage);
+        console.warn('Error escaneo devolución:', errorMessage);
       }
-    );
+    ).catch(err => {
+      console.error('No se pudo iniciar escaneo devolución:', err);
+      mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
+    });
   } catch (e) {
-    console.error('Error al iniciar escaneo QR de devolución:', e);
-    mostrarMensajeKiosco('No se pudo activar la cámara.', 'danger');
+    console.error('Error al iniciar escaneo QR devolución:', e);
+    mostrarMensajeKiosco('Error al iniciar escaneo de devolución', 'danger');
   }
 }
+
 
 
 function ExitoDevolucionQR(qrCodeMessage) {
@@ -1632,6 +1651,18 @@ document.addEventListener('DOMContentLoaded', () => {
     { fps: 10, qrbox: 250 },
     ExitoDevolucionQR
   );
+
+  document.getElementById('boton-flotante-menu-principal')?.addEventListener('click', () => {
+  detenerEscaneoQRDevolucionSegura();
+  nextStep(2); // o el paso que corresponda
+});
+
+document.getElementById('btnAceptarCerrarSesion')?.addEventListener('click', () => {
+  detenerEscaneoQRDevolucionSegura(); // ✅ frena escaneo si estaba en devolución
+  volverAInicio(); // ✅ limpia sesión y vuelve a step1
+});
+
+
 });
 
 
@@ -2116,11 +2147,11 @@ function asegurarModalCerrarSesion() {
         <div class="modal-dialog modal-dialog-centered" role="document" style="z-index:2147483650;">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="modalCerrarSesionLabel">Confirmación</h5>
+              <h5 class="modal-title" id="modalCerrarSesionLabel">Confirmación de cierre de sesion</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body" id="modalCerrarSesionBody">
-              ¿Desea cerrar sesion
+              ¿Desea cerrar sesion?
             </div>
             <div class="modal-footer">
               <button id="btnCancelarCerrarSesion" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
