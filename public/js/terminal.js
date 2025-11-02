@@ -1689,16 +1689,36 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('boton-flotante-menu-principal')?.addEventListener('click', () => {
   detenerEscaneoQRDevolucionSegura();
   nextStep(2); // o el paso que corresponda
+
+  //boton de borrar DNI
+  const btnBorrar = document.getElementById('btnBorrarDNI');
+  const dniInput = document.getElementById('dni');
+
+  if (btnBorrar && dniInput) {
+    btnBorrar.addEventListener('click', () => {
+      dniInput.value = '';
+      dniInput.focus();
+      getRenderer('mostrarMensajeKiosco')('🧹 DNI borrado', 'info');
+    });
+  }
 });
 
-document.getElementById('btnAceptarCerrarSesion')?.addEventListener('click', () => {
-  detenerEscaneoQRDevolucionSegura(); // ✅ frena escaneo si estaba en devolución
-  volverAInicio(); // ✅ limpia sesión y vuelve a step1
-});
+  document.getElementById('btnAceptarCerrarSesion')?.addEventListener('click', () => {
+    detenerEscaneoQRDevolucionSegura(); // ✅ frena escaneo si estaba en devolución
+    volverAInicio(); // ✅ limpia sesión y vuelve a step1
+  });
 
 
 });
 
+function borrarDNI() {
+  const dniInput = document.getElementById('dni');
+  if (dniInput) {
+    dniInput.value = '';
+    dniInput.focus();
+    getRenderer('mostrarMensajeKiosco')('🧹 DNI borrado', 'info');
+  }
+}
 
 const recursosTabs = document.getElementById('recursosTabs');
 if (recursosTabs) {
@@ -2252,6 +2272,7 @@ function ejecutarCerrarSesion() {
   try {
     localStorage.removeItem('id_usuario');
     console.log('🔓 Sesión cerrada (ejecutarCerrarSesion), volviendo a step1');
+    borrarDNI();
   } catch (e) {
     console.warn('⚠️ ejecutarCerrarSesion: error limpiando localStorage', e);
   }
@@ -2785,31 +2806,32 @@ if (limpio === 'menu principal') {
 
 
   // === Step1: Login ===
-if (step === 'step1') {
+  if (step === 'step1') {
 
-      if (!modalVisible && /^\d/.test(limpio)) {
+  if (!modalVisible && /^\d/.test(limpio)) {
     procesarDNIporVoz(limpio);
     return;
   }
 
-   
 
+  
+  if (/\b(borrar|borrar dni|borrar todo)\b/.test(limpio)) {
+    const dniInput = document.getElementById('dni');
+    if (dniInput) {
+      dniInput.value = '';
+      dniInput.focus();
+      getRenderer('mostrarMensajeKiosco')('🧹 DNI borrado por voz', 'info');
+    }
+    return;
+  }
 
   if (/\b(continuar|aceptar|ingresar|confirmar)\b/.test(limpio)) {
     console.log('🎤 Comando de voz: Continuar login');
     identificarTrabajador();
     return;
   }
-
-  if (/\b(qr|iniciar sesión con qr|escanear qr|usar qr)\b/.test(limpio)) {
-    console.log('🎤 Comando de voz: Activar escaneo QR login');
-    activarEscaneoQRLogin();
-    return;
-  }
-
-  console.log('⚠️ Step1: Comando no reconocido');
-  return;
 }
+
 
 
   // === Step2: Menú principal y modal recursos ===

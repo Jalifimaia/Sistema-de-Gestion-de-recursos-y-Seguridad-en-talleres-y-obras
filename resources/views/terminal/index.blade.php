@@ -26,6 +26,7 @@
 
 
       <button class="btn btn-primary btn-lg mb-3" onclick="identificarTrabajador()">Continuar</button>
+      <button id="btnBorrarDNI" class="btn btn-danger btn-lg mb-3" onclick="borrarDNI()">Borrar DNI</button>
 
 
       <div class="text-center mt-4">
