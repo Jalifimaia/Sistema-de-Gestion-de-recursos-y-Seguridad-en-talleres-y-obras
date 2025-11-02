@@ -45,48 +45,50 @@ public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorServic
     $data = $request->validated();
 
     if (\Carbon\Carbon::parse($data['fecha_adquisicion'])->isAfter(now())) {
-    throw \Illuminate\Validation\ValidationException::withMessages([
-        'fecha_adquisicion' => 'La fecha de adquisición no puede ser mayor a la fecha actual.'
-    ]);
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'fecha_adquisicion' => 'La fecha de adquisición no puede ser mayor a la fecha actual.'
+        ]);
     }
 
     $recurso = Recurso::with('subcategoria')->findOrFail($data['id_recurso']);
     $combinaciones = json_decode($data['combinaciones'], true) ?? [];
 
-    $requiereTalle = in_array(strtolower($recurso->subcategoria->nombre ?? ''), ['chaleco', 'botas']);
-
-    $tipoEsperado = match (strtolower($recurso->subcategoria->nombre ?? '')) {
+    $subcategoria = strtolower($recurso->subcategoria->nombre ?? '');
+    $requiereTalle = in_array($subcategoria, ['chaleco', 'botas']);
+    $tipoEsperado = match ($subcategoria) {
         'chaleco' => 'Ropa',
         'botas' => 'Calzado',
         default => null,
     };
 
+    $errores = [];
 
-foreach ($combinaciones as $combo) {
-    if (empty($combo['color_nombre'])) {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'combinaciones' => 'Falta color en una combinación.'
-        ]);
+    foreach ($combinaciones as $i => $combo) {
+        $tipoTalle = strtolower($combo['tipo_talle'] ?? '');
+        $talle = $combo['talle'] ?? null;
+        $color = $combo['color_nombre'] ?? null;
+        $cantidad = $combo['cantidad'] ?? null;
+
+        if (empty($color)) {
+            $errores["combinaciones.$i.color_nombre"] = ['Falta color en la combinación.'];
+        }
+
+        if ($requiereTalle && (empty($talle) || empty($tipoTalle))) {
+            $errores["combinaciones.$i.talle"] = ['Falta talle o tipo de talle.'];
+        }
+
+        if ($requiereTalle && $tipoEsperado && !in_array($tipoTalle, [strtolower($tipoEsperado), 'otro'])) {
+            $errores["combinaciones.$i.tipo_talle"] = ["El tipo de talle debe ser '{$tipoEsperado}' u 'Otro' para el recurso seleccionado."];
+        }
+
+        if (empty($cantidad) || $cantidad < 1) {
+            $errores["combinaciones.$i.cantidad"] = ['Cantidad inválida.'];
+        }
     }
 
-    if ($requiereTalle && (empty($combo['talle']) || empty($combo['tipo_talle']))) {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'combinaciones' => 'Falta talle o tipo en una combinación.'
-        ]);
+    if (!empty($errores)) {
+        throw \Illuminate\Validation\ValidationException::withMessages($errores);
     }
-
-    if ($requiereTalle && $tipoEsperado && !in_array(strtolower($combo['tipo_talle']), [strtolower($tipoEsperado), 'otro'])) {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'combinaciones' => "El tipo de talle debe ser '{$tipoEsperado}' u 'Otro' para el recurso seleccionado."
-        ]);
-    }
-
-    if (empty($combo['cantidad']) || $combo['cantidad'] < 1) {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'combinaciones' => 'Cantidad inválida en una combinación.'
-        ]);
-    }
-}
 
     foreach ($combinaciones as $combo) {
         $generator->createForCombination(
@@ -105,7 +107,7 @@ foreach ($combinaciones as $combo) {
         );
     }
 
-    return redirect()->route('inventario')->with('success', 'Series creadas correctamente.');
+    return response()->json(['success' => true]);
 }
 
 

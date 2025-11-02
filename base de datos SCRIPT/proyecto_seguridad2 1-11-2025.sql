@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 30-10-2025 a las 20:30:31
+-- Tiempo de generación: 02-11-2025 a las 02:21:51
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -437,7 +437,10 @@ INSERT INTO `checklist` (`id`, `trabajador_id`, `supervisor_id`, `anteojos`, `bo
 (21, 23, 5, 0, 0, 0, 1, 1, 1, '2025-10-29', NULL, '2025-10-29 16:04:59', '2025-10-29 16:04:59', '13:04:00', 0),
 (22, 7, 5, 1, 1, 1, 1, 0, 0, '2025-10-29', '-', '2025-10-29 18:13:23', '2025-10-29 18:13:23', '15:13:00', 0),
 (23, 26, 5, 1, 1, 0, 0, 0, 0, '2025-10-29', NULL, '2025-10-29 22:19:21', '2025-10-29 22:19:21', '19:19:00', 0),
-(30, 28, 5, 1, 1, 1, 1, 0, 0, '2025-10-30', '-', '2025-10-30 20:25:48', '2025-10-30 20:25:48', '17:25:00', 0);
+(30, 28, 5, 1, 1, 1, 1, 0, 0, '2025-10-30', '-', '2025-10-30 20:25:48', '2025-10-30 20:25:48', '17:25:00', 0),
+(31, 8, 5, 1, 1, 1, 1, 0, 0, '2025-10-31', '-', '2025-10-31 18:50:45', '2025-10-31 18:50:45', '15:50:00', 0),
+(32, 28, 5, 1, 1, 1, 1, 0, 0, '2025-10-31', 'Sin observaciones', '2025-10-31 19:32:13', '2025-10-31 19:32:13', '16:32:00', 0),
+(33, 27, 5, 1, 1, 1, 1, 0, 0, '2025-10-31', 'Sin observaciones', '2025-10-31 19:46:32', '2025-10-31 19:46:32', '16:46:00', 0);
 
 -- --------------------------------------------------------
 
@@ -455,9 +458,11 @@ CREATE TABLE `color` (
 --
 
 INSERT INTO `color` (`id`, `nombre`) VALUES
+(20, '12'),
 (15, '14'),
 (17, '16'),
 (19, '18'),
+(22, '5'),
 (3, 'Amarillo'),
 (18, 'Anaranjado'),
 (12, 'Gris'),
@@ -467,7 +472,8 @@ INSERT INTO `color` (`id`, `nombre`) VALUES
 (4, 'Negro'),
 (16, 'Negro oscuro'),
 (2, 'Rojo'),
-(9, 'Rosa');
+(9, 'Rosa'),
+(21, 'Verde');
 
 -- --------------------------------------------------------
 
@@ -968,7 +974,17 @@ INSERT INTO `recurso` (`id`, `id_incidente_detalle`, `id_usuario_creacion`, `id_
 (312, NULL, NULL, NULL, 'Botas Dieléctricas', 'Para trabajos eléctricos', 19000.00, NULL, NULL, 9),
 (315, NULL, 5, 5, 'Amoladora Angular', 'Angular Electrica', 45900.00, '2025-10-29 01:47:09', '2025-10-29 01:47:09', 13),
 (316, NULL, 5, 5, 'Guantes Mapa', 'Lana', 20000.00, '2025-10-29 13:46:42', '2025-10-29 13:46:42', 7),
-(317, NULL, 5, 5, 'Serrucho Baco', 'Mango Madera', 78000.00, '2025-10-30 17:30:22', '2025-10-30 17:30:22', 14);
+(317, NULL, 5, 5, 'Serrucho Baco', 'Mango Madera', 78000.00, '2025-10-30 17:30:22', '2025-10-30 17:30:22', 14),
+(318, NULL, 5, 5, 'm', 'm', 0.00, '2025-10-31 17:48:49', '2025-10-31 17:48:49', 1),
+(319, NULL, 5, 5, 'm', 'mdkdjwk kdjkj kdsjkds kdjkqjw', 78999.00, '2025-10-31 18:28:06', '2025-10-31 18:28:06', 5),
+(320, NULL, 5, 5, 'mmsss', 'smkdwjwk kdwjkwd kdwkdwj kdjkwj', 90000.00, '2025-10-31 18:28:43', '2025-10-31 18:28:43', 15),
+(321, NULL, 5, 5, 'm', 'jhsjhsd sdhsjd', 55555.00, '2025-10-31 23:26:23', '2025-10-31 23:26:23', 13),
+(322, NULL, 5, 5, 'm', 'kjkdsjkd kdajkad dakjdak kdjakdja', 25555.00, '2025-10-31 23:39:36', '2025-10-31 23:39:36', 9),
+(323, NULL, 5, 5, 'm', 'kjdskjd kadjkda kdajkda', 55555.00, '2025-10-31 23:45:05', '2025-10-31 23:45:05', 5),
+(324, NULL, 5, 5, 'lllll', 'dlsdkdlsk', 444444.00, '2025-10-31 23:45:51', '2025-10-31 23:45:51', 13),
+(325, NULL, 5, 5, 'msaasa', 'sam skaksa ksksa ksjasjks', 444.00, '2025-10-31 23:53:43', '2025-10-31 23:53:43', 4),
+(326, NULL, 5, 5, 'sss', 'asalsalsal', 777.00, '2025-10-31 23:54:21', '2025-10-31 23:54:21', 16),
+(327, NULL, 5, 5, 'lsak', 'lksalas lsaslk sakasjksa', 7888888.00, '2025-11-01 02:00:48', '2025-11-01 02:00:48', 17);
 
 -- --------------------------------------------------------
 
@@ -1125,7 +1141,7 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_serie_recurso_codigo`, `id_
 (52, 301, 6, NULL, 'CA-V1-CDSTA-25-01-001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
 (53, 302, 7, NULL, 'CB-V1-CDSTB-25-01-001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
 (54, 303, 8, NULL, 'CR-V1-AV-25-01-001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, '2025-10-29 13:48:04', 3, NULL, NULL, 1),
-(55, 304, 9, NULL, 'CT-V1-PCF-25-01-001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
+(55, 304, 9, NULL, 'CT-V1-PCF-25-01-001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, '2025-11-02 00:39:09', 3, NULL, NULL, 1),
 (56, 305, 10, NULL, 'AB-V1-PTEA-25-01-001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
 (57, 306, 11, NULL, 'ADA-V1-MS-25-01-001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
 (58, 307, 12, NULL, 'GDC-V1-RAC-25-01-001', NULL, NULL, '2025-10-01 00:00:00', '2026-10-01 00:00:00', NULL, NULL, 1, NULL, NULL, 1),
@@ -1139,7 +1155,7 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_serie_recurso_codigo`, `id_
 (66, 4, 1, NULL, 'CMP-V1-CN-25-01-003', 'M', NULL, '2025-10-23 00:00:00', NULL, NULL, '2025-10-29 21:45:57', 3, 'QR-412c7270-264f-4988-b4c8-4ff3d1418505', NULL, 3),
 (67, 4, 1, NULL, 'CMP-V1-CN-25-01-004', 'M', NULL, '2025-10-23 00:00:00', NULL, NULL, '2025-10-30 17:34:39', 3, 'QR-a06e8805-141f-466a-9b22-27ce77d53b22', NULL, 4),
 (68, 4, 1, NULL, 'CMP-V1-CN-25-01-005', 'M', NULL, '2025-10-23 00:00:00', NULL, NULL, NULL, 1, 'QR-051edaf6-deba-4f2d-904c-de390e86225e', NULL, 5),
-(69, 4, 1, NULL, 'CMP-V1-CN-25-01-001', 'L', 1, '2025-10-25 00:00:00', NULL, '2025-10-25 19:33:13', '2025-10-25 19:33:13', 1, 'QR-7b894bff-04f7-400d-bc37-6766ccf11c4b', NULL, 1),
+(69, 4, 1, NULL, 'CMP-V1-CN-25-01-001', 'L', 1, '2025-10-25 00:00:00', NULL, '2025-10-25 19:33:13', '2025-11-02 01:15:12', 3, 'QR-7b894bff-04f7-400d-bc37-6766ccf11c4b', NULL, 1),
 (70, 4, 1, NULL, 'CMP-V1-CN-25-01-001', 'XXL', 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:05:59', '2025-10-25 20:05:59', 1, 'QR-0c96959a-5c08-4ebd-9385-4a01a0dd6a7f', NULL, 1),
 (71, 4, 1, NULL, 'CMP-V1-CN-25-01-002', 'XXL', 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:05:59', '2025-10-25 20:05:59', 1, 'QR-adad940e-3c1f-4389-a61d-af65d8754b54', NULL, 2),
 (72, 6, 2, NULL, 'TX-V1-TR-25-01-001', NULL, 1, '2025-10-25 00:00:00', NULL, '2025-10-25 20:06:40', '2025-10-25 20:06:40', 1, 'QR-98077f64-d890-4d55-88f8-ad0c96081fb8', NULL, 1),
@@ -1197,10 +1213,10 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_serie_recurso_codigo`, `id_
 (124, 301, 6, NULL, 'CA-V1-CDSTA-25-01-003', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:04', '2025-10-29 19:11:06', 3, 'QR-7e5324a8-ccd4-4fcb-bcea-78e3f84b9116', NULL, 3),
 (125, 301, 6, NULL, 'CA-V1-CDSTA-25-01-004', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:04', '2025-10-30 17:34:39', 3, 'QR-8e16c66d-0820-4145-b824-41609cd0cce6', NULL, 4),
 (126, 301, 6, NULL, 'CA-V1-CDSTA-25-01-005', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:04', '2025-10-29 21:45:57', 3, 'QR-ef073c08-c40b-4d51-a29b-5ca698510379', NULL, 5),
-(127, 301, 6, NULL, 'CA-V1-CDSTA-25-01-006', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-3cad334e-0819-4a9c-ba57-cbd5f081ddfe', NULL, 6),
+(127, 301, 6, NULL, 'CA-V1-CDSTA-25-01-006', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-11-02 01:15:12', 3, 'QR-3cad334e-0819-4a9c-ba57-cbd5f081ddfe', NULL, 6),
 (128, 301, 6, NULL, 'CA-V1-CDSTA-25-01-007', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-23baab77-cbbd-4d25-b696-e8ad7655b671', NULL, 7),
 (129, 301, 6, NULL, 'CA-V1-CDSTA-25-01-008', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-26e9888d-bd33-401c-a0d0-22c7ebb7bc07', NULL, 8),
-(130, 301, 6, NULL, 'CA-V1-CDSTA-25-01-009', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-25 21:09:41', 1, 'QR-57130283-92d2-4643-9438-acc00f903e24', NULL, 9),
+(130, 301, 6, NULL, 'CA-V1-CDSTA-25-01-009', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-11-02 00:39:09', 3, 'QR-57130283-92d2-4643-9438-acc00f903e24', NULL, 9),
 (131, 301, 6, NULL, 'CA-V1-CDSTA-25-01-010', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:09:41', '2025-10-28 22:41:03', 3, 'QR-7b9f1688-1171-40f7-ba4b-5b43e23ed6ec', NULL, 10),
 (132, 301, 6, NULL, 'CA-V1-CDSTA-25-01-011', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:13:24', '2025-10-25 21:13:24', 1, 'QR-93b9c93e-7333-4d3d-a726-62c52f7da853', NULL, 11),
 (133, 301, 6, NULL, 'CA-V1-CDSTA-25-01-012', NULL, 3, '2025-10-25 00:00:00', NULL, '2025-10-25 21:13:24', '2025-10-25 21:13:24', 1, 'QR-96800cd8-ad5e-46f3-b0c2-361e057d56b0', NULL, 12),
@@ -1229,14 +1245,14 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_serie_recurso_codigo`, `id_
 (156, 4, 32, NULL, 'CMP-V4-CN-04-04-009', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:54:37', '2025-10-27 01:54:37', 1, 'QR-5d80cb11-e966-4690-9177-4e6d745d776d', NULL, 9),
 (157, 4, 32, NULL, 'CMP-V4-CN-04-04-010', 'M', 3, '2025-10-26 00:00:00', NULL, '2025-10-27 01:55:24', '2025-10-27 01:55:24', 1, 'QR-815490b5-c623-4794-996a-014c4591bdac', NULL, 10),
 (158, 306, 33, NULL, 'ADA-V3-MS-03-03-001', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-10-27 01:56:03', 1, 'QR-733ad1a8-fdae-4e66-9b66-d02a0258361f', NULL, 1),
-(159, 306, 33, NULL, 'ADA-V3-MS-03-03-002', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-10-27 01:56:03', 1, 'QR-1c4a2a5f-96ef-4ee5-a347-4306df508165', NULL, 2),
+(159, 306, 33, NULL, 'ADA-V3-MS-03-03-002', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-11-02 00:39:10', 3, 'QR-1c4a2a5f-96ef-4ee5-a347-4306df508165', NULL, 2),
 (160, 306, 33, NULL, 'ADA-V3-MS-03-03-003', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-10-27 01:56:03', 1, 'QR-285c9167-0e19-40a1-8170-b2c58adcde67', NULL, 3),
 (161, 306, 33, NULL, 'ADA-V3-MS-03-03-004', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:03', '2025-10-29 18:18:50', 3, 'QR-b5729ab0-8c6b-466e-a1b3-d93b90d0c48e', NULL, 4),
 (162, 306, 33, NULL, 'ADA-V3-MS-03-03-005', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:41', '2025-10-29 13:48:04', 3, 'QR-97dd1266-1286-414a-b84a-f9aa6657507f', NULL, 5),
 (163, 306, 33, NULL, 'ADA-V3-MS-03-03-006', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:41', '2025-10-29 19:11:06', 3, 'QR-d5df1bb1-51f1-49f6-b96e-53f7b4a14799', NULL, 6),
 (164, 306, 33, NULL, 'ADA-V3-MS-03-03-007', NULL, 2, '2025-10-26 00:00:00', NULL, '2025-10-27 01:56:41', '2025-10-29 21:45:57', 3, 'QR-f21a4a68-ffec-4491-94de-0f9432952bdf', NULL, 7),
 (165, 305, 34, NULL, 'AB-V4-PTEA-10-04-001', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-1e445aac-d0f8-4635-95bf-d7ecb0325bad', NULL, 1),
-(166, 305, 34, NULL, 'AB-V4-PTEA-10-04-002', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-db67c4c3-0dd8-430a-ba60-510d25cd7ec8', NULL, 2),
+(166, 305, 34, NULL, 'AB-V4-PTEA-10-04-002', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-11-02 01:15:12', 3, 'QR-db67c4c3-0dd8-430a-ba60-510d25cd7ec8', NULL, 2),
 (167, 305, 34, NULL, 'AB-V4-PTEA-10-04-003', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-30 17:34:39', 3, 'QR-2ba5cfa7-2401-4420-83c4-8d18f7c7a91e', NULL, 3),
 (168, 305, 34, NULL, 'AB-V4-PTEA-10-04-004', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-3af5f51d-9882-49fa-9dfe-dce2e5a1c6e7', NULL, 4),
 (169, 305, 34, NULL, 'AB-V4-PTEA-10-04-005', NULL, 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:06:29', '2025-10-27 02:06:29', 1, 'QR-bf249763-37b4-4c87-8d26-c179c306e19e', NULL, 5),
@@ -1257,13 +1273,13 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_serie_recurso_codigo`, `id_
 (184, 311, 35, NULL, 'BCPDA-V5-SI-05-05-002', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-53d1b151-9aa8-4115-a39d-5a44b6379bc6', NULL, 2),
 (185, 311, 35, NULL, 'BCPDA-V5-SI-05-05-003', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-28 18:01:45', 3, 'QR-66c7cc77-2bd4-4cc1-b6ba-92aeec033519', NULL, 3),
 (186, 311, 35, NULL, 'BCPDA-V5-SI-05-05-004', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-29 13:48:04', 3, 'QR-b449364b-00be-4439-89c4-59ff4398b185', NULL, 4),
-(187, 311, 35, NULL, 'BCPDA-V5-SI-05-05-005', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-10-27 02:09:42', 1, 'QR-da53da95-dcba-41b3-b90d-e69ce7b655fe', NULL, 5),
+(187, 311, 35, NULL, 'BCPDA-V5-SI-05-05-005', '36', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:09:42', '2025-11-02 01:15:12', 3, 'QR-da53da95-dcba-41b3-b90d-e69ce7b655fe', NULL, 5),
 (188, 311, 35, NULL, 'BCPDA-V5-SI-05-05-001', '38', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-95fd604f-d698-44f7-82b1-335a47ea01ba', NULL, 1),
 (189, 311, 35, NULL, 'BCPDA-V5-SI-05-05-002', '38', 1, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-5575a029-9a18-4d70-bd4a-090b53a04310', NULL, 2),
 (190, 311, 35, NULL, 'BCPDA-V5-SI-05-05-001', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-28 17:42:27', 3, 'QR-e7a9ded5-7595-465a-bee1-d175876aecb4', NULL, 1),
 (191, 311, 35, NULL, 'BCPDA-V5-SI-05-05-002', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-30 17:34:39', 3, 'QR-4ef22c91-0e69-4c3e-a00b-9038bb7f38be', NULL, 2),
 (192, 311, 35, NULL, 'BCPDA-V5-SI-05-05-003', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-28 17:59:14', 3, 'QR-1f5599ff-f124-4751-8b3e-4bbcb3c2d56b', NULL, 3),
-(193, 311, 35, NULL, 'BCPDA-V5-SI-05-05-004', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-1c8ce20d-d64e-4c5c-814b-1a923fc4ad7c', NULL, 4),
+(193, 311, 35, NULL, 'BCPDA-V5-SI-05-05-004', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-11-02 00:39:09', 3, 'QR-1c8ce20d-d64e-4c5c-814b-1a923fc4ad7c', NULL, 4),
 (194, 311, 35, NULL, 'BCPDA-V5-SI-05-05-005', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-875c120e-4927-447c-bbcb-8cf7bdac3463', NULL, 5),
 (195, 311, 35, NULL, 'BCPDA-V5-SI-05-05-006', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-358cf477-e949-4952-89a6-d1890997ad74', NULL, 6),
 (196, 311, 35, NULL, 'BCPDA-V5-SI-05-05-007', 'XL', 4, '2025-10-26 00:00:00', NULL, '2025-10-27 02:10:49', '2025-10-27 02:10:49', 1, 'QR-b6d62dd7-743e-4b95-9a04-e174a4f1d2ef', NULL, 7),
@@ -1305,17 +1321,33 @@ INSERT INTO `serie_recurso` (`id`, `id_recurso`, `id_serie_recurso_codigo`, `id_
 (232, 316, 46, NULL, 'GM-V3-L-11-01-002', NULL, NULL, '2025-10-29 00:00:00', NULL, '2025-10-29 19:10:04', '2025-10-29 21:45:57', 3, 'QR-562a59df-dc93-49e1-aaa6-0de743834460', NULL, 2),
 (233, 317, 47, NULL, 'SB-V2-MM-10-01-001', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 17:31:26', '2025-10-30 17:31:26', 1, 'QR-4fe0fe20-a20b-429c-85ba-e6e45af1e6b3', NULL, 1),
 (234, 317, 47, NULL, 'SB-V2-MM-10-01-002', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 17:31:26', '2025-10-30 17:31:26', 1, 'QR-3f333214-d1cd-4861-961f-6c0be0320dd1', NULL, 2),
-(235, 308, 48, NULL, 'GT-V1-PBT-10-05-001', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 17:33:33', '2025-10-30 17:33:33', 1, 'QR-b6544e3f-b8dd-44e5-bc11-fee7116604a0', NULL, 1),
+(235, 308, 48, NULL, 'GT-V1-PBT-10-05-001', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 17:33:33', '2025-11-02 00:39:09', 3, 'QR-b6544e3f-b8dd-44e5-bc11-fee7116604a0', NULL, 1),
 (236, 308, 48, NULL, 'GT-V1-PBT-10-05-002', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 17:33:33', '2025-10-30 17:34:39', 3, 'QR-bbd39a3f-6b37-49f8-a69c-aa6f3f48a72c', NULL, 2),
 (237, 310, 49, NULL, 'LP-V2-PSYO-11-05-001', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 17:34:02', '2025-10-30 17:34:39', 3, 'QR-e30359ef-7b71-4d58-a662-f14ec8739a5b', NULL, 1),
-(238, 310, 49, NULL, 'LP-V2-PSYO-11-05-002', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 17:34:02', '2025-10-30 17:34:02', 1, 'QR-bd956c81-2a3c-4bf7-8703-252dcc2db966', NULL, 2),
+(238, 310, 49, NULL, 'LP-V2-PSYO-11-05-002', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 17:34:02', '2025-11-02 00:39:09', 3, 'QR-bd956c81-2a3c-4bf7-8703-252dcc2db966', NULL, 2),
 (239, 317, 50, NULL, 'SB-V2-MM-11-01-001', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 18:10:57', '2025-10-30 18:10:57', 1, 'QR-60ae174f-add2-4479-926f-8e1751262671', NULL, 1),
 (240, 317, 51, NULL, 'SB-V2-MM-10-04-001', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 18:25:56', '2025-10-30 18:25:56', 1, 'QR-3d15ca6a-1484-4d76-800f-800ae9c3ba0f', NULL, 1),
 (241, 6, 52, NULL, 'TX-V2-TR-00-01-001', NULL, NULL, '2025-10-30 00:00:00', NULL, '2025-10-30 18:26:34', '2025-10-30 18:26:34', 1, 'QR-4d24bb7e-3d73-4354-a057-1ff7be09c701', NULL, 1),
 (242, 7, 53, NULL, 'TX-V3-A-10-02-001', NULL, 15, '2025-10-30 00:00:00', NULL, '2025-10-30 18:32:42', '2025-10-30 18:32:42', 1, 'QR-d9158ed6-9bef-4dbe-bbbc-1664da064299', NULL, 1),
 (243, 7, 53, NULL, 'TX-V3-A-10-02-002', NULL, 15, '2025-10-30 00:00:00', NULL, '2025-10-30 18:32:42', '2025-10-30 18:32:42', 1, 'QR-fd148c6d-9161-48b5-bcf2-899b97833d2e', NULL, 2),
 (244, 10, 54, NULL, 'T-V1-.-01-03-001', NULL, 17, '2025-10-30 00:00:00', NULL, '2025-10-30 18:55:36', '2025-10-30 19:17:46', 3, 'QR-fafc0d21-d21a-4e10-918c-b78bf655abb9', NULL, 1),
-(245, 10, 55, NULL, 'T-V2-.-11-05-001', NULL, 19, '2025-10-30 00:00:00', NULL, '2025-10-30 19:14:39', '2025-10-30 19:17:51', 3, 'QR-5108d0fb-76a3-4af7-8025-2b12924a7ef1', NULL, 1);
+(245, 10, 55, NULL, 'T-V2-.-11-05-001', NULL, 19, '2025-10-30 00:00:00', NULL, '2025-10-30 19:14:39', '2025-10-30 19:17:51', 3, 'QR-5108d0fb-76a3-4af7-8025-2b12924a7ef1', NULL, 1),
+(246, 326, 56, NULL, 'S-V3-A-10-05-001', NULL, 15, '2025-10-31 00:00:00', NULL, '2025-11-01 00:02:56', '2025-11-01 00:02:56', 1, 'QR-c917d410-85cf-4692-86be-fbca0e20fbf3', NULL, 1),
+(247, 326, 56, NULL, 'S-V3-A-10-05-001', NULL, 20, '2025-10-31 00:00:00', NULL, '2025-11-01 00:02:56', '2025-11-01 00:02:56', 1, 'QR-91ce69cb-6173-4afb-a64f-f8e3d3735c77', NULL, 1),
+(248, 326, 56, NULL, 'S-V3-A-10-05-002', NULL, 20, '2025-10-31 00:00:00', NULL, '2025-11-01 00:02:56', '2025-11-01 00:02:56', 1, 'QR-74326a50-438e-4ff2-b58f-e4fea33b70a7', NULL, 2),
+(249, 4, 57, NULL, 'CMP-V8-CN-12-04-001', '3XL', 22, '2025-10-31 00:00:00', NULL, '2025-11-01 00:29:05', '2025-11-01 00:29:05', 1, 'QR-4e96a353-75f2-43d3-a0bd-e5fc5ed1fff1', NULL, 1),
+(250, 4, 57, NULL, 'CMP-V8-CN-12-04-001', 'Adulto', 22, '2025-10-31 00:00:00', NULL, '2025-11-01 00:29:05', '2025-11-01 00:29:05', 1, 'QR-5c93f6bc-646e-456c-a142-f91acc490299', NULL, 1),
+(251, 311, 58, NULL, 'BCPDA-V5-SI-08-08-001', 'Adulto', 15, '2025-10-31 00:00:00', NULL, '2025-11-01 01:58:00', '2025-11-01 01:58:00', 1, 'QR-e19d4b18-eee5-43a5-be85-be55f3714c6c', NULL, 1),
+(252, 311, 59, NULL, 'BCPDA-V4-SI-03-04-001', '35', 15, '2025-10-31 00:00:00', NULL, '2025-11-01 01:58:59', '2025-11-01 01:58:59', 1, 'QR-1f8e6e8d-9c2e-426e-91f6-e62708b3b7a9', NULL, 1),
+(253, 311, 59, NULL, 'BCPDA-V4-SI-03-04-001', '35', 19, '2025-10-31 00:00:00', NULL, '2025-11-01 01:58:59', '2025-11-01 01:58:59', 1, 'QR-2ffafe1a-def8-4bb1-b90c-3fcfd40964d6', NULL, 1),
+(254, 311, 59, NULL, 'BCPDA-V4-SI-03-04-001', '38', 15, '2025-10-31 00:00:00', NULL, '2025-11-01 01:58:59', '2025-11-01 01:58:59', 1, 'QR-699f203a-f706-4e9c-8413-31ff62dadd66', NULL, 1),
+(255, 311, 59, NULL, 'BCPDA-V4-SI-03-04-001', '37', 15, '2025-10-31 00:00:00', NULL, '2025-11-01 01:58:59', '2025-11-01 01:58:59', 1, 'QR-213baf14-be54-420f-9096-a871e8f05ee9', NULL, 1),
+(256, 307, 60, NULL, 'GDC-V2-RAC-11-02-001', NULL, 20, '2025-11-01 00:00:00', NULL, '2025-11-02 01:14:00', '2025-11-02 01:15:12', 3, 'QR-058453d3-a6b8-47dc-af96-2f417a61a7ca', NULL, 1),
+(257, 307, 60, NULL, 'GDC-V2-RAC-11-02-002', NULL, 20, '2025-11-01 00:00:00', NULL, '2025-11-02 01:14:00', '2025-11-02 01:14:00', 1, 'QR-257befc7-9be5-41a1-98e5-53dc91df8896', NULL, 2),
+(258, 307, 60, NULL, 'GDC-V2-RAC-11-02-003', NULL, 20, '2025-11-01 00:00:00', NULL, '2025-11-02 01:14:00', '2025-11-02 01:14:00', 1, 'QR-2383eb62-4521-4849-b4c3-ede49755524d', NULL, 3),
+(259, 309, 61, NULL, 'LT-V4-POB-08-02-001', NULL, 20, '2025-11-01 00:00:00', NULL, '2025-11-02 01:14:21', '2025-11-02 01:15:12', 3, 'QR-62b8bdeb-bcb8-4bdd-b602-1ac1d01e6b51', NULL, 1),
+(260, 309, 61, NULL, 'LT-V4-POB-08-02-002', NULL, 20, '2025-11-01 00:00:00', NULL, '2025-11-02 01:14:21', '2025-11-02 01:14:21', 1, 'QR-22b37d9f-563d-4f7a-ac3e-76a16eb0b8e3', NULL, 2),
+(261, 309, 61, NULL, 'LT-V4-POB-08-02-003', NULL, 20, '2025-11-01 00:00:00', NULL, '2025-11-02 01:14:21', '2025-11-02 01:14:21', 1, 'QR-00412c79-f625-4a4f-9edd-c4264ebd0e15', NULL, 3);
 
 --
 -- Disparadores `serie_recurso`
@@ -1408,7 +1440,13 @@ INSERT INTO `serie_recurso_codigo` (`id`, `id_recurso`, `version`, `anio`, `lote
 (52, 6, 2, 2000, 1, '2025-10-30 21:26:34', '2025-10-30 21:26:34', 'TX-V2-TR-00-01'),
 (53, 7, 3, 2010, 2, '2025-10-30 21:32:42', '2025-10-30 21:32:42', 'TX-V3-A-10-02'),
 (54, 10, 1, 2001, 3, '2025-10-30 21:55:36', '2025-10-30 21:55:36', 'T-V1-.-01-03'),
-(55, 10, 2, 2011, 5, '2025-10-30 22:14:39', '2025-10-30 22:14:39', 'T-V2-.-11-05');
+(55, 10, 2, 2011, 5, '2025-10-30 22:14:39', '2025-10-30 22:14:39', 'T-V2-.-11-05'),
+(56, 326, 3, 2010, 5, '2025-11-01 03:02:55', '2025-11-01 03:02:55', 'S-V3-A-10-05'),
+(57, 4, 8, 2012, 4, '2025-11-01 03:29:05', '2025-11-01 03:29:05', 'CMP-V8-CN-12-04'),
+(58, 311, 5, 2008, 8, '2025-11-01 04:58:00', '2025-11-01 04:58:00', 'BCPDA-V5-SI-08-08'),
+(59, 311, 4, 2003, 4, '2025-11-01 04:58:59', '2025-11-01 04:58:59', 'BCPDA-V4-SI-03-04'),
+(60, 307, 2, 2011, 2, '2025-11-02 04:13:59', '2025-11-02 04:13:59', 'GDC-V2-RAC-11-02'),
+(61, 309, 4, 2008, 2, '2025-11-02 04:14:21', '2025-11-02 04:14:21', 'LT-V4-POB-08-02');
 
 -- --------------------------------------------------------
 
@@ -1512,7 +1550,10 @@ INSERT INTO `subcategoria` (`id`, `nombre`, `categoria_id`) VALUES
 (9, 'botas', 1),
 (12, 'Test', 2),
 (13, 'Amoladora', 2),
-(14, 'Serrucho', 2);
+(14, 'Serrucho', 2),
+(15, 'aaaaa', 2),
+(16, 'eeeee', 2),
+(17, 'iiii', 2);
 
 -- --------------------------------------------------------
 
@@ -1625,19 +1666,19 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`, `updated_at`, `usuario_creacion`, `usuario_modificacion`, `ultimo_acceso`, `id_estado`, `fecha_nacimiento`, `dni`, `telefono`, `nro_legajo`, `auth_key`, `access_token`, `codigo_qr`) VALUES
-(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-10-30 17:19:46', NULL, NULL, '2025-10-30 17:19:46', 1, NULL, '16', NULL, NULL, NULL, NULL, 'USR-722c6a13-ad73-11f0-a94d-00e070eec074'),
+(5, 1, 'Admin Restaurado', 'admin@empresa.com', '$2y$12$UXwLLgfJwN7DU0ZICwtOJOM/LGRQgaxL4GB05.cdexpN/1f1II/MK', '2025-10-03 18:08:23', '2025-11-01 23:25:41', NULL, NULL, '2025-11-01 23:25:41', 1, NULL, '16', NULL, NULL, NULL, NULL, 'USR-722c6a13-ad73-11f0-a94d-00e070eec074'),
 (6, 2, 'supervisor14', 'sup@empresa.com', '$2y$12$RzZoB461wF/csEEhwnXvke6Tcq1PGGrsIVN5XXEibSLPPWlreZVDK', '2025-10-03 21:42:12', '2025-10-13 18:29:09', 5, 5, '2025-10-11 15:18:10', 2, NULL, '2', NULL, NULL, NULL, NULL, 'USR-722c8102-ad73-11f0-a94d-00e070eec074'),
-(7, 3, 'trabajador', 'trabajador@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-10-13 18:19:12', 5, 5, '2025-10-03 21:44:20', 1, NULL, '4', NULL, NULL, NULL, NULL, 'USR-722c823c-ad73-11f0-a94d-00e070eec074'),
+(7, 3, 'trabajador', 'trabajador@gmail.com', '$2y$12$TFhscjYuiCjO6VgqA8iRe.CY0A2/U6ZQSjV0TVOk/PA984zBtDRLi', '2025-10-03 21:44:00', '2025-11-01 23:54:24', 5, 5, '2025-10-03 21:44:20', 1, NULL, '44', NULL, NULL, NULL, NULL, 'USR-722c823c-ad73-11f0-a94d-00e070eec074'),
 (8, 3, 'David', 'david@gmail.com', '$2y$12$l.ikdT365X7RBrvj2Dn39ueD.yu6xcISDf0.1avy2Uk5FgTFVge4G', '2025-10-04 01:49:47', '2025-10-17 02:15:53', 5, 5, '2025-10-17 02:15:53', 1, NULL, '1', NULL, NULL, NULL, NULL, 'USR-722c830f-ad73-11f0-a94d-00e070eec074'),
 (9, 3, 'Tuti', 'hola@gmail.com', '$2y$12$gsTfJ1SvZv23pMdPvMoPyevF1mU06rGVAXaXaH/mFLxGP7Jj3ltbO', '2025-10-04 02:04:56', '2025-10-12 23:06:57', 5, 5, '2025-10-04 02:04:56', 2, NULL, '5', NULL, NULL, NULL, NULL, 'USR-722c83a6-ad73-11f0-a94d-00e070eec074'),
-(10, 3, 'userprueba', 'user@gmail.com', '$2y$12$StRvDRhkkWWjZFSQgzmjcOueFq5mh2QXU5eV1RixsfqnScflf3vV.', '2025-10-04 02:07:02', '2025-10-13 18:43:35', 5, 5, '2025-10-04 02:07:02', 2, NULL, '6', NULL, NULL, NULL, NULL, 'USR-722c8504-ad73-11f0-a94d-00e070eec074'),
-(11, 2, 'user2', 'user2@gmail.com', '$2y$12$SRAh1tdXbYlz8o64bcx/muoTzwWpW9fbaXBpDr4N7InI8fOamUHBi', '2025-10-04 02:08:49', '2025-10-04 02:08:49', 5, 5, '2025-10-04 02:08:49', 2, NULL, '7', NULL, NULL, NULL, NULL, 'USR-722c8584-ad73-11f0-a94d-00e070eec074'),
+(10, 3, 'userprueba', 'user@gmail.com', '$2y$12$StRvDRhkkWWjZFSQgzmjcOueFq5mh2QXU5eV1RixsfqnScflf3vV.', '2025-10-04 02:07:02', '2025-11-02 01:06:27', 5, 5, '2025-10-04 02:07:02', 1, NULL, '6', NULL, NULL, NULL, NULL, 'USR-722c8504-ad73-11f0-a94d-00e070eec074'),
+(11, 2, 'user266', 'user2@gmail.com', '$2y$12$SRAh1tdXbYlz8o64bcx/muoTzwWpW9fbaXBpDr4N7InI8fOamUHBi', '2025-10-04 02:08:49', '2025-11-01 23:50:44', 5, 5, '2025-10-04 02:08:49', 2, NULL, '7', NULL, NULL, NULL, NULL, 'USR-722c8584-ad73-11f0-a94d-00e070eec074'),
 (12, 2, 'aaaa3', 'eee@gmail.com', '$2y$12$6PXfvfB4iNUZpnE.DV.gd.tgzhEEjO4zUjSx0KM8zpf6o.fYQ0Yem', '2025-10-04 02:09:24', '2025-10-13 18:31:44', 5, 5, '2025-10-04 02:09:24', 2, NULL, '9', NULL, NULL, NULL, NULL, 'USR-722cc890-ad73-11f0-a94d-00e070eec074'),
 (13, 1, 'miki', 'miki@gmail.com', '$2y$12$34yPOTEHJiOkR/XO5H4q1eq1t9LHam0HyNt8T9kH65HuwrrwdF0Yu', '2025-10-04 02:13:01', '2025-10-13 18:55:55', 5, 5, '2025-10-04 02:13:01', 3, NULL, '10', NULL, NULL, NULL, NULL, 'USR-722cca7d-ad73-11f0-a94d-00e070eec074'),
 (14, 3, 'mimi', 'mimi@gmail.com', '$2y$12$AqMIKF5KyQt0EuMwAVYKtOfnog5xPuZi9pz1i.duy8X4REbhmzfza', '2025-10-04 02:15:12', '2025-10-13 21:14:32', 5, 5, '2025-10-04 02:15:12', 1, NULL, '3', NULL, NULL, NULL, NULL, 'USR-722ccb66-ad73-11f0-a94d-00e070eec074'),
 (19, 1, 'test13-10', 'test13@empresa.com', '$2y$12$yOiNgGpcZYCJ.gRcjqxKeuKQbncs.ydJIh2EXBlSNHO0AbogJvmr.', '2025-10-13 19:49:08', '2025-10-13 22:56:25', 5, 5, '2025-10-13 19:49:08', 2, NULL, '15', NULL, NULL, NULL, NULL, 'USR-722ccc31-ad73-11f0-a94d-00e070eec074'),
 (20, 2, 'test15', 'test15@empresa.com', '$2y$12$eljJDNiHnzO5ubrXtoZOsekSgNUICJC00GrK8tyEmUE0S2DxD93k2', '2025-10-13 19:50:06', '2025-10-13 22:42:54', 5, 5, '2025-10-13 19:50:06', 2, NULL, '13', NULL, NULL, NULL, NULL, 'USR-722cccfa-ad73-11f0-a94d-00e070eec074'),
-(21, 2, 'gestion8', 'gestion66@empresa.com', '$2y$12$doXQ8vbMZSPWEXgsz8G/G.AkfQ/Xpq.oof09wyHZdjvzQLaGTy.0i', '2025-10-13 20:10:36', '2025-10-13 22:40:32', 5, 5, '2025-10-13 20:10:36', 2, NULL, '11', NULL, NULL, NULL, NULL, 'USR-722ccdbe-ad73-11f0-a94d-00e070eec074'),
+(21, 2, 'gestion8', 'gestion66@empresa.com', '$2y$12$doXQ8vbMZSPWEXgsz8G/G.AkfQ/Xpq.oof09wyHZdjvzQLaGTy.0i', '2025-10-13 20:10:36', '2025-11-01 23:51:24', 5, 5, '2025-10-13 20:10:36', 2, NULL, '11', NULL, NULL, NULL, NULL, 'USR-722ccdbe-ad73-11f0-a94d-00e070eec074'),
 (22, 1, 'Jaun', 'r@gmail.com', '$2y$12$Bc4NsElMD8hJUx0eEbgZi.oa.EwU2vEuFzl7CixDZR3tgQw4k15eO', '2025-10-14 17:17:03', '2025-10-14 17:17:03', 5, 5, '2025-10-14 17:17:03', 3, NULL, '14', NULL, NULL, NULL, NULL, 'USR-722cce74-ad73-11f0-a94d-00e070eec074'),
 (23, 3, 'Jaun288', 'jaun6@empresa.com', '$2y$12$L9.YD/HxvdZ2TF2bBwucBunV2e58j4Q4x3Bb9skIdN4o9MBGa48pu', '2025-10-14 17:17:47', '2025-10-14 17:20:49', 5, 5, '2025-10-14 17:17:47', 1, NULL, '12', NULL, NULL, NULL, NULL, 'USR-722ccf2d-ad73-11f0-a94d-00e070eec074'),
 (24, 3, 'Hernesto', 'Hernesto@empresa.com', '$2y$12$//y/nkrr7bNUYL8rUxVqR.ZTmd49srApQXs4EhTaes9pS6tMGPAEm', '2025-10-14 17:26:03', '2025-10-14 17:26:03', 5, 5, '2025-10-14 17:26:03', 3, NULL, '17', NULL, NULL, NULL, NULL, 'USR-722ccff0-ad73-11f0-a94d-00e070eec074'),
@@ -1645,7 +1686,8 @@ INSERT INTO `usuario` (`id`, `id_rol`, `name`, `email`, `password`, `created_at`
 (27, 3, 'testqr3', 'testQr3@empresa.com', '$2y$12$5RE/QFYnmGkhLX2h4aOdpuXthJBIzPW5SbuVhIYv13ODKgJE8/kaa', '2025-10-20 07:06:08', '2025-10-20 07:06:08', 5, 5, '2025-10-20 07:06:08', 3, NULL, '9999', NULL, NULL, NULL, NULL, 'USR-ebb10c71-fb9b-42a8-863b-290d4cbf5398'),
 (28, 3, 'Micaelita', 'micaelita@gmail.com', '$2y$12$ECR7zv8MhgzTxD04gClUB.1opI58Qa7HjUNKqsyeEdBM6f8/hC91m', '2025-10-20 16:35:27', '2025-10-20 16:40:48', 5, 5, '2025-10-20 16:35:26', 1, NULL, '77894879', NULL, NULL, NULL, NULL, 'USR-3db5a98c-27aa-4637-a70e-a6d4d580543d'),
 (29, 2, 'Anabelita', 'anabelita@gmail.com', '$2y$12$WMu9093DUE.q9AAcxQoqkO9U/DhJFU7TDCPqhar10U8/M5F97eRKO', '2025-10-20 16:36:03', '2025-10-20 16:43:17', 5, 5, '2025-10-20 16:36:03', 1, NULL, '89784521', NULL, NULL, NULL, NULL, 'USR-35214c6b-b0a0-48bb-88b5-198f7a13ffdb'),
-(30, 1, 'Maita', 'maita@gmail.com', '$2y$12$oPN2RoIi9zLAlYHPgYh21u7AOKzqFETq6CcKXMtXpEv3I99vgrwDW', '2025-10-20 16:36:39', '2025-10-20 16:36:39', 5, 5, '2025-10-20 16:36:39', 3, NULL, '87945621', NULL, NULL, NULL, NULL, 'USR-32398859-3d75-4fca-ba52-a310f48a3a46');
+(30, 1, 'Maita', 'maita@gmail.com', '$2y$12$oPN2RoIi9zLAlYHPgYh21u7AOKzqFETq6CcKXMtXpEv3I99vgrwDW', '2025-10-20 16:36:39', '2025-10-20 16:36:39', 5, 5, '2025-10-20 16:36:39', 3, NULL, '87945621', NULL, NULL, NULL, NULL, 'USR-32398859-3d75-4fca-ba52-a310f48a3a46'),
+(31, 3, 'mikiii', 'miki@empresa.com', '$2y$12$xLzD06Pbb.HPJru2fvGKxOJuj3yhwNVB1k6I4opFOjDmIaqInF1B2', '2025-11-02 01:09:21', '2025-11-02 01:13:03', 5, 5, '2025-11-02 01:09:18', 1, NULL, '44444', NULL, NULL, NULL, NULL, 'USR-d36f2828-0218-4e5c-b8bc-30a3e63759cd');
 
 -- --------------------------------------------------------
 
@@ -1708,7 +1750,19 @@ INSERT INTO `usuario_recurso` (`id`, `id_usuario`, `id_recurso`, `tipo_epp`, `id
 (39, 14, 310, 'lentes', 237, '2025-10-30 00:00:00'),
 (40, 14, 311, 'botas', 191, '2025-10-30 00:00:00'),
 (41, 14, 4, 'chaleco', 67, '2025-10-30 00:00:00'),
-(42, 14, 305, 'arnes', 167, '2025-10-30 00:00:00');
+(42, 14, 305, 'arnes', 167, '2025-10-30 00:00:00'),
+(43, 10, 301, 'casco', 130, '2025-11-02 00:00:00'),
+(44, 10, 308, 'guantes', 235, '2025-11-02 00:00:00'),
+(45, 10, 310, 'lentes', 238, '2025-11-02 00:00:00'),
+(46, 10, 311, 'botas', 193, '2025-11-02 00:00:00'),
+(47, 10, 304, 'chaleco', 55, '2025-11-02 00:00:00'),
+(48, 10, 306, 'arnes', 159, '2025-11-02 00:00:00'),
+(49, 31, 301, 'casco', 127, '2025-11-02 00:00:00'),
+(50, 31, 307, 'guantes', 256, '2025-11-02 00:00:00'),
+(51, 31, 309, 'lentes', 259, '2025-11-02 00:00:00'),
+(52, 31, 311, 'botas', 187, '2025-11-02 00:00:00'),
+(53, 31, 4, 'chaleco', 69, '2025-11-02 00:00:00'),
+(54, 31, 305, 'arnes', 166, '2025-11-02 00:00:00');
 
 --
 -- Índices para tablas volcadas
@@ -1969,13 +2023,13 @@ ALTER TABLE `usuario_recurso`
 -- AUTO_INCREMENT de la tabla `checklist`
 --
 ALTER TABLE `checklist`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT de la tabla `color`
 --
 ALTER TABLE `color`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_prestamo`
@@ -2041,19 +2095,19 @@ ALTER TABLE `prestamo`
 -- AUTO_INCREMENT de la tabla `recurso`
 --
 ALTER TABLE `recurso`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=318;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=328;
 
 --
 -- AUTO_INCREMENT de la tabla `serie_recurso`
 --
 ALTER TABLE `serie_recurso`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=246;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=262;
 
 --
 -- AUTO_INCREMENT de la tabla `serie_recurso_codigo`
 --
 ALTER TABLE `serie_recurso_codigo`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT de la tabla `stock`
@@ -2065,7 +2119,7 @@ ALTER TABLE `stock`
 -- AUTO_INCREMENT de la tabla `subcategoria`
 --
 ALTER TABLE `subcategoria`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `talle`
@@ -2089,13 +2143,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario_recurso`
 --
 ALTER TABLE `usuario_recurso`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- Restricciones para tablas volcadas

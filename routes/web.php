@@ -35,7 +35,9 @@ use App\Http\Controllers\PrestamoTerminalController;
 Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
-Route::get('/usuarios/{id}', [UserController::class, 'show'])->name('usuarios.show');
+Route::get('/usuarios/{id}', [UserController::class, 'show'])
+     ->where('id', '[0-9]+')
+     ->name('usuarios.show');
 //Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index']);
 Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index'])->name('controlEPP');
 
@@ -286,7 +288,8 @@ Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])
 */
 
 Route::post('/usuarios/{id}/baja', [UserController::class, 'darDeBaja'])->name('usuarios.baja');
-Route::post('/usuarios/{id}/alta', [ControlEPPController::class, 'activarTrabajador'])->name('usuarios.alta');
+Route::post('usuarios/{id}/activar-con-epp', [ControlEPPController::class, 'activarConEPP'])->name('usuarios.activarConEPP');
+Route::post('usuarios/{id}/standby', [UserController::class, 'standby'])->name('usuarios.standby');
 
 Route::post('/asignarEPP', [ControlEPPController::class, 'store'])->name('asignarEPP.store');
 Route::get('/series-epp', [ControlEPPController::class, 'buscarSeriesEPP']);

@@ -90,6 +90,28 @@
     </div>
   </form>
 </div>
+
+<!-- 🔶 Modal de advertencia -->
+<div class="modal fade" id="modalChecklistIncompleto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content border-warning">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title fw-bold">Checklist incompleto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="fs-5 mb-2">Faltan marcar los siguientes EPP asignados:</p>
+        <ul id="listaEppFaltantes" class="mb-3 fs-5"></ul>
+        <p class="text-danger fw-bold">Por favor revisá el checklist antes de continuar.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 @endsection
 
 @push('scripts')
@@ -182,9 +204,26 @@ document.addEventListener('DOMContentLoaded', function () {
       e.preventDefault();
       alert('No se puede registrar el checklist: hay EPP marcados como usados pero no asignados.');
     } else if (incompleto) {
-      e.preventDefault();
-      alert('Este trabajador tiene EPP asignado que no fue marcado como usado hoy. Por favor revisá el checklist.');
+  e.preventDefault();
+
+  const lista = document.getElementById('listaEppFaltantes');
+  lista.innerHTML = '';
+
+  checklistItems.forEach(campo => {
+    const tipoReal = aliasTipos[campo] || campo;
+    const checkbox = document.getElementById(campo);
+    const marcado = checkbox.checked;
+    const tieneAsignado = asignados.includes(tipoReal);
+
+    if (tieneAsignado && !marcado && campo !== 'arnes') {
+      lista.innerHTML += `<li>${tipoReal.charAt(0).toUpperCase() + tipoReal.slice(1)}</li>`;
     }
+  });
+
+  const modal = new bootstrap.Modal(document.getElementById('modalChecklistIncompleto'));
+  modal.show();
+}
+
   });
 });
 </script>

@@ -151,39 +151,47 @@
       <p class="text-muted">No se registraron checklists hoy.</p>
     @else
       <div class="table-responsive">
-        <table class="table table-bordered align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Trabajador</th>
-              <th>Supervisor</th>
-              <th>Altura</th>
-              <th>Anteojos</th>
-              <th>Botas</th>
-              <th>Chaleco</th>
-              <th>Guantes</th>
-              <th>Arnés</th>
-              <th>Observaciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach($checklistsHoy as $item)
-              <tr>
-                <td>{{ $item->trabajador->name ?? '—' }}</td>
-                <td>{{ $item->supervisor->name ?? '—' }}</td>
-                <td>{{ $item->es_en_altura ? 'Sí' : 'No' }}</td>
-                <td>{{ $item->anteojos ? '✔️' : '❌' }}</td>
-                <td>{{ $item->botas ? '✔️' : '❌' }}</td>
-                <td>{{ $item->chaleco ? '✔️' : '❌' }}</td>
-                <td>{{ $item->guantes ? '✔️' : '❌' }}</td>
-                <td>{{ $item->arnes ? '✔️' : '❌' }}</td>
-                <td>{{ $item->observaciones ?? '—' }}</td>
-              </tr>
-            @endforeach
-          </tbody>
-        </table>
-      </div>
+  <table class="table table-bordered text-center">
+    <thead class="table-light">
+      <tr>
+        <th>Trabajador</th>
+        <th>Anteojos</th>
+        <th>Botas</th>
+        <th>Chaleco</th>
+        <th>Guantes</th>
+        <th>Arnés</th>
+        <th>Altura</th>
+        <th>Crítico</th>
+        <th>Fecha</th>
+        <th>Observaciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($checklistsHoy->take(5) as $c)
+        <tr>
+          <td>{{ $c->trabajador->name }}</td>
+          <td>{!! $c->anteojos ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
+          <td>{!! $c->botas ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
+          <td>{!! $c->chaleco ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
+          <td>{!! $c->guantes ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
+          <td>{!! $c->arnes ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
+          <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
+          <td>
+            @if($c->critico)
+              <span class="badge bg-danger">Crítico</span>
+            @else
+              <span class="badge bg-success">OK</span>
+            @endif
+          </td>
+          <td>{{ \Carbon\Carbon::parse($c->hora)->format('d/m/Y H:i') }}</td>
+          <td>{{ $c->observaciones ?? '—' }}</td>
+        </tr>
+      @endforeach
+    </tbody>
+  </table>
+</div>
 
-      <!-- ✅ Botón para ver todos -->
+
       <div class="mt-3 text-end">
         <a href="{{ route('controlEPP') }}" class="btn btn-sm btn-outline-primary">
           Ver todos los checklist
@@ -192,7 +200,6 @@
     @endif
   </div>
 </div>
-
 
 
 
@@ -228,7 +235,7 @@
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingVencidos">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVencidos" aria-expanded="false" aria-controls="collapseVencidos">
-                Elementos vencidos ({{ $alertasVencidos->count() }})
+                Recursos vencidos ({{ $alertasVencidos->count() }})
               </button>
             </h2>
             <div id="collapseVencidos" class="accordion-collapse collapse" aria-labelledby="headingVencidos" data-bs-parent="#alertasPrioritarias">
@@ -315,7 +322,6 @@
       }
     });
 
-  
   </script>
 
 @endsection

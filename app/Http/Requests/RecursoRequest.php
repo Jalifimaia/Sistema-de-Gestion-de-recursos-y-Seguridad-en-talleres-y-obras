@@ -24,8 +24,16 @@ class RecursoRequest extends FormRequest
     return [
         'id_subcategoria' => 'required|exists:subcategoria,id',
         'nombre' => 'required|string|max:255',
-        'descripcion' => 'nullable|string|max:1000',
-        'costo_unitario' => 'nullable|numeric|min:0',
+        'descripcion' => [
+    'required',
+    'string',
+    function ($attribute, $value, $fail) {
+        if (str_word_count($value) > 4) {
+            $fail('La descripción debe tener como máximo 4 palabras.');
+        }
+    },
+],
+        'costo_unitario' => 'required|numeric|min:0',
 
         'id_usuario_creacion' => 'nullable',
         'id_usuario_modificacion' => 'nullable',

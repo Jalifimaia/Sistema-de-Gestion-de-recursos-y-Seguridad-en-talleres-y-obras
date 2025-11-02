@@ -61,8 +61,11 @@
         <!-- Fecha de asignación -->
         <div class="mb-3">
             <label for="fecha_asignacion" class="form-label">Fecha de asignación</label>
-            <input type="date" name="fecha_asignacion" class="form-control" required value="{{ now()->toDateString() }}">
+            <div class="input-group" onclick="this.querySelector('input').showPicker()" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ') this.querySelector('input').showPicker()">
+                <input type="date" name="fecha_asignacion" id="fecha_asignacion" class="form-control" required value="{{ now()->toDateString() }}">
+            </div>
         </div>
+
 
         <!-- Botones -->
         <div class="d-flex justify-content-between">
@@ -141,19 +144,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 // Cargar EPP del primer trabajador automáticamente
-                if (data.length > 0) {
-                    selectTrabajador.value = data[0].id;
-                    cargarEPP(data[0].id);
-                } else {
-                    eppList.innerHTML = '';
-                    eppBox.classList.add('d-none');
-                    tipos.forEach(tipo => {
-                        const select = document.getElementById(tipo);
-                        select.innerHTML = `<option value="">-- Seleccionar ${tipo} disponible --</option>`;
-                        select.disabled = false;
-                        document.getElementById('alert-' + tipo).classList.add('d-none');
-                    });
-                }
+                eppList.innerHTML = '';
+                eppBox.classList.add('d-none');
+                tipos.forEach(tipo => {
+                    const select = document.getElementById(tipo);
+                    select.innerHTML = `<option value="">-- Seleccionar ${tipo} disponible --</option>`;
+                    select.disabled = false;
+                    document.getElementById('alert-' + tipo).classList.add('d-none');
+                });
             });
     });
 });

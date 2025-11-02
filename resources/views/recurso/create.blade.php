@@ -9,18 +9,6 @@
       <h5 class="card-title fw-bold mb-1">Agregar Nuevo Recurso</h5>
       <p class="text-muted small mb-4">Complete los campos para registrar un nuevo recurso.</p>
 
-      @if ($errors->any())
-        <div class="alert alert-danger">
-          <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
-
-      <!-- Contenedor para mensajes JS -->
-      <div id="mensaje"></div>
 
       <form id="recursoForm" method="POST" action="{{ route('recursos.store') }}">
         @csrf
@@ -59,13 +47,13 @@
         <!-- Descripción -->
         <div class="mb-3">
           <label for="descripcion" class="form-label">Descripción</label>
-          <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Descripción..." rows="3">{{ old('descripcion') }}</textarea>
+          <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Breve descripción (máx. 4 palabras)" rows="3" required>{{ old('descripcion') }}</textarea>
         </div>
 
         <!-- Costo unitario -->
         <div class="mb-3">
           <label for="costo_unitario" class="form-label">Costo Unitario</label>
-          <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" placeholder="Costo unitario" step="0.01" min="0">
+          <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" placeholder="Costo unitario" step="0.01" min="0" required>
         </div>
 
         <div class="text-end">
@@ -77,8 +65,6 @@
   </div>
 </div>
 
-<!-- Modal que aparece al crear -->
-@if(session('success'))
 <div class="modal fade" id="modalRecursoCreado" tabindex="-1" aria-labelledby="modalRecursoCreadoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -86,8 +72,8 @@
         <h5 class="modal-title" id="modalRecursoCreadoLabel">Nuevo recurso agregado</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body">
-        {{ session('success') }}
+      <div class="modal-body" id="modalRecursoBody">
+        El recurso fue creado correctamente.
       </div>
       <div class="modal-footer">
         <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
@@ -96,7 +82,7 @@
     </div>
   </div>
 </div>
-@endif
+
 
 @endsection
 

@@ -315,6 +315,7 @@ class RecursoController extends Controller
 {
     $validated = $request->validated();
 
+
     $recurso = Recurso::create([
         'id_subcategoria' => $validated['id_subcategoria'],
         'nombre' => $validated['nombre'],
