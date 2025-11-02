@@ -190,6 +190,21 @@ function nextStep(n) {
     console.warn('nextStep: step element not found:', 'step' + n);
   }
 
+  // Desactivar botón de menú principal si estamos en step 2
+  const btnMenu = document.getElementById('boton-flotante-menu-principal');
+  if (btnMenu) {
+    if (n === 2) {
+      btnMenu.disabled = true;
+      btnMenu.style.pointerEvents = 'none';
+      btnMenu.style.opacity = '0.5';
+    } else {
+      btnMenu.disabled = false;
+      btnMenu.style.pointerEvents = 'auto';
+      btnMenu.style.opacity = '1';
+    }
+  }
+
+
   // Acciones específicas por step
   if (n === 2) cargarMenuPrincipal();
   if (n === 5) window.cargarCategorias();
@@ -1951,14 +1966,7 @@ function cargarMenuPrincipal() {
       });
     },
     clase: "btn-outline-dark"
-  },
-  {
-  id: 4,
-  texto: "Volver",
-  accion: () => volverAInicio(),
-  clase: "btn-primary mt-3 simple"
-}
-
+  }
 ];
 
 
@@ -2881,26 +2889,29 @@ if (tabPorModal === 'herramientas') {
     return;
   }
 
-// PRIORIDAD: comando exacto cerrar sesion (sin variaciones)
-if (limpio === 'cerrar sesion') {
-  console.log('🔐 Comando de voz exacto detectado: cerrar sesion');
-  mostrarModalCerrarSesion();
-  return;
-}
+  // Compruebo que el usuario haya iniciado sesion (que no este en step1)
+  if (step !== 'step1') {
+    if (limpio === 'cerrar sesion') {
+      console.log('🔐 Comando de voz exacto detectado: cerrar sesion');
+      mostrarModalCerrarSesion();
+      return;
+    }
 
-// Manejo por voz EXACTO: "menu principal" -> ir a step2 y cargar menú principal
-if (limpio === 'menu principal') {
-  console.log('📋 Comando de voz exacto detectado: menu principal');
-  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ menu principal: safeStop falló', e); }
-  try {
-    window.nextStep && window.nextStep(2);
-    try { cargarMenuPrincipal && cargarMenuPrincipal(); } catch (e) {}
-    console.log('➡️ Navegando a step2 (¿Qué querés hacer?) por comando de voz "menu principal"');
-  } catch (e) { console.warn('⚠️ menu principal: nextStep(2) falló', e); }
-  try { setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 recognitionGlobal: intento reinicio tras menu principal (voz)'); }, 120); } catch(e){}
-  return;
-}
-
+    // Compruebo que el usuario no este en el menu principal (step2)
+    if (step !== 'step2') {
+      if (limpio === 'menu principal') {
+        console.log('📋 Comando de voz exacto detectado: menu principal');
+        try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ menu principal: safeStop falló', e); }
+        try {
+          window.nextStep && window.nextStep(2);
+          try { cargarMenuPrincipal && cargarMenuPrincipal(); } catch (e) {}
+          console.log('➡️ Navegando a step2 (¿Qué querés hacer?) por comando de voz "menu principal"');
+        } catch (e) { console.warn('⚠️ menu principal: nextStep(2) falló', e); }
+        try { setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 recognitionGlobal: intento reinicio tras menu principal (voz)'); }, 120); } catch(e){}
+        return;
+      }
+    }
+  }
 
   // === Step1: Login ===
   if (step === 'step1') {
