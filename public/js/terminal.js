@@ -2005,6 +2005,43 @@ function normalizarTexto(str) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+// Detección permisiva para cambio de tabs EPP <-> Herramientas
+function matchTabCambio(texto) {
+  if (!texto) return null;
+  const s = normalizarTexto(String(texto)).trim();
+
+  // triggers más permisivos para EPP
+  const eppTriggers = [
+    'epp', 'ver epp', 'mostrar epp', 'cambiar epp',
+    'equipo', 'equipo proteccion', 'equipo proteccion personal',
+    'proteccion', 'proteccion personal', 'equipo de proteccion'
+  ];
+
+  // triggers para herramientas (formas y errores comunes)
+  const herrTriggers = [
+    'herramienta', 'herramientas', 'ver herramienta', 'ver herramientas',
+    'mostrar herramienta', 'mostrar herramientas',
+    'cambiar herramienta', 'cambiar herramientas', 'ver herramientas',
+    'ver herramienta(s)?', 'herramient'
+  ];
+
+  // comprobaciones por inclusión (permite frases largas y errores parciales)
+  for (const t of eppTriggers) {
+    if (s.includes(t)) return 'epp';
+  }
+  for (const t of herrTriggers) {
+    if (s.includes(t)) return 'herramientas';
+  }
+
+  // tokens aislados: si dicen solo "e p p" o "h e r r"
+  const tokens = s.split(/\s+/).filter(Boolean);
+  if (tokens.length === 3 && tokens.join('') === 'epp') return 'epp';
+  if (tokens.length <= 4 && tokens.join('').startsWith('herramient')) return 'herramientas';
+
+  return null;
+}
+
+
 // 🔍 Detectar qué step está activo
 function getStepActivo() {
   const steps = document.querySelectorAll('.step');
@@ -2603,6 +2640,22 @@ if (modalVisible) {
     }
     return;
   }
+
+  // dentro de `if (modalVisible) { ... }` justo después del cierre por voz
+const tabPorModal = matchTabCambio(limpio);
+if (tabPorModal === 'epp') {
+  const tabBtn = document.getElementById('tab-epp');
+  if (tabBtn) new bootstrap.Tab(tabBtn).show();
+  getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
+  return;
+}
+if (tabPorModal === 'herramientas') {
+  const tabBtn = document.getElementById('tab-herramientas');
+  if (tabBtn) new bootstrap.Tab(tabBtn).show();
+  getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
+  return;
+}
+
   // ⚠️ Si el modal está abierto pero el comando no fue "cerrar", seguimos evaluando el resto
 }
 
@@ -2673,17 +2726,28 @@ if (step === 'step1') {
     }
 
     // ✅ Comandos de cambio de tab por voz (funcionan dentro y fuera del modal)
-    if (limpio === 'ver epp') {
+  // Cambio de tabs más permisivo
+  if (modalVisible) {
+    const tabDeseada = matchTabCambio(limpio);
+    if (tabDeseada === 'epp') {
       const tabBtn = document.getElementById('tab-epp');
-      if (tabBtn) new bootstrap.Tab(tabBtn).show();
+      if (tabBtn) {
+        try { new bootstrap.Tab(tabBtn).show(); } catch (e) { console.warn('show tab-epp failed', e); }
+        getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
+      }
       return;
     }
-
-    if (limpio === 'ver herramientas') {
+    if (tabDeseada === 'herramientas') {
       const tabBtn = document.getElementById('tab-herramientas');
-      if (tabBtn) new bootstrap.Tab(tabBtn).show();
+      if (tabBtn) {
+        try { new bootstrap.Tab(tabBtn).show(); } catch (e) { console.warn('show tab-herramientas failed', e); }
+        getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
+      }
       return;
     }
+  }
+
+
 
     // ✅ Comandos del menú principal (solo si el modal NO está abierto)
     if (!modalAbierto) {
