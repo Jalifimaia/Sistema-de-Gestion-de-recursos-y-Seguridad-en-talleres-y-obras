@@ -22,7 +22,11 @@
       <h2 class="mb-4 text-center">Identificar Trabajador</h2>
 
       <input type="text" id="dni" class="form-control form-control-lg mb-4" placeholder="Ingresar DNI">
+      <small class="text-muted d-block text-start mb-3">Podes dictar tu DNI como por ejemplo : “20 583 321”</small>
+
+
       <button class="btn btn-primary btn-lg mb-3" onclick="identificarTrabajador()">Continuar</button>
+
 
       <div class="text-center mt-4">
         <button class="btn btn-primary btn-lg" onclick="activarEscaneoQRLogin()">
