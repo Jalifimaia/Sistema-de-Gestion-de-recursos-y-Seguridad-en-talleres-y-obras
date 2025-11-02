@@ -268,7 +268,7 @@
   position: fixed;
   bottom: 18px;
   left: 18px;
-  z-index: 2147483646;
+  z-index: 1040;
   background: #0d6efd;
   color: #fff;
   border: none;
@@ -285,7 +285,7 @@
   position: fixed;
   bottom: 18px;
   right: 18px;
-  z-index: 2147483647;
+  z-index: 1040;
   background: #dc3545;
   color: #fff;
   border: none;

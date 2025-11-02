@@ -677,6 +677,22 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
   const modal = new bootstrap.Modal(modalEl);
   modal.show();
 
+  // Desactivar botones flotantes mientras el modal está activo
+  const btnMenu = document.getElementById('boton-flotante-menu-principal');
+  const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
+
+  if (btnMenu) {
+    btnMenu.disabled = true;
+    btnMenu.style.pointerEvents = 'none';
+    btnMenu.style.opacity = '0.5';
+  }
+  if (btnCerrar) {
+    btnCerrar.disabled = true;
+    btnCerrar.style.pointerEvents = 'none';
+    btnCerrar.style.opacity = '0.5';
+  }
+
+
   try {
     if ('webkitSpeechRecognition' in window) {
       const recog = new webkitSpeechRecognition();
@@ -713,6 +729,19 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
     // Handler seguro para cuando el modal se oculta
   const onHidden = () => {
     modalEl.removeEventListener('hidden.bs.modal', onHidden);
+
+    // Reactivar botones flotantes al cerrar el modal
+    if (btnMenu) {
+      btnMenu.disabled = false;
+      btnMenu.style.pointerEvents = 'auto';
+      btnMenu.style.opacity = '1';
+    }
+    if (btnCerrar) {
+      btnCerrar.disabled = false;
+      btnCerrar.style.pointerEvents = 'auto';
+      btnCerrar.style.opacity = '1';
+    }
+
 
     // limpiar guardas/recog
     modalEl._opening = false;
@@ -1515,9 +1544,15 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
   function cleanup() {
     try {
       const existing = modalEl._recogInstance;
-      if (existing && typeof existing.stop === 'function') existing.stop();
+      if (existing) {
+        try { existing.onresult = null; } catch (e) {}
+        try { existing.onerror = null; } catch (e) {}
+        try { existing.onend = null; } catch (e) {}
+        try { if (typeof existing.stop === 'function') existing.stop(); } catch (e) {}
+      }
     } catch (e) {}
     modalEl._recogInstance = null;
+    modalEl._lastTranscript = null;
   }
 
   function onAceptar() {
@@ -1536,8 +1571,16 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
     if (typeof mostrarMensaje === 'function') mostrarMensaje('Solicitud cancelada.', 'info');
   }
 
-  try { if (aceptarBtn) { aceptarBtn.removeEventListener('click', onAceptar); aceptarBtn.addEventListener('click', onAceptar); } } catch (e) {}
-  try { if (cancelarBtn) { cancelarBtn.removeEventListener('click', onCancelar); cancelarBtn.addEventListener('click', onCancelar); } } catch (e) {}
+  try {
+    if (aceptarBtn) {
+      aceptarBtn.removeEventListener('click', onAceptar);
+      aceptarBtn.addEventListener('click', onAceptar);
+    }
+    if (cancelarBtn) {
+      cancelarBtn.removeEventListener('click', onCancelar);
+      cancelarBtn.addEventListener('click', onCancelar);
+    }
+  } catch (e) {}
 
   try {
     recognitionGlobalPaused = true;
@@ -1547,32 +1590,73 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
     }
   } catch (e) { console.warn('⚠️ No se pudo abortar recognitionGlobal:', e); }
 
+  // === Inicio: reconocimiento local robusto para confirmarSerieModal ===
   try {
     if ('webkitSpeechRecognition' in window) {
       const recog = new webkitSpeechRecognition();
       recog.lang = 'es-ES';
-      recog.continuous = true;
+      recog.continuous = false; // evitar reinicios automáticos y races con el global
       recog.interimResults = false;
 
+      // inicializadores locales en el elemento modal
+      modalEl._lastTranscript = null;
+
       recog.onresult = function (event) {
-        const texto = (event.results && event.results[0] && event.results[0][0] && event.results[0][0].transcript)
-          ? event.results[0][0].transcript.toLowerCase().trim()
-          : '';
-        console.log('🎤 Texto reconocido (modal):', texto);
+        const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+        console.log('🎤 Texto reconocido (modal serie):', texto);
 
         if (modalActionTaken) return;
 
-        if (texto.includes('aceptar')) {
+        // Evitar repeticiones exactas
+        if (modalEl._lastTranscript === texto) {
+          console.log('🔁 Texto repetido, ignorado:', texto);
+          return;
+        }
+        modalEl._lastTranscript = texto;
+
+        // Comandos válidos
+        if (texto.includes('aceptar') || texto.includes('confirm')) {
           try { aceptarBtn?.click(); } catch (e) { onAceptar(); }
           try { recog.stop(); } catch (e) {}
-        } else if (texto.includes('cancelar')) {
+          return;
+        }
+
+        if (texto.includes('cancelar') || texto === 'no') {
           try { cancelarBtn?.click(); } catch (e) { onCancelar(); }
           try { recog.stop(); } catch (e) {}
+          return;
+        }
+
+        // Comando no reconocido: feedback y no forzar stop/start aquí
+        console.log('🗣️ Comando no reconocido en modal serie:', texto);
+        if (typeof mostrarMensaje === 'function') {
+          mostrarMensaje('No se reconoció el comando. Decí “aceptar” o “cancelar”.', 'info');
+        }
+        // No hacemos stop/start; onend decidirá si reiniciar
+      };
+
+      // onend solo reintenta reiniciar si el modal sigue abierto, no se tomó acción y el global no está corriendo
+      recog.onend = function () {
+        try {
+          if (modalActionTaken) return;
+          if (!modalEl || !modalEl.classList || !modalEl.classList.contains('show')) return;
+          if (recognitionRunning) {
+            console.log('ℹ️ onend: recognition global corriendo, no reinicio recog modal');
+            return;
+          }
+          try {
+            recog.start();
+            console.log('🔁 reconocimiento local (modal serie) reiniciado desde onend');
+          } catch (err) {
+            console.warn('⚠️ No se pudo reiniciar recog local desde onend (ignored):', err);
+          }
+        } catch (e) {
+          console.warn('onend (modal serie) excep:', e);
         }
       };
 
       recog.onerror = function (e) {
-        if (e && e.error === 'aborted') {
+        if (e?.error === 'aborted') {
           console.log('ℹ️ Reconocimiento modal abortado (intencional/conflicto)');
           return;
         }
@@ -1580,28 +1664,41 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
       };
 
       modalEl._recogInstance = recog;
-      try { recog.start(); } catch (e) { console.warn('No se pudo iniciar reconocimiento del modal:', e); }
+
+      try {
+        recog.start();
+        console.log('🔔 reconocimiento local (modal serie) iniciado (no-continuous)');
+      } catch (e) {
+        console.warn('No se pudo iniciar reconocimiento del modal:', e);
+      }
     }
   } catch (e) {
     console.warn('No se pudo crear reconocimiento del modal', e);
   }
+  // === Fin: reconocimiento local robusto para confirmarSerieModal ===
 
   const onHidden = () => {
     modalEl.removeEventListener('hidden.bs.modal', onHidden);
+    modalEl._opening = false;
     cleanup();
     window.botonSerieSeleccionada = null;
     recognitionGlobalPaused = false;
+
+    // reactivar el recognition global de forma segura usando la helper que evita starts dobles
     try {
-      if (recognitionGlobal && typeof recognitionGlobal.start === 'function') {
-        console.log('🎤 Reiniciando recognitionGlobal después de modal');
-        recognitionGlobal.start();
-      }
-    } catch (e) { console.warn('No se pudo reiniciar recognitionGlobal:', e); }
+      safeStartRecognitionGlobal();
+      console.log('🎤 safeStartRecognitionGlobal llamado tras cerrar modal serie');
+    } catch (e) {
+      console.warn('No se pudo reiniciar recognitionGlobal:', e);
+    }
   };
   modalEl.addEventListener('hidden.bs.modal', onHidden);
 
   modal.show();
 }
+
+
+
 
 async function registrarSerie(serieId, boton = null) {
   const id_usuario = window.localStorage.getItem('id_usuario');
