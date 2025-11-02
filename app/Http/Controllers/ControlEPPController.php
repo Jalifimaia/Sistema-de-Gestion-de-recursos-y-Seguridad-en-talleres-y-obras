@@ -14,6 +14,7 @@ use App\Models\Usuario;
 use App\Models\Checklist;
 use Carbon\Carbon;
 use App\Models\UsuarioRecurso;
+use App\Models\EstadoUsuario;
 
 class ControlEPPController extends Controller
 {
@@ -315,29 +316,58 @@ class ControlEPPController extends Controller
 
 
 
-public function activarTrabajador($id)
+public function activarConEPP($id)
 {
-    $usuario = Usuario::with('usuarioRecursos')->findOrFail($id);
+    $usuario = Usuario::with('usuarioRecursos', 'estado')->findOrFail($id);
 
-    $tiposObligatorios = ['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'];
+    // Solo trabajadores (ajustá id_rol si corresponde)
+    if ($usuario->id_rol !== 3) {
+        return back()->withErrors(['rol' => 'Solo se pueden activar trabajadores con EPP.']);
+    }
 
-    $tiposAsignados = $usuario->usuarioRecursos->pluck('tipo_epp')->toArray();
+    // Solo permitir activar si está en stand by o ya en Alta
+    $estadoActual = optional($usuario->estado)->nombre;
+    if (! in_array($estadoActual, ['stand by', 'Alta'])) {
+        return back()->withErrors(['estado' => "No se puede dar de alta desde el estado '{$estadoActual}'. Primero pase a stand by."]);
+    }
 
+    // Normalizar y recolectar tipos asignados
+    $tiposAsignados = $usuario->usuarioRecursos
+        ->pluck('tipo_epp')
+        ->filter()
+        ->map(fn($t) => strtolower(trim($t)))
+        ->unique()
+        ->values()
+        ->toArray();
+
+    $tiposObligatorios = ['casco','guantes','lentes','botas','chaleco','arnes'];
     $faltantes = array_diff($tiposObligatorios, $tiposAsignados);
 
     if (count($faltantes) > 0) {
         return back()->withErrors([
             'faltantes' => 'No se puede dar de alta. Faltan: ' . implode(', ', $faltantes)
-        ]);
+        ])->withInput();
     }
 
-    $usuario->update(['id_estado' => 1]); // Alta
+    $estadoAlta = EstadoUsuario::where('nombre', 'Alta')->first();
+    if (!$estadoAlta) {
+        return back()->withErrors(['estado' => 'No se encontró el estado "Alta".']);
+    }
 
-    return redirect()->route('usuarios.index')->with('success', 'Trabajador dado de alta correctamente.');
+    $usuario->id_estado = $estadoAlta->id;
+    $usuario->usuario_modificacion = auth()->id();
+    $usuario->save();
+
+    \Log::info("Usuario {$usuario->id} activado a Alta por usuario " . auth()->id());
+
+    return redirect()->route('usuarios.edit', $usuario->id)->with('success', 'Trabajador dado de alta correctamente.');
 }
 
 
-    public function storeAsignacionEPP(Request $request)
+
+
+
+public function storeAsignacionEPP(Request $request)
 {
     $request->validate([
         'usuario_id' => 'required|exists:usuario,id',
@@ -350,34 +380,81 @@ public function activarTrabajador($id)
         'fecha_asignacion' => 'required|date',
     ]);
 
-    foreach (['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'] as $epp) {
-        $serieId = $request->$epp;
+    $usuario = Usuario::with('estado', 'usuarioRecursos')->findOrFail($request->usuario_id);
 
-        // Validar que la serie no esté ya asignada
-        if (UsuarioRecurso::where('id_serie_recurso', $serieId)->exists()) {
-            return back()->withErrors([
-                $epp => "La serie ya está asignada a otro trabajador."
-            ])->withInput();
-        }
-
-        // Obtener el recurso desde la serie
-        $serie = SerieRecurso::with('recurso')->findOrFail($serieId);
-
-        // Registrar asignación con tipo_epp
-        UsuarioRecurso::create([
-            'id_usuario' => $request->usuario_id,
-            'id_serie_recurso' => $serieId,
-            'id_recurso' => $serie->recurso->id,
-            'fecha_asignacion' => $request->fecha_asignacion,
-            'tipo_epp' => strtolower(trim($epp)),
-        ]);
-
-        // Actualizar estado del recurso a "Prestado"
-        $serie->update(['id_estado' => 3]);
+    // El usuario debe estar en 'stand by' para poder asignarle EPP
+    $estadoNombre = optional($usuario->estado)->nombre;
+    if ($estadoNombre !== 'stand by') {
+        return back()->withErrors(['usuario_id' => 'El usuario debe estar en stand by para asignarle EPP.'])->withInput();
     }
 
-    return redirect()->route('controlEPP')->with('success', 'EPP asignado correctamente. El trabajador sigue en stand by.');
+    $tipos = ['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'];
+
+    // Evitar asignaciones duplicadas del mismo tipo al mismo usuario
+    $tiposExistentes = $usuario->usuarioRecursos
+        ->pluck('tipo_epp')
+        ->filter()
+        ->map(fn($t) => strtolower(trim($t)))
+        ->toArray();
+
+    foreach ($tipos as $t) {
+        if (in_array($t, $tiposExistentes)) {
+            return back()->withErrors([$t => "El usuario ya tiene asignado un {$t}."])->withInput();
+        }
+    }
+
+    try {
+        \DB::beginTransaction();
+
+        foreach ($tipos as $epp) {
+            $serieId = $request->input($epp);
+
+            // Verificar existencia y estado de la serie (disponible y no asignada)
+            $serie = SerieRecurso::with('recurso')->lockForUpdate()->findOrFail($serieId);
+
+            // Si la serie ya está marcada como prestada u asignada en usuario_recurso, abortar
+            $yaAsignadaEnUsuarioRecurso = UsuarioRecurso::where('id_serie_recurso', $serieId)->exists();
+            if ($yaAsignadaEnUsuarioRecurso) {
+                \DB::rollBack();
+                return back()->withErrors([
+                    $epp => "La serie {$serie->nro_serie} ya está asignada a otro trabajador."
+                ])->withInput();
+            }
+
+            // Comprobar estado de la serie (asumiendo id_estado 1 = Disponible)
+            if ($serie->id_estado !== 1) {
+                \DB::rollBack();
+                return back()->withErrors([
+                    $epp => "La serie {$serie->nro_serie} no está disponible para asignación."
+                ])->withInput();
+            }
+
+            // Crear asignación
+            UsuarioRecurso::create([
+                'id_usuario' => $request->usuario_id,
+                'id_serie_recurso' => $serieId,
+                'id_recurso' => $serie->recurso->id,
+                'fecha_asignacion' => $request->fecha_asignacion,
+                'tipo_epp' => strtolower(trim($epp)),
+            ]);
+
+            // Actualizar estado de la serie a "Prestado" (id_estado = 3)
+            $serie->update(['id_estado' => 3]);
+        }
+
+        \DB::commit();
+
+        return redirect()->route('controlEPP')->with('success', 'EPP asignado correctamente. El trabajador sigue en stand by.');
+    } catch (\Throwable $e) {
+        \DB::rollBack();
+        \Log::error('Error asignando EPP: ' . $e->getMessage(), [
+            'usuario_id' => $request->usuario_id,
+            'input' => $request->all()
+        ]);
+        return back()->withErrors(['error' => 'Ocurrió un error al asignar EPP. Intentá nuevamente.'])->withInput();
+    }
 }
+
 
 
 public function buscarSeriesEPP(Request $request)

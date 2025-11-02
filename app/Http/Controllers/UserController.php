@@ -87,7 +87,8 @@ public function store(UserRequest $request): RedirectResponse
      */
     public function edit($id): View
     {
-        $usuario = User::with(['estado', 'usuarioRecursos'])->findOrFail($id);
+        $usuario = User::with(['estado', 'usuarioRecursos.serieRecurso', 'usuarioRecursos.recurso', 'usuarioRecursos.serie.codigo'])->findOrFail($id);
+
         $roles = Rol::all();
         $estados = EstadoUsuario::all();
 
@@ -97,6 +98,21 @@ public function store(UserRequest $request): RedirectResponse
 
         return view('usuario.edit', compact('usuario', 'roles', 'estados'));
     }
+
+    public function standby($id)
+{
+    $usuario = User::findOrFail($id);
+    $estadoStandBy = EstadoUsuario::where('nombre', 'stand by')->first();
+
+    if (!$estadoStandBy) {
+        return back()->with('error', 'No se encontró el estado "stand by".');
+    }
+
+    $usuario->id_estado = $estadoStandBy->id;
+    $usuario->save();
+
+    return back()->with('success', 'Usuario puesto en estado "stand by".');
+}
 
     /**
      * Update the specified resource in storage.
