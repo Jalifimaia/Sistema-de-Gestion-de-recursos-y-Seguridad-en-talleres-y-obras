@@ -2787,10 +2787,11 @@ if (limpio === 'menu principal') {
   // === Step1: Login ===
 if (step === 'step1') {
 
-    if (!modalVisible) {
-    procesarDNIporVoz(limpio); // 👈 ya no hace falta validar acá, se hace dentro
+      if (!modalVisible && /^\d/.test(limpio)) {
+    procesarDNIporVoz(limpio);
     return;
   }
+
    
 
 
