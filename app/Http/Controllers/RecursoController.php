@@ -312,24 +312,29 @@ class RecursoController extends Controller
 
 
     public function store(RecursoRequest $request)
-    {
-        $validated = $request->validated();
+{
+    $validated = $request->validated();
 
-        $recurso = Recurso::create([
-            'id_subcategoria' => $validated['id_subcategoria'],
-            'nombre' => $validated['nombre'],
-            'descripcion' => $validated['descripcion'] ?? null,
-            'costo_unitario' => $validated['costo_unitario'],
-            'id_usuario_creacion' => auth()->id(),
-            'id_usuario_modificacion' => auth()->id(),
+
+    $recurso = Recurso::create([
+        'id_subcategoria' => $validated['id_subcategoria'],
+        'nombre' => $validated['nombre'],
+        'descripcion' => $validated['descripcion'] ?? null,
+        'costo_unitario' => $validated['costo_unitario'],
+        'id_usuario_creacion' => auth()->id(),
+        'id_usuario_modificacion' => auth()->id(),
+    ]);
+
+    if ($request->expectsJson()) {
+        return response()->json([
+            'message' => 'Recurso creado correctamente.',
+            'recurso' => $recurso,
         ]);
-
-        // Volvemos a la vista create y dejamos el mensaje en la sesión para mostrar modal
-        return redirect()->route('recursos.create')
-            ->with('success', 'Recurso creado correctamente.');
     }
 
-
+    return redirect()->route('recursos.create')
+        ->with('success', 'Recurso creado correctamente.');
+}
 
     /**
      * Display the specified resource.
@@ -384,10 +389,11 @@ public function create()
 }
 
    public function getSubcategorias($categoriaId)
-    {
-        $subs = \App\Models\Subcategoria::where('categoria_id', $categoriaId)->get(['id','nombre']);
-        return response()->json($subs);
-    }
+{
+    $subcategorias = \App\Models\Subcategoria::where('categoria_id', $categoriaId)->get();
+    return response()->json($subcategorias);
+}
+
 
 
 

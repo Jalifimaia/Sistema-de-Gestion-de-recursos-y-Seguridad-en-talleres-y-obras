@@ -96,4 +96,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'usuario_modificacion');
     }
+
+    public function usuarioRecursos()
+{
+    return $this->hasMany(\App\Models\UsuarioRecurso::class, 'id_usuario', 'id');
+}
+
 }

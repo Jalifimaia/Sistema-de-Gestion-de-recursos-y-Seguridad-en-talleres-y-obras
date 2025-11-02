@@ -150,38 +150,51 @@ public function identificarTrabajador(Request $request)
     }
 
     // ✅ Devolver recurso
-    public function devolverRecurso($detalleId)
-    {
-        try {
-            $detalle = DetallePrestamo::with('serieRecurso', 'prestamo')->findOrFail($detalleId);
 
-            $detalle->update([
-                'id_estado_prestamo'     => 3, // Devuelto
-                'updated_at'             => now(),
-                'id_usuario_modificacion'=> auth()->id() ?? $detalle->prestamo->id_usuario,
-            ]);
+public function devolverRecurso($id)
+{
+    DB::beginTransaction();
+    try {
+        $detalle = DetallePrestamo::find($id);
 
-            $detalle->serieRecurso->update(['id_estado' => 1]);
-
-            DB::table('stock')->where('id_serie_recurso', $detalle->id_serie)->update([
-                'id_estado_recurso' => 1,
-                'id_usuario'        => null,
-            ]);
-
-            $todosDevueltos = DetallePrestamo::where('id_prestamo', $detalle->id_prestamo)
-                ->where('id_estado_prestamo', '!=', 3)
-                ->doesntExist();
-
-            if ($todosDevueltos) {
-                $detalle->prestamo->update(['estado' => 3]);
-            }
-
-            return response()->json(['success' => true]);
-        } catch (\Exception $e) {
-            \Log::error('Error al devolver recurso desde terminal: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        if (! $detalle) {
+            return response()->json(['success' => false, 'message' => 'Detalle no encontrado']);
         }
+
+        if ($detalle->id_estado_prestamo != 2) {
+            return response()->json(['success' => false, 'message' => 'El recurso ya fue devuelto o no está asignado']);
+        }
+
+        // Marcar detalle como devuelto
+        $detalle->id_estado_prestamo = 4;
+        $detalle->fecha_devolucion = now();
+        $detalle->save();
+
+        // Liberar serie
+        if ($detalle->id_serie) {
+            SerieRecurso::where('id', $detalle->id_serie)
+                ->update(['id_estado' => 1, 'updated_at' => now()]);
+
+            Stock::where('id_serie_recurso', $detalle->id_serie)
+                ->update(['id_estado_recurso' => 1, 'id_usuario' => null, 'updated_at' => now()]);
+        }
+
+        // Cerrar préstamo si todos los detalles están devueltos
+        $prestamo = Prestamo::find($detalle->id_prestamo);
+        if ($prestamo && ! $prestamo->detalles()->where('id_estado_prestamo', '!=', 4)->exists()) {
+            $prestamo->estado = 3;
+            $prestamo->fecha_devolucion = $prestamo->fecha_devolucion ?? now();
+            $prestamo->save();
+        }
+
+        DB::commit();
+        return response()->json(['success' => true]);
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return response()->json(['success' => false, 'message' => 'Error al devolver recurso', 'error' => $e->getMessage()]);
     }
+}
+
 
     // ✅ Subcategorías
     public function getSubcategorias($categoriaId)
@@ -262,12 +275,12 @@ public function identificarTrabajador(Request $request)
 {
     $usuarioId = $request->input('id_usuario');
 
-    if (!$this->tieneEppCompleto($usuarioId)) {
+    /*if (!$this->tieneEppCompleto($usuarioId)) {
         return response()->json([
             'success' => false,
             'message' => 'No se puede solicitar herramientas sin EPP completo.'
         ], 403);
-    }
+    }*/
 
     // Lógica de solicitud real (si la tenés)
     return response()->json([

@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title', 'Inventario')</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <!-- Estilos base -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
   <link href="{{ asset('css/estilos.css') }}" rel="stylesheet">
+
+  <!-- Livewire y estilos inyectados -->
   @livewireStyles
   @stack('styles')
-   @yield('scripts')
- 
 </head>
-
 
 <body class="d-flex">
 
@@ -48,15 +50,14 @@
                 alt="Foto de perfil"
                 class="rounded-circle border shadow-sm me-2"
                 style="width: 40px; height: 40px; object-fit: cover;">
-           @auth
-  <span class="fw-semibold">{{ auth()->user()->name }}</span>
-@endauth
-
+            @auth
+              <span class="fw-semibold">{{ auth()->user()->name }}</span>
+            @endauth
           </div>
         </button>
         <ul class="dropdown-menu dropdown-menu-end mt-2">
           <li>
-            <a href="{{ url('perfil') }}" class="dropdown-item">
+            <a href="{{ route('usuarios.show', auth()->user()->id) }}" class="dropdown-item">
               <i class="bi bi-person me-2"></i> Ver perfil
             </a>
           </li>
@@ -83,12 +84,17 @@
     @yield('content')
   </main>
 
-  @livewireScripts
-  @stack('scripts')
+  <!-- Scripts base -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Scripts personalizados -->
+  <script src="{{ asset('js/asignar.js') }}"></script>
   <script src="{{ asset('js/filtroBusqueda.js') }}"></script>
   <script src="{{ asset('js/formatoFecha.js') }}"></script>
 
+  <!-- Sidebar logic -->
   <script>
     const toggleBtn = document.getElementById('toggleSidebar');
     const closeBtn = document.getElementById('closeSidebar');
@@ -131,6 +137,10 @@
     toggleBtn.addEventListener('click', abrirSidebar);
     closeBtn.addEventListener('click', cerrarSidebar);
   </script>
-  @yield('scripts')
+
+  <!-- Livewire y scripts inyectados -->
+  @livewireScripts
+  @stack('scripts')
+  
 </body>
 </html>

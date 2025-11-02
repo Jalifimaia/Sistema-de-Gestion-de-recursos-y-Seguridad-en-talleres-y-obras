@@ -100,3 +100,13 @@
   }
 </style>
 @endsection
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    const dia = String(today.getDate()).padStart(2, '0');
+    const mes = String(today.getMonth() + 1).padStart(2, '0');
+    const año = today.getFullYear();
+    document.getElementById('today').textContent = `${dia}/${mes}/${año}`;
+  });
+</script>

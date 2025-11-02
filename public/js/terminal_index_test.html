@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Kiosco Test</title>
+  <meta name="csrf-token" content="FAKE_TOKEN">
+</head>
+<body>
+  <!-- Steps -->
+  <div id="step1" class="step active"></div>
+  <div id="step2" class="step">
+    <div id="menu-principal-buttons"></div>
+  </div>
+  <div id="step3" class="step">
+    <h2 id="titulo-step3"></h2>
+  </div>
+  <div id="step4" class="step"></div>
+  <div id="step5" class="step">
+    <div id="categoria-buttons"></div>
+  </div>
+  <div id="step6" class="step">
+    <div id="subcategoria-buttons"></div>
+  </div>
+  <div id="step7" class="step">
+    <div id="recurso-buttons"></div>
+  </div>
+  <div id="step8" class="step">
+    <div id="serie-buttons"></div>
+  </div>
+
+  <!-- Contenedores auxiliares -->
+  <div id="toastContainer"></div>
+  <div id="tablaRecursos"></div>
+  <div id="contenedorRecursos"></div>
+  <div id="modalRecursos"></div>
+
+  <!-- QR -->
+  <div id="qr-reader"></div>
+  <button id="btn-escanear-qr"></button>
+  <button id="btn-cancelar-qr"></button>
+  <span id="texto-camara-activa"></span>
+
+  <!-- QR Login -->
+  <div id="qr-login-container" style="display:none;">
+    <div id="qr-login-reader"></div>
+  </div>
+
+  <!-- Inputs -->
+  <input id="dni" />
+  <div id="saludo-trabajador"></div>
+</body>
+</html>

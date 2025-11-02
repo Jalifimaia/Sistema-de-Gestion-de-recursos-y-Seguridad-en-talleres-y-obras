@@ -72,7 +72,8 @@
                             <td>{{ $incidente->descripcion ?? '-' }}</td>
                             <td>{{ $incidente->estadoIncidente?->nombre_estado ?? '-' }}</td>
                             <td>{{ $incidente->resolucion ?? '-' }}</td>
-                            <td>{{ $incidente->fecha_incidente ?? '-' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($incidente->fecha_incidente)->format('d/m/Y H:i') }}</td>
+
                             <td>
                                 <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-sm btn-orange">
                                     <i class="bi bi-pencil"></i>
@@ -86,6 +87,9 @@
         </div>
     </div>
 </div>
+
+
+
 @endsection
 
 @push('scripts')

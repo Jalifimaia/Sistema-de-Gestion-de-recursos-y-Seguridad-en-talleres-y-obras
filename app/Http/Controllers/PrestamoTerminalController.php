@@ -8,6 +8,8 @@ use App\Models\Usuario;
 use App\Models\SerieRecurso;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\DetallePrestamo;
+use Illuminate\Support\Facades\Log;
 
 class PrestamoTerminalController extends Controller
 {
@@ -50,6 +52,115 @@ class PrestamoTerminalController extends Controller
             ], 500);
         }
     }
+
+    public function devolverPorQR(Request $request)
+    {
+        try {
+            $detalle = DetallePrestamo::findOrFail($request->input('id_detalle'));
+
+            if ($detalle->id_estado_prestamo != 2) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El recurso ya fue devuelto o no está asignado',
+                ]);
+            }
+
+            // Actualizar estado del detalle
+            $detalle->update([
+                'id_estado_prestamo' => 3,
+                'updated_at' => now(),
+            ]);
+
+            // Liberar la serie
+            $detalle->serieRecurso->update(['id_estado' => 1]);
+
+            // Liberar el stock
+            \DB::table('stock')->where('id_serie_recurso', $detalle->id_serie)->update([
+                'id_estado_recurso' => 1,
+                'id_usuario' => null,
+            ]);
+
+            // Actualizar préstamo si todos los detalles fueron devueltos
+            $prestamo = $detalle->prestamo;
+            $prestamo->fecha_devolucion = now();
+
+            $todosDevueltos = $prestamo->detalles()->where('id_estado_prestamo', '!=', 3)->doesntExist();
+            if ($todosDevueltos) {
+                $prestamo->estado = 3;
+            }
+
+            $prestamo->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Recurso devuelto correctamente',
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Error en devolverPorQR: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => '❌ Error al devolver el recurso',
+            ], 500);
+        }
+    }
+
+
+
+    public function validarQRDevolucion(Request $request)
+    {
+        $codigoQR = $request->input('codigo_qr');
+        $idUsuario = $request->input('id_usuario');
+        $serieEsperada = $request->input('serie_esperada');
+
+        if (! $codigoQR || ! $idUsuario || ! $serieEsperada) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Faltan datos para validar el QR'
+            ]);
+        }
+
+        $serie = SerieRecurso::where('codigo_qr', $codigoQR)->first();
+
+        if (! $serie) {
+            return response()->json([
+                'success' => false,
+                'message' => 'QR no corresponde a ninguna serie registrada'
+            ]);
+        }
+
+        $detalle = DetallePrestamo::where('id_serie', $serie->id)
+            ->where('id_estado_prestamo', 2)
+            ->whereHas('prestamo', function ($q) use ($idUsuario) {
+                $q->where('id_usuario', $idUsuario)
+                ->where('estado', 2);
+            })
+            ->first();
+
+        if (! $detalle) {
+            return response()->json([
+                'success' => true,
+                'coincide' => false,
+                'message' => 'El recurso ya fue devuelto o no está asignado a este usuario'
+            ]);
+        }
+
+        if ($detalle->serieRecurso->nro_serie !== $serieEsperada) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El QR escaneado no coincide con el recurso que se está devolviendo'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'coincide' => true,
+            'id_detalle' => $detalle->id
+        ]);
+    }
+
+
+
+
 
 // ✅ Registrar préstamo por QR (escaneo directo del recurso)
 public function registrarPorQR(Request $request)

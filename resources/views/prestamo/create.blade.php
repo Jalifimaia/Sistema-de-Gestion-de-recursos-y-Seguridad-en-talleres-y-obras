@@ -25,28 +25,35 @@
       <form method="POST" action="{{ route('prestamos.store') }}">
         @csrf
 
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="fecha_prestamo" class="form-label">Fecha de Préstamo</label>
-            <input type="date" name="fecha_prestamo" class="form-control" required>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Fecha de Préstamo</label>
+              <input type="text" class="form-control" value="{{ \Carbon\Carbon::today()->format('d/m/Y') }}" disabled>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Fecha de Devolución</label>
+              <input type="text" class="form-control" value="{{ \Carbon\Carbon::tomorrow()->format('d/m/Y') }}" disabled>
+            </div>
           </div>
-          <div class="col-md-6">
-            <label for="fecha_devolucion" class="form-label">Fecha de Devolución (opcional)</label>
-            <input type="date" name="fecha_devolucion" class="form-control">
-          </div>
-        </div>
 
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label for="id_trabajador" class="form-label">Trabajador</label>
-            <select name="id_trabajador" class="form-select" required>
-              <option selected disabled>Seleccione un trabajador</option>
+        <div class="col-md-6">
+          <label for="id_trabajador" class="form-label">Trabajador</label>
+          <div class="d-flex gap-2">
+            <select id="id_trabajador" name="id_trabajador_select" class="form-select" required>
+              <option value="" selected disabled>Seleccione un trabajador</option>
               @foreach($trabajadores as $t)
                 <option value="{{ $t->id }}">{{ $t->name }}</option>
               @endforeach
             </select>
+
+            <!-- Hidden que realmente se enviará -->
+            <input type="hidden" id="id_trabajador_hidden" name="id_trabajador" value="">
+
+            <button type="button" id="cambiarTrabajador" class="btn btn-outline-secondary" style="display:none;">Cambiar</button>
           </div>
         </div>
+
+
 
         <input type="hidden" name="estado" value="2">
 
@@ -120,6 +127,25 @@
   </div>
 </div>
 
+<div class="modal fade" id="modalConfirmarCambioTrabajador" tabindex="-1" aria-labelledby="modalConfirmarCambioTrabajadorLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="modalConfirmarCambioTrabajadorLabel">Confirmar cambio de trabajador</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Al cambiar al trabajador eliminará los recursos agregados. ¿Desea continuar?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-action="cancel" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-warning" data-action="confirm">Sí, cambiar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- ✅ Modal: Préstamo guardado -->
 @if(session('success'))
 <div class="modal fade" id="modalPrestamoGuardado" tabindex="-1" aria-labelledby="modalPrestamoGuardadoLabel" aria-hidden="true">
@@ -148,17 +174,16 @@
   <script src="{{ asset('js/prestamo.js') }}"></script>
   <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Mostrar modal de recurso agregado
-    document.getElementById('agregar').addEventListener('click', function () {
-      const modal = new bootstrap.Modal(document.getElementById('modalRecursoAgregado'));
-      modal.show();
-    });
-
     // Mostrar modal de préstamo guardado si hay sesión
     @if(session('success'))
-      const modal = new bootstrap.Modal(document.getElementById('modalPrestamoGuardado'));
-      modal.show();
+      const modalPrestamo = document.getElementById('modalPrestamoGuardado');
+      if (modalPrestamo && typeof bootstrap !== 'undefined') {
+        const inst = new bootstrap.Modal(modalPrestamo);
+        inst.show();
+        modalPrestamo.addEventListener('hidden.bs.modal', () => inst.dispose(), { once: true });
+      }
     @endif
   });
-</script>
+  </script>
 @endpush
+

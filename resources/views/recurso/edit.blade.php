@@ -47,19 +47,19 @@
         <!-- Nombre -->
         <div class="col-md-6">
             <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" id="nombre" name="nombre" class="form-control" value="{{ old('nombre', $recurso->nombre) }}" required>
+            <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre del recurso" value="{{ old('nombre', $recurso->nombre) }}" required>
         </div>
 
         <!-- Descripción -->
         <div class="col-12">
             <label for="descripcion" class="form-label">Descripción</label>
-            <textarea id="descripcion" name="descripcion" class="form-control" rows="3">{{ old('descripcion', $recurso->descripcion) }}</textarea>
+            <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Descripción..." rows="3">{{ old('descripcion', $recurso->descripcion) }}</textarea>
         </div>
 
         <!-- Costo unitario -->
         <div class="col-md-6">
             <label for="costo_unitario" class="form-label">Costo unitario</label>
-            <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" min="0" step="0.01" value="{{ old('costo_unitario', $recurso->costo_unitario) }}">
+            <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" placeholder="Costo unitario" min="0" step="0.01" value="{{ old('costo_unitario', $recurso->costo_unitario) }}">
         </div>
 
         <!-- Guardar cambios -->
