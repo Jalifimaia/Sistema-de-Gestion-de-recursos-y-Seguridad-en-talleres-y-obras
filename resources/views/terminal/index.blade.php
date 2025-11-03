@@ -145,7 +145,6 @@
 
       <!-- Botones de acción -->
       <div class="text-center mt-4">
-        <button id="btnConfirmarDevolucion" class="btn btn-primary" disabled>Confirmar devolución</button>
         <button id="btnVolverDevolucionQR" class="btn btn-primary ms-2" onclick="volverARecursosAsignadosDesdeDevolucionQR()">Volver</button>
       </div>
     </div>
@@ -153,7 +152,23 @@
 
   </div>
 
-  
+  <!-- Modal de confirmacion final de devolucion por QR -->
+  <div class="modal fade" id="modalConfirmarQR" tabindex="-1" aria-labelledby="modalConfirmarQRLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalConfirmarQRLabel">Confirmar devolución</h5>
+        </div>
+        <div class="modal-body" id="modalConfirmarQRBody">
+          ¿Deseás confirmar la devolución del recurso escaneado?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelarQR" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnAceptarQR">Confirmar devolución</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
   <!-- Modal de recursos asignados -->

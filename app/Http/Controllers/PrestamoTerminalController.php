@@ -61,7 +61,9 @@ class PrestamoTerminalController extends Controller
             if ($detalle->id_estado_prestamo != 2) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'El recurso ya fue devuelto o no está asignado',
+                    'estado' => 'ya_devuelto',
+                     'message' => ''
+                   // 'message' => 'El recurso ya fue devuelto o no está asignado',
                 ]);
             }
 
@@ -140,9 +142,11 @@ class PrestamoTerminalController extends Controller
             return response()->json([
                 'success' => true,
                 'coincide' => false,
-                'message' => 'El recurso ya fue devuelto o no está asignado a este usuario'
+                //'message' => 'El recurso ya fue devuelto o no está asignado a este usuario',
+                'estado' => 'ya_devuelto'
             ]);
         }
+
 
         if ($detalle->serieRecurso->nro_serie !== $serieEsperada) {
             return response()->json([

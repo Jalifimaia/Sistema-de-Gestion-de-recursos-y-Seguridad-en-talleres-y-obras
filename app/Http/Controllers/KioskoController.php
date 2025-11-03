@@ -162,8 +162,10 @@ public function devolverRecurso($id)
         }
 
         if ($detalle->id_estado_prestamo != 2) {
-            return response()->json(['success' => false, 'message' => 'El recurso ya fue devuelto o no está asignado']);
+            return response()->json(['success' => false, 'message' => '']);
+            // o directamente: return response()->json(['success' => false]);
         }
+
 
         // Marcar detalle como devuelto
         $detalle->id_estado_prestamo = 4;
