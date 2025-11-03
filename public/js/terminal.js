@@ -801,6 +801,7 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
 
 let serieEsperada = '';
 let detalleIdActual = null;
+window._modalErrorQR = null;
 
 function mostrarStepDevolucionQR(serie, detalleId) {
   safeStopRecognitionGlobal();
@@ -1069,16 +1070,13 @@ async function activarEscaneoDevolucionQR() {
     return;
   }
 
-  // Evitar duplicación total (si ya activo)
   if (window._qrDevolucionActivo) {
     console.warn('⚠️ Escáner QR ya activo, se evita duplicación');
     return;
   }
 
-  // Limpiar cualquier intento anterior de forma segura
   await detenerEscaneoQRDevolucionSegura();
 
-  // Crear nueva instancia
   try {
     window.html5QrCodeDevolucion = new Html5Qrcode(contenedorId);
   } catch (e) {
@@ -1094,78 +1092,41 @@ async function activarEscaneoDevolucionQR() {
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       async (decodedText) => {
-        // decodedText -> cadena (codigoQR)
         console.log('🔎 QR detectado (decodedText):', decodedText);
-
-        // Llamada al backend
         const res = await validarDevolucionQR(decodedText, idUsuario);
         console.log('📦 Respuesta de validación QR (handler):', res);
 
-        // Manejo explícito del estado ya_devuelto
-       // Manejo explícito del estado ya_devuelto (mejor experiencia, no disruptiva)
-        if (res && res.estado === 'ya_devuelto') {
-          console.log('🧪 Estado ya_devuelto detectado. Flag:', window._devolucionCompletada);
+        if (!res.success || res.estado === 'qr_invalido') {
+          await detenerEscaneoQRDevolucionSegura();
+          safeStopRecognitionGlobal();
 
-          // Si acabamos de devolverlo en esta sesión, suprimimos mensaje redundante
-          if (window._devolucionCompletada) {
-            window._devolucionCompletada = false;
-            return;
+          const modalEl = document.getElementById('modalErrorQR');
+          if (!modalEl) return;
+
+          if (!window._modalErrorQR) {
+            window._modalErrorQR = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
           }
 
-          // Throttle para no repetir el mismo warning muchas veces (ej. 3 segundos)
-          window._lastYaDevueltoAt = window._lastYaDevueltoAt || 0;
-          const now = Date.now();
-          const THROTTLE_MS = 3000;
+          const body = document.getElementById('modalErrorQRBody');
+          if (body) body.textContent = res.message || 'El QR no coincide con el recurso solicitado';
 
-          if (now - window._lastYaDevueltoAt > THROTTLE_MS) {
-            window._lastYaDevueltoAt = now;
+          window._modalErrorQR.show();
 
-            // Mensaje suave en UI
-            const feedbackEl = document.getElementById('qrFeedback');
-            if (feedbackEl) {
-              feedbackEl.textContent = '⚠️ Ya devuelto';
-              // autoclear después de un tiempo para no ensuciar la UI
-              setTimeout(() => {
-                try { if (feedbackEl.textContent === '⚠️ Ya devuelto') feedbackEl.textContent = ''; } catch(e){}
-              }, 3500);
-            }
-
-            // Mensaje no disruptivo tipo toast / alerta suave
-            mostrarMensajeKiosco(res.message || 'El recurso ya fue devuelto o no está asignado', 'warning');
-          } else {
-            // Si está throttleado, sólo actualizar feedback mínimo (sin toast)
-            const feedbackEl = document.getElementById('qrFeedback');
-            if (feedbackEl && !feedbackEl.textContent) feedbackEl.textContent = '⚠️ Ya devuelto';
+          const btnCerrar = document.getElementById('btnCerrarErrorQR');
+          if (btnCerrar) {
+            btnCerrar.removeEventListener('click', cerrarModalErrorQR);
+            btnCerrar.addEventListener('click', cerrarModalErrorQR);
           }
 
-          // Important: No detener el escáner; seguir escaneando para que usuario pueda probar otro QR.
           return;
         }
 
-
-        // Caso válido: success && coincide
-        if (res && res.success && res.coincide) {
-          // Parar escáner de forma segura (comprueba existencia)
-          try {
-            if (window.html5QrCodeDevolucion) {
-              if (typeof window.html5QrCodeDevolucion.stop === 'function') {
-                await window.html5QrCodeDevolucion.stop();
-              }
-            }
-            if (window.html5QrCodeDevolucion && typeof window.html5QrCodeDevolucion.clear === 'function') {
-              await window.html5QrCodeDevolucion.clear();
-            }
-          } catch (e) {
-            console.warn('⚠️ No se pudo detener/limpiar escáner tras QR válido', e);
-          }
-          window.html5QrCodeDevolucion = null;
-          window._qrDevolucionActivo = false;
-
+        if (res.success && res.coincide) {
+          await detenerEscaneoQRDevolucionSegura();
           detalleIdActual = res.id_detalle;
           document.getElementById('qrFeedback').textContent = '';
           mostrarMensajeKiosco('✅ QR válido. Confirma la devolución en pantalla.', 'success');
 
-          // Mostrar modal de confirmación (si existe) o confirmar directo
           const modalEl = document.getElementById('modalConfirmarQR');
           if (modalEl) {
             const body = document.getElementById('modalConfirmarQRBody');
@@ -1194,19 +1155,15 @@ async function activarEscaneoDevolucionQR() {
           } else {
             confirmarDevolucionQRActual();
           }
-
-          return;
         }
-
-        // Resto de casos: QR inválido / no coincide
-        document.getElementById('qrFeedback').textContent = '❌ QR inválido';
-        mostrarMensajeKiosco(res?.message || '❌ QR inválido para devolución', 'danger');
-
       },
       (errorMessage) => {
-        // mensajes frecuentes de html5-qrcode por frames sin QR detectado
-        // loguear a nivel debug para no spamear el UI
-        console.debug('frame scan error:', errorMessage);
+        const msg = String(errorMessage || '');
+        if (msg.includes('No MultiFormat Readers')) {
+          console.debug('frame scan: no QR detected');
+          return;
+        }
+        console.warn('Error escaneo devolucion (frame):', errorMessage);
       }
     );
 
@@ -1214,13 +1171,10 @@ async function activarEscaneoDevolucionQR() {
   } catch (err) {
     console.error('No se pudo iniciar escaneo devolución:', err);
     mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
-    // asegurar reset del flag
     window._qrDevolucionActivo = false;
-    // intentar limpiar cualquier instancia parcial
     try { await detenerEscaneoQRDevolucionSegura(); } catch(e){}
   }
 }
-
 
 
 
@@ -1248,7 +1202,7 @@ function ExitoDevolucionQR(qrCodeMessage) {
 function activarReconocimientoDevolucionQR() {
   if (!('webkitSpeechRecognition' in window)) return;
 
-  safeStopRecognitionGlobal(); // 🔧 detener el global antes de iniciar el local
+  safeStopRecognitionGlobal();
 
   const recog = new webkitSpeechRecognition();
   recog.lang = 'es-ES';
@@ -1268,6 +1222,12 @@ function activarReconocimientoDevolucionQR() {
     } else if (texto === 'volver') {
       volverARecursosAsignadosDesdeDevolucionQR();
       recog.stop();
+    } else if (texto === 'cerrar') {
+      const btn = document.getElementById('btnCerrarErrorQR');
+      if (btn) {
+        btn.click();
+        recog.stop();
+      }
     }
   };
 
@@ -1284,6 +1244,33 @@ function activarReconocimientoDevolucionQR() {
 
   window._recogQRDevolucion = recog;
 }
+
+function cerrarModalErrorQR() {
+  try {
+    const modalEl = document.getElementById('modalErrorQR');
+    if (!modalEl) return;
+
+    // Usamos instancia única para evitar duplicados
+    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    modal.hide();
+  } catch (e) {
+    console.warn('⚠️ No se pudo cerrar modalErrorQR correctamente', e);
+  }
+
+  // Reactivar escaneo y reconocimiento de voz
+  setTimeout(() => {
+    activarEscaneoDevolucionQR();
+    safeStartRecognitionGlobal();
+  }, 300);
+}
+
+
+const btnCerrar = document.getElementById('btnCerrarErrorQR');
+if (btnCerrar) {
+  btnCerrar.removeEventListener('click', cerrarModalErrorQR);
+  btnCerrar.addEventListener('click', cerrarModalErrorQR);
+}
+
 
 // asegurar handlers básicos del modalConfirmarQR (idempotente)
 document.addEventListener('DOMContentLoaded', () => {
@@ -3127,6 +3114,23 @@ function parsearDNIPorBloques(texto) {
 
 function procesarComandoVoz(limpio) {
   const step = getStepActivo();
+
+// 🧰 Cierre por voz del modal de error QR
+const modalErrorQR = document.getElementById('modalErrorQR');
+const modalErrorVisible = modalErrorQR && modalErrorQR.classList.contains('show');
+
+if (modalErrorVisible) {
+  if (/\b(cerrar|cerrar error|cerrar modal|cerrar qr)\b/.test(limpio)) {
+    console.log('🎤 Comando de voz: cerrar modal error QR');
+    cerrarModalErrorQR();
+    return;
+  }
+
+  // Si el modal está abierto, no procesamos otros comandos
+  console.log('⚠️ Modal de error QR abierto, comando ignorado:', limpio);
+  return;
+}
+
 
   // 🧰 Cierre por voz del modal de recursos asignados
 const modalRecursos = document.getElementById('modalRecursos');

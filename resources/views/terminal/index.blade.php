@@ -170,6 +170,23 @@
     </div>
   </div>
 
+  <!-- Modal de error de devolucion por QR -->
+  <div class="modal fade" id="modalErrorQR" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-header">
+          <h5 class="modal-title">Error de escaneo</h5>
+        </div>
+        <div class="modal-body">
+          <p id="modalErrorQRBody">El QR no coincide con el recurso solicitado</p>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-danger" id="btnCerrarErrorQR" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Modal de recursos asignados -->
   <div class="modal fade" id="modalRecursos" tabindex="-1" aria-labelledby="modalRecursosLabel" aria-hidden="true">

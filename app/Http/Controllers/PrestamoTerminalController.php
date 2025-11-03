@@ -117,7 +117,8 @@ class PrestamoTerminalController extends Controller
         if (! $codigoQR || ! $idUsuario || ! $serieEsperada) {
             return response()->json([
                 'success' => false,
-                'message' => 'Faltan datos para validar el QR'
+                'estado' => 'qr_invalido',
+                'message' => 'El QR no coincide con el recurso solicitado'
             ]);
         }
 
@@ -126,7 +127,8 @@ class PrestamoTerminalController extends Controller
         if (! $serie) {
             return response()->json([
                 'success' => false,
-                'message' => 'QR no corresponde a ninguna serie registrada'
+                'estado' => 'qr_invalido',
+                'message' => 'El QR no coincide con el recurso solicitado'
             ]);
         }
 
@@ -138,20 +140,11 @@ class PrestamoTerminalController extends Controller
             })
             ->first();
 
-        if (! $detalle) {
-            return response()->json([
-                'success' => true,
-                'coincide' => false,
-                //'message' => 'El recurso ya fue devuelto o no está asignado a este usuario',
-                'estado' => 'ya_devuelto'
-            ]);
-        }
-
-
-        if ($detalle->serieRecurso->nro_serie !== $serieEsperada) {
+        if (! $detalle || $detalle->serieRecurso->nro_serie !== $serieEsperada) {
             return response()->json([
                 'success' => false,
-                'message' => 'El QR escaneado no coincide con el recurso que se está devolviendo'
+                'estado' => 'qr_invalido',
+                'message' => 'El QR no coincide con el recurso solicitado'
             ]);
         }
 
@@ -161,6 +154,8 @@ class PrestamoTerminalController extends Controller
             'id_detalle' => $detalle->id
         ]);
     }
+
+
 
 
 
