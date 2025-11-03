@@ -17,13 +17,20 @@
         <!-- 🧍 Trabajador -->
         <div class="card mb-3">
             <div class="card-header bg-primary text-white">Datos del Trabajador</div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Trabajador</label>
-                        <input type="text" class="form-control" 
-                               value="{{ $incidente->trabajador?->name }}" readonly>
-                        <input type="hidden" name="id_trabajador" value="{{ $incidente->trabajador?->id }}">
+                <div class="card-body">
+                    <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Trabajador</label>
+                        <input type="text" class="form-control"
+                            value="{{ $incidente->trabajador?->name ?? '-' }}" readonly>
+                        <input type="hidden" name="id_trabajador" value="{{ $incidente->trabajador?->id ?? '' }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">DNI</label>
+                        <input type="text" class="form-control"
+                            value="{{ $incidente->trabajador?->dni ?? '-' }}" readonly>
+                        <input type="hidden" name="dni_trabajador" value="{{ $incidente->trabajador?->dni ?? '' }}">
                     </div>
                 </div>
             </div>
@@ -35,40 +42,58 @@
             <div class="card mb-3 recurso-block">
                 <div class="card-header bg-success text-white">Recurso asociado</div>
                 <div class="card-body">
-                    <div class="row mb-3">
+                    <div class="row g-3 align-items-end">
                         <div class="col-md-3">
-                            <label>Categoría</label>
+                            <label class="form-label">Categoría</label>
                             <input type="text" class="form-control" 
-                                   value="{{ $recurso->subcategoria->categoria->nombre_categoria }}" readonly>
+                                value="{{ $recurso->subcategoria->categoria->nombre_categoria ?? '-' }}" readonly>
                             <input type="hidden" name="recursos[{{ $i }}][id_categoria]" 
-                                   value="{{ $recurso->subcategoria->categoria->id }}">
+                                value="{{ $recurso->subcategoria->categoria->id ?? '' }}">
                         </div>
+
                         <div class="col-md-3">
-                            <label>Subcategoría</label>
+                            <label class="form-label">Subcategoría</label>
                             <input type="text" class="form-control" 
-                                   value="{{ $recurso->subcategoria->nombre }}" readonly>
+                                value="{{ $recurso->subcategoria->nombre ?? '-' }}" readonly>
                             <input type="hidden" name="recursos[{{ $i }}][id_subcategoria]" 
-                                   value="{{ $recurso->subcategoria->id }}">
+                                value="{{ $recurso->subcategoria->id ?? '' }}">
                         </div>
+
                         <div class="col-md-3">
-                            <label>Recurso</label>
+                            <label class="form-label">Recurso</label>
                             <input type="text" class="form-control" 
-                                   value="{{ $recurso->nombre }}" readonly>
+                                value="{{ $recurso->nombre ?? '-' }}" readonly>
                             <input type="hidden" name="recursos[{{ $i }}][id_recurso]" 
-                                   value="{{ $recurso->id }}">
+                                value="{{ $recurso->id ?? '' }}">
                         </div>
+
                         <div class="col-md-3">
-                            <label>Serie del recurso</label>
+                            <label class="form-label">Serie del recurso</label>
                             <input type="text" class="form-control" 
-                                   value="{{ $recurso->serieRecursos->firstWhere('id', $recurso->pivot->id_serie_recurso)?->nro_serie }}" readonly>
+                                value="{{ $recurso->serieRecursos->firstWhere('id', $recurso->pivot->id_serie_recurso)?->nro_serie ?? '-' }}" readonly>
                             <input type="hidden" name="recursos[{{ $i }}][id_serie_recurso]" 
-                                   value="{{ $recurso->pivot->id_serie_recurso }}">
+                                value="{{ $recurso->pivot->id_serie_recurso ?? '' }}">
                         </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Estado</label>
+                            <select name="recursos[{{ $i }}][id_estado]" class="form-select" required>
+                                <option value="">Seleccione</option>
+                                @foreach($estadosRecurso as $estado)
+                                    <option value="{{ $estado->id }}"
+                                        {{ (string)($recurso->pivot->id_estado ?? '') === (string)$estado->id ? 'selected' : '' }}>
+                                        {{ $estado->nombre_estado }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                     </div>
                 </div>
             </div>
             @endforeach
         </div>
+
 
         <!-- Estado del incidente -->
         <div class="mb-3">
@@ -97,14 +122,17 @@
                    value="{{ $incidente->resolucion }}">
         </div>
 
-        <!-- Fecha del incidente -->
+        <!-- Fecha del incidente (no editable) -->
         <div class="mb-3">
-            <label for="fecha_incidente" class="form-label">Fecha del incidente</label>
-            <input type="datetime-local" name="fecha_incidente" id="fecha_incidente" 
-                   class="form-control" 
-                   value="{{ \Carbon\Carbon::parse($incidente->fecha_incidente)->format('Y-m-d\TH:i') }}" 
-                   required>
+        <label class="form-label">Fecha del incidente</label>
+
+        {{-- input visual no editable --}}
+        <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($incidente->fecha_incidente)->setTimezone(config('app.timezone'))->format('d/m/Y H:i') }}" readonly>
+
+        {{-- hidden que efectivamente se envía en el form (formato ISO aceptado por tus validaciones) --}}
+        <input type="hidden" name="fecha_incidente" value="{{ \Carbon\Carbon::parse($incidente->fecha_incidente)->format('Y-m-d H:i:s') }}">
         </div>
+
 
         <div class="d-flex justify-content-between">
             <button type="submit" class="btn btn-success">Actualizar incidente</button>

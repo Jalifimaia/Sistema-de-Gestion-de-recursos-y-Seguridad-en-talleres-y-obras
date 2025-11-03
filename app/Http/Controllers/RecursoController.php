@@ -53,7 +53,7 @@ class RecursoController extends Controller
 
         $recursos = $query
             ->groupBy('recurso.id', 'recurso.nombre')
-            ->orderByDesc('cantidad_prestamos')
+            ->orderByDesc('ultima_fecha')
             ->get();
 
         $labels = $recursos->pluck('nombre');
@@ -87,7 +87,7 @@ class RecursoController extends Controller
 
         $recursos = $query
             ->groupBy('recurso.id', 'recurso.nombre')
-            ->orderByDesc('cantidad_prestamos')
+            ->orderByDesc('ultima_fecha')
             ->get();
 
         $total = $recursos->sum('cantidad_prestamos');
@@ -257,7 +257,8 @@ class RecursoController extends Controller
         }
 
         if ($fecha_fin) {
-            $query->where('incidente.fecha_incidente', '<=', $fecha_fin);
+            $fecha_fin_incluida = Carbon::parse($fecha_fin)->endOfDay(); // 2025-10-28 23:59:59
+            $query->where('incidente.fecha_incidente', '<=', $fecha_fin_incluida);
         }
 
         $incidentes = $query
