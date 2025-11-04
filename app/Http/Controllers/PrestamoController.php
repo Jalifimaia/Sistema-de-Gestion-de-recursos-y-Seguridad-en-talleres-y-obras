@@ -42,12 +42,13 @@ public function index(): View
         ->whereIn('prestamo.estado', [1, 2, 3])
         ->when($query, function ($q) use ($query) {
         $q->where(function ($sub) use ($query) {
-            $sub->where('recurso.nombre', 'like', "{$query}%")
-                ->orWhere('serie_recurso.nro_serie', 'like', "{$query}%")
-                ->orWhere('trabajador.name', 'like', "{$query}%")
-                ->orWhere('creador.name', 'like', "{$query}%");
+            $sub->where('recurso.nombre', 'like', "%{$query}%")
+                ->orWhere('serie_recurso.nro_serie', 'like', "%{$query}%")
+                ->orWhere('trabajador.name', 'like', "%{$query}%")
+                ->orWhere('creador.name', 'like', "%{$query}%");
         });
     })
+
 
         ->orderByDesc('prestamo.id');
 
