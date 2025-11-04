@@ -3,8 +3,15 @@
 @section('title', 'Registro de Checklist Diario')
 
 @section('content')
-<div class="container py-4">
-  <h2 class="h4 fw-bold mb-4">Registro de Checklist Diario</h2>
+  <div class="container py-4">
+  <div class="d-flex align-items-center mb-4">
+    <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary me-3">
+      ⬅️ Volver
+    </a>
+    <h2 class="h4 fw-bold mb-0">Registro de Checklist Diario</h2>
+  </div>
+
+
 
   @if ($errors->any())
     <div class="alert alert-danger">

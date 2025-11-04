@@ -4,7 +4,12 @@
 
 @section('content')
 <div class="container py-4">
-  <h1 class="h4 fw-bold mb-4">🚨 Recursos Faltantes</h1>
+  <div class="d-flex align-items-center mb-4">
+    <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary me-3">
+      ⬅️ Volver
+    </a>
+    <h2 class="h4 fw-bold mb-0">Recursos Faltantes</h2>
+  </div>
   <p class="text-muted">Usuarios con rol de trabajador que no tienen todos los EPP obligatorios asignados según el checklist más reciente.</p>
 
   @if (count($faltantes))

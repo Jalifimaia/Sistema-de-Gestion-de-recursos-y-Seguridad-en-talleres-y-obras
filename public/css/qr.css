@@ -17,3 +17,8 @@
   border-color: #e67e22;
   color: #fff;
 }
+
+/* Oculta el resumen de paginación */
+p.small.text-muted {
+  display: none;
+}

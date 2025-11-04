@@ -6,8 +6,11 @@
 <div class="container py-4">
   <h3 class="mb-4">📦 Series con código QR</h3>
 
-  <!-- 🔍 Buscador en vivo por nro_serie -->
-  <input type="text" id="busquedaSerie" class="form-control mb-3" placeholder="🔍 Buscar por iniciales del número de serie...">
+  <!-- 🔍 Buscador por nro_serie con botón -->
+  <div class="input-group mb-3">
+    <input type="text" id="busquedaSerie" class="form-control" placeholder="🔍 Buscar por iniciales del número de serie...">
+    <button id="btnBuscarSerie" class="btn btn-primary">Buscar</button>
+  </div>
 
   <div class="mb-3 text-end">
     <a href="{{ route('series.qr.lote.pdf') }}" class="btn btn-outline-primary" target="_blank">
@@ -70,7 +73,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Script cargado');
 
-    // Copiar código QR
+    // 📋 Copiar código QR
     document.querySelectorAll('.copiar-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const codigo = btn.getAttribute('data-codigo');
@@ -89,19 +92,33 @@
       });
     });
 
-    // 🔍 Filtro en vivo por iniciales del nro_serie
+    // 🔍 Buscar solo al presionar Enter o botón
     const input = document.getElementById('busquedaSerie');
-    const tarjetas = document.querySelectorAll('.col');
+    const boton = document.getElementById('btnBuscarSerie');
+    
+    input.value = new URLSearchParams(window.location.search).get('search') || '';
 
-    input?.addEventListener('input', () => {
-      const filtro = input.value.trim().toLowerCase();
-      console.log('🔍 Buscando:', filtro);
+    const buscar = () => {
+    const valor = input.value.trim();
+    const baseUrl = window.location.pathname;
 
-      tarjetas.forEach(col => {
-        const nroSerie = col.querySelector('.card-title')?.textContent.toLowerCase() || '';
-        col.style.display = nroSerie.startsWith(filtro) ? '' : 'none';
-      });
+    if (valor) {
+      window.location.href = `${baseUrl}?search=${encodeURIComponent(valor)}`;
+    } else {
+      window.location.href = baseUrl; // 🔄 sin filtro, muestra todo
+    }
+  };
+
+
+    input.addEventListener('keypress', e => {
+      if (e.key === 'Enter') buscar();
     });
+
+    boton.addEventListener('click', buscar);
   });
+
+
+
 </script>
 @endpush
+

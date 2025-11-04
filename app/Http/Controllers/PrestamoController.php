@@ -14,11 +14,14 @@ use App\Models\SerieRecurso;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+
 class PrestamoController extends Controller
 {
 public function index(): View
 {
-    $prestamos = DB::table('prestamo')
+    $query = request('search');
+
+    $base = DB::table('prestamo')
         ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
         ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
         ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
@@ -36,9 +39,23 @@ public function index(): View
             'prestamo.fecha_creacion',
             'estado_prestamo.nombre as estado'
         )
-        ->whereIn('prestamo.estado', [1, 2, 3]) // 1 = Cancelado, 2 = Activo, 3 = Devuelto
-        ->orderByDesc('prestamo.id')
-        ->get();
+        ->whereIn('prestamo.estado', [1, 2, 3])
+        ->when($query, function ($q) use ($query) {
+        $q->where(function ($sub) use ($query) {
+            $sub->where('recurso.nombre', 'like', "{$query}%")
+                ->orWhere('serie_recurso.nro_serie', 'like', "{$query}%")
+                ->orWhere('trabajador.name', 'like', "{$query}%")
+                ->orWhere('creador.name', 'like', "{$query}%");
+        });
+    })
+
+        ->orderByDesc('prestamo.id');
+
+    $prestamos = DB::table(DB::raw("({$base->toSql()}) as sub"))
+        ->mergeBindings($base)
+        ->paginate(18)
+        ->onEachSide(1)
+        ->withQueryString();
 
     return view('prestamo.index', compact('prestamos'));
 }
