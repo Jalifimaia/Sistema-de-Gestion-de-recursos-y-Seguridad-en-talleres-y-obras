@@ -341,16 +341,21 @@ function cerrarModalKiosco() {
   modalEl._recogInstance = null;
   modalEl._lastTranscript = null;
 
-  // 🔓 Despausar y reiniciar reconocimiento global
+  // ✅ Resetear flag y reiniciar reconocimiento global
   try {
-    safeStopRecognitionGlobal(); // ✅ asegura que no quedó colgado
     recognitionGlobalPaused = false;
-    console.log('🔓 recognitionGlobalPaused = false');
+    safeStopRecognitionGlobal(); // por si quedó colgado
     safeStartRecognitionGlobal();
+    console.log('🎤 Reconocimiento global reactivado tras cerrar modal kiosco');
   } catch (e) {
-    console.warn('⚠️ No se pudo reiniciar recognitionGlobal:', e);
+    console.warn('⚠️ No se pudo reiniciar reconocimiento global:', e);
   }
+
+  // Ocultar backdrop manual si lo usás
+  const backdropManual = document.getElementById('backdrop-manual-kiosco');
+  if (backdropManual) backdropManual.style.display = 'none';
 }
+
 
 
 function quitarEmojis(texto) {
