@@ -181,8 +181,13 @@ function esComandoVolver(limpio) {
 //modal de mensajes
 function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
   mensaje = quitarEmojis(mensaje); // 🧹 Limpiar emojis
- 
-  if (tipo === 'warning' || tipo === 'danger') {
+
+  // 🔁 Redirigir ciertos mensajes a modal
+  const mensajeModalForzado = [
+    'Recurso asignado correctamente'
+  ];
+
+  if (tipo === 'warning' || tipo === 'danger' || mensajeModalForzado.includes(mensaje.trim())) {
     mostrarModalKiosco(mensaje, tipo);
     return;
   }
@@ -220,6 +225,7 @@ function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
     setTimeout(() => toast.remove(), 500);
   }, duracion);
 }
+
 
 function mostrarModalKiosco(mensaje, tipo = 'danger') {
   const modalEl = document.getElementById('modal-mensaje-kiosco');
