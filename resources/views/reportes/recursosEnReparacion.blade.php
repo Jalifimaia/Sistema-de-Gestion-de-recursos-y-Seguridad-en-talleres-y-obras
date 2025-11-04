@@ -3,14 +3,12 @@
 @section('content')
 <div class="container py-4">
 
-
     <div class="d-flex align-items-center justify-content-start gap-3 mb-4">
         <a href="{{ route('reportes.index') }}" class="btn btn-outline-secondary">
             ⬅️ Volver
         </a>
         <h2 class="mb-4 text-orange">🔧 Recursos en reparación</h2>
-        </div>
-
+    </div>
 
     <form method="GET" action="{{ route('reportes.enReparacion') }}" class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
@@ -32,33 +30,54 @@
     </form>
 
     @if($recursos->count())
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped align-middle">
-            <thead class="table-light">
-                <tr class="text-orange">
-                    <th>Recurso</th>
-                    <th>Número de serie</th>
-                    <th>Fecha adquisición</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($recursos as $r)
-                <tr>
-                    <td>{{ $r->nombre }}</td>
-                    <td>{{ $r->nro_serie }}</td>
-                    <td>{{ $r->fecha_adquisicion }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @else
-    <div class="alert alert-info">No se encontraron recursos en reparación en el rango seleccionado.</div>
-    @endif
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-light">
+                    <tr class="text-orange">
+                        <th>Categoría</th>
+                        <th>Subcategoría</th>
+                        <th>Recurso</th>
+                        <th>Número de serie</th>
+                        <th>Fecha adquisición</th>
+                        <th>Fecha marcado en reparación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($recursos as $r)
+                    <tr>
+                        <td>{{ $r->categoria ?? '-' }}</td>
+                        <td>{{ $r->subcategoria ?? '-' }}</td>
+                        <td>{{ $r->recurso ?? '-' }}</td>
+                        <td>{{ $r->nro_serie }}</td>
+                        <td>
+                            {{ $r->fecha_adquisicion
+                                ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $r->fecha_adquisicion, 'UTC')
+                                    ->setTimezone(config('app.timezone'))
+                                    ->format('d/m/Y')
+                                : '-' }}
+                        </td>
+                        <td>
+                            {{ $r->estado_actualizado_en
+                                ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $r->estado_actualizado_en, 'UTC')
+                                    ->setTimezone(config('app.timezone'))
+                                    ->format('d/m/Y ')
+                                : '-' }}
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @else
+        <div class="alert alert-info">No se encontraron recursos en reparación en el rango seleccionado.</div>
+        @endif
+
 </div>
 
 <div style="max-width: 100%; height: 220px;">
     <canvas id="graficoReparacion"></canvas>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('graficoReparacion').getContext('2d');
@@ -110,6 +129,5 @@
         }
     });
 </script>
-
 
 @endsection

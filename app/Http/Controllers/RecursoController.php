@@ -97,63 +97,109 @@ class RecursoController extends Controller
     }
 
     public function recursosEnReparacion(Request $request)
-{
-    $fecha_inicio = $request->input('fecha_inicio');
-    $fecha_fin = $request->input('fecha_fin');
+    {
+        $fecha_inicio = $request->input('fecha_inicio');
+        $fecha_fin    = $request->input('fecha_fin');
+        $estadoId     = 6; // id "En reparación"
 
-    $query = DB::table('serie_recurso')
-        ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
-        ->where('serie_recurso.id_estado', 6) // estado "En reparación"
-        ->select('recurso.nombre', 'serie_recurso.nro_serie', 'serie_recurso.fecha_adquisicion');
+        $query = DB::table('serie_recurso as sr')
+            ->join('recurso as r', 'sr.id_recurso', '=', 'r.id')
+            ->join('subcategoria as sc', 'r.id_subcategoria', '=', 'sc.id')
+            ->join('categoria as c', 'sc.categoria_id', '=', 'c.id')
+            ->join('incidente_recurso as ir', function($join) {
+                $join->on('ir.id_recurso', '=', 'r.id')
+                    ->on('ir.id_serie_recurso', '=', 'sr.id');
+            })
+            ->join('incidente as i', 'i.id', '=', 'ir.id_incidente')
+            ->where('ir.id_estado', $estadoId)
+            ->select(
+                'c.nombre_categoria as categoria',
+                'sc.nombre as subcategoria',
+                'r.nombre as recurso',
+                'sr.nro_serie',
+                'sr.fecha_adquisicion',
+                'ir.updated_at as estado_actualizado_en',
+                'i.id as incidente_id'
+            )
+            ->distinct();
 
-    if ($fecha_inicio) {
-        $query->where('serie_recurso.fecha_adquisicion', '>=', $fecha_inicio);
+        if ($fecha_inicio) {
+            $query->whereDate('ir.updated_at', '>=', $fecha_inicio);
+        }
+        if ($fecha_fin) {
+            $query->whereDate('ir.updated_at', '<=', $fecha_fin);
+        }
+
+        $recursos = $query->orderByDesc('ir.updated_at')->get();
+
+        // Opcional: eliminar duplicados por nro_serie
+        $recursos = $recursos->unique('nro_serie')->values();
+
+        // Agrupar por categoría para el gráfico
+        $agrupado = $recursos->groupBy('categoria')->map(function ($items, $nombre) {
+            return [
+                'tipo' => $nombre,
+                'cantidad' => $items->count()
+            ];
+        })->values();
+
+        $labels = $agrupado->pluck('tipo');
+        $valores = $agrupado->pluck('cantidad');
+
+        return view('reportes.recursosEnReparacion', compact('recursos', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
     }
 
-    if ($fecha_fin) {
-        $query->where('serie_recurso.fecha_adquisicion', '<=', $fecha_fin);
-    }
 
-    $recursos = $query->orderByDesc('serie_recurso.fecha_adquisicion')->get();
 
-    // 🔧 Agrupar por nombre de recurso y contar
-    $agrupado = $recursos->groupBy('nombre')->map(function ($items, $nombre) {
-        return [
-            'tipo' => $nombre,
-            'cantidad' => $items->count()
-        ];
-    })->values();
-
-    $labels = $agrupado->pluck('tipo');
-    $valores = $agrupado->pluck('cantidad');
-
-    return view('reportes.recursosEnReparacion', compact('recursos', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
-}
 
     public function recursosEnReparacionPDF(Request $request)
     {
         $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
+        $fecha_fin    = $request->input('fecha_fin');
+        $estadoId     = 6; // id "En reparación"
 
-        $query = DB::table('serie_recurso')
-            ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
-            ->where('serie_recurso.id_estado', 6)
-            ->select('recurso.nombre', 'serie_recurso.nro_serie', 'serie_recurso.fecha_adquisicion');
+        $query = DB::table('serie_recurso as sr')
+            ->join('recurso as r', 'sr.id_recurso', '=', 'r.id')
+            ->join('subcategoria as sc', 'r.id_subcategoria', '=', 'sc.id')
+            ->join('categoria as c', 'sc.categoria_id', '=', 'c.id') // ajustá si tu columna es id_categoria
+            ->join('incidente_recurso as ir', function($join) {
+                $join->on('ir.id_recurso', '=', 'r.id')
+                    ->on('ir.id_serie_recurso', '=', 'sr.id');
+            })
+            ->join('incidente as i', 'i.id', '=', 'ir.id_incidente')
+            ->where('ir.id_estado', $estadoId)
+            ->select(
+                'c.nombre_categoria as categoria',
+                'sc.nombre as subcategoria',
+                'r.nombre as recurso',
+                'sr.nro_serie',
+                'sr.fecha_adquisicion',
+                'ir.updated_at as estado_actualizado_en',
+                'i.id as incidente_id'
+            )
+            ->distinct();
 
         if ($fecha_inicio) {
-            $query->where('serie_recurso.fecha_adquisicion', '>=', $fecha_inicio);
+            $query->whereDate('ir.updated_at', '>=', $fecha_inicio);
         }
-
         if ($fecha_fin) {
-            $query->where('serie_recurso.fecha_adquisicion', '<=', $fecha_fin);
+            $query->whereDate('ir.updated_at', '<=', $fecha_fin);
         }
 
-        $recursos = $query->orderByDesc('serie_recurso.fecha_adquisicion')->get();
+        $recursos = $query->orderByDesc('ir.updated_at')->get();
+
+        // eliminar duplicados por serie si hiciera falta
+        $recursos = $recursos->unique('nro_serie')->values();
+
         $total = $recursos->count();
 
-        $pdf = Pdf::loadView('reportes/recursosEnReparacionPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
+        $pdf = Pdf::loadView('reportes.recursosEnReparacionPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
+
+        // forzar descarga
         return $pdf->download('reporte_recursos_en_reparacion.pdf');
     }
+
+
 
 
     public function herramientasPorTrabajador(Request $request)

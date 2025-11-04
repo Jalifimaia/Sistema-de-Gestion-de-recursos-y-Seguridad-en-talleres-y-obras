@@ -294,8 +294,7 @@ public function edit($id): View
         }
 
         DB::commit();
-        return redirect()->route('prestamos.index')->with('success', 'Préstamo actualizado correctamente.');
-    } catch (\Exception $e) {
+        return redirect()->route('prestamos.edit', $id)->with('success', 'Préstamo actualizado correctamente.');    } catch (\Exception $e) {
         DB::rollBack();
         Log::error('Error al actualizar préstamo: ' . $e->getMessage());
         return back()->withErrors(['error' => 'No se pudo actualizar el préstamo. ' . $e->getMessage()]);

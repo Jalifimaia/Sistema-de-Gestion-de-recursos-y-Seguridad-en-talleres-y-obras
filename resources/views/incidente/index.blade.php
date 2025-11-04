@@ -50,14 +50,26 @@
                             <td>{{ $incidente->descripcion ?? '-' }}</td>
                             <td>{{ $incidente->estadoIncidente?->nombre_estado ?? '-' }}</td>
                             <td>{{ $incidente->resolucion ? $incidente->resolucion : 'No hay resolución' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($incidente->fecha_incidente)->format('d/m/Y H:i') }}</td>
+                            <td>
+                              {{ $incidente->fecha_incidente
+                                  ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
+                                      ->setTimezone('America/Argentina/Buenos_Aires')
+                                      ->format('d/m/Y H:i')
+                                  : '-' }}
+                            </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalIncidente{{ $incidente->id }}">
                                     Ver detalles
                                 </button>
-                                <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-sm btn-orange">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                                @if($incidente->estadoIncidente?->nombre_estado === 'Resuelto')
+                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalBloqueado{{ $incidente->id }}">
+                                      <i class="bi bi-lock"></i>
+                                    </button>
+                                  @else
+                                    <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-sm btn-orange">
+                                      <i class="bi bi-pencil"></i>
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -90,37 +102,32 @@
         @endif
         </p>
 
-
       <p><strong>Motivo:</strong> {{ $incidente->descripcion ?? '-' }}</p>
         <p><strong>Estado del incidente:</strong> {{ $incidente->estadoIncidente?->nombre_estado ?? '-' }}</p>
         <p><strong>Resolución:</strong> {{ $incidente->resolucion ? $incidente->resolucion : 'No hay resolución' }}</p>
         <p><strong>Fecha del incidente:</strong>
         {{ $incidente->fecha_incidente
             ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
-                ->setTimezone(config('app.timezone'))
+                ->setTimezone('America/Argentina/Buenos_Aires')
                 ->format('d/m/Y H:i')
             : '-' }}
-
         </p>
 
         <p><strong>Última modificación del incidente:</strong>
         {{ $incidente->fecha_modificacion
             ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_modificacion, 'UTC')
-                ->setTimezone(config('app.timezone'))
+                ->setTimezone('America/Argentina/Buenos_Aires')
                 ->format('d/m/Y H:i')
             : 'No hay modificaciones' }}
-
         </p>
 
         <p><strong>Fecha de resolución del incidente:</strong>
         {{ $incidente->fecha_cierre_incidente
             ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_cierre_incidente, 'UTC')
-                ->setTimezone(config('app.timezone'))
+                ->setTimezone('America/Argentina/Buenos_Aires')
                 ->format('d/m/Y H:i')
             : 'No hay fecha de resolución' }}
-
         </p>
-
 
         <hr>
         <h6 class="text-orange">Recursos asociados</h6>
@@ -133,7 +140,6 @@
                 <th>Recurso</th>
                 <th>Serie</th>
                 <th>Estado</th>
-                
               </tr>
             </thead>
             <tbody>
@@ -150,10 +156,7 @@
                   <td>{{ $recurso->subcategoria?->nombre ?? '-' }}</td>
                   <td>{{ $recurso->nombre ?? '-' }}</td>
                   <td>{{ $recurso->serieRecursos->firstWhere('id', $recurso->pivot->id_serie_recurso)?->nro_serie ?? '-' }}</td>
-
                   <td>{{ $estados[$recurso->pivot->id_estado] ?? 'Sin estado' }}</td>
-
-                
                 </tr>
               @endforeach
             </tbody>
@@ -161,34 +164,54 @@
         </div>
       </div>
 
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
 </div>
+<!-- Modales de bloqueo -->
+@foreach($incidentes as $incidente)
+  @if($incidente->estadoIncidente?->nombre_estado === 'Resuelto')
+    <div class="modal fade" id="modalBloqueado{{ $incidente->id }}" tabindex="-1" aria-labelledby="modalBloqueadoLabel{{ $incidente->id }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-warning text-dark">
+            <h5 class="modal-title" id="modalBloqueadoLabel{{ $incidente->id }}">Incidente bloqueado</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            El incidente <strong>#{{ $incidente->id }}</strong> ya está marcado como <strong>Resuelto</strong> y no puede ser editado.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  @endif
+@endforeach
+
 @endforeach
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const today = document.getElementById('today');
-    const alerta = document.getElementById('alertaEstado');
+  {{-- Cargar archivo externo que formatea la fecha en zona Buenos Aires --}}
+  <script src="{{ asset('js/formatoFecha.js') }}" defer></script>
 
-    const ahora = new Date();
-    const opciones = { day: '2-digit', month: 'long', year: 'numeric' };
-    today.textContent = ahora.toLocaleDateString('es-AR', opciones);
-
-    if (alerta) {
-        setTimeout(() => {
-            alerta.classList.add('fade');
-            alerta.classList.remove('show');
-            alerta.addEventListener('transitionend', () => {
-                alerta.remove();
-            }, { once: true });
-        }, 5000);
-    }
-});
-</script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const alerta = document.getElementById('alertaEstado');
+      if (alerta) {
+          setTimeout(() => {
+              alerta.classList.add('fade');
+              alerta.classList.remove('show');
+              alerta.addEventListener('transitionend', () => {
+                  alerta.remove();
+              }, { once: true });
+          }, 5000);
+      }
+  });
+  </script>
 @endpush
