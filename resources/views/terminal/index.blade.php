@@ -273,6 +273,25 @@
     </div>
   </div>
 
+  <!-- Modal de mensajes de error -->
+  <div id="modal-mensaje-kiosco" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="tituloModalKiosco" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tituloModalKiosco">Atención</h5>
+          <button type="button" class="btn-close btn-cerrar-modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="modalMensajeKioscoBody">Mensaje dinámico</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-cerrar-modal" id="btnCerrarMensajeKiosco">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
 
 <!-- Microfono flotante -->
 <div id="micStatusButton" style="

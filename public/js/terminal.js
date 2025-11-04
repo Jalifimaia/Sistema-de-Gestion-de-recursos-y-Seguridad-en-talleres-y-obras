@@ -23,6 +23,74 @@ let recognitionGlobalWasRunning = false;
 function safeStopRecognitionGlobal() {
   try {
     if (recognitionGlobal && recognitionRunning) {
+      actualizarEstadoMicrofono(false);
+      recognitionGlobalWasRunning = true;
+      if (typeof recognitionGlobal.abort === 'function') {
+        recognitionGlobal.abort();
+      } else if (typeof recognitionGlobal.stop === 'function') {
+        recognitionGlobal.stop();
+      }
+      recognitionRunning = false;
+      console.log('ℹ️ safeStopRecognitionGlobal: detenido (marcado)');
+    } else {
+      recognitionGlobalWasRunning = false;
+    }
+  } catch (e) {
+    console.warn('safeStopRecognitionGlobal error', e);
+    recognitionGlobalWasRunning = false;
+  }
+}
+
+function safeStartRecognitionGlobal() {
+  try {
+    if (!('webkitSpeechRecognition' in window)) return;
+
+    // 🚫 Si está pausado, no iniciar
+    if (window.recognitionGlobalPaused) {
+      console.log('⏸️ safeStartRecognitionGlobal: pausado, no se inicia');
+      return;
+    }
+
+    if (recognitionRunning) {
+      console.log('safeStartRecognitionGlobal: recognition ya corriendo; skip start');
+      return;
+    }
+
+    if (!recognitionGlobal) {
+      iniciarReconocimientoGlobal();
+      return;
+    }
+
+    try {
+      recognitionGlobal.start();
+      recognitionRunning = true;
+      actualizarEstadoMicrofono(true);
+      console.log('safeStartRecognitionGlobal: start solicitado');
+    } catch (err) {
+      const isAlreadyStarted = err && (err.name === 'InvalidStateError' || /recognition has already started/i.test(err.message || ''));
+      if (isAlreadyStarted) {
+        recognitionRunning = true;
+        actualizarEstadoMicrofono(true);
+        console.log('safeStartRecognitionGlobal: start ignorado, reconocimiento ya iniciado');
+      } else {
+        console.warn('safeStartRecognitionGlobal: start() falló', err);
+        try {
+          iniciarReconocimientoGlobal();
+        } catch (e) {
+          console.warn('safeStartRecognitionGlobal: reiniciar falló', e);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('safeStartRecognitionGlobal: excepción', e);
+  }
+}
+
+
+/*
+function safeStopRecognitionGlobal() {
+  try {
+    if (recognitionGlobal && recognitionRunning) {
           actualizarEstadoMicrofono(false); // 👈 Aquí
       recognitionGlobalWasRunning = true;
       if (typeof recognitionGlobal.abort === 'function') {
@@ -74,7 +142,7 @@ function safeStartRecognitionGlobal() {
     console.warn('safeStartRecognitionGlobal: excepción', e);
   }
 }
-
+*/
 function actualizarEstadoMicrofono(activo = true) {
   const icon = document.getElementById('micStatusIcon');
   const text = document.getElementById('micStatusText');
@@ -110,21 +178,26 @@ function esComandoVolver(limpio) {
 
 
 
-
+//modal de mensajes
 function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
+  mensaje = quitarEmojis(mensaje); // 🧹 Limpiar emojis
+ 
+  if (tipo === 'warning' || tipo === 'danger') {
+    mostrarModalKiosco(mensaje, tipo);
+    return;
+  }
+
   const container = document.getElementById('toast-container');
   if (!container) return;
 
-  // Verificar si ya existe un toast con el mismo mensaje
   const toasts = container.querySelectorAll('.toast');
   for (const toast of toasts) {
     const body = toast.querySelector('.toast-body');
     if (body && body.textContent.trim() === mensaje.trim()) {
-      return; // Ya existe, no lo mostramos de nuevo
+      return;
     }
   }
 
-  // Crear nuevo toast
   const toast = document.createElement('div');
   toast.className = `toast align-items-center text-white bg-${tipo} border-0 show`;
   toast.setAttribute('role', 'alert');
@@ -141,7 +214,6 @@ function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
 
   container.appendChild(toast);
 
-  // Auto-remover después de duración
   setTimeout(() => {
     toast.classList.remove('show');
     toast.classList.add('hide');
@@ -149,8 +221,138 @@ function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
   }, duracion);
 }
 
+function mostrarModalKiosco(mensaje, tipo = 'danger') {
+  const modalEl = document.getElementById('modal-mensaje-kiosco');
+  const body = document.getElementById('modalMensajeKioscoBody');
+  const cerrarBtn = document.getElementById('btnCerrarMensajeKiosco');
+
+  body.textContent = mensaje;
+  window.modalKioscoActivo = true;
+
+  // 🔒 Pausar reconocimiento global ANTES de mostrar el modal
+  try {
+    recognitionGlobalPaused = true;
+    recognitionGlobal?.abort();
+    console.log('🛑 Reconocimiento global abortado por modal kiosco');
+  } catch (e) {
+    console.warn('⚠️ No se pudo abortar recognitionGlobal:', e);
+  }
+
+  const modal = new bootstrap.Modal(modalEl);
+  let modalActionTaken = false;
+
+  function cerrarModal() {
+    if (modalActionTaken) return;
+    modalActionTaken = true;
+    modal.hide();
+    cleanup();
+    cerrarModalKiosco(); // ✅ delega cierre completo
+  }
+
+  function cleanup() {
+    try {
+      const recog = modalEl._recogInstance;
+      if (recog) {
+        recog.onresult = null;
+        recog.onerror = null;
+        recog.onend = null;
+        recog.stop?.();
+      }
+    } catch (e) {
+      console.warn('⚠️ Error al limpiar recog local del modal kiosco:', e);
+    }
+    modalEl._recogInstance = null;
+    modalEl._lastTranscript = null;
+  }
+
+  cerrarBtn.onclick = cerrarModal;
+  document.querySelectorAll('.btn-cerrar-modal').forEach(btn => {
+    btn.onclick = cerrarModal;
+  });
+
+  try {
+    if ('webkitSpeechRecognition' in window) {
+      const recog = new webkitSpeechRecognition();
+      recog.lang = 'es-ES';
+      recog.continuous = false;
+      recog.interimResults = false;
+      modalEl._lastTranscript = null;
+
+      recog.onresult = function (event) {
+        const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+        if (modalActionTaken || modalEl._lastTranscript === texto) return;
+        modalEl._lastTranscript = texto;
+
+        if (texto.includes('cerrar') || texto.includes('entendido') || texto.includes('ok')) {
+          cerrarModal();
+          recog.stop();
+        } else {
+          mostrarMensajeKiosco('No se reconoció el comando. Decí “cerrar” o “entendido”.', 'info');
+        }
+      };
+
+      recog.onend = function () {
+        if (!modalActionTaken && modalEl.classList.contains('show')) {
+          recog.start();
+        }
+      };
+
+      recog.onerror = function (e) {
+        if (e?.error !== 'aborted') console.warn('Error en reconocimiento modal kiosco:', e);
+      };
+
+      modalEl._recogInstance = recog;
+      recog.start();
+    }
+  } catch (e) {
+    console.warn('No se pudo iniciar reconocimiento modal kiosco:', e);
+  }
+
+  modal.show();
+}
 
 
+function cerrarModalKiosco() {
+  const modalEl = document.getElementById('modal-mensaje-kiosco');
+  if (!modalEl) return;
+
+  modalEl.classList.remove('show');
+  modalEl.style.display = 'none';
+  window.modalKioscoActivo = false;
+
+  // Limpiar reconocimiento local
+  try {
+    const recog = modalEl._recogInstance;
+    if (recog) {
+      recog.onresult = null;
+      recog.onerror = null;
+      recog.onend = null;
+      recog.stop?.();
+    }
+  } catch (e) {
+    console.warn('⚠️ Error al limpiar recog local del modal kiosco:', e);
+  }
+  modalEl._recogInstance = null;
+  modalEl._lastTranscript = null;
+
+  // 🔓 Despausar y reiniciar reconocimiento global
+  try {
+    safeStopRecognitionGlobal(); // ✅ asegura que no quedó colgado
+    recognitionGlobalPaused = false;
+    console.log('🔓 recognitionGlobalPaused = false');
+    safeStartRecognitionGlobal();
+  } catch (e) {
+    console.warn('⚠️ No se pudo reiniciar recognitionGlobal:', e);
+  }
+}
+
+
+function quitarEmojis(texto) {
+  return texto.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|[\uD83C-\uDBFF\uDC00-\uDFFF])+/g, '');
+}
+
+
+//otras cosas
 function nextStep(n) {
   // Cerrar modal de recursos si está abierto (con guardas)
   const modalEl = document.getElementById('modalRecursos');
@@ -3144,6 +3346,19 @@ function parsearDNIPorBloques(texto) {
 
 function procesarComandoVoz(limpio) {
   const step = getStepActivo();
+
+  // 🛑 Si el kiosco está en modo modalKioscoActivo, no procesamos comandos
+if (window.modalKioscoActivo) {
+  if (matchCerrar(limpio) || limpio.includes('entendido') || limpio.includes('cerrar mensaje')) {
+    console.log('🎤 Cierre por voz del modal kiosco:', limpio);
+    cerrarModalKiosco();
+  } else {
+    console.log('🚫 Comando bloqueado por modal kiosco activo:', limpio);
+  }
+  return;
+}
+
+
 
 // 🧰 Cierre por voz del modal de error QR
 const modalErrorQR = document.getElementById('modalErrorQR');
