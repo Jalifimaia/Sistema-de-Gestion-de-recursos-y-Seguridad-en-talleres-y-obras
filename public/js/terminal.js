@@ -52,9 +52,15 @@ function safeStartRecognitionGlobal() {
     }
 
     if (recognitionRunning) {
-      console.log('safeStartRecognitionGlobal: recognition ya corriendo; skip start');
-      return;
-    }
+  try {
+    recognitionGlobal.stop(); // fuerza reinicio si quedó colgado
+    recognitionRunning = false;
+    console.log('safeStartRecognitionGlobal: reinicio forzado por estado inconsistente');
+  } catch (e) {
+    console.warn('safeStartRecognitionGlobal: stop falló en reinicio forzado', e);
+  }
+}
+
 
     if (!recognitionGlobal) {
       iniciarReconocimientoGlobal();
@@ -365,74 +371,103 @@ function quitarEmojis(texto) {
 
 //otras cosas
 function nextStep(n) {
-  // Cerrar modal de recursos si está abierto (con guardas)
-  const modalEl = document.getElementById('modalRecursos');
-  if (modalEl) {
-    const modalInstance = (bootstrap && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function')
-      ? bootstrap.Modal.getInstance(modalEl)
-      : null;
-    if (modalInstance && typeof modalInstance.hide === 'function') {
-      modalInstance.hide();
+  try {
+    // Limpieza defensiva: detener recog locales en steps antes de cambiar
+    try {
+      document.querySelectorAll('.step').forEach(s => {
+        try {
+          if (s._recogInstance) {
+            try { s._recogInstance.onresult = null; s._recogInstance.onerror = null; s._recogInstance.onend = null; } catch(e) {}
+            try { if (typeof s._recogInstance.stop === 'function') s._recogInstance.stop(); } catch(e) {}
+          }
+        } catch(e){}
+        s._recogInstance = null;
+        s._opening = false;
+      });
+    } catch (e) {
+      console.warn('nextStep: limpieza recog locales falló', e);
     }
-  }
 
-  // Detener escaneo QR si no estamos en step3
- // if (n !== 3) {
-    try { 
-      detenerEscaneoQRregistroRecursos(); 
+    // Cerrar modal de recursos si está abierto (compatibilidad legacy)
+    const modalEl = document.getElementById('modalRecursos');
+    if (modalEl) {
+      const modalInstance = (window.bootstrap && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function')
+        ? bootstrap.Modal.getInstance(modalEl)
+        : null;
+      if (modalInstance && typeof modalInstance.hide === 'function') {
+        try { modalInstance.hide(); } catch(e) { console.warn('nextStep: hide modalRecursos fallo', e); }
+      }
+    }
+
+    // Detener escaneo QR en cualquier flow relevante (usamos las versiones seguras)
+    try {
+      detenerEscaneoQRregistroRecursos();
       cancelarEscaneoQRregistroRecursos();
       detenerEscaneoQRLogin();
       detenerEscaneoQRDevolucion();
-      detenerEscaneoQRDevolucionSegura(); // 👈 usa la versión robusta
+      try { detenerEscaneoQRDevolucionSegura && detenerEscaneoQRDevolucionSegura(); } catch(e){}
       console.log('🛑 Escaneo QR detenido en nextStep');
     } catch (e) { /* no bloquear flujo por errores en stop */ }
- // }
 
-  // Ocultar todos los steps
-  document.querySelectorAll('.step').forEach(s => {
-    s.classList.remove('active');
-    s.classList.add('d-none');
-  });
+    // Ocultar todos los steps
+    document.querySelectorAll('.step').forEach(s => {
+      try { s.classList.remove('active'); s.classList.add('d-none'); } catch(e){}
+    });
 
-  // Activar el step deseado
-  const stepEl = document.getElementById('step' + n);
-  if (stepEl && stepEl.classList) {
-    stepEl.classList.remove('d-none');
-    stepEl.classList.add('active');
-  } else {
-    console.warn('nextStep: step element not found:', 'step' + n);
-  }
-
-  // Desactivar botón de menú principal si estamos en step 2
-  const btnMenu = document.getElementById('boton-flotante-menu-principal');
-  if (btnMenu) {
-    if (n === 2) {
-      btnMenu.disabled = true;
-      btnMenu.style.pointerEvents = 'none';
-      btnMenu.style.opacity = '0.5';
+    // Activar el step deseado
+    const stepEl = document.getElementById('step' + n);
+    if (stepEl && stepEl.classList) {
+      stepEl.classList.remove('d-none');
+      stepEl.classList.add('active');
     } else {
-      btnMenu.disabled = false;
-      btnMenu.style.pointerEvents = 'auto';
-      btnMenu.style.opacity = '1';
+      console.warn('nextStep: step element not found:', 'step' + n);
     }
+
+    // Desactivar botón de menú principal si estamos en step 2
+    const btnMenu = document.getElementById('boton-flotante-menu-principal');
+    if (btnMenu) {
+      if (n === 2) {
+        btnMenu.disabled = true;
+        btnMenu.style.pointerEvents = 'none';
+        btnMenu.style.opacity = '0.5';
+      } else {
+        btnMenu.disabled = false;
+        btnMenu.style.pointerEvents = 'auto';
+        btnMenu.style.opacity = '1';
+      }
+    }
+
+    // Acciones específicas por step
+    try { if (n === 2) cargarMenuPrincipal(); } catch (e) { console.warn('nextStep: cargarMenuPrincipal falló', e); }
+    try { if (n === 5) window.cargarCategorias(); } catch (e) { console.warn('nextStep: cargarCategorias falló', e); }
+
+    // Reiniciar reconocimiento global al cambiar de step (con pequeño delay para evitar conflictos)
+    try {
+      safeStopRecognitionGlobal();
+      setTimeout(() => {
+        try { safeStartRecognitionGlobal(); console.log('🎤 Reconocimiento reiniciado tras cambio de step'); } catch(e){}
+      }, 300);
+    } catch (e) {
+      console.warn('⚠️ No se pudo reiniciar reconocimiento tras cambio de step', e);
+    }
+
+    // Ajuste: actualizar visibilidad de botones flotantes si existe wrapper de nextStep envuelto
+    try {
+      if (typeof window._nextStepWrappedVisibilityUpdater === 'function') {
+        window._nextStepWrappedVisibilityUpdater('step' + n);
+      } else {
+        // fallback local
+        const ocultar = (n === 1 || 'step' + n === 'step1');
+        const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
+        const btnMenu2 = document.getElementById('boton-flotante-menu-principal');
+        if (btnCerrar) btnCerrar.style.display = ocultar ? 'none' : 'inline-block';
+        if (btnMenu2) btnMenu2.style.display = ocultar ? 'none' : 'inline-block';
+      }
+    } catch (e) {}
+
+  } catch (err) {
+    console.warn('nextStep: excepción general', err);
   }
-
-
-  // Acciones específicas por step
-  if (n === 2) cargarMenuPrincipal();
-  if (n === 5) window.cargarCategorias();
-
-  // Reiniciar reconocimiento global al cambiar de step
-try {
-  safeStopRecognitionGlobal();
-  setTimeout(() => {
-    safeStartRecognitionGlobal();
-    console.log('🎤 Reconocimiento reiniciado tras cambio de step');
-  }, 300); // pequeño delay para evitar conflictos
-} catch (e) {
-  console.warn('⚠️ No se pudo reiniciar reconocimiento tras cambio de step', e);
-}
-
 }
 
 
@@ -1241,7 +1276,7 @@ async function detenerEscaneoQRDevolucionSegura() {
 function volverARecursosAsignadosDesdeDevolucionQR() {
   try {
     detenerEscaneoQRDevolucionSegura(); // 🔧 usa la versión segura
-    nextStep(2);
+    nextStep(10);
     const btn = document.getElementById('btnVolverDevolucionQR');
     if (btn) btn.disabled = false; // por si quedó bloqueado
   } catch (e) {
@@ -2445,17 +2480,20 @@ function cargarMenuPrincipal() {
     },
     clase: "btn-outline-dark"
   },
-  {
+  // dentro de opciones en cargarMenuPrincipal, reemplazar accion de la opción 3 por:
+    {
     id: 3,
     texto: " Ver recursos asignados",
     accion: () => {
       console.log('📋 opción seleccionada: ver recursos asignados');
       window.cargarRecursos().then(() => {
-        abrirModalRecursos();
+        abrirStepRecursos();
       });
     },
     clase: "btn-outline-dark"
   }
+
+
 ];
 
 
@@ -2489,146 +2527,289 @@ function volverDesdeStep5() {
   window.nextStep(step5ReturnTarget);
 }
 
+// modal de recursos asignados
+function abrirStepRecursos() {
+  const stepId = 'step10';
+  let stepEl = document.getElementById(stepId);
 
-function abrirModalRecursos() {
-  const modalEl = document.getElementById('modalRecursos');
-  if (!modalEl) return;
-  if (!(window.bootstrap && bootstrap.Modal)) {
-    console.warn('abrirModalRecursos: bootstrap.Modal no disponible');
-    return;
+  if (!stepEl) {
+    stepEl = document.createElement('div');
+    stepEl.id = stepId;
+    stepEl.className = 'step d-none';
+    stepEl.innerHTML = `
+      <h2 class="mb-4 text-center">Recursos asignados</h2>
+      <div class="d-flex justify-content-center mb-3">
+        <button class="btn btn-primary me-2" id="tab-epp-step" type="button" aria-selected="true">Ver EPP</button>
+        <button class="btn btn-primary" id="tab-herramientas-step" type="button" aria-selected="false">Ver herramientas</button>
+      </div>
+
+      <div id="recursosTabContentStep" class="tab-content">
+        <div id="panel-epp-step" class="tab-pane show active">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead><tr><th>Subcategoría / Recurso</th><th>Serie</th><th>Fecha de préstamo</th><th>Fecha de devolución</th><th>Devolver</th></tr></thead>
+              <tbody id="tablaEPP-step"></tbody>
+            </table>
+          </div>
+          <div id="paginadorEPP-step" class="d-flex flex-wrap justify-content-center mt-3"></div>
+        </div>
+
+        <div id="panel-herramientas-step" class="tab-pane">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead><tr><th>Subcategoría / Recurso</th><th>Serie</th><th>Fecha de préstamo</th><th>Fecha de devolución</th><th>Devolver</th></tr></thead>
+              <tbody id="tablaHerramientas-step"></tbody>
+            </table>
+          </div>
+          <div id="paginadorHerramientas-step" class="d-flex flex-wrap justify-content-center mt-3"></div>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <button id="btnVolverStepRecursos" class="btn btn-primary">Volver</button>
+      </div>
+
+    `;
+    document.querySelector('.container-kiosk')?.appendChild(stepEl);
   }
 
-  if (modalEl._opening) {
-    console.log('abrirModalRecursos: ya en proceso de apertura, ignorando llamada');
-    return;
-  }
-  modalEl._opening = true;
+  if (stepEl._opening) return;
+  stepEl._opening = true;
 
   recognitionGlobalPaused = true;
-  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('abrirModalRecursos: error al pausar reconocimiento global', e); }
-  console.log('🛑 Reconocimiento global pausado antes de abrir modal');
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('abrirStepRecursos: safeStopRecognitionGlobal failed', e); }
 
-  const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-  modalInstance.show();
+  // Mostrar step10 (nextStep ya oculta otros steps y maneja recognition restarts)
+  // pequeño delay para evitar races si lo necesitás
+  try { nextStep(10); } catch (e) { console.warn('abrirStepRecursos: nextStep(10) falló', e); }
 
-  modalEl.addEventListener('shown.bs.modal', () => {
-    modalEl._opening = false;
-    console.log('✅ Modal de recursos completamente visible (shown.bs.modal)');
-    recognitionGlobalPaused = false;
+  // asegurar estado visual inicial de tabs/panels
+  try {
+    const tabEPP = document.getElementById('tab-epp-step');
+    const tabHerr = document.getElementById('tab-herramientas-step');
+    const panelEPP = document.getElementById('panel-epp-step');
+    const panelHerr = document.getElementById('panel-herramientas-step');
 
-    // 🧠 Reconocimiento local dedicado mientras el modal está abierto
-    try {
-      if ('webkitSpeechRecognition' in window) {
-        const recog = new webkitSpeechRecognition();
-        recog.lang = 'es-ES';
-        recog.continuous = true;
-        recog.interimResults = false;
+    if (tabEPP) { tabEPP.classList.add('active'); tabEPP.setAttribute('aria-selected','true'); }
+    if (tabHerr) { tabHerr.classList.remove('active'); tabHerr.setAttribute('aria-selected','false'); }
+    if (panelEPP) { panelEPP.classList.add('show','active'); }
+    if (panelHerr) { panelHerr.classList.remove('show','active'); }
 
-        recog.onresult = function (event) {
-          const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
-          const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-          console.log('🎤 Texto reconocido (modal recursos):', limpio);
+    // Renderizar contenidos si ya están cargados
+    if (window.recursosEPP) renderTablaRecursosStep('tablaEPP-step', window.recursosEPP, window.paginaEPPActual || 1, 'paginadorEPP-step');
+    else document.getElementById('tablaEPP-step').innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
 
-          if (/\b(cerrar|cerrar recursos|cerrar modal)\b/.test(limpio)) {
-            bootstrap.Modal.getInstance(modalEl)?.hide();
-            getRenderer('mostrarMensajeKiosco')('Modal cerrado por voz', 'info');
-            return;
-          }
+    if (window.recursosHerramientas) renderTablaRecursosStep('tablaHerramientas-step', window.recursosHerramientas, window.paginaHerramientasActual || 1, 'paginadorHerramientas-step');
+  } catch (e) { console.warn('abrirStepRecursos: preparar UI falló', e); }
 
-          const tabCambio = matchTabCambio(limpio);
-          if (tabCambio === 'epp') {
-            document.getElementById('tab-epp')?.click();
-            getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
-            return;
-          }
-          if (tabCambio === 'herramientas') {
-            document.getElementById('tab-herramientas')?.click();
-            getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
-            return;
-          }
-
-          const match = limpio.match(/opcion\s*(\d{1,2})/i);
-          if (match) {
-            const index = parseInt(match[1], 10);
-            confirmarDevolucionPorVoz(index);
-            return;
-          }
-        };
-
-        recog.onerror = function (e) {
-          console.warn('Reconocimiento modal recursos falló', e);
-        };
-
-        modalEl._recogInstance = recog;
-        recog.start();
-        console.log('🎤 Reconocimiento local (modal recursos) iniciado');
+  // listeners idempotentes
+  try {
+      const btnVolver = document.getElementById('btnVolverStepRecursos');
+      if (btnVolver && !btnVolver._connected) {
+        btnVolver.addEventListener('click', () => {
+          recognitionGlobalPaused = false;
+          safeStartRecognitionGlobal();
+          nextStep(2);
+        });
+        btnVolver._connected = true;
       }
-    } catch (e) {
-      console.warn('No se pudo iniciar reconocimiento local en modal recursos', e);
+
+
+    const tabEPPBtn = document.getElementById('tab-epp-step');
+    const tabHerrBtn = document.getElementById('tab-herramientas-step');
+    if (tabEPPBtn && !tabEPPBtn._connected) {
+      tabEPPBtn.addEventListener('click', () => {
+        document.getElementById('panel-epp-step')?.classList.add('show','active');
+        document.getElementById('panel-herramientas-step')?.classList.remove('show','active');
+        tabEPPBtn.classList.add('active'); tabEPPBtn.setAttribute('aria-selected','true');
+        tabHerrBtn.classList.remove('active'); tabHerrBtn.setAttribute('aria-selected','false');
+        safeStartRecognitionGlobal();
+      });
+      tabEPPBtn._connected = true;
     }
+    if (tabHerrBtn && !tabHerrBtn._connected) {
+      tabHerrBtn.addEventListener('click', () => {
+        document.getElementById('panel-herramientas-step')?.classList.add('show','active');
+        document.getElementById('panel-epp-step')?.classList.remove('show','active');
+        tabHerrBtn.classList.add('active'); tabHerrBtn.setAttribute('aria-selected','true');
+        tabEPPBtn.classList.remove('active'); tabEPPBtn.setAttribute('aria-selected','false');
+        safeStartRecognitionGlobal();
+      });
+      tabHerrBtn._connected = true;
+    }
+  } catch (e) { console.warn('abrirStepRecursos: conectar listeners falló', e); }
 
-    setTimeout(() => {
-      safeStartRecognitionGlobal();
-      console.log('🎤 safeStartRecognitionGlobal llamado desde shown.bs.modal (modal recursos)');
-    }, 120);
-  }, { once: true });
-
-  modalEl.addEventListener('hidden.bs.modal', function onHiddenRecursos() {
-    modalEl.removeEventListener('hidden.bs.modal', onHiddenRecursos);
-    modalEl._opening = false;
-    recognitionGlobalPaused = false;
-
-    try {
-      const recog = modalEl._recogInstance;
-      if (recog) {
-        recog.onresult = null;
-        recog.onerror = null;
-        recog.stop();
+  // reconocimiento local para step10 (gestiona comandos de cambio de tab, opción N y paginación)
+  try {
+    const stepRec = stepEl;
+    if ('webkitSpeechRecognition' in window) {
+      if (stepRec._recogInstance) {
+        try { stepRec._recogInstance.onresult = null; stepRec._recogInstance.onerror = null; stepRec._recogInstance.stop(); } catch(e) {}
+        stepRec._recogInstance = null;
       }
-    } catch (e) {}
-    modalEl._recogInstance = null;
+      const recog = new webkitSpeechRecognition();
+      recog.lang = 'es-ES';
+      recog.continuous = true;
+      recog.interimResults = false;
 
-    setTimeout(() => {
-      safeStartRecognitionGlobal();
-      console.log('🎤 safeStartRecognitionGlobal llamado tras cerrar modal recursos');
-    }, 120);
-  }, { once: true });
+      recog.onresult = function(event) {
+        const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+        const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
+        // cerrar / volver
+        if (/\b(cerrar|cerrar recursos asignados|cerrar pantalla|cerrar modal)\b/.test(limpio)) {
+          try { recognitionGlobalPaused = false; safeStartRecognitionGlobal(); } catch(e) {}
+          nextStep(2);
+          getRenderer('mostrarMensajeKiosco')('Pantalla cerrada por voz', 'info');
+          return;
+        }
+        // tabs
+        const tabCambio = matchTabCambio(limpio);
+        if (tabCambio === 'epp') { document.getElementById('tab-epp-step')?.click(); getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP','success'); return; }
+        if (tabCambio === 'herramientas') { document.getElementById('tab-herramientas-step')?.click(); getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas','success'); return; }
+        // opcion N
+        const match = limpio.match(/opcion\s*(\d{1,2})/i);
+        if (match) { confirmarDevolucionPorVozStep10(parseInt(match[1],10)); return; }
+        // pagina N
+        const mp = limpio.match(/^pagina\s*(\d{1,2})$/i);
+        if (mp) { handleStep10Pagina(parseInt(mp[1],10)); return; }
+      };
 
-  const tabBtn = document.getElementById('tab-epp');
-  if (tabBtn && window.bootstrap && bootstrap.Tab) {
-    try { new bootstrap.Tab(tabBtn).show(); } catch (e) { console.warn('abrirModalRecursos: error al activar tab-epp', e); }
+      recog.onerror = function (e) {
+  console.warn('Reconocimiento stepRecursos falló', e);
+  try {
+    recog.stop();
+    stepRec._recogInstance = null;
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal(); // reactiva el global si el local falló
+    console.log('🎤 Reconocimiento global reactivado tras fallo en stepRecursos');
+  } catch (err) {
+    console.warn('No se pudo reiniciar reconocimiento global tras error local', err);
   }
-
-  const panelEPP = document.getElementById('panel-epp');
-  const panelHerr = document.getElementById('panel-herramientas');
-  const tabEPP = document.getElementById('tab-epp');
-  const tabHerr = document.getElementById('tab-herramientas');
-
-  if (tabEPP?.classList) {
-    tabEPP.classList.add('active');
-    tabEPP.setAttribute('aria-selected', 'true');
-  }
-  if (tabHerr?.classList) {
-    tabHerr.classList.remove('active');
-    tabHerr.setAttribute('aria-selected', 'false');
-  }
-  if (panelEPP?.classList) panelEPP.classList.add('show', 'active');
-  if (panelHerr?.classList) panelHerr.classList.remove('show', 'active');
-
-  if (window.recursosEPP && document.getElementById('tablaEPP')) {
-    try {
-      renderTablaRecursos('tablaEPP', window.recursosEPP || [], window.paginaEPPActual || 1, 'paginadorEPP');
-      console.log('abrirModalRecursos: renderTablaRecursos tablaEPP ejecutado');
-    } catch (e) {
-      console.warn('abrirModalRecursos: error al renderizar tablaEPP', e);
+};
+      stepRec._recogInstance = recog;
+      try { recog.start(); console.log('🎤 reconocimiento local (stepRecursos) iniciado'); } catch(e) { console.warn('abrirStepRecursos recog.start falló', e); }
     }
-  } else {
-    const tabla = document.getElementById('tablaEPP');
-    const paginador = document.getElementById('paginadorEPP');
-    if (tabla) tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
-    if (paginador) paginador.innerHTML = '';
-  }
+  } catch (e) { console.warn('abrirStepRecursos: start local recog failed', e); }
+
+  stepEl._opening = false;
 }
+
+function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId) {
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderTablaRecursosStep: safeStop failed', e); }
+
+  const tabla = document.getElementById(tablaId);
+  const paginador = document.getElementById(paginadorId);
+  if (!tabla || !paginador) {
+    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+    return;
+  }
+
+  const porPagina = 5;
+  const totalPaginas = Math.max(1, Math.ceil((recursos||[]).length / porPagina));
+  const inicio = (pagina - 1) * porPagina;
+  const visibles = (recursos||[]).slice(inicio, inicio + porPagina);
+
+  tabla.innerHTML = '';
+  if (visibles.length === 0) {
+    tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
+    paginador.innerHTML = '';
+    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+    return;
+  }
+
+  visibles.forEach((r, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm btn-primary';
+    btn.dataset.detalleId = r.detalle_id;
+    btn.dataset.serie = r.serie || '';
+    btn.dataset.recurso = r.recurso || '';
+    btn.dataset.opcionIndex = index + 1;
+    btn.innerHTML = `Opción ${index + 1}`;
+    btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id);
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${r.subcategoria || '-'} / ${r.recurso || '-'}</td>
+      <td>${r.serie || '-'}</td>
+      <td>${r.fecha_prestamo || '-'}</td>
+      <td>${r.fecha_devolucion || '-'}</td>
+      <td></td>
+    `;
+    row.children[4].appendChild(btn);
+    tabla.appendChild(row);
+  });
+
+  // paginador
+  paginador.innerHTML = '';
+  for (let i = 1; i <= totalPaginas; i++) {
+    const b = document.createElement('button');
+    b.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+    b.textContent = `Pagina ${i}`;
+    b.onclick = () => { try { safeStopRecognitionGlobal(); } catch(e){}; setTimeout(() => renderTablaRecursosStep(tablaId, recursos, i, paginadorId), 60); };
+    paginador.appendChild(b);
+  }
+
+  if (tablaId === 'tablaEPP-step') window.paginaEPPActual = pagina;
+  if (tablaId === 'tablaHerramientas-step') window.paginaHerramientasActual = pagina;
+
+  try { setTimeout(() => { safeStartRecognitionGlobal(); }, 80); } catch (e) {}
+}
+
+function confirmarDevolucionPorVozStep10(index) {
+  console.log(`🎤 confirmarDevolucionPorVozStep10: opción ${index}`);
+
+  const botonesEPP = document.querySelectorAll('#tablaEPP-step button');
+  const botonesHerr = document.querySelectorAll('#tablaHerramientas-step button');
+
+  const eppActivo = document.getElementById('tab-epp-step')?.classList.contains('active');
+  const herrActivo = document.getElementById('tab-herramientas-step')?.classList.contains('active');
+
+  let btn = null;
+  if (eppActivo) btn = document.querySelector(`#tablaEPP-step button[data-opcion-index="${index}"]`) || Array.from(botonesEPP)[index-1];
+  else if (herrActivo) btn = document.querySelector(`#tablaHerramientas-step button[data-opcion-index="${index}"]`) || Array.from(botonesHerr)[index-1];
+  else btn = document.querySelector(`#tablaEPP-step button[data-opcion-index="${index}"]`) || document.querySelector(`#tablaHerramientas-step button[data-opcion-index="${index}"]`);
+
+  if (!btn) {
+    getRenderer('mostrarMensajeKiosco')(`No se encontró la opción ${index}. Verificá que esté visible.`, 'warning');
+    return;
+  }
+
+  const detalleId = btn.dataset.detalleId;
+  const serie = btn.dataset.serie || '';
+  console.log(`➡️ confirmarDevolucionPorVozStep10: detalleId=${detalleId}, serie=${serie}`);
+
+  window._modalConfirmedByVoice = true;
+  try { safeStopRecognitionGlobal(); } catch (e) {}
+  mostrarStepDevolucionQR(serie, detalleId);
+}
+
+function handleStep10Pagina(numero) {
+  if (!Number.isFinite(numero) || numero < 1) {
+    getRenderer('mostrarMensajeKiosco')('Número de página no reconocido', 'warning');
+    return;
+  }
+  const eppActivo = document.getElementById('tab-epp-step')?.classList.contains('active');
+  const herrActivo = document.getElementById('tab-herramientas-step')?.classList.contains('active');
+
+  if (eppActivo) {
+    const total = Math.max(1, Math.ceil((window.recursosEPP?.length || 0) / 5));
+    if (numero > total) { getRenderer('mostrarMensajeKiosco')('Número de página inválido', 'warning'); return; }
+    renderTablaRecursosStep('tablaEPP-step', window.recursosEPP || [], numero, 'paginadorEPP-step');
+    return;
+  }
+
+  if (herrActivo) {
+    const total = Math.max(1, Math.ceil((window.recursosHerramientas?.length || 0) / 5));
+    if (numero > total) { getRenderer('mostrarMensajeKiosco')('Número de página inválido', 'warning'); return; }
+    renderTablaRecursosStep('tablaHerramientas-step', window.recursosHerramientas || [], numero, 'paginadorHerramientas-step');
+    return;
+  }
+
+  getRenderer('mostrarMensajeKiosco')('No se detectó el tab activo', 'warning');
+}
+
+
+
 
 // 🔧 Normalizar texto (quita acentos)
 function normalizarTexto(str) {
@@ -3355,572 +3536,347 @@ function parsearDNIPorBloques(texto) {
   return /^\d{7,9}$/.test(resultado) ? resultado : '';
 }
 
-function procesarComandoVoz(limpio) {
-  const step = getStepActivo();
+function procesarComandoVoz(rawTexto) {
+  try {
+    if (!rawTexto && typeof rawTexto !== 'string') return;
+    const texto = String(rawTexto || '').toLowerCase().trim();
+    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
+    console.log("👉 Reconocido (raw):", rawTexto, "| normalizado:", limpio, "| Step activo:", getStepActivo());
 
-  // 🛑 Si el kiosco está en modo modalKioscoActivo, no procesamos comandos
-if (window.modalKioscoActivo) {
-  if (matchCerrar(limpio) || limpio.includes('entendido') || limpio.includes('cerrar mensaje')) {
-    console.log('🎤 Cierre por voz del modal kiosco:', limpio);
-    cerrarModalKiosco();
-  } else {
-    console.log('🚫 Comando bloqueado por modal kiosco activo:', limpio);
-  }
-  return;
-}
-
-
-
-// 🧰 Cierre por voz del modal de error QR
-const modalErrorQR = document.getElementById('modalErrorQR');
-const modalErrorVisible = modalErrorQR && modalErrorQR.classList.contains('show');
-
-if (modalErrorVisible) {
-  if (/\b(cerrar|cerrar error|cerrar modal|cerrar qr)\b/.test(limpio)) {
-    console.log('🎤 Comando de voz: cerrar modal error QR');
-    cerrarModalErrorQR();
-    return;
-  }
-
-  // Si el modal está abierto, no procesamos otros comandos
-  console.log('⚠️ Modal de error QR abierto, comando ignorado:', limpio);
-  return;
-}
-
-
-  // 🧰 Cierre por voz del modal de recursos asignados
-const modalRecursos = document.getElementById('modalRecursos');
-const modalVisible = modalRecursos && modalRecursos.classList.contains('show');
-
-if (modalVisible) {
-  if (/\b(cerrar|cerrar recursos asignados|cerrar modal)\b/.test(limpio)) {
-    console.log('🎤 Comando de voz: cerrar modal recursos asignados');
-    const modalInstance = bootstrap.Modal.getInstance(modalRecursos);
-    if (modalInstance) {
-      modalInstance.hide();
-      getRenderer('mostrarMensajeKiosco')('Modal cerrado por voz', 'info');
-    }
-    return;
-  }
-
-  // dentro de `if (modalVisible) { ... }` justo después del cierre por voz
-const tabPorModal = matchTabCambio(limpio);
-if (tabPorModal === 'epp') {
-  const tabBtn = document.getElementById('tab-epp');
-  if (tabBtn) new bootstrap.Tab(tabBtn).show();
-  getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
-  return;
-}
-if (tabPorModal === 'herramientas') {
-  const tabBtn = document.getElementById('tab-herramientas');
-  if (tabBtn) new bootstrap.Tab(tabBtn).show();
-  getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
-  return;
-}
-
-  // ⚠️ Si el modal está abierto pero el comando no fue "cerrar", seguimos evaluando el resto
-}
-
-
-  console.log("👉 Texto reconocido (normalizado):", limpio, " | Step activo:", step);
-
-  if (recognitionGlobalPaused) {
-    console.log('⚠️ Reconocimiento global pausado, ignorando comando:', limpio);
-    return;
-  }
-
-  // Compruebo que el usuario haya iniciado sesion (que no este en step1)
-  if (step !== 'step1') {
-    if (limpio === 'cerrar sesion') {
-      console.log('🔐 Comando de voz exacto detectado: cerrar sesion');
-      mostrarModalCerrarSesion();
+    // Si el kiosco está mostrando un modal kiosco forzado, priorizamos su cierre por voz
+    if (window.modalKioscoActivo) {
+      if (matchCerrar(limpio) || limpio.includes('entendido') || limpio.includes('cerrar mensaje')) {
+        console.log('🎤 Cierre por voz del modal kiosco:', limpio);
+        cerrarModalKiosco();
+      } else {
+        console.log('🚫 Comando bloqueado por modal kiosco activo:', limpio);
+      }
       return;
     }
 
-    // Compruebo que el usuario no este en el menu principal (step2)
-    if (step !== 'step2') {
-      if (limpio === 'menu principal') {
-        console.log('📋 Comando de voz exacto detectado: menu principal');
-        try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ menu principal: safeStop falló', e); }
-        try {
-          window.nextStep && window.nextStep(2);
-          try { cargarMenuPrincipal && cargarMenuPrincipal(); } catch (e) {}
-          console.log('➡️ Navegando a step2 (¿Qué querés hacer?) por comando de voz "menu principal"');
-        } catch (e) { console.warn('⚠️ menu principal: nextStep(2) falló', e); }
-        try { setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 recognitionGlobal: intento reinicio tras menu principal (voz)'); }, 120); } catch(e){}
+    // Si hay modal de error QR visible priorizamos su cierre
+    const modalErrorQR = document.getElementById('modalErrorQR');
+    const modalErrorVisible = modalErrorQR && modalErrorQR.classList.contains('show');
+    if (modalErrorVisible) {
+      if (/\b(cerrar|cerrar error|cerrar modal|cerrar qr)\b/.test(limpio)) {
+        console.log('🎤 Comando de voz: cerrar modal error QR');
+        cerrarModalErrorQR();
+      } else {
+        console.log('⚠️ Modal de error QR abierto, comando ignorado:', limpio);
+      }
+      return;
+    }
+
+    const step = getStepActivo();
+
+
+        if (/\b(cerrar sesión|cerrar sesion)\b/.test(limpio)) {
+          console.log('🔐 Comando de voz detectado: cerrar sesión');
+          mostrarModalCerrarSesion(); // tu función actual para abrir el modal
+          return;
+        }
+
+        if (/\b(menu principal)\b/.test(limpio)) {
+        recognitionGlobalPaused = false;
+        safeStartRecognitionGlobal();
+        nextStep(2);
+        getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
         return;
       }
-    }
-  }
 
-  // === Step1: Login ===
-  if (step === 'step1') {
+    // Si estamos en step10 (pantalla de recursos asignados) manejamos comandos allí
+    if (step === 'step10') {
 
-  if (!modalVisible && /^\d/.test(limpio)) {
-    procesarDNIporVoz(limpio);
-    return;
-  }
-
-
-  
-  if (/\b(borrar|borrar dni|borrar todo)\b/.test(limpio)) {
-    const dniInput = document.getElementById('dni');
-    if (dniInput) {
-      dniInput.value = '';
-      dniInput.focus();
-      getRenderer('mostrarMensajeKiosco')('🧹 DNI borrado por voz', 'info');
-    }
-    return;
-  }
-
-  if (/\b(continuar|aceptar|ingresar|confirmar)\b/.test(limpio)) {
-    console.log('🎤 Comando de voz: Continuar login');
-    identificarTrabajador();
-    return;
-  }
-}
-
-
-
-  // === Step2: Menú principal y modal recursos ===
-  if (step === 'step2') {
-    limpio = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
-
-    const modalEl = document.getElementById('modalRecursos');
-    const modalAbierto = modalEl && modalEl.classList.contains('show');
-
-    // ✅ Comando de devolución por voz dentro del modal
-    if (modalAbierto) {
-      const matchOpcionNum = limpio.match(/^(devolver\s*)?opcion\s*(\d{1,2})$/i);
-      if (matchOpcionNum) {
-        const index = parseInt(matchOpcionNum[2], 10);
-        console.log(`🎤 Comando de devolución por voz detectado: opción ${index}`);
-        confirmarDevolucionPorVoz(index);
-        return;
-      }
+      if (esComandoVolver(limpio) || /\b(volver)\b/.test(limpio)) {
+      recognitionGlobalPaused = false;
+      safeStartRecognitionGlobal();
+      nextStep(2);
+      getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
+      return;
     }
 
-    // ✅ Comandos de cambio de tab por voz (funcionan dentro y fuera del modal)
-  // Cambio de tabs más permisivo
-  if (modalVisible) {
-    const tabDeseada = matchTabCambio(limpio);
-    if (tabDeseada === 'epp') {
-      const tabBtn = document.getElementById('tab-epp');
-      if (tabBtn) {
-        try { new bootstrap.Tab(tabBtn).show(); } catch (e) { console.warn('show tab-epp failed', e); }
+
+      // cambio de tab por voz
+      const tabPorStep = matchTabCambio(limpio);
+      if (tabPorStep === 'epp') {
+        document.getElementById('tab-epp-step')?.click();
         getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
+        return;
       }
-      return;
-    }
-    if (tabDeseada === 'herramientas') {
-      const tabBtn = document.getElementById('tab-herramientas');
-      if (tabBtn) {
-        try { new bootstrap.Tab(tabBtn).show(); } catch (e) { console.warn('show tab-herramientas failed', e); }
+      if (tabPorStep === 'herramientas') {
+        document.getElementById('tab-herramientas-step')?.click();
         getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
+        return;
       }
+
+      // Devolución por voz: "opcion N"
+      const mOp = limpio.match(/opcion\s*(\d{1,2})/i);
+      if (mOp) {
+        const index = parseInt(mOp[1], 10);
+        if (!isNaN(index)) {
+          confirmarDevolucionPorVozStep10(index);
+        } else {
+          getRenderer('mostrarMensajeKiosco')('Opción no reconocida', 'warning');
+        }
+        return;
+      }
+
+      // Paginación "pagina N"
+      const mp = limpio.match(/^pagina\s*(\d{1,2})$/i);
+      if (mp) {
+        const numero = parseInt(mp[1], 10);
+        if (!isNaN(numero)) handleStep10Pagina(numero);
+        else getRenderer('mostrarMensajeKiosco')('Número de página no reconocido', 'warning');
+        return;
+      }
+
+      console.log('⚠️ step10: comando no reconocido', limpio);
       return;
     }
-  }
 
+    // Comandos globales cuando no estamos bloqueados por modales ni step10
+    if (recognitionGlobalPaused) {
+      console.log('⚠️ Reconocimiento global pausado, ignorando comando:', limpio);
+      return;
+    }
 
+    
 
-    // ✅ Comandos del menú principal (solo si el modal NO está abierto)
-    if (!modalAbierto) {
-      if (matchOpcion(limpio, 1, "herramienta en mano")) {
+    // === Step1: Login ===
+    if (step === 'step1') {
+      if (!/^[a-zA-Z]/.test(limpio) && /^\d/.test(limpio)) {
+        // DNI dictado por bloques
+        procesarDNIporVoz(limpio);
+        return;
+      }
+
+      if (/\b(borrar|borrar dni|borrar todo)\b/.test(limpio)) {
+        const dniInput = document.getElementById('dni');
+        if (dniInput) { dniInput.value = ''; dniInput.focus(); getRenderer('mostrarMensajeKiosco')('🧹 DNI borrado por voz', 'info'); }
+        return;
+      }
+
+      if (/\b(continuar|aceptar|ingresar|confirmar)\b/.test(limpio)) {
+        console.log('🎤 Comando de voz: Continuar login');
+        identificarTrabajador();
+        return;
+      }
+    }
+
+    // === Step2: Menú principal y navegación ===
+    if (step === 'step2') {
+      // normalizar repeticiones
+      const textoSimple = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
+
+      // Si modalRecursos estuviera abierto (en el viejo enfoque) no lo procesamos aquí,
+      // pero ahora preferimos abrir step10 desde menú con la opción correspondiente.
+      if (matchOpcion(textoSimple, 1, "herramienta en mano")) {
         window.mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
         setModoEscaneo('manual');
         return;
       }
 
-      if (matchOpcion(limpio, 2, "solicitar herramienta", "quiero solicitar", "pedir herramienta")) {
+      if (matchOpcion(textoSimple, 2, "solicitar herramienta", "quiero solicitar", "pedir herramienta")) {
         window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
         step5ReturnTarget = 2;
         window.nextStep(5);
         return;
       }
 
-      if (matchOpcion(limpio, 3, "ver recursos", "recursos asignados", "mostrar recursos")) {
+      if (matchOpcion(textoSimple, 3, "ver recursos", "recursos asignados", "mostrar recursos")) {
         window.mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
-        window.cargarRecursos().then(() => abrirModalRecursos());
+        window.cargarRecursos().then(() => abrirStepRecursos());
         return;
       }
 
-      if (matchOpcion(limpio, 4, "volver", "inicio", "regresar", "atrás", "cerrar")) {
+      if (matchOpcion(textoSimple, 4, "volver", "inicio", "regresar", "atrás", "cerrar")) {
         window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
         volverAInicio();
         return;
       }
-    }
 
-    // ✅ Paginación específica por tab
-    const matchPaginaEPP = limpio.match(/^pagina\s*epp\s*(\d{1,2})$/i);
-    const matchPaginaHerr = limpio.match(/^pagina\s*herramientas\s*(\d{1,2})$/i);
-
-    if (matchPaginaEPP) {
-      const numero = parseInt(matchPaginaEPP[1], 10);
-      const total = Math.ceil((window.recursosEPP?.length || 0) / 5);
-      if (numero >= 1 && numero <= total) {
-        renderTablaRecursos('tablaEPP', window.recursosEPP, numero, 'paginadorEPP');
-      } else {
-        window.mostrarMensajeKiosco('Número de página inválido para EPP', 'warning');
-      }
-      return;
-    }
-
-    if (matchPaginaHerr) {
-      const numero = parseInt(matchPaginaHerr[1], 10);
-      const total = Math.ceil((window.recursosHerramientas?.length || 0) / 5);
-      if (numero >= 1 && numero <= total) {
-        renderTablaRecursos('tablaHerramientas', window.recursosHerramientas, numero, 'paginadorHerramientas');
-      } else {
-        window.mostrarMensajeKiosco('Número de página inválido para herramientas', 'warning');
-      }
-      return;
-    }
-
-    // ✅ Paginación genérica según tab activo
-    const matchPaginaGen = limpio.match(/^pagina\s*(\d{1,2})$/i);
-    if (matchPaginaGen) {
-      const numero = parseInt(matchPaginaGen[1], 10);
-      const eppActivo = document.getElementById('tab-epp')?.getAttribute('aria-selected') === 'true';
-      const herrActivo = document.getElementById('tab-herramientas')?.getAttribute('aria-selected') === 'true';
-
-      if (eppActivo) {
+      // paginación por tab si corresponde (comandos "pagina EPP 2", etc.)
+      const matchPaginaEPP = textoSimple.match(/^pagina\s*epp\s*(\d{1,2})$/i);
+      const matchPaginaHerr = textoSimple.match(/^pagina\s*herramientas\s*(\d{1,2})$/i);
+      if (matchPaginaEPP) {
+        const numero = parseInt(matchPaginaEPP[1], 10);
         const total = Math.ceil((window.recursosEPP?.length || 0) / 5);
-        if (numero >= 1 && numero <= total) {
-          renderTablaRecursos('tablaEPP', window.recursosEPP, numero, 'paginadorEPP');
-        } else {
-          window.mostrarMensajeKiosco('Número de página inválido para EPP', 'warning');
-        }
+        if (numero >= 1 && numero <= total) renderTablaRecursos('tablaEPP', window.recursosEPP, numero, 'paginadorEPP');
+        else window.mostrarMensajeKiosco('Número de página inválido para EPP', 'warning');
         return;
       }
-
-      if (herrActivo) {
+      if (matchPaginaHerr) {
+        const numero = parseInt(matchPaginaHerr[1], 10);
         const total = Math.ceil((window.recursosHerramientas?.length || 0) / 5);
-        if (numero >= 1 && numero <= total) {
-          renderTablaRecursos('tablaHerramientas', window.recursosHerramientas, numero, 'paginadorHerramientas');
-        } else {
-          window.mostrarMensajeKiosco('Número de página inválido para herramientas', 'warning');
+        if (numero >= 1 && numero <= total) renderTablaRecursos('tablaHerramientas', window.recursosHerramientas, numero, 'paginadorHerramientas');
+        else window.mostrarMensajeKiosco('Número de página inválido para herramientas', 'warning');
+        return;
+      }
+
+      console.log("⚠️ Step2: No se reconoció comando válido");
+      return;
+    }
+
+    // === Step3: Escaneo QR ===
+    if (step === 'step3') {
+      if (matchOpcion(limpio, 1, "qr", "escanear")) {
+        window.mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
+        activarEscaneoQRregistroRecursos();
+        return;
+      }
+      if (limpio.includes("cancelar")) {
+        window.mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
+        cancelarEscaneoQRregistroRecursos();
+        return;
+      }
+      if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
+        window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
+        step5ReturnTarget = 3;
+        detenerEscaneoQRregistroRecursos(5);
+        return;
+      }
+      if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
+        window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
+        detenerEscaneoQRregistroRecursos(2);
+        return;
+      }
+      console.log("⚠️ Step3: No se reconoció ningún comando válido");
+      return;
+    }
+
+    // === Step5, Step6, Step7, Step8 handling (botones + paginación) ===
+    // Delegamos a bloques ya implementados en tu código original
+    if (step === 'step5') {
+      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
+        window.mostrarMensajeKiosco(step5ReturnTarget === 3 ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"' : '🎤 Comando reconocido: Volver al menú principal', 'success');
+        window.nextStep(step5ReturnTarget);
+        return;
+      }
+      const botonesCat = document.querySelectorAll('#categoria-buttons button');
+      for (let i = 0; i < botonesCat.length; i++) {
+        const btn = botonesCat[i];
+        if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) { btn.click(); return; }
+      }
+      console.log("⚠️ Step5: Procesada entrada (si hubo coincidencias)");
+      return;
+    }
+
+    if (step === 'step6') {
+      const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+      if (matchPaginaSub && Array.isArray(window.subcategoriasActuales)) {
+        const token = matchPaginaSub[1];
+        const numero = numeroDesdeToken(token);
+        if (!isNaN(numero) && numero >= 1) {
+          const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
+          if (numero > totalPaginas) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+          renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
+          return;
         }
+      }
+      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) { window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success'); window.nextStep(5); return; }
+      const botonesSub = document.querySelectorAll('#subcategoria-buttons button');
+      for (let i = 0; i < botonesSub.length; i++) { const btn = botonesSub[i]; if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) { btn.click(); return; } }
+      console.log("⚠️ Step6: Procesada entrada (si hubo coincidencias)");
+      return;
+    }
+
+    if (step === 'step7') {
+      const matchPaginaRec = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+      if (matchPaginaRec && Array.isArray(window.recursosActuales)) {
+        const token = matchPaginaRec[1];
+        const numero = numeroDesdeToken(token);
+        if (!isNaN(numero) && numero >= 1) {
+          const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
+          if (numero > totalPaginas) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+          renderRecursosPaginados(window.recursosActuales, numero);
+          return;
+        }
+      }
+      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) { window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a subcategorías', 'success'); window.nextStep(6); return; }
+      const botonesRec = document.querySelectorAll('#recurso-buttons button');
+      botonesRec.forEach((btn, index) => { try { if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) { btn.click(); } } catch (e) { console.warn('Error al procesar botón recurso', e); } });
+      console.log("⚠️ Step7: Procesada entrada (si hubo coincidencias)");
+      return;
+    }
+
+    if (step === 'step8') {
+      const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+      if (matchPaginaSer && Array.isArray(window.seriesActuales)) {
+        const token = matchPaginaSer[1];
+        const numero = numeroDesdeToken(token);
+        if (!isNaN(numero) && numero >= 1) {
+          const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
+          if (numero > totalPaginas) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+          renderSeriesPaginadas(window.seriesActuales, numero);
+          return;
+        }
+      }
+      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) { window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success'); window.nextStep(7); return; }
+      const botonesSeries = document.querySelectorAll('#serie-buttons button');
+      botonesSeries.forEach((btn, index) => { try { if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) { btn.click(); } } catch (e) { console.warn('Error al procesar botón serie', e); } });
+      console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
+      return;
+    }
+
+    // === Step9: Devolución por QR ===
+    if (step === 'step9') {
+      if (/\b(confirmar|confirm|aceptar|accept)\b/.test(limpio)) {
+        const btn = document.getElementById('btnConfirmarDevolucion');
+        if (btn && !btn.disabled) { try { btn.click(); } catch(e) { confirmarDevolucionQRActual(); } return; }
+        getRenderer('mostrarMensajeKiosco')('Aún no se detectó un QR válido para confirmar', 'warning');
+        return;
+      }
+      if (esComandoVolver(limpio) || /\b(volver)\b/.test(limpio)) { volverARecursosAsignadosDesdeDevolucionQR(); return; }
+      console.warn('⚠️ step9: comando no reconocido en devoluciones:', limpio);
+      getRenderer('mostrarMensajeKiosco')('No se reconoció el comando. Decí "confirmar" o "volver".', 'info');
+      return;
+    }
+
+    // === Paginación y navegación globales (fallback) ===
+    const matchPaginaAny = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+    if (matchPaginaAny) {
+      const token = matchPaginaAny[1];
+      const numero = numeroDesdeToken(token);
+      if (isNaN(numero) || numero < 1) { window.mostrarMensajeKiosco('Número de página no reconocido', 'warning'); return; }
+
+      if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
+        const total = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
+        if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+        renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
+        return;
+      }
+      if (step === 'step7' && Array.isArray(window.recursosActuales)) {
+        const total = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
+        if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+        renderRecursosPaginados(window.recursosActuales, numero);
+        return;
+      }
+      if (step === 'step8' && Array.isArray(window.seriesActuales)) {
+        const total = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
+        if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+        renderSeriesPaginadas(window.seriesActuales, numero);
         return;
       }
 
-      window.mostrarMensajeKiosco('No se detectó el tab activo', 'warning');
+      console.log('⚠️ matchPaginaAny: comando página detectado pero no aplicable en step', step);
       return;
     }
 
-    console.log("⚠️ Step2: No se reconoció comando válido");
-    return;
-  }
-
-
-  // === Step3: Escaneo QR ===
-  else if (step === 'step3') {
-    if (matchOpcion(limpio, 1, "qr", "escanear")) {
-      window.mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
-      console.log('🎤 Comando reconocido: Escanear QR');
-      activarEscaneoQRregistroRecursos();
-      return;
-    }
-
-    if (limpio.includes("cancelar")) {
-      window.mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
-      console.log('🎤 Comando reconocido: Cancelar escaneo');
-      cancelarEscaneoQRregistroRecursos();
-      return;
-    }
-
-    if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
-      window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
-      console.log('🎤 Comando reconocido: Solicitar manualmente');
-      step5ReturnTarget = 3;
-      detenerEscaneoQRregistroRecursos(5);
-      return;
-    }
-
-    if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
-      window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
-      console.log('🎤 Comando reconocido: Volver al menú principal');
-      detenerEscaneoQRregistroRecursos(2);
-      return;
-    }
-
-    console.log("⚠️ Step3: No se reconoció ningún comando válido");
-    return;
-  }
-
-  // === Step5: Categorías ===
-  else if (step === 'step5') {
-  // ✅ Priorizar comando "volver" antes de evaluar botones
-  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
-    window.mostrarMensajeKiosco(
-      step5ReturnTarget === 3
-        ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"'
-        : '🎤 Comando reconocido: Volver al menú principal',
-      'success'
-    );
-    window.nextStep(step5ReturnTarget);
-    return;
-  }
-
-  // ✅ Solo si no fue "volver", evaluar botones
-  const botonesCat = document.querySelectorAll('#categoria-buttons button');
-  for (let i = 0; i < botonesCat.length; i++) {
-    const btn = botonesCat[i];
-    if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) {
-      btn.click();
-      return;
-    }
-  }
-
-  console.log("⚠️ Step5: Procesada entrada (si hubo coincidencias)");
-  return;
-}
-
-
-
-  // === Step6: Subcategorías ===
-else if (step === 'step6') {
-  // --- Paginación por voz ---
-  const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
-  if (matchPaginaSub && Array.isArray(window.subcategoriasActuales)) {
-    const token = matchPaginaSub[1];
-    const numero = numeroDesdeToken(token);
-    console.log('🔍 paginación step6 token:', token, '->', numero);
-    if (!isNaN(numero) && numero >= 1) {
-      const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
-      if (numero > totalPaginas) {
-        window.mostrarMensajeKiosco('Número de página inválido', 'warning');
+    // Comando global: cerrar modalRecursos antiguo compat (si sigue existiendo)
+    const modalRec = document.getElementById('modalRecursos');
+    if (modalRec && modalRec.classList.contains('show')) {
+      if (matchOpcion(limpio, 0, "volver", "cerrar", "cerrar recursos")) {
+        console.log("✅ Comando global: Cerrar modal de recursos asignados");
+        try { bootstrap.Modal.getInstance(modalRec)?.hide(); } catch (e) {}
+        window.mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
         return;
       }
-      renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
-      return;
     }
+
+    console.log("⚠️ procesarComandoVoz: comando no reconocido en ningún step");
+  } catch (err) {
+    console.warn('procesarComandoVoz: excepción', err);
   }
-
-  // ✅ Priorizar "volver" antes de evaluar botones
-  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
-    window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success');
-    console.log('🎤 Comando reconocido: Volver a categorías');
-    window.nextStep(5);
-    return;
-  }
-
-  // ✅ Evaluar botones solo si no fue "volver"
-  const botonesSub = document.querySelectorAll('#subcategoria-buttons button');
-  for (let i = 0; i < botonesSub.length; i++) {
-    const btn = botonesSub[i];
-    if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) {
-      btn.click();
-      return;
-    }
-  }
-
-  console.log("⚠️ Step6: Procesada entrada (si hubo coincidencias)");
-  return;
-}
-
-
-// === Step7: Recursos ===
-else if (step === 'step7') {
-  // --- Primer chequeo: paginación por voz en recursos ---
-  const matchPaginaRec = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
-  if (matchPaginaRec && Array.isArray(window.recursosActuales)) {
-    const token = matchPaginaRec[1];
-    const numero = numeroDesdeToken(token);
-    console.log('🔍 paginación step7 token:', token, '->', numero);
-    if (!isNaN(numero) && numero >= 1) {
-      const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
-      if (numero > totalPaginas) {
-        window.mostrarMensajeKiosco('Número de página inválido', 'warning');
-        console.log('⚠ Número de página inválido para recursos', numero, '>', totalPaginas);
-        return;
-      }
-      renderRecursosPaginados(window.recursosActuales, numero);
-      return;
-    }
-  }
-
-  // --- Interceptar "volver" antes de analizar botones por texto ---
-  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
-    window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a subcategorías', 'success');
-    console.log('🎤 Comando reconocido: Volver a subcategorías');
-    window.nextStep(6);
-    return;
-  }
-
-  // --- luego el bucle de botones (selección por opción o por texto) ---
-  const botonesRec = document.querySelectorAll('#recurso-buttons button');
-  botonesRec.forEach((btn, index) => {
-    try {
-      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-        btn.click();
-      }
-    } catch (e) {
-      console.warn('Error al procesar botón recurso', e);
-    }
-  });
-
-  console.log("⚠️ Step7: Procesada entrada (si hubo coincidencias)");
-  return;
-}
-
-// === Step8: Series ===
-else if (step === 'step8') {
-  // --- Primer chequeo: paginación por voz en series ---
-  const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
-  if (matchPaginaSer && Array.isArray(window.seriesActuales)) {
-    const token = matchPaginaSer[1];
-    const numero = numeroDesdeToken(token);
-    console.log('🔍 paginación step8 token:', token, '->', numero);
-    if (!isNaN(numero) && numero >= 1) {
-      const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
-      if (numero > totalPaginas) {
-        window.mostrarMensajeKiosco('Número de página inválido', 'warning');
-        console.log('⚠ Número de página inválido para series', numero, '>', totalPaginas);
-        return;
-      }
-      renderSeriesPaginadas(window.seriesActuales, numero);
-      return;
-    }
-  }
-
-  // --- Interceptar "volver" antes de analizar botones por texto ---
-  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
-    window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success');
-    console.log('🎤 Comando reconocido: Volver a recursos');
-    window.nextStep(7);
-    return;
-  }
-
-  // --- luego el bucle de botones (selección por opción o por texto) ---
-  const botonesSeries = document.querySelectorAll('#serie-buttons button');
-  botonesSeries.forEach((btn, index) => {
-    try {
-      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-        btn.click();
-      }
-    } catch (e) {
-      console.warn('Error al procesar botón serie', e);
-    }
-  });
-
-  console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
-  return;
-}
-
-// Manejo explícito para step9 (Devolución por QR)
-if (step === 'step9') {
-  // Aceptar muchas variantes: "confirmar", "confirmar devolución", "aceptar", "confirm"
-  if (/\b(confirmar|confirm|aceptar|acept)\b/.test(limpio)) {
-    const btn = document.getElementById('btnConfirmarDevolucion');
-    if (btn && !btn.disabled) {
-      console.log('🎤 step9: comando confirmar detectado -> click confirmar');
-      try { btn.click(); } catch(e) { confirmarDevolucionQRActual(); }
-      return;
-    } else {
-      console.log('⚠️ step9: comando confirmar, pero botón deshabilitado');
-      getRenderer('mostrarMensajeKiosco')('Aún no se detectó un QR válido para confirmar', 'warning');
-      return;
-    }
-  }
-
-  // Volver: usar tu helper de tolerancia
-  if (esComandoVolver(limpio) || /\b(volver)\b/.test(limpio)) {
-    console.log('🎤 step9: comando volver detectado -> volverARecursosAsignadosDesdeDevolucionQR');
-    volverARecursosAsignadosDesdeDevolucionQR();
-    return;
-  }
-
-  // si no coincidió en step9, devolvemos control para logs o fallback
-  console.warn('⚠️ step9: comando no reconocido en devoluciones:', limpio);
-  getRenderer('mostrarMensajeKiosco')('No se reconoció el comando. Decí "confirmar" o "volver".', 'info');
-  return;
-}
-
-
-  /*
-
-const mapaNumeros = {
-  uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5,
-  seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10,
-  once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
-  dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20
-};*/
-
-
-  // === Paginación y navegación globales por si modal está abierto ===
-  // Soporta "pagina 3", "pagina tres", "pagina veinte", etc.
-  const matchPaginaAny = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
-  if (matchPaginaAny) {
-  // token puede ser "3" o "tres"
-  let token = matchPaginaAny[1];
-  // convierte token a número soportando dígitos y palabras
-  let numero = numeroDesdeToken(token); // usa helper declarado arriba
-
-  console.log('🔍 matchPaginaAny token:', token, '-> numero:', numero, 'step:', step);
-
-  if (isNaN(numero) || numero < 1) {
-    window.mostrarMensajeKiosco('Número de página no reconocido', 'warning');
-    return;
-  }
-
-  // Subcategorias (step6)
-  if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
-    const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
-    if (numero > totalPaginas) {
-      window.mostrarMensajeKiosco('Número de página inválido', 'warning');
-      console.log('⚠ Número de página inválido para subcategorías', numero, '>', totalPaginas);
-      return;
-    }
-    renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
-    return;
-  }
-
-  // Recursos (step7)
-  if (step === 'step7' && Array.isArray(window.recursosActuales)) {
-    const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
-    if (numero > totalPaginas) {
-      window.mostrarMensajeKiosco('Número de página inválido', 'warning');
-      console.log('⚠ Número de página inválido para recursos', numero, '>', totalPaginas);
-      return;
-    }
-    renderRecursosPaginados(window.recursosActuales, numero);
-    return;
-  }
-
-  // Series (step8)
-  if (step === 'step8' && Array.isArray(window.seriesActuales)) {
-    const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
-    if (numero > totalPaginas) {
-      window.mostrarMensajeKiosco('Número de página inválido', 'warning');
-      console.log('⚠ Número de página inválido para series', numero, '>', totalPaginas);
-      return;
-    }
-    renderSeriesPaginadas(window.seriesActuales, numero);
-    return;
-  }
-
-  // Si no estamos en esos steps, no hacemos nada aquí
-  console.log('⚠️ matchPaginaAny: comando página detectado pero no aplicable en step', step);
-  return;
-}
-
-
-  // === Comando global: cerrar modal de recursos ===
-  const modalEl = document.getElementById('modalRecursos');
-  if (modalEl && modalEl.classList.contains('show')) {
-    if (matchOpcion(limpio, 0, "volver", "cerrar", "cerrar recursos")) {
-      console.log("✅ Comando global: Cerrar modal de recursos asignados");
-      const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-      modalInstance.hide();
-      window.mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
-      return;
-    }
-  }
-
-  // Si llegamos aquí, no hubo comando reconocido
-  console.log("⚠️ procesarComandoVoz: comando no reconocido en ningún step");
 }
 
 if (typeof module !== 'undefined' && module.exports) {
