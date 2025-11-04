@@ -250,6 +250,21 @@ function mostrarModalKiosco(mensaje, tipo = 'danger') {
     console.warn('⚠️ No se pudo abortar recognitionGlobal:', e);
   }
 
+  // Dentro de mostrarModalKiosco, antes de modal.show()
+try {
+  const modalSerie = document.getElementById('modalConfirmarSerie');
+  if (modalSerie && modalSerie.classList.contains('show')) {
+    const instanciaSerie = bootstrap.Modal.getInstance(modalSerie);
+    if (instanciaSerie) {
+      instanciaSerie.hide();
+      console.log('🔁 modalConfirmarSerie cerrado para mostrar mensaje kiosco');
+    }
+  }
+} catch (e) {
+  console.warn('⚠️ No se pudo cerrar modalConfirmarSerie desde mostrarModalKiosco', e);
+}
+
+
   const modal = new bootstrap.Modal(modalEl);
   let modalActionTaken = false;
 
