@@ -176,11 +176,26 @@ public function createConRecurso($id)
             ->with('success', 'SerieRecurso deleted successfully');
     }
 
-    public function qrIndex(): View
+ public function qrIndex(): View
 {
-    $series = SerieRecurso::with('recurso')->orderByDesc('id')->get();
+    $query = request('search');
+
+    $series = SerieRecurso::with('recurso')
+        ->when($query, function ($q) use ($query) {
+            $q->where('nro_serie', 'like', $query . '%'); // ← busca por las iniciales del nro_serie
+        })
+        ->orderByDesc('id')
+        ->paginate(18)
+        ->onEachSide(1)
+        ->withQueryString(); // ← mantiene el ?search en los links de paginación
+
     return view('serie_recurso.qrindex', compact('series'));
 }
+
+
+
+
+
 
 public function exportQrPdf($id)
 {
@@ -220,7 +235,8 @@ public function qrLote()
         });
     }
 
-    $series = $query->orderByDesc('id')->get();
+    $series = $query->orderByDesc('id')->paginate(18)->onEachSide(1)->withQueryString();
+
 
     return view('serie_recurso.qrlote', compact('series'));
 }

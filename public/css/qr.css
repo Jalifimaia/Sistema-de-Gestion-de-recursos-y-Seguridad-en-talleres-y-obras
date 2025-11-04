@@ -1,0 +1,19 @@
+.pagination .page-link {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.25rem;
+  color: #d35400;
+  border-color: #d35400;
+}
+
+.pagination .page-link:hover {
+  background-color: #fbeee0;
+  color: #e67e22;
+  border-color: #e67e22;
+}
+
+.pagination .active .page-link {
+  background-color: #e67e22;
+  border-color: #e67e22;
+  color: #fff;
+}

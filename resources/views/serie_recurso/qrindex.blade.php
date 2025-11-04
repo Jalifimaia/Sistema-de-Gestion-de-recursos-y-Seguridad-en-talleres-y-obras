@@ -6,9 +6,8 @@
 <div class="container py-4">
   <h3 class="mb-4">📦 Series con código QR</h3>
 
-  <div class="mb-3">
-  <input type="text" id="busquedaSerie" class="form-control" placeholder="🔍 Buscar por iniciales del recurso...">
-</div>
+  <!-- 🔍 Buscador en vivo por nro_serie -->
+  <input type="text" id="busquedaSerie" class="form-control mb-3" placeholder="🔍 Buscar por iniciales del número de serie...">
 
   <div class="mb-3 text-end">
     <a href="{{ route('series.qr.lote.pdf') }}" class="btn btn-outline-primary" target="_blank">
@@ -20,28 +19,32 @@
     <div class="alert alert-warning">No hay series registradas.</div>
   @else
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      @foreach($series as $serie)
+      @foreach($series as $serie)   
         <div class="col">
           <div class="card shadow-sm h-100">
             <div class="card-body d-flex flex-column justify-content-between">
               <div>
                 <h5 class="card-title">{{ $serie->nro_serie }}</h5>
                 <p class="card-text">
-                  <strong>Recurso:</strong> {{ $serie->recurso->nombre ?? 'Sin nombre' }}
+                  <strong>Recurso:</strong> {{ $serie->recurso->nombre ?? 'Sin nombre' }}<br>
+                  <strong>Código:</strong> {{ $serie->serie_recurso_codigo ?? '—' }}
                 </p>
+
                 @if($serie->codigo_qr)
                   <div class="text-center mt-3">
-                    {!! QrCode::size(150)->generate($serie->codigo_qr) !!}
+                    {!! QrCode::size(100)->generate($serie->codigo_qr) !!}
                   </div>
                 @endif
               </div>
-              <div class="mt-4 text-center">
-                <button class="btn btn-outline-dark btn-sm me-2 copiar-btn" 
+
+              <div class="mt-4 d-flex justify-content-center flex-wrap gap-2">
+                <button class="btn btn-outline-dark btn-sm copiar-btn" 
                         data-codigo="{{ $serie->codigo_qr }}">
                   📋 Copiar código
                 </button>
 
-                <a href="{{ route('series.qr.pdf', $serie->id) }}" class="btn btn-outline-secondary btn-sm" target="_blank">
+                <a href="{{ route('series.qr.pdf', $serie->id) }}" 
+                   class="btn btn-outline-secondary btn-sm" target="_blank">
                   📄 Exportar PDF
                 </a>
               </div>
@@ -50,9 +53,17 @@
         </div>
       @endforeach
     </div>
+
+    <div class="mt-4 d-flex justify-content-center">
+      {{ $series->links() }}
+    </div>
   @endif
 </div>
 @endsection
+
+@push('styles')
+<link href="{{ asset('css/qr.css') }}" rel="stylesheet">
+@endpush
 
 @push('scripts')
 <script>
@@ -78,7 +89,7 @@
       });
     });
 
-    // Filtro por iniciales del nro_serie
+    // 🔍 Filtro en vivo por iniciales del nro_serie
     const input = document.getElementById('busquedaSerie');
     const tarjetas = document.querySelectorAll('.col');
 
@@ -94,5 +105,3 @@
   });
 </script>
 @endpush
-
-
