@@ -591,9 +591,22 @@ function devolverRecurso(detalleId) {
 
 function confirmarDevolucionPorVoz(index) {
   console.log(`🎤 confirmarDevolucionPorVoz: pedido para opción ${index}`);
+
+  // Limpieza de texto duplicado (por si se aplica antes)
+  if (typeof index === 'string') {
+    index = index.replace(/\b(\w+)\s+\1\b/g, '$1');
+  }
+
+  // Verificar que los botones están renderizados
+  const botones = document.querySelectorAll('#tablaEPP button, #tablaHerramientas button, #contenedorRecursos button');
+  if (botones.length === 0) {
+    console.warn('⚠️ No hay botones renderizados aún, ignorando comando de voz');
+    getRenderer('mostrarMensajeKiosco')('Los recursos aún se están cargando. Intentá de nuevo en unos segundos.', 'warning');
+    return;
+  }
+
   const eppActivo = document.getElementById('tab-epp')?.getAttribute('aria-selected') === 'true';
   const herrActivo = document.getElementById('tab-herramientas')?.getAttribute('aria-selected') === 'true';
-  console.log('🔍 Tabs activo -> EPP:', eppActivo, 'Herr:', herrActivo);
 
   let btn = null;
   if (eppActivo) {
@@ -606,20 +619,18 @@ function confirmarDevolucionPorVoz(index) {
 
   if (!btn) {
     console.warn(`❌ confirmarDevolucionPorVoz: no se encontró botón para opción ${index}`);
-    getRenderer('mostrarMensajeKiosco')(`No se encontró opción ${index}`, 'warning');
+    getRenderer('mostrarMensajeKiosco')(`No se encontró la opción ${index}. Verificá que esté visible.`, 'warning');
     return;
   }
 
   const detalleId = btn.dataset.detalleId;
-  const serie = btn.dataset.serie || ''; // <-- corregido: obtener serie del botón
+  const serie = btn.dataset.serie || '';
   console.log(`➡️ confirmarDevolucionPorVoz: botón encontrado, detalleId=${detalleId}, serie=${serie}`);
 
-  // Abrir modal de confirmación (marcamos que la apertura vino por voz)
   window._modalConfirmedByVoice = true;
-  safeStopRecognitionGlobal(); // pausamos global antes de abrir modal de confirmación
-  console.log('🛑 confirmarDevolucionPorVoz: recognition global pausado, mostrando modal confirmación');
+  safeStopRecognitionGlobal();
+  console.log('🛑 reconocimiento global pausado, mostrando modal confirmación');
 
-  // Mostrar el paso de devolución: pasamos la serie desde el botón
   mostrarStepDevolucionQR(serie, detalleId);
 }
 
@@ -2280,98 +2291,117 @@ function abrirModalRecursos() {
   }
   modalEl._opening = true;
 
-  // Pausar el reconocimiento global de forma segura antes de mostrar el modal
   recognitionGlobalPaused = true;
-  try {
-    safeStopRecognitionGlobal();
-  } catch (e) {
-    console.warn('abrirModalRecursos: error al pausar reconocimiento global', e);
-  }
+  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('abrirModalRecursos: error al pausar reconocimiento global', e); }
   console.log('🛑 Reconocimiento global pausado antes de abrir modal');
 
-  // Obtener o crear instancia y mostrar modal
   const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
   modalInstance.show();
 
-  // Registrar shown.bs.modal para acciones cuando el modal ya está visible
   modalEl.addEventListener('shown.bs.modal', () => {
     modalEl._opening = false;
     console.log('✅ Modal de recursos completamente visible (shown.bs.modal)');
-
-    // Permitir procesamiento de comandos por voz en el modal: levantamos la pausa
     recognitionGlobalPaused = false;
 
-    // Intentar arrancar el recognition global de forma segura para que procesarComandoVoz
-    // reciba comandos mientras el modal está visible. Dejamos un pequeño delay para estabilidad.
+    // 🧠 Reconocimiento local dedicado mientras el modal está abierto
     try {
-      setTimeout(() => {
-        safeStartRecognitionGlobal();
-        console.log('🎤 safeStartRecognitionGlobal llamado desde shown.bs.modal (modal recursos)');
-      }, 120);
+      if ('webkitSpeechRecognition' in window) {
+        const recog = new webkitSpeechRecognition();
+        recog.lang = 'es-ES';
+        recog.continuous = true;
+        recog.interimResults = false;
+
+        recog.onresult = function (event) {
+          const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+          const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
+          console.log('🎤 Texto reconocido (modal recursos):', limpio);
+
+          if (/\b(cerrar|cerrar recursos|cerrar modal)\b/.test(limpio)) {
+            bootstrap.Modal.getInstance(modalEl)?.hide();
+            getRenderer('mostrarMensajeKiosco')('Modal cerrado por voz', 'info');
+            return;
+          }
+
+          const tabCambio = matchTabCambio(limpio);
+          if (tabCambio === 'epp') {
+            document.getElementById('tab-epp')?.click();
+            getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
+            return;
+          }
+          if (tabCambio === 'herramientas') {
+            document.getElementById('tab-herramientas')?.click();
+            getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
+            return;
+          }
+
+          const match = limpio.match(/opcion\s*(\d{1,2})/i);
+          if (match) {
+            const index = parseInt(match[1], 10);
+            confirmarDevolucionPorVoz(index);
+            return;
+          }
+        };
+
+        recog.onerror = function (e) {
+          console.warn('Reconocimiento modal recursos falló', e);
+        };
+
+        modalEl._recogInstance = recog;
+        recog.start();
+        console.log('🎤 Reconocimiento local (modal recursos) iniciado');
+      }
     } catch (e) {
-      console.warn('abrirModalRecursos: no se pudo iniciar recognitionGlobal en shown.bs.modal', e);
+      console.warn('No se pudo iniciar reconocimiento local en modal recursos', e);
     }
+
+    setTimeout(() => {
+      safeStartRecognitionGlobal();
+      console.log('🎤 safeStartRecognitionGlobal llamado desde shown.bs.modal (modal recursos)');
+    }, 120);
   }, { once: true });
 
-  // hidden.bs.modal: limpieza y reactivación segura del reconocimiento global
   modalEl.addEventListener('hidden.bs.modal', function onHiddenRecursos() {
     modalEl.removeEventListener('hidden.bs.modal', onHiddenRecursos);
+    modalEl._opening = false;
+    recognitionGlobalPaused = false;
 
-    // limpieza mínima por seguridad
     try {
       const recog = modalEl._recogInstance;
       if (recog) {
-        try { recog.onresult = null; } catch(e){}
-        try { recog.onerror = null; } catch(e){}
-        try { recog.stop(); } catch(e){}
+        recog.onresult = null;
+        recog.onerror = null;
+        recog.stop();
       }
     } catch (e) {}
     modalEl._recogInstance = null;
 
-    modalEl._opening = false;
-    recognitionGlobalPaused = false;
-
-    // re-activar de forma segura con un pequeño delay
-    try {
-      setTimeout(() => {
-        safeStartRecognitionGlobal();
-        console.log('🎤 safeStartRecognitionGlobal llamado tras cerrar modal recursos');
-      }, 120);
-    } catch (e) {
-      console.warn('abrirModalRecursos hidden: safeStartRecognitionGlobal falló (ignored)', e);
-    }
-
-    recognitionGlobalWasRunning = false;
+    setTimeout(() => {
+      safeStartRecognitionGlobal();
+      console.log('🎤 safeStartRecognitionGlobal llamado tras cerrar modal recursos');
+    }, 120);
   }, { once: true });
 
-  // Forzar activar tab EPP visualmente como comportamiento por defecto
   const tabBtn = document.getElementById('tab-epp');
   if (tabBtn && window.bootstrap && bootstrap.Tab) {
-    try {
-      new bootstrap.Tab(tabBtn).show();
-    } catch (e) {
-      console.warn('abrirModalRecursos: error al activar tab-epp', e);
-    }
+    try { new bootstrap.Tab(tabBtn).show(); } catch (e) { console.warn('abrirModalRecursos: error al activar tab-epp', e); }
   }
 
-  // Actualizar estado visual de tabs/panels (guardas por si no existen)
   const panelEPP = document.getElementById('panel-epp');
   const panelHerr = document.getElementById('panel-herramientas');
   const tabEPP = document.getElementById('tab-epp');
   const tabHerr = document.getElementById('tab-herramientas');
 
-  if (tabEPP && tabEPP.classList) {
+  if (tabEPP?.classList) {
     tabEPP.classList.add('active');
     tabEPP.setAttribute('aria-selected', 'true');
   }
-  if (tabHerr && tabHerr.classList) {
+  if (tabHerr?.classList) {
     tabHerr.classList.remove('active');
     tabHerr.setAttribute('aria-selected', 'false');
   }
-  if (panelEPP && panelEPP.classList) panelEPP.classList.add('show', 'active');
-  if (panelHerr && panelHerr.classList) panelHerr.classList.remove('show', 'active');
+  if (panelEPP?.classList) panelEPP.classList.add('show', 'active');
+  if (panelHerr?.classList) panelHerr.classList.remove('show', 'active');
 
-  // Renderizar tabla EPP si existen recursos y el elemento de tabla está presente
   if (window.recursosEPP && document.getElementById('tablaEPP')) {
     try {
       renderTablaRecursos('tablaEPP', window.recursosEPP || [], window.paginaEPPActual || 1, 'paginadorEPP');
