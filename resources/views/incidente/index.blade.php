@@ -39,7 +39,7 @@
                             <th>Motivo</th>
                             <th>Estado</th>
                             <th>Resolución</th>
-                            <th>Fecha</th>
+                            <th>Fecha del incidente</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -52,10 +52,9 @@
                             <td>{{ $incidente->resolucion ? $incidente->resolucion : 'No hay resolución' }}</td>
                             <td>
                               {{ $incidente->fecha_incidente
-                                  ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
-                                      ->setTimezone('America/Argentina/Buenos_Aires')
-                                      ->format('d/m/Y H:i')
-                                  : '-' }}
+                                ? \Carbon\Carbon::parse($incidente->fecha_incidente, config('app.timezone'))->format('d/m/Y H:i')
+                                : '-' }}
+
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalIncidente{{ $incidente->id }}">
@@ -107,10 +106,9 @@
         <p><strong>Resolución:</strong> {{ $incidente->resolucion ? $incidente->resolucion : 'No hay resolución' }}</p>
         <p><strong>Fecha del incidente:</strong>
         {{ $incidente->fecha_incidente
-            ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
-                ->setTimezone('America/Argentina/Buenos_Aires')
-                ->format('d/m/Y H:i')
-            : '-' }}
+        ? \Carbon\Carbon::parse($incidente->fecha_incidente, config('app.timezone'))->format('d/m/Y H:i')
+        : '-' }}
+
         </p>
 
         <p><strong>Última modificación del incidente:</strong>

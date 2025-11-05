@@ -20,7 +20,7 @@
         @csrf
         @method('PUT')
 
-        <!-- 🧍 Trabajador -->
+        <!-- Trabajador -->
         <div class="card mb-3">
             <div class="card-header bg-primary text-white">Datos del Trabajador</div>
             <div class="card-body">
@@ -42,7 +42,7 @@
             </div>
         </div>
 
-        <!-- 🧰 Recursos asociados -->
+        <!-- Recursos asociados -->
         <div id="recursos-container">
             @foreach($incidente->recursos as $i => $recurso)
             <div class="card mb-3 recurso-block">
@@ -85,7 +85,6 @@
                             <label class="form-label">Estado</label>
 
                             @if(!empty($readonly))
-                              {{-- modo solo lectura: mostrar estado como texto y enviar hidden --}}
                               <input type="text" class="form-control" 
                                      value="{{ $estadosRecurso->firstWhere('id', $recurso->pivot->id_estado)?->nombre_estado ?? ($estados[$recurso->pivot->id_estado] ?? 'Sin estado') }}" readonly>
                               <input type="hidden" name="recursos[{{ $i }}][id_estado]" value="{{ $recurso->pivot->id_estado ?? '' }}">
@@ -123,16 +122,17 @@
         @else
             <select name="id_estado_incidente" id="id_estado_incidente" class="form-select" required>
             @foreach($estados as $estado)
-                @if($estado->nombre_estado !== 'Resuelto')
                 <option value="{{ $estado->id }}" {{ $incidente->id_estado_incidente == $estado->id ? 'selected' : '' }}>
                     {{ $estado->nombre_estado }}
                 </option>
-                @endif
             @endforeach
+            {{-- Agregar opción Resuelto al final (por si no está en $estados) --}}
+            @if(!$estados->firstWhere('nombre_estado', 'Resuelto'))
+              <option value="{{ optional($resueltoEstado)->id }}" {{ $incidente->id_estado_incidente == optional($resueltoEstado)->id ? 'selected' : '' }}>Resuelto</option>
+            @endif
             </select>
         @endif
         </div>
-
 
         <!-- Motivo / Descripción -->
         <div class="mb-3">
@@ -155,16 +155,13 @@
             <input type="text" name="resolucion" id="resolucion" class="form-control" value="{{ $incidente->resolucion }}" readonly >
             <input type="hidden" name="resolucion" value="{{ $incidente->resolucion }}">
             @else
-            <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}" required>
+            <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}" >
             @endif
         </div>
 
-
-        <!-- Fecha del incidente (no editable) -->
+        <!-- Fecha del incidente -->
         <div class="mb-3">
           <label class="form-label">Fecha del incidente</label>
-
-          {{-- input visual no editable --}}
           <input type="text" class="form-control"
             value="{{ $incidente->fecha_incidente
                 ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
@@ -173,14 +170,12 @@
                 : '-' }}"
             readonly>
 
-          {{-- hidden que efectivamente se envía en el form (UTC, formato Y-m-d H:i:s) --}}
           <input type="hidden" name="fecha_incidente"
             value="{{ $incidente->fecha_incidente
                 ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
                     ->format('Y-m-d H:i:s')
                 : '' }}">
         </div>
-
 
         <div class="d-flex justify-content-between">
             @if(empty($readonly))
@@ -191,6 +186,7 @@
     </form>
 </div>
 
+{{-- Modales --}}
 @if(session('success'))
 <!-- Modal de éxito -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -210,52 +206,62 @@
     </div>
   </div>
 </div>
-
 <script>
-    window.addEventListener('DOMContentLoaded', () => {
-        const modal = new bootstrap.Modal(document.getElementById('successModal'));
-        modal.show();
-    });
+  window.addEventListener('DOMContentLoaded', () => {
+    const modal = new bootstrap.Modal(document.getElementById('successModal'));
+    modal.show();
+  });
 </script>
 @endif
 
+<!-- Modal error resolución -->
+<div class="modal fade" id="modalFaltaResolucion" tabindex="-1" aria-labelledby="modalFaltaResolucionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalFaltaResolucionLabel">Falta resolución</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Para marcar el incidente como <strong>Resuelto</strong>, debe ingresar una resolución.
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnCompletarResolucion" class="btn btn-outline-danger" data-bs-dismiss="modal">Completar resolución</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @push('scripts')
 <script>
-  const estadosOriginales = @json(
-    $estados->filter(fn($e) => $e->nombre_estado !== 'Resuelto')
-             ->map(fn($e) => ['id' => $e->id, 'nombre' => $e->nombre_estado])
-             ->values()
-  );
+  // estados originales (sin procesar) y id seleccionado al cargar
+  const estadosOriginales = @json($estados->map(fn($e) => ['id' => $e->id, 'nombre' => $e->nombre_estado]));
   const estadoOriginalSeleccionado = '{{ $incidente->id_estado_incidente }}';
+  const resueltoId = @json(optional($resueltoEstado)->id);
+  const permitidosIds = @json($estadosPermitidos ?? \App\Models\Estado::whereIn('nombre_estado', ['Disponible','Baja'])->pluck('id')->toArray());
 </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // IDs permitidos para cerrar (Disponible, Baja) — se expone desde controller o se calcula aquí
-  const permitidosIds = @json($estadosPermitidos ?? \App\Models\Estado::whereIn('nombre_estado', ['Disponible','Baja'])->pluck('id')->toArray());
-  const resueltoId = @json(optional($resueltoEstado)->id);
-
   const incidenteSelect = document.getElementById('id_estado_incidente');
   const ayudaContainerId = 'mensaje-puede-resolver';
   let ayudaNode = document.getElementById(ayudaContainerId);
-
-  if (!ayudaNode) {
-    // crear contenedor justo después del select (si existe)
-    const cont = incidenteSelect ? incidenteSelect.parentNode : null;
+  if (!ayudaNode && incidenteSelect) {
+    const cont = incidenteSelect.parentNode;
     ayudaNode = document.createElement('div');
     ayudaNode.id = ayudaContainerId;
     ayudaNode.className = 'mt-2';
-    if (cont) cont.appendChild(ayudaNode);
+    cont.appendChild(ayudaNode);
   }
 
   // selects de estado de recursos
-  const estadoSelects = Array.from(document.querySelectorAll('select[name^="recursos"][name$="[id_estado]"].recurso-estado-select'));
+  function getEstadoSelects() {
+    return Array.from(document.querySelectorAll('select[name^="recursos"][name$="[id_estado]"].recurso-estado-select'));
+  }
 
-  // helper para obtener nombre del recurso desde la tarjeta .recurso-block
   function nombreRecursoParaSelect(sel) {
     const card = sel.closest('.recurso-block') || sel.closest('.card') || sel.parentElement;
     if (!card) return 'Recurso';
-    // buscamos el primer input text readonly que no sea hidden
     const nameInput = card.querySelector('input[type="text"][readonly]');
     if (nameInput && nameInput.value) return nameInput.value;
     const header = card.querySelector('.card-header');
@@ -282,10 +288,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  function recalcular() {
+  function calcularBloqueadores() {
     const bloqueadores = [];
-
-    estadoSelects.forEach(sel => {
+    const selects = getEstadoSelects();
+    selects.forEach(sel => {
       const val = sel.value ? String(sel.value) : null;
       if (!val) {
         bloqueadores.push({ nombre: nombreRecursoParaSelect(sel), estadoText: textEstadoSel(sel) });
@@ -295,106 +301,162 @@ document.addEventListener('DOMContentLoaded', function () {
         bloqueadores.push({ nombre: nombreRecursoParaSelect(sel), estadoText: textEstadoSel(sel) });
       }
     });
+    return bloqueadores;
+  }
 
-    
+  function mostrarAyudaYGestionarResuelto() {
+    const bloqueadores = calcularBloqueadores();
+
     if (bloqueadores.length === 0) {
-  ayudaNode.innerHTML = '<div class="text-success"><strong>Resuelto.</strong> Todos los recursos están en estado Disponible o Baja.</div>';
-
-  // Forzar selección de Resuelto
-  if (resueltoId && incidenteSelect) {
-  // Reemplazar todas las opciones por solo "Resuelto"
-  incidenteSelect.innerHTML = '';
-  const opt = document.createElement('option');
-  opt.value = String(resueltoId);
-  opt.textContent = 'Resuelto';
-  opt.selected = true;
-  incidenteSelect.appendChild(opt);
-  incidenteSelect.dispatchEvent(new Event('change', { bubbles: true }));
-}
-
-
-  // Mostrar campo de resolución
-  const resolucionContainer = document.getElementById('resolucion-container');
-  if (resolucionContainer) {
-    resolucionContainer.style.display = '';
+      ayudaNode.innerHTML = '<div class="text-success"><strong>Puede seleccionar resuelto.</strong> Todos los recursos están en estado Disponible o Baja.</div>';
+      enableResueltoOption(true);
+      // mostrar resolucion
+      const resolucionContainer = document.getElementById('resolucion-container');
+      if (resolucionContainer) resolucionContainer.style.display = '';
+    } else {
+      let html = '<div class="text-warning"><strong>Para marcar el incidente como Resuelto, todos los recursos deben estar en estado Disponible o Baja.</strong></div>';
+      html += '<ul class="mt-1 mb-0 small text-danger">';
+      bloqueadores.forEach(b => {
+        html += `<li>${escapeHtml(b.nombre)} — estado actual: ${escapeHtml(b.estadoText)}</li>`;
+      });
+      html += '</ul>';
+      ayudaNode.innerHTML = html;
+      enableResueltoOption(false);
+      const resolucionContainer = document.getElementById('resolucion-container');
+      if (resolucionContainer) resolucionContainer.style.display = 'none';
+    }
   }
 
-} else {
-  // Mostrar advertencia
-  let html = '<div class="text-warning"><strong>Para marcar el incidente como Resuelto, todos los recursos deben estar en estado Disponible o Baja.</strong></div>';
-  html += '<ul class="mt-1 mb-0 small text-danger">';
-  bloqueadores.forEach(b => {
-    html += `<li>${escapeHtml(b.nombre)} — estado actual: ${escapeHtml(b.estadoText)}</li>`;
-  });
-  html += '</ul>';
-  ayudaNode.innerHTML = html;
-
-  // Ocultar opción Resuelto
-  // Restaurar opciones originales (sin "Resuelto")
-if (incidenteSelect) {
-  incidenteSelect.innerHTML = '';
-  estadosOriginales.forEach(e => {
-    const opt = document.createElement('option');
-    opt.value = e.id;
-    opt.textContent = e.nombre;
-    opt.selected = (String(e.id) === incidenteSelect.value);
-    incidenteSelect.appendChild(opt);
-  });
-  incidenteSelect.dispatchEvent(new Event('change', { bubbles: true }));
-}
-
-
-  // Ocultar campo de resolución
-  const resolucionContainer = document.getElementById('resolucion-container');
-  if (resolucionContainer) {
-    resolucionContainer.style.display = 'none';
-  }
-}
-
-
-    if (incidenteSelect && typeof resueltoId !== 'undefined' && resueltoId !== null) {
-      const optionRes = Array.from(incidenteSelect.options).find(o => o.value == String(resueltoId));
-      if (optionRes) {
-        if (bloqueadores.length === 0) {
-          optionRes.disabled = false;
-          optionRes.style.display = '';
-        } else {
-          // ocultar la opción Resuelto para que no sea seleccionable
-          optionRes.style.display = 'none';
-          optionRes.disabled = true;
-          if (incidenteSelect.value == String(resueltoId)) {
-            const firstValid = Array.from(incidenteSelect.options).find(o => o.value != String(resueltoId) && !o.disabled && o.style.display !== 'none');
-            if (firstValid) incidenteSelect.value = firstValid.value;
+  function enableResueltoOption(allow) {
+    if (!incidenteSelect) return;
+    // buscar opción Resuelto (si existe)
+    const optRes = Array.from(incidenteSelect.options).find(o => String(o.value) === String(resueltoId));
+    if (optRes) {
+      if (allow) {
+        optRes.disabled = false;
+        optRes.style.display = '';
+      } else {
+        // si está seleccionado actualmente y no permitimos, cambiar a valor original o al primero visible
+        if (incidenteSelect.value == String(resueltoId)) {
+          // intentar reestablecer selección previa
+          if (estadoOriginalSeleccionado) incidenteSelect.value = estadoOriginalSeleccionado;
+          else {
+            const firstOpt = Array.from(incidenteSelect.options).find(o => !o.disabled && o.style.display !== 'none' && String(o.value) !== String(resueltoId));
+            if (firstOpt) incidenteSelect.value = firstOpt.value;
           }
         }
+        optRes.disabled = true;
+        optRes.style.display = 'none';
+      }
+    } else {
+      // si no existe, y allow = true, crearla
+      if (allow && resueltoId) {
+        const newOpt = document.createElement('option');
+        newOpt.value = String(resueltoId);
+        newOpt.textContent = 'Resuelto';
+        newOpt.selected = false;
+        incidenteSelect.appendChild(newOpt);
       }
     }
   }
 
-  // listeners dinámicos: si se agregan bloques dinámicamente, re-scanear
+  // attach listeners
   function attachListeners() {
-    const current = Array.from(document.querySelectorAll('select[name^="recursos"][name$="[id_estado]"].recurso-estado-select'));
-    // attach change only to those without listener (cheap approach: remove all and re-add)
-    estadoSelects.length = 0;
-    current.forEach(s => {
-      estadoSelects.push(s);
-      s.removeEventListener('change', recalcular);
-      s.addEventListener('change', recalcular);
+    getEstadoSelects().forEach(s => {
+      s.removeEventListener('change', mostrarAyudaYGestionarResuelto);
+      s.addEventListener('change', mostrarAyudaYGestionarResuelto);
     });
+    if (incidenteSelect) {
+      incidenteSelect.removeEventListener('change', onIncidenteChange);
+      incidenteSelect.addEventListener('change', onIncidenteChange);
+    }
   }
 
-  // inicial
-  attachListeners();
-  recalcular();
+  function onIncidenteChange() {
+    const resolucionContainer = document.getElementById('resolucion-container');
+    if (!resolucionContainer) return;
+    const seleccionado = incidenteSelect.value;
+    if (String(seleccionado) === String(resueltoId)) {
+      resolucionContainer.style.display = '';
+    } else {
+      resolucionContainer.style.display = 'none';
+    }
+  }
 
-  // observar DOM por cambios en recursos (si el usuario añade/quita recursos)
+  // submit handler robusto
+  (function () {
+    const form = document.querySelector('form[action*="/incidente/"]') || document.querySelector('form');
+    if (!form) {
+      console.warn('No se encontró el formulario en la página.');
+      return;
+    }
+
+    form.addEventListener('submit', function (e) {
+      try {
+        if (!incidenteSelect || typeof resueltoId === 'undefined' || resueltoId === null) return;
+
+        const seleccionado = String(incidenteSelect.value);
+        if (seleccionado === String(resueltoId)) {
+          const resolucionInput = document.getElementById('resolucion');
+          const texto = resolucionInput ? resolucionInput.value.trim() : '';
+
+          if (!texto) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const modalEl = document.getElementById('modalFaltaResolucion');
+            if (modalEl && window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+              const m = new bootstrap.Modal(modalEl);
+              m.show();
+              modalEl.addEventListener('hidden.bs.modal', function handler() {
+                modalEl.removeEventListener('hidden.bs.modal', handler);
+                if (resolucionInput) {
+                  resolucionInput.focus();
+                  resolucionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              });
+            } else {
+              alert('Debe ingresar una resolución para cerrar el incidente.');
+              if (resolucionInput) {
+                resolucionInput.focus();
+                resolucionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error en validación submit:', err);
+      }
+    }, { passive: false });
+  })();
+
+  // inicialización
+  attachListeners();
+  mostrarAyudaYGestionarResuelto();
+  onIncidenteChange();
+
+  // MutationObserver para detectar cambios en recursos dinámicos
   const recursosContainer = document.getElementById('recursos-container');
   if (recursosContainer) {
     const mo = new MutationObserver(() => {
       attachListeners();
-      recalcular();
+      mostrarAyudaYGestionarResuelto();
     });
     mo.observe(recursosContainer, { childList: true, subtree: true });
+  }
+
+  // botón del modal de completar resolución
+  const btnCompletar = document.getElementById('btnCompletarResolucion');
+  if (btnCompletar) {
+    btnCompletar.addEventListener('click', () => {
+      setTimeout(() => {
+        const resol = document.getElementById('resolucion');
+        if (resol) {
+          resol.focus();
+          resol.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 200);
+    });
   }
 });
 </script>
