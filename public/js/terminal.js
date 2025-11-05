@@ -487,7 +487,7 @@ function nextStep(n) {
 
 
 function identificarTrabajador() {
-  const dni = document.getElementById('dni').value;
+  const clave = document.getElementById('clave').value;
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/terminal/identificar', true);
@@ -515,7 +515,7 @@ if (csrf) {
       }
     };
 
-    xhr.send('dni=' + encodeURIComponent(dni));
+    xhr.send('clave=' + encodeURIComponent(clave));
   });
 }
 
@@ -1837,10 +1837,10 @@ function volverAInicio() {
 
   // Volvemos al paso 1
   window.nextStep(1);
-  // Opcional: limpiar el campo DNI por si quedó algo escrito
-  const dniInput = document.getElementById('dni');
-  if (dniInput) dniInput.value = '';
-  if (dniInput) dniInput.focus();
+  // Opcional: limpiar el campo clave por si quedó algo escrito
+  const claveInput = document.getElementById('clave');
+  if (claveInput) claveInput.value = '';
+  if (claveInput) claveInput.focus();
 
 
 }
@@ -2341,15 +2341,15 @@ document.addEventListener('DOMContentLoaded', () => {
   detenerEscaneoQRDevolucionSegura();
   nextStep(2); // o el paso que corresponda
 
-  //boton de borrar DNI
-  const btnBorrar = document.getElementById('btnBorrarDNI');
-  const dniInput = document.getElementById('dni');
+  //boton de Borrar clave
+  const btnBorrar = document.getElementById('btnBorrarClave');
+  const claveInput = document.getElementById('clave');
 
-  if (btnBorrar && dniInput) {
+  if (btnBorrar && claveInput) {
     btnBorrar.addEventListener('click', () => {
-      dniInput.value = '';
-      dniInput.focus();
-      getRenderer('mostrarMensajeKiosco')('🧹 DNI borrado', 'info');
+      claveInput.value = '';
+      claveInput.focus();
+      getRenderer('mostrarMensajeKiosco')('🧹 clave borrada', 'info');
     });
   }
 });
@@ -2362,12 +2362,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-function borrarDNI() {
-  const dniInput = document.getElementById('dni');
-  if (dniInput) {
-    dniInput.value = '';
-    dniInput.focus();
-    getRenderer('mostrarMensajeKiosco')('🧹 DNI borrado', 'info');
+function BorrarClave() {
+  const claveInput = document.getElementById('clave');
+  if (claveInput) {
+    claveInput.value = '';
+    claveInput.focus();
+    getRenderer('mostrarMensajeKiosco')('🧹 clave borrada', 'info');
   }
 }
 
@@ -2953,8 +2953,8 @@ function iniciarReconocimientoGlobal() {
 // 👉 Arranca automáticamente al cargar la página
 window.addEventListener('load', () => {
   iniciarReconocimientoGlobal();
-  const dniInput = document.getElementById('dni');
-  if (dniInput) dniInput.focus();
+  const claveInput = document.getElementById('clave');
+  if (claveInput) claveInput.focus();
 });
 
 
@@ -3081,7 +3081,7 @@ function ejecutarCerrarSesion() {
   try {
     localStorage.removeItem('id_usuario');
     console.log('🔓 Sesión cerrada (ejecutarCerrarSesion), volviendo a step1');
-    borrarDNI();
+    BorrarClave();
   } catch (e) {
     console.warn('⚠️ ejecutarCerrarSesion: error limpiando localStorage', e);
   }
@@ -3458,98 +3458,295 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-function procesarDNIporVoz(texto) {
-  if (!texto) return;
-
-  const limpio = parsearDNIPorBloques(texto);
-
-  console.log(`🧠 procesarDNIporVoz: texto original="${texto}" → extraído="${limpio}"`);
-
-  if (!/^\d{7,9}$/.test(limpio)) {
-    getRenderer('mostrarMensajeKiosco')('❌ DNI no reconocido. Intente nuevamente.', 'warning');
-    return;
-  }
-
-  const dniInput = document.getElementById('dni');
-  if (dniInput) {
-    dniInput.value = limpio;
-    dniInput.focus();
-    //getRenderer('mostrarMensajeKiosco')(`✅ DNI detectado: ${limpio}`, 'success');
-  }
-}
-
-function parsearDNIPorBloques(texto) {
+function parsearClavePorVoz(texto) {
   if (!texto) return '';
 
   const mapa = {
-    cero: 0, uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5,
-    seis: 6, siete: 7, ocho: 8, nueve: 9,
-    diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
-    dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19,
-    veinte: 20, veintiuno: 21, veintidos: 22, veintitres: 23, veinticuatro: 24,
-    veinticinco: 25, veintiseis: 26, veintisiete: 27, veintiocho: 28, veintinueve: 29,
-    treinta: 30, cuarenta: 40, cincuenta: 50, sesenta: 60,
-    setenta: 70, ochenta: 80, noventa: 90,
-    cien: 100, ciento: 100, doscientos: 200, trescientos: 300, cuatrocientos: 400,
-    quinientos: 500, seiscientos: 600, setecientos: 700, ochocientos: 800, novecientos: 900
+    cero: '0',
+    uno: '1', dos: '2', tres: '3', cuatro: '4', cinco: '5',
+    seis: '6', siete: '7', ocho: '8', nueve: '9',
+    diez: '10', once: '11', doce: '12', trece: '13', catorce: '14', quince: '15',
+    dieciseis: '16', diecisiete: '17', dieciocho: '18', diecinueve: '19',
+    veinte: '20', veintiuno: '21', veintidos: '22', veintitres: '23', veinticuatro: '24',
+    veinticinco: '25', veintiseis: '26', veintisiete: '27', veintiocho: '28', veintinueve: '29',
+    treinta: '30', cuarenta: '40', cincuenta: '50', sesenta: '60',
+    setenta: '70', ochenta: '80', noventa: '90',
+    mil: '000',
+    cuarentaidos: '42', // tolerancia a errores de reconocimiento
+    cuarentaitres: '43',
+    cincuentayuno: '51',
+    cuarentayuno: '41',
+    cuarentaycuatro: '44',
+    cincuentaydos: '52',
+    cincuentaytres: '53',
+    sesentayseis: '66',
+    setentaysiete: '77',
+    ochentayocho: '88',
+    noventaynueve: '99',
+
+    treintayuno: '31',
+    treintaydos: '32',
+    treintaytres: '33',
+    treintaycuatro: '34',
+    treintaycinco: '35',
+    treintayseis: '36',
+    treintaysiete: '37',
+    treintayocho: '38',
+    treintaynueve: '39',
+
+    cuarentaycinco: '45',
+    cuarentayseis: '46',
+    cuarentaysiete: '47',
+    cuarentayocho: '48',
+    cuarentaynueve: '49',
+
+    cincuentaycuatro: '54',
+    cincuentaycinco: '55',
+    cincuentayseis: '56',
+    cincuentaysiete: '57',
+    cincuentayocho: '58',
+    cincuentaynueve: '59',
+
+    sesentayuno: '61',
+    sesentaydos: '62',
+    sesentaytres: '63',
+    sesentaycuatro: '64',
+    sesentaycinco: '65',
+    sesentaysiete: '67',
+    sesentayocho: '68',
+    sesentaynueve: '69',
+
+    setentayuno: '71',
+    setentaydos: '72',
+    setentaytres: '73',
+    setentaycuatro: '74',
+    setentaycinco: '75',
+    setentayseis: '76',
+    setentayocho: '78',
+    setentaynueve: '79',
+
+    ochentayuno: '81',
+    ochentaydos: '82',
+    ochentaytres: '83',
+    ochentaycuatro: '84',
+    ochentaycinco: '85',
+    ochentayseis: '86',
+    ochentaysiete: '87',
+    ochentaynueve: '89',
+
+    noventayuno: '91',
+    noventaydos: '92',
+    noventaytres: '93',
+    noventaycuatro: '94',
+    noventaycinco: '95',
+    noventayseis: '96',
+    noventaysiete: '97',
+    noventayocho: '98',
+    cien: '100',
+
+
+  // ... ya existentes ...
+  noventasiete: '97',
+  noventaocho: '98',
+  noventanueve: '99',
+  treintauno: '31',
+  treintados: '32',
+  treintatres: '33',
+  treintacuatro: '34',
+  treintacinco: '35',
+  treintaseis: '36',
+  treintasiete: '37',
+  treintaocho: '38',
+  treintanueve: '39',
+  cuarentauno: '41',
+  cuarentados: '42',
+  // ... y así hasta noventanueve
+  // ... tu mapa actual ...
+  // Treinta
+  treintauno: '31',
+  treintados: '32',
+  treintatres: '33',
+  treintacuatro: '34',
+  treintacinco: '35',
+  treintaseis: '36',
+  treintasiete: '37',
+  treintaocho: '38',
+  treintanueve: '39',
+  // Cuarenta
+  cuarentauno: '41',
+  cuarentados: '42',
+  cuarentatres: '43',
+  cuarentacuatro: '44',
+  cuarentacinco: '45',
+  cuarentaseis: '46',
+  cuarentasiete: '47',
+  cuarentaocho: '48',
+  cuarentanueve: '49',
+  // Cincuenta
+  cincuentauno: '51',
+  cincuentados: '52',
+  cincuentatres: '53',
+  cincuentacuatro: '54',
+  cincuentacinco: '55',
+  cincuentaseis: '56',
+  cincuentasiete: '57',
+  cincuentaocho: '58',
+  cincuentanueve: '59',
+  // Sesenta
+  sesentauno: '61',
+  sesentados: '62',
+  sesentatres: '63',
+  sesentacuatro: '64',
+  sesentacinco: '65',
+  sesentaseis: '66',
+  sesentasiete: '67',
+  sesentaocho: '68',
+  sesentanueve: '69',
+  // Setenta
+  setentauno: '71',
+  setentados: '72',
+  setentatres: '73',
+  setentacuatro: '74',
+  setentacinco: '75',
+  setentaseis: '76',
+  setentasiete: '77',
+  setentaocho: '78',
+  setentanueve: '79',
+  // Ochenta
+  ochentauno: '81',
+  ochentados: '82',
+  ochentatres: '83',
+  ochentacuatro: '84',
+  ochentacinco: '85',
+  ochentaseis: '86',
+  ochentasiete: '87',
+  ochentaocho: '88',
+  ochentanueve: '89',
+  // Noventa
+  noventauno: '91',
+  noventados: '92',
+  noventatres: '93',
+  noventacuatro: '94',
+  noventacinco: '95',
+  noventaseis: '96',
+  noventasiete: '97',
+  noventaocho: '98',
+  noventanueve: '99'
+
   };
 
-  const tokens = normalizarTexto(texto)
-    .replace(/[.,/\\-]/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean);
+  const conectoresIgnorados = new Set([
+    'del', 'de', 'la', 'el', 'los', 'las',
+    'eh', 'por', 'favor', 'gracias', 'porfavor',
+    'hola', 'soy', 'clave', 'para', 'es',
+    'mi', 'un', 'una', 'usuario', 'nombre', 'identificador',
+    'dame', 'decime', 'quiero', 'necesito',
+    'mostrar', 'mostrarme', 'ingresar', 'ingrese',
+    'comando', 'codigo', 'contraseña', 'como',
+    'contraseña', 'contrasena', 'contrasenia'
 
-  if (tokens.join(' ') === 'mil millones') return '1000000000';
+  ]);
 
-  let bloques = [];
-  let actual = 0;
-  let acumulando = false;
-  let palabrasAcumuladas = [];
 
-  for (const token of tokens) {
-    if (/^\d+$/.test(token)) {
-      bloques.push(token);
-      actual = 0;
-      acumulando = false;
-      palabrasAcumuladas = [];
-    } else if (['mil', 'millones', 'millón'].includes(token)) {
-      if (acumulando && actual > 0) {
-        bloques.push(String(actual));
-      }
-      actual = 0;
-      acumulando = false;
-      palabrasAcumuladas = [];
-    } else if (mapa[token] !== undefined) {
-      actual += mapa[token];
-      acumulando = true;
-      palabrasAcumuladas.push(token);
-    } else {
-      // palabra irrelevante, cortar acumulación
-      if (acumulando && actual > 0) {
-        // ⚠️ Validación: si solo hay 2 palabras y ambas son menores a 30, probablemente sea ambiguo
-        const esAmbiguo = palabrasAcumuladas.length <= 2 &&
-                          palabrasAcumuladas.every(p => mapa[p] < 30);
-        if (!esAmbiguo) {
-          bloques.push(String(actual));
+
+  const normalizar = str =>
+    str.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[.,/\\-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  texto = normalizar(texto)
+    .replace(/\bveinti\s+uno\b/g, 'veintiuno')
+    .replace(/\bveinti\s+dos\b/g, 'veintidos')
+    .replace(/\bveinti\s+tres\b/g, 'veintitres')
+    .replace(/\bveinti\s+cuatro\b/g, 'veinticuatro')
+    .replace(/\bveinti\s+cinco\b/g, 'veinticinco')
+    .replace(/\bveinti\s+seis\b/g, 'veintiseis')
+    .replace(/\bveinti\s+siete\b/g, 'veintisiete')
+    .replace(/\bveinti\s+ocho\b/g, 'veintiocho')
+    .replace(/\bveinti\s+nueve\b/g, 'veintinueve');
+
+
+    ///
+
+// 🔽 INSERTÁ ACÁ el bloque de limpieza de frase inicial
+const frasesInicioClave = [
+  'ingresa clave', 'ingresar clave', 'clave es',
+  'mi clave es', 'clave de usuario es', 'la clave es',
+  'por favor ingresa la clave', 'por favor ingresar clave'
+];
+
+const fraseValida = frasesInicioClave.find(frase => texto.startsWith(frase));
+if (!fraseValida) return ''; // ❌ No se dijo la frase requerida
+
+texto = texto.replace(fraseValida, '').trim(); // ✅ Limpiar la frase inicial
+
+for (const frase of frasesInicioClave) {
+  if (texto.startsWith(frase)) {
+    texto = texto.replace(frase, '').trim();
+    break;
+  }
+}
+
+
+  const tokens = texto.split(' ');
+  let numero = '';
+  let candidatos = [];
+
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+
+    if (/^\d+$/.test(t)) {
+      numero += t;
+      continue;
+    }
+
+    const v = mapa[t];
+    if (v !== undefined) {
+      // decena + unidad
+      if (parseInt(v) >= 30 && parseInt(v) % 10 === 0 && i + 1 < tokens.length) {
+        const next = tokens[i + 1];
+        if (next === 'y' && i + 2 < tokens.length && mapa[tokens[i + 2]]) {
+          numero += String(parseInt(v) + parseInt(mapa[tokens[i + 2]]));
+          i += 2;
+          continue;
+        } else if (mapa[next]) {
+          numero += String(parseInt(v) + parseInt(mapa[next]));
+          i++;
+          continue;
         }
       }
-      actual = 0;
-      acumulando = false;
-      palabrasAcumuladas = [];
+
+      numero += v;
+      continue;
+    }
+
+    // palabra no numérica ni reconocida → candidata a nombre
+    if (!conectoresIgnorados.has(t)) {
+      candidatos.push({ palabra: t, index: i });
     }
   }
 
-  if (acumulando && actual > 0) {
-    const esAmbiguo = palabrasAcumuladas.length <= 2 &&
-                      palabrasAcumuladas.every(p => mapa[p] < 30);
-    if (!esAmbiguo) {
-      bloques.push(String(actual));
-    }
-  }
+  // elegir nombre más confiable: primer candidato antes del número
+  const centro = tokens.findIndex(t => mapa[t] || /^\d+$/.test(t));
+  const candidatosAntes = candidatos.filter(c => c.index < centro);
+  const mejor = candidatosAntes.length > 0 ? candidatosAntes[0] : candidatos[0];
+  if (!mejor || !numero) return '';
 
-  const resultado = bloques.join('');
-  return /^\d{7,9}$/.test(resultado) ? resultado : '';
+  // validación: evitar números excesivos
+  if (numero.length > 6 || parseInt(numero) > 999999) return '';
+
+  return (mejor.palabra + numero).toLowerCase();
+
 }
+
+// Export CommonJS para tests
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { parsearClavePorVoz };
+}
+
 
 function procesarComandoVoz(rawTexto) {
   try {
@@ -3659,24 +3856,51 @@ function procesarComandoVoz(rawTexto) {
 
     // === Step1: Login ===
     if (step === 'step1') {
-      if (!/^[a-zA-Z]/.test(limpio) && /^\d/.test(limpio)) {
-        // DNI dictado por bloques
-        procesarDNIporVoz(limpio);
-        return;
-      }
-
-      if (/\b(borrar|borrar dni|borrar todo)\b/.test(limpio)) {
-        const dniInput = document.getElementById('dni');
-        if (dniInput) { dniInput.value = ''; dniInput.focus(); getRenderer('mostrarMensajeKiosco')('🧹 DNI borrado por voz', 'info'); }
-        return;
-      }
-
-      if (/\b(continuar|aceptar|ingresar|confirmar)\b/.test(limpio)) {
-        console.log('🎤 Comando de voz: Continuar login');
-        identificarTrabajador();
-        return;
-      }
+  // 🧠 Intento de ingreso por voz usando frase activadora
+  const clave = parsearClavePorVoz(rawTexto);
+  if (clave) {
+    const claveInput = document.getElementById('clave');
+    if (claveInput) {
+      claveInput.value = clave;
+      claveInput.focus();
+      getRenderer('mostrarMensajeKiosco')(`🎤 Clave reconocida: ${clave}`, 'success');
+      // Opcional: avanzar automáticamente
+      // nextStep();
     }
+    return;
+  }
+
+  // 🧹 Comando para borrar el campo clave
+  if (/\b(borrar|borrar clave|borrar todo)\b/.test(limpio)) {
+    const claveInput = document.getElementById('clave');
+    if (claveInput) {
+      claveInput.value = '';
+      claveInput.focus();
+      getRenderer('mostrarMensajeKiosco')('🧹 clave borrada por voz', 'info');
+    }
+    return;
+  }
+
+  // ▶️ Comando para continuar login manualmente
+  if (/\b(continuar)\b/.test(limpio)) {
+    console.log('🎤 Comando de voz: Continuar login');
+    identificarTrabajador(); // tu función actual para validar y avanzar
+    return;
+  }
+
+  // 🧩 Fallback: si se dictó solo números sin frase activadora
+  if (!/^[a-zA-Z]/.test(limpio) && /^\d/.test(limpio)) {
+    // Si querés permitir ingreso de clave por bloques sin activadora
+    const claveInput = document.getElementById('clave');
+    if (claveInput) {
+      claveInput.value = limpio.replace(/\s+/g, '');
+      claveInput.focus();
+      getRenderer('mostrarMensajeKiosco')('🎤 clave dictado por voz', 'info');
+    }
+    return;
+  }
+}
+
 
     // === Step2: Menú principal y navegación ===
     if (step === 'step2') {
@@ -3894,8 +4118,9 @@ function procesarComandoVoz(rawTexto) {
   }
 }
 
+/*
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Object.assign(module.exports || {}, {
-    parsearDNIPorBloques
+    parsearclavePorBloques
   });
-}
+}*/

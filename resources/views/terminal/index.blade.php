@@ -21,12 +21,12 @@
     <div id="step1" class="step active">
       <h2 class="mb-4 text-center">Identificar Trabajador</h2>
 
-      <input type="text" id="dni" class="form-control form-control-lg mb-4" placeholder="Ingresar DNI">
-      <small class="text-muted d-block text-start mb-3">Podes dictar tu DNI como por ejemplo : “20 583 321”</small>
+      <input type="text" id="clave" class="form-control form-control-lg mb-4" placeholder="Ingresar clave ...">
+      <small class="text-muted d-block text-start mb-3">Deci "INGRESAR CLAVE" antes de decir tu clave</small>
 
 
       <button class="btn btn-primary btn-lg mb-3" onclick="identificarTrabajador()">Continuar</button>
-      <button id="btnBorrarDNI" class="btn btn-danger btn-lg mb-3" onclick="borrarDNI()">Borrar DNI</button>
+      <button id="btnBorrarClave" class="btn btn-danger btn-lg mb-3" onclick="BorrarClave()">Borrar clave</button>
 
 
       <div class="text-center mt-4">
