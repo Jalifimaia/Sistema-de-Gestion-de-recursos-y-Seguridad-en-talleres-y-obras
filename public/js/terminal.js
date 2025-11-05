@@ -3781,13 +3781,17 @@ function procesarComandoVoz(rawTexto) {
 
     const step = getStepActivo();
 
-
+    // boton permanente de cerrar sesión
+    if (step !== 'step1') {
         if (/\b(cerrar sesión|cerrar sesion)\b/.test(limpio)) {
           console.log('🔐 Comando de voz detectado: cerrar sesión');
           mostrarModalCerrarSesion(); // tu función actual para abrir el modal
           return;
         }
+    }
 
+     // boton permanente de menu principal
+    if (step !== 'step1' && step !== 'step2') {
         if (/\b(menu principal)\b/.test(limpio)) {
         recognitionGlobalPaused = false;
         safeStartRecognitionGlobal();
@@ -3795,6 +3799,7 @@ function procesarComandoVoz(rawTexto) {
         getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
         return;
       }
+    }
 
     // Si estamos en step10 (pantalla de recursos asignados) manejamos comandos allí
     if (step === 'step10') {
