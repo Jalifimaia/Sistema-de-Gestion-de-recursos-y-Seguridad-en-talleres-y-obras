@@ -5001,6 +5001,13 @@ if (modalRegistroVisible && esperandoAceptar) {
 
     // === Step1: Login ===
     if (step === 'step1') {
+
+      if (/\b(iniciar sesión con qr|iniciar sesion con qr|qr)\b/.test(limpio)) {
+    console.log('🎤 Comando de voz: iniciar sesión con QR');
+    activarEscaneoQRLogin(); // ejecuta la función del botón
+    return;
+  }
+
   // 🧠 Intento de ingreso por voz usando frase activadora
   const clave = parsearClavePorVoz(rawTexto);
   if (clave) {
