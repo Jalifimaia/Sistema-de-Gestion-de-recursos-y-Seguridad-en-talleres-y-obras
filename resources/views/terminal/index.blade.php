@@ -196,6 +196,26 @@
 
   </div>
 
+  <!-- Modal de confirmacion unico de serie -->
+<div id="modalResultadoRegistro" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="tituloModalRegistro" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tituloModalRegistro">Confirmación</h5>
+        <button type="button" class="btn-close" id="btnCerrarResultadoRegistro" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="modalResultadoRegistroBody">
+        ¿Confirmás que querés solicitar el recurso?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btnAceptarResultadoRegistro">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
   <!-- Modal de confirmacion final de devolucion por QR -->
   <div class="modal fade" id="modalConfirmarQR" tabindex="-1" aria-labelledby="modalConfirmarQRLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

@@ -242,6 +242,12 @@ function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
   ];
 
   if (tipo === 'warning' || tipo === 'danger' || mensajeModalForzado.includes(mensaje.trim())) {
+    
+    if (window.modalKioscoActivo && mensaje.trim() === 'Recurso asignado correctamente') {
+  console.log('⏸️ Modal ya activo con mismo mensaje, se evita duplicación');
+  return;
+}
+
     mostrarModalKiosco(mensaje, tipo);
     return;
   }
@@ -289,7 +295,6 @@ function mostrarModalKiosco(mensaje, tipo = 'danger') {
   body.textContent = mensaje;
   window.modalKioscoActivo = true;
 
-  // 🔒 Pausar reconocimiento global ANTES de mostrar el modal
   try {
     recognitionGlobalPaused = true;
     recognitionGlobal?.abort();
@@ -298,30 +303,31 @@ function mostrarModalKiosco(mensaje, tipo = 'danger') {
     console.warn('⚠️ No se pudo abortar recognitionGlobal:', e);
   }
 
-  // Dentro de mostrarModalKiosco, antes de modal.show()
-try {
-  const modalSerie = document.getElementById('modalConfirmarSerie');
-  if (modalSerie && modalSerie.classList.contains('show')) {
-    const instanciaSerie = bootstrap.Modal.getInstance(modalSerie);
-    if (instanciaSerie) {
-      instanciaSerie.hide();
+  try {
+    const modalSerie = document.getElementById('modalConfirmarSerie');
+    if (modalSerie?.classList.contains('show')) {
+      bootstrap.Modal.getInstance(modalSerie)?.hide();
       console.log('🔁 modalConfirmarSerie cerrado para mostrar mensaje kiosco');
     }
+  } catch (e) {
+    console.warn('⚠️ No se pudo cerrar modalConfirmarSerie desde mostrarModalKiosco', e);
   }
-} catch (e) {
-  console.warn('⚠️ No se pudo cerrar modalConfirmarSerie desde mostrarModalKiosco', e);
-}
 
+  if (modalEl.classList.contains('show')) {
+    console.log('⏸️ Modal kiosco ya visible, se evita duplicación');
+    return;
+  }
 
   const modal = new bootstrap.Modal(modalEl);
   let modalActionTaken = false;
+  let ultimoTexto = null;
 
   function cerrarModal() {
     if (modalActionTaken) return;
     modalActionTaken = true;
     modal.hide();
     cleanup();
-    cerrarModalKiosco(); // ✅ delega cierre completo
+    cerrarModalKiosco();
   }
 
   function cleanup() {
@@ -353,60 +359,96 @@ try {
       recog.interimResults = false;
       modalEl._lastTranscript = null;
 
-      recog.onresult = function (event) {
-        const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
-        if (modalActionTaken || modalEl._lastTranscript === texto) return;
-        modalEl._lastTranscript = texto;
+recog.onresult = function (event) {
+  const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+  if (modalActionTaken || texto === ultimoTexto) return;
+  ultimoTexto = texto;
 
-        if (texto.includes('cerrar') || texto.includes('entendido') || texto.includes('ok')) {
-          cerrarModal();
-          recog.stop();
-        } else {
-          mostrarMensajeKiosco('No se reconoció el comando. Decí “cerrar” o “entendido”.', 'info');
-        }
+  // 🛑 Evitar bucle si el mensaje ya está activo y es el mismo
+  if (window.modalKioscoActivo && body?.textContent?.trim() === 'Recurso asignado correctamente') {
+    console.log('⏸️ Modal kiosco ya activo con mismo mensaje, ignorando comando de voz');
+    return;
+  }
+
+  if (texto.includes('cerrar') || texto.includes('entendido') || texto.includes('ok')) {
+    cerrarModal();
+    try { recog.stop(); } catch (e) {}
+  } else {
+    modalEl._recogIntentosFallidos = (modalEl._recogIntentosFallidos || 0) + 1;
+    console.log('⚠️ Comando no reconocido en modal kiosco:', texto);
+
+    if (modalEl._recogIntentosFallidos >= 3) {
+      console.log('⏹️ Intentos fallidos superados, cerrando modal automáticamente');
+      cerrarModal();
+    }
+    // No llamamos mostrarMensajeKiosco para evitar bucle
+  }
+};
+
+
+
+      recog.onerror = function (e) {
+        console.warn('Reconocimiento modal kiosco falló', e);
+        if (e?.error === 'aborted') return;
+
+        try { recog.stop(); } catch (err) {}
+
+        setTimeout(() => {
+          if (!modalActionTaken && modalEl.classList.contains('show')) {
+            try {
+              recog.start();
+              console.log('🔁 recog modal reiniciado tras error');
+            } catch (err) {
+              if (err.name === 'InvalidStateError') {
+                console.log('⚠️ recog.start() ignorado: ya estaba iniciado');
+              } else {
+                console.warn('⚠️ recog.start() falló:', err);
+              }
+            }
+          }
+        }, 300);
       };
 
       recog.onend = function () {
         if (!modalActionTaken && modalEl.classList.contains('show')) {
-          recog.start();
+          try {
+            recog.start();
+            console.log('🔁 recog modal reiniciado tras onend');
+          } catch (err) {
+            console.warn('⚠️ recog.start() falló en onend:', err);
+          }
         }
       };
 
-      recog.onerror = function (e) {
-        if (e?.error !== 'aborted') console.warn('Error en reconocimiento modal kiosco:', e);
-      };
-
       modalEl._recogInstance = recog;
+      modalEl._recogIntentosFallidos = 0;
+
       recog.start();
+      console.log('🎤 reconocimiento local (modal kiosco) iniciado');
     }
   } catch (e) {
     console.warn('No se pudo iniciar reconocimiento modal kiosco:', e);
   }
 
   if (getStepActivo() === 'step9') {
-  window._recogStep9PausadoPorModal = true;
-  try {
-    if (window._recogStep9) {
-      window._recogStep9.onresult = null;
-      window._recogStep9.onerror = null;
-      window._recogStep9.onend = null;
-      window._recogStep9.stop?.();
-      window._recogStep9 = null;
-      console.log('🛑 Reconocimiento local step9 pausado por mostrarModalKiosco');
+    window._recogStep9PausadoPorModal = true;
+    try {
+      if (window._recogStep9) {
+        window._recogStep9.onresult = null;
+        window._recogStep9.onerror = null;
+        window._recogStep9.onend = null;
+        window._recogStep9.stop?.();
+        window._recogStep9 = null;
+        console.log('🛑 Reconocimiento local step9 pausado por mostrarModalKiosco');
+      }
+    } catch (e) {
+      console.warn('⚠️ No se pudo pausar recog step9 desde mostrarModalKiosco', e);
     }
-  } catch (e) {
-    console.warn('⚠️ No se pudo pausar recog step9 desde mostrarModalKiosco', e);
   }
-}
-
-if (modalEl.classList.contains('show')) {
-  console.log('⏸️ Modal kiosco ya visible, se evita duplicación');
-  return;
-}
-
 
   modal.show();
 }
+
 
 
 function cerrarModalKiosco() {
@@ -2331,6 +2373,8 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
   let modalActionTaken = false;
 
   function cleanup() {
+    modalEl._recogIntentosFallidos = 0;
+
     try {
       const existing = modalEl._recogInstance;
       if (existing) {
@@ -2530,8 +2574,12 @@ async function registrarSerie(serieId, boton = null) {
     if (data && data.success) {
       if (typeof window.mostrarMensajeKiosco === 'function') 
         {
-          getRenderer('mostrarMensajeKiosco')('✅ Recurso asignado correctamente', 'success');
-      console.log('✅ Recurso asignado correctamente');
+          mostrarModalResultadoRegistro('Recurso asignado correctamente', boton);
+
+
+          //mostrarModalKiosco('✅ Recurso asignado correctamente', 'success');
+
+          console.log('✅ Recurso asignado correctamente');
         }
 
       // ✅ Actualizar botón si se pasó como referencia
@@ -2751,6 +2799,58 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn('No se pudo wrappear nextStep para protección adicional', e);
   }
 });
+
+function mostrarModalResultadoRegistro(mensaje, botonSerie = null, tipo = 'success') {
+  const modalEl = document.getElementById('modalResultadoRegistro');
+  const body = document.getElementById('modalResultadoRegistroBody');
+  const btnAceptar = document.getElementById('btnAceptarResultadoRegistro');
+  const btnCerrar = document.getElementById('btnCerrarResultadoRegistro');
+
+  if (!modalEl || !body || !btnAceptar || !btnCerrar) return;
+
+  // 🧠 Extraer texto de serie desde el botón
+  let serieTexto = '';
+  if (botonSerie && botonSerie instanceof HTMLElement) {
+    const el = botonSerie.querySelector('.flex-grow-1');
+    serieTexto = el ? el.textContent.trim() : botonSerie.textContent.trim();
+  }
+
+  // 🖤 Mensaje en negro con serie incluida
+  const textoFinal = serieTexto ? `${mensaje}: ${serieTexto}` : mensaje;
+  body.textContent = textoFinal;
+  body.className = 'text-dark';
+
+  // 🛑 Detener todos los recogedores
+  detenerTodosLosRecogedoresLocales();
+  if (window.recognitionGlobal) {
+    try {
+      window.recognitionGlobal.abort?.();
+      window.recognitionGlobal.stop?.();
+    } catch (e) {}
+    window.recognitionGlobal = null;
+    window.recognitionRunning = false;
+    window.recognitionGlobalPaused = true;
+  }
+
+  // Marcar el modal como esperando comando de voz
+  modalEl.classList.add('esperando-aceptar');
+
+  const cerrar = () => {
+    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
+    modalEl.classList.remove('esperando-aceptar');
+    window.recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+  };
+
+  btnAceptar.onclick = cerrar;
+  btnCerrar.onclick = cerrar;
+  document.querySelectorAll('.btn-cerrar-modal').forEach(btn => {
+    btn.onclick = cerrar;
+  });
+
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+}
 
 
 function BorrarClave() {
@@ -4789,6 +4889,7 @@ function procesarComandoVoz(rawTexto) {
       return;
     }
 
+    
     // Si hay modal de error QR visible priorizamos su cierre
     const modalErrorQR = document.getElementById('modalErrorQR');
     const modalErrorVisible = modalErrorQR && modalErrorQR.classList.contains('show');
@@ -4804,7 +4905,22 @@ function procesarComandoVoz(rawTexto) {
 
     const step = getStepActivo();
 
-    
+const modalRegistro = document.getElementById('modalResultadoRegistro');
+const modalRegistroVisible = modalRegistro?.classList.contains('show');
+const esperandoAceptar = modalRegistro?.classList.contains('esperando-aceptar');
+
+if (modalRegistroVisible && esperandoAceptar) {
+  if (limpio.includes('aceptar')) {
+    console.log('🎤 Comando de voz: aceptar modal de registro');
+    document.getElementById('btnAceptarResultadoRegistro')?.click();
+    return;
+  } else {
+    console.log('⚠️ Modal de registro abierto, comando ignorado:', limpio);
+    return;
+  }
+}
+
+
     // boton permanente de cerrar sesión
     if (step !== 'step1') {
         if (/\b(cerrar sesión|cerrar sesion)\b/.test(limpio)) {
