@@ -4431,7 +4431,7 @@ function procesarComandoVoz(rawTexto) {
 }
 
 
-  /*  // === Step2: Menú principal y navegación ===
+/*  // === Step2: Menú principal y navegación ===
     if (step === 'step2') {
       // normalizar repeticiones
       const textoSimple = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
@@ -4484,7 +4484,7 @@ function procesarComandoVoz(rawTexto) {
       console.log("⚠️ Step2: No se reconoció comando válido");
       return;
     }
-*
+
     // === Step3: Escaneo QR ===
     if (step === 'step3') {
       if (matchOpcion(limpio, 1, "qr", "escanear")) {
@@ -4511,7 +4511,7 @@ function procesarComandoVoz(rawTexto) {
       console.log("⚠️ Step3: No se reconoció ningún comando válido");
       return;
     }
-*
+
     // === Step5, Step6, Step7, Step8 handling (botones + paginación) ===
     // Delegamos a bloques ya implementados en tu código original
     if (step === 'step5') {
@@ -4527,7 +4527,7 @@ function procesarComandoVoz(rawTexto) {
       }
       console.log("⚠️ Step5: Procesada entrada (si hubo coincidencias)");
       return;
-    }*
+    }
 
     if (step === 'step6') {
       const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
@@ -4546,7 +4546,7 @@ function procesarComandoVoz(rawTexto) {
       for (let i = 0; i < botonesSub.length; i++) { const btn = botonesSub[i]; if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) { btn.click(); return; } }
       console.log("⚠️ Step6: Procesada entrada (si hubo coincidencias)");
       return;
-    }*
+    }
 
     if (step === 'step7') {
       const matchPaginaRec = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
@@ -4565,7 +4565,8 @@ function procesarComandoVoz(rawTexto) {
       botonesRec.forEach((btn, index) => { try { if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) { btn.click(); } } catch (e) { console.warn('Error al procesar botón recurso', e); } });
       console.log("⚠️ Step7: Procesada entrada (si hubo coincidencias)");
       return;
-    }*/
+    }
+*/
 
     if (step === 'step8') {
       const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
@@ -4601,13 +4602,13 @@ function procesarComandoVoz(rawTexto) {
     }*/
 
     // === Paginación y navegación globales (fallback) ===
-   /* const matchPaginaAny = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+    const matchPaginaAny = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
     if (matchPaginaAny) {
       const token = matchPaginaAny[1];
       const numero = numeroDesdeToken(token);
       if (isNaN(numero) || numero < 1) { window.mostrarMensajeKiosco('Número de página no reconocido', 'warning'); return; }
 
-      if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
+     /* if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
         const total = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
         if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
         renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
@@ -4618,7 +4619,7 @@ function procesarComandoVoz(rawTexto) {
         if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
         renderRecursosPaginados(window.recursosActuales, numero);
         return;
-      }
+      }*/
       if (step === 'step8' && Array.isArray(window.seriesActuales)) {
         const total = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
         if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
@@ -4628,7 +4629,7 @@ function procesarComandoVoz(rawTexto) {
 
       console.log('⚠️ matchPaginaAny: comando página detectado pero no aplicable en step', step);
       return;
-    }*/
+    }
 
     // Comando global: cerrar modalRecursos antiguo compat (si sigue existiendo)
     const modalRec = document.getElementById('modalRecursos');
