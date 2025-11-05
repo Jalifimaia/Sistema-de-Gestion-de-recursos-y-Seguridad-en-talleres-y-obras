@@ -474,6 +474,8 @@ function nextStep(n) {
         // fallback local
         const ocultar = (n === 1 || 'step' + n === 'step1');
         const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
+
+        
         const btnMenu2 = document.getElementById('boton-flotante-menu-principal');
         if (btnCerrar) btnCerrar.style.display = ocultar ? 'none' : 'inline-block';
         if (btnMenu2) btnMenu2.style.display = ocultar ? 'none' : 'inline-block';
@@ -504,7 +506,10 @@ if (csrf) {
         if (res.success) {
           localStorage.setItem('id_usuario', res.usuario.id);
           window.nextStep(2);
-          document.getElementById('saludo-trabajador').textContent = `Hola ${res.usuario.name}`;
+          document.getElementById('saludo-trabajador').innerHTML = `
+            <span class="saludo-texto">Hola ${res.usuario.name}</span>
+            <img src="/images/hola.svg" alt="Saludo" class="icono-saludo">
+          `;
         } else {
       getRenderer('mostrarMensajeKiosco')(res.message || 'Error al identificar al trabajador', 'danger');
         }
@@ -537,6 +542,11 @@ function cargarCategorias() {
       const contenedor = document.getElementById('categoria-buttons');
       contenedor.innerHTML = '';
 
+      const iconosCategoria = {
+        'EPP': '/images/casco2.svg',
+        'Herramienta': '/images/herramienta2.svg'
+      };
+
       categorias.forEach((cat, index) => {
         const btn = document.createElement('button');
         btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
@@ -545,7 +555,10 @@ function cargarCategorias() {
 
         btn.innerHTML = `
           <span class="badge-opcion">Opción ${index + 1}</span>
-          <span class="flex-grow-1 text-start">${cat.nombre_categoria}</span>
+          <span class="flex-grow-1 text-start d-flex align-items-center gap-2">
+            ${iconosCategoria[cat.nombre_categoria] ? `<img src="${iconosCategoria[cat.nombre_categoria]}" alt="${cat.nombre_categoria}" class="icono-opcion">` : ''}
+            <span>${cat.nombre_categoria}</span>
+          </span>
         `;
         contenedor.appendChild(btn);
       });
@@ -2323,44 +2336,200 @@ async function registrarSerie(serieId, boton = null) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
- /* const idUsuario = localStorage.getItem('id_usuario');
-  if (!idUsuario) {
-    mostrarMensajeKiosco('⚠️ Usuario no identificado', 'danger');
-    return;
-  }*/
+  // Inicializar escáner QR de devolución de forma defensiva
+  try {
+    if (typeof Html5Qrcode !== 'undefined') {
+      try {
+        const qrScanner = new Html5Qrcode("qr-reader-devolucion");
+        qrScanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: 250 },
+          ExitoDevolucionQR
+        );
+      } catch (e) {
+        console.warn('QR devolucion init falló (start):', e);
+      }
+    } else {
+      console.warn('Html5Qrcode no disponible en este contexto');
+    }
+  } catch (e) {
+    console.warn('QR devolucion init general falló:', e);
+  }
 
-  // Inicializar escáner QR
-  const qrScanner = new Html5Qrcode("qr-reader-devolucion");
-  qrScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    ExitoDevolucionQR
-  );
+  // --- Listener seguro y único para el botón "Menu principal" ---
+  (function bindSafeMenuPrincipal() {
+    const btn = document.getElementById('boton-flotante-menu-principal');
+    if (!btn) return;
 
-  document.getElementById('boton-flotante-menu-principal')?.addEventListener('click', () => {
-  detenerEscaneoQRDevolucionSegura();
-  nextStep(2); // o el paso que corresponda
+    // Limpiar handlers inseguros previos
+    try {
+      // eliminar onclick directo si existiera
+      btn.onclick = null;
+      // si previamente guardamos un handler, eliminarlo
+      if (btn._safeMenuHandler) {
+        try { btn.removeEventListener('click', btn._safeMenuHandler, true); } catch (e) {}
+        btn._safeMenuHandler = null;
+        btn._safeMenuListenerAttached = false;
+      }
+    } catch (e) {
+      console.warn('bindSafeMenuPrincipal: limpieza previa falló', e);
+    }
 
-  //boton de Borrar clave
-  const btnBorrar = document.getElementById('btnBorrarClave');
-  const claveInput = document.getElementById('clave');
+    // Handler seguro
+    const handler = function (e) {
+      try {
+        const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
+        const idUsuario = window.localStorage.getItem('id_usuario');
 
-  if (btnBorrar && claveInput) {
-    btnBorrar.addEventListener('click', () => {
-      claveInput.value = '';
-      claveInput.focus();
-      getRenderer('mostrarMensajeKiosco')('🧹 clave borrada', 'info');
-    });
+        // Si estamos en step1 y no hay usuario identificado, bloquear navegación
+        if ((stepActivo === 'step1' || stepActivo === '1') && !idUsuario) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          getRenderer('mostrarMensajeKiosco')('Debés identificarte antes de abrir el Menú principal', 'warning');
+          return;
+        }
+
+        // Permitido: detener scanners y abrir menú
+        try { detenerEscaneoQRDevolucionSegura(); } catch (err) { console.warn('stop escaneo previo falló', err); }
+        if (typeof window.cargarMenuPrincipal === 'function') window.cargarMenuPrincipal();
+        if (typeof window.nextStep === 'function') window.nextStep(2);
+
+        // reactivar reconocimiento global con pequeño delay
+        setTimeout(() => {
+          try { safeStartRecognitionGlobal(); } catch (err) { /* ignore */ }
+        }, 120);
+      } catch (err) {
+        console.warn('bindSafeMenuPrincipal handler error', err);
+      }
+    };
+
+    // Guardar referencias para evitar múltiples attachments
+    btn._safeMenuHandler = handler;
+    btn._safeMenuListenerAttached = true;
+
+    // Usar listener en captura para interceptar antes que handlers en bubbling
+    btn.addEventListener('click', handler, true);
+  })();
+
+  // --- Botón Borrar clave (idempotente) ---
+  try {
+    const btnBorrar = document.getElementById('btnBorrarClave');
+    const claveInput = document.getElementById('clave');
+    if (btnBorrar && claveInput && !btnBorrar._borrarAttached) {
+      btnBorrar.addEventListener('click', () => {
+        claveInput.value = '';
+        claveInput.focus();
+        getRenderer('mostrarMensajeKiosco')('🧹 clave borrada', 'info');
+      });
+      btnBorrar._borrarAttached = true;
+    }
+  } catch (e) {
+    console.warn('Error conectando btnBorrarClave', e);
+  }
+
+  // --- Botón Aceptar Cerrar Sesión (idempotente) ---
+  try {
+    const btnAceptarCerrarSesion = document.getElementById('btnAceptarCerrarSesion');
+    if (btnAceptarCerrarSesion && !btnAceptarCerrarSesion._cerrarAttached) {
+      btnAceptarCerrarSesion.addEventListener('click', () => {
+        try { detenerEscaneoQRDevolucionSegura(); } catch (e) { console.warn('detenerEscaneo en cerrar sesion falló', e); }
+        try { volverAInicio(); } catch (e) { console.warn('volverAInicio falló', e); }
+      });
+      btnAceptarCerrarSesion._cerrarAttached = true;
+    }
+  } catch (e) {
+    console.warn('Error conectando btnAceptarCerrarSesion', e);
+  }
+
+  // --- Estado inicial defensivo: asegurar que en step1 el botón no permita acción ---
+  try {
+    const btnMenu = document.getElementById('boton-flotante-menu-principal');
+    const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
+    const activo = document.querySelector('.step.active')?.id || getStepActivo();
+    const enStep1 = (activo === 'step1' || activo === '1' || document.getElementById('step1')?.classList.contains('active'));
+
+    if (btnMenu) {
+      if (enStep1) {
+        btnMenu.disabled = true;
+        btnMenu.setAttribute('aria-disabled', 'true');
+        btnMenu.style.pointerEvents = 'none';
+        btnMenu.style.opacity = '0.5';
+      } else {
+        btnMenu.disabled = false;
+        btnMenu.removeAttribute('aria-disabled');
+        btnMenu.style.pointerEvents = 'auto';
+        btnMenu.style.opacity = '1';
+      }
+    }
+
+    if (btnCerrar) {
+      if (enStep1) {
+        btnCerrar.disabled = true;
+        btnCerrar.setAttribute('aria-disabled', 'true');
+        btnCerrar.style.pointerEvents = 'none';
+        btnCerrar.style.opacity = '0.5';
+      } else {
+        btnCerrar.disabled = false;
+        btnCerrar.removeAttribute('aria-disabled');
+        btnCerrar.style.pointerEvents = 'auto';
+        btnCerrar.style.opacity = '1';
+      }
+    }
+  } catch (e) {
+    console.warn('Error aplicando estado inicial a botones flotantes', e);
+  }
+
+  // --- Reaplicar estado defensivo tras cargas tardías / posibles re-creaciones ---
+  // Si nextStep existe, envolverlo para reaplicar la verificación luego de cada cambio de step
+  try {
+    if (typeof window.nextStep === 'function' && !window._nextStepWrappedForMenuProtection) {
+      const origNext = window.nextStep;
+      window.nextStep = function (n) {
+        try { origNext(n); } catch (e) { console.warn('wrapped nextStep original falló', e); }
+        // reaplicar estado con pequeño delay para evitar races
+        setTimeout(() => {
+          try {
+            const btnMenu = document.getElementById('boton-flotante-menu-principal');
+            const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
+            const activo = typeof n === 'number' ? 'step' + n : (document.querySelector('.step.active')?.id || getStepActivo());
+            const enStep1 = (activo === 'step1' || activo === '1');
+
+            if (btnMenu) {
+              if (enStep1) {
+                btnMenu.disabled = true;
+                btnMenu.setAttribute('aria-disabled', 'true');
+                btnMenu.style.pointerEvents = 'none';
+                btnMenu.style.opacity = '0.5';
+              } else {
+                btnMenu.disabled = false;
+                btnMenu.removeAttribute('aria-disabled');
+                btnMenu.style.pointerEvents = 'auto';
+                btnMenu.style.opacity = '1';
+              }
+            }
+            if (btnCerrar) {
+              if (enStep1) {
+                btnCerrar.disabled = true;
+                btnCerrar.setAttribute('aria-disabled', 'true');
+                btnCerrar.style.pointerEvents = 'none';
+                btnCerrar.style.opacity = '0.5';
+              } else {
+                btnCerrar.disabled = false;
+                btnCerrar.removeAttribute('aria-disabled');
+                btnCerrar.style.pointerEvents = 'auto';
+                btnCerrar.style.opacity = '1';
+              }
+            }
+          } catch (e) { console.warn('Reaplicacion estado botones falló', e); }
+        }, 40);
+      };
+      window._nextStepWrappedForMenuProtection = true;
+    }
+  } catch (e) {
+    console.warn('No se pudo wrappear nextStep para protección adicional', e);
   }
 });
 
-  document.getElementById('btnAceptarCerrarSesion')?.addEventListener('click', () => {
-    detenerEscaneoQRDevolucionSegura(); // ✅ frena escaneo si estaba en devolución
-    volverAInicio(); // ✅ limpia sesión y vuelve a step1
-  });
-
-
-});
 
 function BorrarClave() {
   const claveInput = document.getElementById('clave');
@@ -2429,9 +2598,11 @@ function setModoEscaneo(modo) {
   const titulo = document.getElementById('titulo-step3');
   if (modo === 'manual') {
     console.log('🔄 setModoEscaneo: modo manual activado');
-    titulo.textContent = 'Tengo la herramienta en mano';
+    titulo.innerHTML = `
+      <img src="/images/trabajadorHerramienta.svg" alt="Herramienta" class="icono-herramienta">
+      Tengo la herramienta en mano
+    `;
     detenerEscaneoQRregistroRecursos();
-    // 👇 si luego vamos a solicitar manualmente (step5), el volver debe regresar acá (step3)
     step5ReturnTarget = 3;
   } else {
     console.log('🔄 setModoEscaneo: modo escaneo QR activado');
@@ -2454,59 +2625,63 @@ function cargarMenuPrincipal() {
       console.log('📦 opción seleccionada: herramienta en mano');
       setModoEscaneo('manual');
     },
-    clase: "btn-outline-dark"
+    clase: "btn-outline-dark",
+    icono: "/images/trabajadorHerramienta.svg"
   },
   {
-    id: 2,
-    texto: " Quiero solicitar una herramienta",
-    accion: () => {
-      const id_usuario = window.localStorage.getItem('id_usuario');
-      if (!id_usuario) {
-        console.warn('⚠️ cargarMenuPrincipal: no hay id_usuario para solicitar herramienta');
-        window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+  id: 2,
+  texto: "Quiero solicitar una herramienta",
+  accion: () => {
+    const id_usuario = window.localStorage.getItem('id_usuario');
+    if (!id_usuario) {
+      console.warn('⚠️ cargarMenuPrincipal: no hay id_usuario para solicitar herramienta');
+      window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+      return;
+    }
+
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    const csrf = meta && meta.content ? meta.content : null;
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+    fetch('/terminal/solicitar', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ id_usuario })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        console.warn('❌ No se puede solicitar herramientas:', data.message);
+        window.mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
         return;
       }
 
-      const meta = document.querySelector('meta[name="csrf-token"]');
-      const csrf = meta && meta.content ? meta.content : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (csrf) headers['X-CSRF-TOKEN'] = csrf;
-      fetch('/terminal/solicitar', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ id_usuario })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.success) {
-          console.warn('❌ No se puede solicitar herramientas:', data.message);
-          window.mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
-          return;
-        }
-
-        console.log('🛠️ opción seleccionada: solicitar herramienta');
-        step5ReturnTarget = 2;
-        window.nextStep(5);
-      })
-      .catch(() => {
-        console.error('❌ Error de red al validar EPP');
-        window.mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
-      });
-    },
-    clase: "btn-outline-dark"
+      console.log('🛠️ opción seleccionada: solicitar herramienta');
+      step5ReturnTarget = 2;
+      window.nextStep(5);
+    })
+    .catch(() => {
+      console.error('❌ Error de red al validar EPP');
+      window.mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
+    });
   },
+  clase: "btn-outline-dark",
+  icono: "/images/herramienta2.svg"
+},
   // dentro de opciones en cargarMenuPrincipal, reemplazar accion de la opción 3 por:
-    {
-    id: 3,
-    texto: " Ver recursos asignados",
-    accion: () => {
-      console.log('📋 opción seleccionada: ver recursos asignados');
-      window.cargarRecursos().then(() => {
-        abrirStepRecursos();
-      });
-    },
-    clase: "btn-outline-dark"
-  }
+ {
+  id: 3,
+  texto: "Ver recursos asignados",
+  accion: () => {
+    console.log('📋 opción seleccionada: ver recursos asignados');
+    window.cargarRecursos().then(() => {
+      abrirStepRecursos();
+    });
+  },
+  clase: "btn-outline-dark",
+  icono: "/images/list.svg"
+}
+
 
 
 ];
@@ -2525,9 +2700,12 @@ function cargarMenuPrincipal() {
     // Botones con badge y layout horizontal
     btn.className = `btn ${op.clase} btn-lg d-flex align-items-center justify-content-start m-2 w-100`;
     btn.innerHTML = `
-      <span class="badge-opcion">Opción ${op.id}</span>
-      <span class="ms-2 flex-grow-1 text-start">${op.texto}</span>
-    `;
+  <span class="badge-opcion">Opción ${op.id}</span>
+  <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
+    ${op.icono ? `<img src="${op.icono}" alt="Icono" class="icono-opcion">` : ''}
+    ${op.texto}
+  </span>
+`;
   }
 
   btn.onclick = op.accion;
@@ -2551,12 +2729,27 @@ function abrirStepRecursos() {
     stepEl = document.createElement('div');
     stepEl.id = stepId;
     stepEl.className = 'step d-none';
+
+    const rutaCasco = '/images/casco3.svg';
+const rutaHerramienta = '/images/tool.svg';
+
     stepEl.innerHTML = `
-      <h2 class="mb-4 text-center">Recursos asignados</h2>
-      <div class="d-flex justify-content-center mb-3">
-        <button class="btn btn-primary me-2" id="tab-epp-step" type="button" aria-selected="true">Ver EPP</button>
-        <button class="btn btn-primary" id="tab-herramientas-step" type="button" aria-selected="false">Ver herramientas</button>
-      </div>
+      <h2 class="mb-4 text-center d-flex justify-content-center align-items-center gap-2">
+        <img src="/images/herramienta3.svg" alt="Recursos" class="icono-opcion">
+        <span>Recursos asignados</span>
+      </h2>
+
+       <div class="d-flex justify-content-center mb-3">
+    <button class="btn btn-primary me-2 d-flex align-items-center gap-2" id="tab-epp-step" type="button" aria-selected="true">
+      <img src="${rutaCasco}" alt="EPP" class="icono-opcion">
+      <span>Ver EPP</span>
+    </button>
+
+    <button class="btn btn-primary d-flex align-items-center gap-2" id="tab-herramientas-step" type="button" aria-selected="false">
+      <img src="${rutaHerramienta}" alt="Herramientas" class="icono-opcion">
+      <span>Ver herramientas</span>
+    </button>
+  </div>
 
       <div id="recursosTabContentStep" class="tab-content">
         <div id="panel-epp-step" class="tab-pane show active">
@@ -2581,10 +2774,11 @@ function abrirStepRecursos() {
       </div>
 
       <div class="text-center mt-3">
-        <button id="btnVolverStepRecursos" class="btn btn-primary">Volver</button>
-      </div>
-
-    `;
+      <button id="btnVolverStepRecursos" class="btn btn-primary texto-volver d-flex align-items-center gap-2">
+        <img src="/images/volver.svg" alt="Volver" class="icono-opcion">
+        <span>Volver</span>
+      </button>
+    </div>`;
     document.querySelector('.container-kiosk')?.appendChild(stepEl);
   }
 

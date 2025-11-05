@@ -56,3 +56,588 @@
   gap: 0.5rem;                   /* 👈 espacio uniforme entre elementos */
   padding: 0.75rem 1rem;
 }
+
+
+/* 5/11*/
+/* Tipografía general más grande y legible */
+body {
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 18px;
+  background-color: #f7f1ea;
+  color: #333;
+}
+
+/* Contenedor principal con fondo suave */
+.container-kiosk {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 2.5rem;
+  background-color: #fffdf9;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+/* Títulos con naranja suave */
+h2, h3, h4, h5 {
+  font-weight: 700;
+  color: #e67e22;
+  margin-bottom: 1rem;
+}
+
+/* Inputs más grandes y amigables */
+input.form-control {
+  font-size: 20px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+}
+
+/* Botones con naranja vibrante y letras más gruesas */
+button.btn {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+button.btn-primary {
+  background-color: #f39c12;
+  border-color: #f39c12;
+  color: #fff;
+}
+
+button.btn-primary:hover {
+  background-color: #e67e22;
+}
+
+button.btn-danger {
+  background-color: #e74c3c;
+  border-color: #e74c3c;
+  color: #fff;
+}
+
+button.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+/* Botones flotantes con sombra y naranja */
+#boton-flotante-menu-principal {
+  background-color: #f39c12;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+#boton-flotante-cerrar-sesion {
+  background-color: #e74c3c;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Badge de opción con naranja */
+.badge-opcion {
+  background-color: #e67e22;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* QR readers con borde decorativo */
+#qr-reader, #qr-login-reader, #qr-reader-devolucion {
+  border: 2px dashed #f39c12;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* Micrófono flotante con verde suave */
+#micStatusButton {
+  font-size: 18px;
+  background-color: #e9f7ef;
+  color: #27ae60;
+  border: 1px solid #27ae60;
+}
+
+/* Transiciones suaves */
+.step, .modal, .btn, input {
+  transition: all 0.3s ease-in-out;
+}
+
+input.form-control {
+  border: 2px solid #f39c12; /* Borde naranja suave */
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 20px;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+input.form-control:focus {
+  border-color: #e67e22; /* Borde más intenso al enfocar */
+  outline: none;
+  box-shadow: 0 0 5px rgba(230, 126, 34, 0.4);
+}
+
+#categoria-buttons button,
+#subcategoria-buttons button,
+#recurso-buttons button,
+#serie-buttons button {
+  font-size: 22px;              /* 👈 ¡Más grande! */
+  font-weight: 700;             /* 👈 Bien marcadas */
+  padding: 1.2rem 1.5rem;       /* 👈 Más espacio interno */
+  border-radius: 12px;
+  background-color: #fff;
+  border: 2px solid #f39c12;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  line-height: 1.4;
+}
+
+/* Hover con más contraste */
+#categoria-buttons button:hover,
+#subcategoria-buttons button:hover,
+#recurso-buttons button:hover,
+#serie-buttons button:hover {
+  background-color: #fff3e0;
+  border-color: #e67e22;
+  box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
+}
+
+#menu-principal-buttons button {
+  font-size: 24px;              /* 👈 ¡Bien grande! */
+  font-weight: 700;             /* 👈 Letras marcadas */
+  padding: 1.2rem 1.5rem;       /* 👈 Espacio generoso */
+  border-radius: 12px;
+  background-color: #fff;
+  border: 2px solid #f39c12;    /* 👈 Borde naranja */
+  color: #333;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+#menu-principal-buttons button:hover {
+  background-color: #fff3e0;
+  border-color: #e67e22;
+  box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
+}
+
+/* Estilo para todos los botones generados dinámicamente con clases Bootstrap */
+.btn-outline-dark.btn-lg.d-flex {
+  font-size: 18px;              /* 👈 Más contenido */
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background-color: #fff;
+  border: 2px solid #f39c12;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  text-align: left;
+  line-height: 1.3;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Hover para esos botones */
+.btn-outline-dark.btn-lg.d-flex:hover {
+  background-color: #fff3e0;
+  border-color: #e67e22;
+  box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
+}
+
+/* Botones de opciones principales en step3 */
+#step3 button .badge-opcion + .flex-grow-1 {
+  font-size: 22px;              /* 👈 Igual que en pantallas anteriores */
+  font-weight: 700;
+  color: #333;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Botón completo con layout coherente */
+#step3 button:has(.badge-opcion) {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background-color: #fff;
+  border: 2px solid #f39c12;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+/* Hover coherente con estilo naranja */
+#step3 button:has(.badge-opcion):hover {
+  background-color: #fff3e0;
+  border-color: #e67e22;
+  box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
+}
+
+/* Tabla general con líneas más visibles */
+#tablaEPP,
+#tablaHerramientas,
+#tablaEPP-step,
+#tablaHerramientas-step {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #f39c12; /* 👈 borde externo más visible */
+}
+
+/* Encabezado con fondo naranja suave y líneas marcadas */
+#tablaEPP th,
+#tablaHerramientas th,
+#tablaEPP-step th,
+#tablaHerramientas-step th {
+  background-color: #fff3e0;   /* 👈 fondo naranja claro */
+  color: #e67e22;              /* 👈 texto naranja intenso */
+  font-weight: 700;
+  padding: 0.75rem;
+  border-bottom: 2px solid #f39c12; /* 👈 línea inferior más gruesa */
+  text-align: left;
+}
+
+/* Celdas con líneas más visibles */
+#tablaEPP td,
+#tablaHerramientas td,
+#tablaEPP-step td,
+#tablaHerramientas-step td {
+  padding: 0.6rem;
+  border-bottom: 1.5px solid #f1c27d; /* 👈 línea más marcada */
+  vertical-align: middle;
+}
+
+/* Hover en filas para mejor feedback */
+#tablaEPP tr:hover,
+#tablaHerramientas tr:hover,
+#tablaEPP-step tr:hover,
+#tablaHerramientas-step tr:hover {
+  background-color: #fff8f0;
+}
+
+/* Botones dentro de la tabla */
+#tablaEPP button,
+#tablaHerramientas button,
+#tablaEPP-step button,
+#tablaHerramientas-step button {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  background-color: #f39c12;
+  border: none;
+  color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+#tablaEPP button:hover,
+#tablaHerramientas button:hover,
+#tablaEPP-step button:hover,
+#tablaHerramientas-step button:hover {
+  background-color: #e67e22;
+}
+
+/* Fondo completo para el thead */
+#tablaEPP thead,
+#tablaHerramientas thead,
+#tablaEPP-step thead,
+#tablaHerramientas-step thead {
+  background-color: #f39c12;   /* Fondo naranja intenso */
+  color: #fff;                 /* Texto blanco para contraste */
+}
+
+/* Celdas del encabezado */
+#tablaEPP th,
+#tablaHerramientas th,
+#tablaEPP-step th,
+#tablaHerramientas-step th {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 0.75rem;
+  border-bottom: 2px solid #e67e22; /*Línea inferior más marcada */
+  text-align: left;
+  color: inherit; /* Hereda el blanco del thead */
+}
+/* Texto explicativo dentro de modales */
+.modal .modal-body,
+.modal .modal-body p,
+.modal .modal-body span,
+.modal .modal-body div {
+  font-size: 20px;         
+  font-weight: 700;    
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Título del modal */
+.modal .modal-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #e67e22;   
+}
+
+/* Botón flotante: Menú principal */
+#boton-flotante-menu-principal {
+  font-size: 18px;              /* 👈 Texto más grande */
+  font-weight: 700;
+  padding: 0.8rem 1.2rem;       /* 👈 Área de toque más generosa */
+  border-radius: 12px;
+  background-color: #f39c12;
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: background-color 0.3s ease;
+}
+
+/* Hover para Menú principal */
+#boton-flotante-menu-principal:hover {
+  background-color: #e67e22;
+}
+
+/* Botón flotante: Cerrar sesión */
+#boton-flotante-cerrar-sesion {
+  font-size: 18px;
+  font-weight: 700;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  background-color: #d9534f;
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: background-color 0.3s ease;
+}
+
+/* Hover para Cerrar sesión */
+#boton-flotante-cerrar-sesion:hover {
+  background-color: #c9302c;
+}
+
+/* Botón flotante: Menú principal */
+#boton-flotante-menu-principal {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1040;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 14px 22px;           /* 👈 Más área de toque */
+  border-radius: 12px;          /* 👈 Más redondeado */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  font-size: 18px;              /* 👈 Más grande */
+  font-weight: 700;             /* 👈 Más marcado */
+  cursor: pointer;
+  display: none;
+  transition: all 0.3s ease;
+}
+
+/* Botón flotante: Cerrar sesión */
+#boton-flotante-cerrar-sesion {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1040;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: none;
+  transition: all 0.3s ease;
+}
+
+/* Hover para ambos */
+#boton-flotante-menu-principal:hover {
+  background-color: #0b5ed7;
+}
+
+#boton-flotante-cerrar-sesion:hover {
+  background-color: #c82333;
+}
+
+/*icono casco seguridad*/
+.titulo-identificar {
+  font-size: 30px;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.icono-casco {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+/*icono flecha continuar*/
+.boton-continuar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icono-flecha {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/*icono cruz borrar*/
+.boton-borrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icono-cruz {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/*icono qr iniciar sesion*/
+.boton-qr {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icono-qr {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/*botones en general*/
+.boton-continuar,
+.boton-borrar,
+.boton-qr {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 22px !important;        /* ⬆️ Texto más grande */
+  font-weight: 600;
+  padding: 14px 24px;     /* ⬆️ Botón más alto y ancho */
+}
+
+.icono-flecha,
+.icono-cruz,
+.icono-qr {
+  width: 32px;            /* ⬆️ Ícono más grande */
+  height: 28px;
+  flex-shrink: 0;
+}
+
+/*boton qr*/
+.boton-qr-personalizado {
+  background-color: #3168ff !important; /* ejemplo: verde agua */
+  border-color: #3168ff !important;
+  color: #fff !important;
+  font-size: 22px !important;
+}
+
+.boton-qr-personalizado:hover {
+  background-color: #3168ff !important;
+  border-color: #3168ff !important;
+}
+
+/*icono herramienta tengo la herramienta en mano*/
+#titulo-step3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.icono-herramienta {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+
+.icono-opcion {
+  width: 35px;
+  height: 35px;
+  flex-shrink: 0;
+}
+
+/*icono saludo trabajador*/
+.saludo-trabajador {
+  display: flex;
+  justify-content: center; /* centra horizontalmente */
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.saludo-texto {
+  display: inline-block;
+}
+
+.icono-saludo {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+/*texto volver*/
+.texto-volver span {
+  font-size: 24px; /* Ajustá el tamaño que quieras */
+  font-weight: 600; /* Opcional: más grueso */
+}
+
+#titulo-step3 {
+  font-size: 32px; /* Ajustá el tamaño a gusto */
+  font-weight: 600; /* Opcional: más grueso */
+  font-weight: bold;
+}
+
+.texto-cancelar {
+  font-size: 25px !important;
+  font-weight: 600 !important;
+  font-weight: bold !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
