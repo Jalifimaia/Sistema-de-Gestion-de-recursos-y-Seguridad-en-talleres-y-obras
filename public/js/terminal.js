@@ -123,6 +123,23 @@ if (['step2','step3','step5','step6','step7','step9','step10'].includes(step)) {
   }
 }
 
+function reactivarReconocimientoActual() {
+  const step = getStepActivo();
+  if (esStepConReconocimientoLocal(step)) {
+    const fnName = `iniciarReconocimientoLocal${step.charAt(4).toUpperCase()}${step.slice(5)}`;
+    const fn = window[fnName];
+    if (typeof fn === 'function') {
+      fn();
+      console.log(`🎤 Reconocimiento local reactivado en ${step}`);
+    } else {
+      console.warn(`⚠️ No se encontró recogedor local para ${step}`);
+    }
+  } else {
+    safeStartRecognitionGlobal();
+    console.log('🎤 Reconocimiento global reactivado');
+  }
+}
+
 
 /*
 function safeStopRecognitionGlobal() {
@@ -401,32 +418,26 @@ function cerrarModalKiosco() {
   window.modalKioscoActivo = false;
   window._modalKioscoErrorMostrado = false;
 
-//reactivar el escaneo de devolucion por QR
-if (getStepActivo() === 'step9') {
-  try {
-    activarEscaneoDevolucionQR();
-    console.log('📷 Escáner QR reactivado tras cierre de modal');
-  } catch (e) {
-    console.warn('⚠️ No se pudo reactivar escáner QR en step9:', e);
+  // Reactivar escaneo QR si estamos en step9
+  if (getStepActivo() === 'step9') {
+    try {
+      activarEscaneoDevolucionQR();
+      console.log('📷 Escáner QR reactivado tras cierre de modal');
+    } catch (e) {
+      console.warn('⚠️ No se pudo reactivar escáner QR en step9:', e);
+    }
+
+    const btn = document.getElementById('btnConfirmarDevolucion');
+    if (btn && !btn.disabled) {
+      window._recogStep9PausadoPorModal = false;
+      iniciarReconocimientoLocalStep9();
+      console.log('🎤 Reconocimiento local step9 reactivado tras cierre de modal kiosco');
+    } else {
+      console.log('⏸️ No se reactiva recog step9: botón sigue deshabilitado');
+    }
   }
-}
 
-
-if (getStepActivo() === 'step9') {
-  const btn = document.getElementById('btnConfirmarDevolucion');
-  if (btn && !btn.disabled) {
-    window._recogStep9PausadoPorModal = false;
-    iniciarReconocimientoLocalStep9();
-    console.log('🎤 Reconocimiento local step9 reactivado tras cierre de modal kiosco');
-  } else {
-    console.log('⏸️ No se reactiva recog step9: botón sigue deshabilitado');
-  }
-}
-
-
-
-
-  // Limpiar reconocimiento local
+  // Limpiar reconocimiento local del modal
   try {
     const recog = modalEl._recogInstance;
     if (recog) {
@@ -441,14 +452,30 @@ if (getStepActivo() === 'step9') {
   modalEl._recogInstance = null;
   modalEl._lastTranscript = null;
 
-  // ✅ Resetear flag y reiniciar reconocimiento global
+  // ✅ Reactivar reconocimiento según el step
   try {
     recognitionGlobalPaused = false;
     safeStopRecognitionGlobal(); // por si quedó colgado
-    safeStartRecognitionGlobal();
-    console.log('🎤 Reconocimiento global reactivado tras cerrar modal kiosco');
+
+    const step = getStepActivo();
+    if (step === 'step10') {
+      abrirStepRecursos(true); // 🔁 fuerza reinicio completo
+      console.log('🔁 step10 reactivado tras cerrar modal kiosco');
+    } else if (esStepConReconocimientoLocal(step)) {
+      const fnName = `iniciarReconocimientoLocal${step.charAt(4).toUpperCase()}${step.slice(5)}`;
+      const fn = window[fnName];
+      if (typeof fn === 'function') {
+        fn();
+        console.log(`🎤 Reconocimiento local ${step} reactivado tras cerrar modal kiosco`);
+      } else {
+        console.warn(`⚠️ No se encontró recogedor local para ${step}`);
+      }
+    } else {
+      safeStartRecognitionGlobal();
+      console.log('🎤 Reconocimiento global reactivado tras cerrar modal kiosco');
+    }
   } catch (e) {
-    console.warn('⚠️ No se pudo reiniciar reconocimiento global:', e);
+    console.warn('⚠️ No se pudo reiniciar reconocimiento tras cerrar modal kiosco', e);
   }
 
   // Ocultar backdrop manual si lo usás
@@ -457,8 +484,7 @@ if (getStepActivo() === 'step9') {
 
   document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
   document.body.classList.remove('modal-open');
-  document.body.style.overflow = ''; // por si quedó bloqueado
-
+  document.body.style.overflow = '';
 }
 
 
@@ -2977,7 +3003,8 @@ function handleStep10Pagina(numero) {
     renderTablaRecursosStep('tablaHerramientas-step', window.recursosHerramientas || [], numero, 'paginadorHerramientas-step');
     return;
   }
-
+  
+  console.log(`📄 handleStep10Pagina: solicitando página ${numero}`);
   getRenderer('mostrarMensajeKiosco')('No se detectó el tab activo', 'warning');
 }
 
@@ -3291,6 +3318,8 @@ function mostrarModalCerrarSesion() {
   }
 
   function onCancelar() {
+    reactivarReconocimientoActual();
+
     try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
     modalEl._opening = false;
     recognitionGlobalPaused = false;
@@ -3670,6 +3699,9 @@ function reactivarReconocimientoGlobal() {
 // LOCALES
 //===============================
 function iniciarReconocimientoLocalStep2() {
+
+  window.iniciarReconocimientoLocalStep2 = iniciarReconocimientoLocalStep2;
+
   if (!('webkitSpeechRecognition' in window)) return;
 
   const recog = new webkitSpeechRecognition();
@@ -3718,6 +3750,9 @@ function iniciarReconocimientoLocalStep2() {
 }
 
 function iniciarReconocimientoLocalStep3() {
+
+  window.iniciarReconocimientoLocalStep3 = iniciarReconocimientoLocalStep3;
+
   if (!('webkitSpeechRecognition' in window)) return;
 
   const recog = new webkitSpeechRecognition();
@@ -3767,6 +3802,9 @@ function iniciarReconocimientoLocalStep3() {
 }
 
 function iniciarReconocimientoLocalStep5() {
+
+  window.iniciarReconocimientoLocalStep5 = iniciarReconocimientoLocalStep5;
+
   if (!('webkitSpeechRecognition' in window)) return;
 
   const recog = new webkitSpeechRecognition();
@@ -3816,6 +3854,9 @@ function iniciarReconocimientoLocalStep5() {
 }
 
 function iniciarReconocimientoLocalStep6() {
+
+  window.iniciarReconocimientoLocalStep6 = iniciarReconocimientoLocalStep6;
+
   if (!('webkitSpeechRecognition' in window)) return;
 
   const recog = new webkitSpeechRecognition();
@@ -3881,6 +3922,9 @@ function iniciarReconocimientoLocalStep6() {
 }
 
 function iniciarReconocimientoLocalStep7() {
+
+  window.iniciarReconocimientoLocalStep7 = iniciarReconocimientoLocalStep7;
+
   if (!('webkitSpeechRecognition' in window)) return;
 
   const recog = new webkitSpeechRecognition();
@@ -3942,6 +3986,9 @@ function iniciarReconocimientoLocalStep7() {
 }
 
 function iniciarReconocimientoLocalStep9() {
+
+  window.iniciarReconocimientoLocalStep9 = iniciarReconocimientoLocalStep9;
+
   if (!('webkitSpeechRecognition' in window)) return;
 
   const recog = new webkitSpeechRecognition();
@@ -4024,6 +4071,14 @@ function reactivarReconocimientoLocalStep9SiAplica() {
 }
 
 function iniciarReconocimientoLocalStep10() {
+
+  if (window._recogStep10 && typeof window._recogStep10.stop === 'function') {
+  try { window._recogStep10.stop(); } catch (e) {}
+  window._recogStep10 = null;
+}
+
+  window.iniciarReconocimientoLocalStep10 = iniciarReconocimientoLocalStep10;
+
   if (!('webkitSpeechRecognition' in window)) return;
 
   const recog = new webkitSpeechRecognition();
@@ -4086,24 +4141,29 @@ function iniciarReconocimientoLocalStep10() {
     console.log('⚠️ [step10] Comando no reconocido:', limpio);
   };
 
-  recog.onerror = function(e) {
-    console.warn('[step10] Error en reconocimiento local:', e);
-    if (e.error === 'aborted') {
-  console.log('⏸️ Abortado, pero se reinicia recogedor local step10');
-}
+recog.onerror = function(e) {
+  console.warn('[step10] Error en reconocimiento local:', e);
+  if (e.error === 'aborted') {
+    console.log('⏸️ Abortado, pero se reinicia recogedor local step10');
+  }
 
-    try {
-      recog.stop();
-      setTimeout(() => {
-        if (getStepActivo() === 'step10') {
-          console.log('🔁 Reiniciando recogedor local step10 tras error');
-          iniciarReconocimientoLocalStep10();
-        }
-      }, 200);
-    } catch (err) {
-      console.warn('No se pudo reiniciar recogedor local step10 tras error', err);
+  if (getStepActivo() !== 'step10') return;
+
+  try {
+    recog.stop();
+  } catch (err) {}
+
+  setTimeout(() => {
+    if (!window._recogStep10) {
+      console.log('🔁 Reiniciando recogedor local step10 tras error');
+      iniciarReconocimientoLocalStep10();
+    } else {
+      console.log('⏸️ recogedor step10 ya activo, no se reinicia');
     }
-  };
+  }, 300);
+};
+
+
 
   try {
     safeStopRecognitionGlobal();
@@ -4115,6 +4175,23 @@ function iniciarReconocimientoLocalStep10() {
 
   window._recogStep10 = recog;
 }
+
+function reiniciarReconocimientoLocalDelStepActual() {
+  const step = getStepActivo();
+  const fnName = `iniciarReconocimientoLocal${step.charAt(4).toUpperCase()}${step.slice(5)}`;
+  const fn = window[fnName];
+  if (typeof fn === 'function') {
+    try {
+      fn();
+      console.log(`🎤 recogedor local reiniciado en ${step}`);
+    } catch (e) {
+      console.warn(`⚠️ Error al reiniciar recogedor local en ${step}`, e);
+    }
+  } else {
+    console.warn(`⚠️ No se encontró función para reiniciar recogedor en ${step}`);
+  }
+}
+
 
 function procesarComandosGlobalesDesdeLocal(limpio) {
   if (!limpio || typeof limpio !== 'string') return false;
@@ -4136,9 +4213,25 @@ function procesarComandosGlobalesDesdeLocal(limpio) {
       console.log('🔴 comando global: cancelar modal cerrar sesión');
       try { bootstrap.Modal.getInstance(modalCerrar)?.hide(); } catch (e) {}
       recognitionGlobalPaused = false;
-      if (!esStepConReconocimientoLocal(step)) {
+
+      if (esStepConReconocimientoLocal(step)) {
+        // ✅ Reiniciar recogedor local del step actual
+        try {
+          const fnName = `iniciarReconocimientoLocal${step.charAt(4).toUpperCase()}${step.slice(5)}`;
+          const fn = window[fnName];
+          if (typeof fn === 'function') {
+            fn();
+            console.log(`🎤 recogedor local reiniciado tras cancelar en ${step}`);
+          } else {
+            console.warn(`⚠️ No se encontró función para reiniciar recogedor en ${step}`);
+          }
+        } catch (e) {
+          console.warn(`⚠️ Error al reiniciar recogedor local en ${step}`, e);
+        }
+      } else {
         safeStartRecognitionGlobal();
       }
+
       return true;
     }
   }
