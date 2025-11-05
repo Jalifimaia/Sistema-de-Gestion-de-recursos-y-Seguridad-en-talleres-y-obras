@@ -42,7 +42,21 @@ function safeStopRecognitionGlobal() {
 }
 
 function safeStartRecognitionGlobal() {
-    if (window.recognitionGlobalPaused) {
+    
+
+  if (document.getElementById('modalCerrarSesion')?.classList.contains('show')) {
+  console.log('⛔️ safeStartRecognitionGlobal: bloqueado por modalCerrarSesion activo');
+  return;
+}
+
+  const step = getStepActivo();
+if (['step2','step3','step5','step6','step7','step9','step10'].includes(step)) {
+  console.log(`⛔️ safeStartRecognitionGlobal: bloqueado en ${step}`);
+  return;
+}
+
+
+  if (window.recognitionGlobalPaused) {
     console.log('⏸️ safeStartRecognitionGlobal: pausado, no se inicia');
     return;
   }
@@ -3268,7 +3282,10 @@ function mostrarModalCerrarSesion() {
     ejecutarCerrarSesion();
     setTimeout(() => {
       recognitionGlobalPaused = false;
-      safeStartRecognitionGlobal();
+      const step = getStepActivo();
+      if (!esStepConReconocimientoLocal(step)) {
+        safeStartRecognitionGlobal();
+      }
       console.log('🎤 recognitionGlobal: reiniciado tras aceptar cierre de sesión');
     }, 120);
   }
@@ -3277,7 +3294,10 @@ function mostrarModalCerrarSesion() {
     try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
     modalEl._opening = false;
     recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal();
+    const step = getStepActivo();
+    if (!esStepConReconocimientoLocal(step)) {
+      safeStartRecognitionGlobal();
+    }
     console.log('🎤 recognitionGlobal: reiniciado tras cancelar cierre de sesión');
   }
 
@@ -3290,81 +3310,101 @@ function mostrarModalCerrarSesion() {
     const modal = new bootstrap.Modal(modalEl);
     modal.show();
   } catch (e) {
-    if (confirm('¿Desea cerrar sesion')) {
+    if (confirm('¿Desea cerrar sesión?')) {
       onAceptar();
     } else {
       onCancelar();
     }
   }
 
+  // 🛑 Detenemos todos los recogedores locales antes de iniciar el del modal
+  detenerTodosLosRecogedoresLocales(); // ← ESTE ES EL PUNTO CLAVE QUE TE MENCIONÉ
+
   // 🎤 Reconocimiento de voz local dentro del modal
   try {
     if ('webkitSpeechRecognition' in window) {
+      detenerTodosLosRecogedoresLocales(); // ← Esto garantiza exclusividad
+
       const recog = new webkitSpeechRecognition();
       recog.lang = 'es-ES';
       recog.continuous = true;
       recog.interimResults = false;
 
+      modalEl._actionTaken = false;
+
       recog.onresult = function (event) {
-  const textoRec = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
-  console.log('🎤 Texto reconocido (modal cerrar sesión):', textoRec);
-  if (modalEl._actionTaken) return;
+        const textoRec = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+        const limpio = normalizarTexto(textoRec);
+        console.log('🎤 Texto reconocido (modal cerrar sesión):', limpio);
 
-  if (textoRec.includes('acept') || textoRec.includes('confirm')) {
-    modalEl._actionTaken = true;
-    console.log('🟢 cerrar sesión: voz reconocida como aceptar');
-    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch(e){}
-    ejecutarCerrarSesion();
-    setTimeout(() => {
-      recognitionGlobalPaused = false;
-      safeStartRecognitionGlobal();
-      console.log('🎤 recognitionGlobal: reiniciado tras aceptar por voz');
-    }, 120);
-    try { recog.stop(); } catch(e){}
-  } else if (textoRec.includes('cancel')) {
-    modalEl._actionTaken = true;
-    console.log('🔴 cerrar sesión: voz reconocida como cancelar');
-    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch(e){}
-    recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal();
-    try { recog.stop(); } catch(e){}
-  } else {
-    console.log('⚠️ cerrar sesión: voz reconocida pero no válida → ignorada');
-    
-    try {
-  recog.stop();
-  setTimeout(() => {
-    try {
-      recog.start();
-      console.log('🔁 reconocimiento local (modal cerrar sesión) reiniciado tras comando no válido');
-    } catch (err) {
-      if (err.name === 'InvalidStateError') {
-        console.log('⚠️ recog.start() ignorado: ya estaba iniciado');
-      } else {
-        console.warn('⚠️ recog.start() falló:', err);
-      }
-    }
-  }, 200);
-} catch (e) {
-  console.warn('⚠️ recog.stop() falló antes de reiniciar:', e);
-}
+        if (modalEl._actionTaken || !modalEl.classList.contains('show')) return;
 
-  }
-};
+        if (limpio === 'aceptar') {
+          modalEl._actionTaken = true;
+          console.log('🟢 cerrar sesión: voz reconocida como aceptar');
+          setTimeout(() => {
+            try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch(e){}
+            ejecutarCerrarSesion();
+          }, 50);
+          return;
+        }
 
+        if (limpio === 'cancelar') {
+          modalEl._actionTaken = true;
+          console.log('🔴 cerrar sesión: voz reconocida como cancelar');
+          setTimeout(() => {
+            try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch(e){}
+            recognitionGlobalPaused = false;
+            const step = getStepActivo();
+            if (!esStepConReconocimientoLocal(step)) {
+              safeStartRecognitionGlobal();
+            }
+          }, 50);
+          return;
+        }
 
+        console.log('⚠️ cerrar sesión: comando no reconocido → ignorado:', limpio);
+        try {
+          recog.stop();
+          setTimeout(() => {
+            try {
+              recog.start();
+              console.log('🔁 reconocimiento local (modal cerrar sesión) reiniciado tras comando no válido');
+            } catch (err) {
+              if (err.name === 'InvalidStateError') {
+                console.log('⚠️ recog.start() ignorado: ya estaba iniciado');
+              } else {
+                console.warn('⚠️ recog.start() falló:', err);
+              }
+            }
+          }, 200);
+        } catch (e) {
+          console.warn('⚠️ recog.stop() falló antes de reiniciar:', e);
+        }
+      };
 
       recog.onerror = function (e) {
         console.warn('Reconocimiento modal cerrar sesión falló', e);
+        if (e.error === 'aborted') {
+          console.log('⛔️ recog modal abortado, no se reinicia');
+          return;
+        }
+        try {
+          recog.stop();
+          setTimeout(() => {
+            recog.start();
+            console.log('🔁 recog modal reiniciado tras error');
+          }, 300);
+        } catch (err) {
+          console.warn('⚠️ recog modal reinicio falló:', err);
+        }
       };
 
+
       modalEl._recogInstance = recog;
-      try {
-        recog.start();
-        console.log('🎤 reconocimiento local (modal cerrar sesión) iniciado');
-      } catch (e) {
-        console.warn('No se pudo iniciar recog modal cerrar sesión', e);
-      }
+      window._recogCerrarSesion = recog; // ← Guardamos como si fuera un step exclusivo
+      recog.start();
+      console.log('🎤 reconocimiento local (modal cerrar sesión) iniciado');
     }
   } catch (e) {
     console.warn('No se pudo crear reconocimiento modal cerrar sesión', e);
@@ -3386,12 +3426,17 @@ function mostrarModalCerrarSesion() {
     }
     modalEl._recogInstance = null;
     modalEl._actionTaken = false;
+    window._recogCerrarSesion = null; // ← Limpiamos como cualquier recogedor de step
+
     recognitionGlobalPaused = false;
-    try {
-      safeStartRecognitionGlobal();
-      console.log('🎤 recognitionGlobal: reiniciado tras cerrar modal de sesión');
-    } catch (e) {
-      console.warn('⚠️ No se pudo reiniciar reconocimiento tras cerrar modal de sesión', e);
+    const step = getStepActivo();
+    if (!esStepConReconocimientoLocal(step)) {
+      try {
+        safeStartRecognitionGlobal();
+        console.log('🎤 recognitionGlobal: reiniciado tras cerrar modal de sesión');
+      } catch (e) {
+        console.warn('⚠️ No se pudo reiniciar reconocimiento tras cerrar modal de sesión', e);
+      }
     }
   };
   modalEl.addEventListener('hidden.bs.modal', onHidden, { once: true });
@@ -3639,6 +3684,9 @@ function iniciarReconocimientoLocalStep2() {
   console.log('🎤 [step2] Reconocido (interim):', limpio);
 
   
+    // comandos globales de menu principal y cerrar sesion
+    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
+
     if (matchOpcion(limpio, 1, "herramienta en mano")) {
       mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
       setModoEscaneo('manual');
@@ -3649,9 +3697,6 @@ function iniciarReconocimientoLocalStep2() {
     } else if (matchOpcion(limpio, 3, "ver recursos", "recursos asignados")) {
       mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
       cargarRecursos().then(() => abrirStepRecursos());
-    } else if (matchOpcion(limpio, 4, "volver", "inicio", "cerrar")) {
-      mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
-      volverAInicio();
     } else {
       mostrarMensajeKiosco('⚠️ Comando no reconocido en menú principal', 'info');
     }
@@ -3685,7 +3730,10 @@ function iniciarReconocimientoLocalStep3() {
     const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
     const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
     console.log('🎤 [step3] Reconocido (interim):', limpio);
-
+  
+    // comandos globales de menu principal y cerrar sesion
+    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
+   
     if (matchOpcion(limpio, 1, "qr", "escanear")) {
       mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
       activarEscaneoQRregistroRecursos();
@@ -3731,7 +3779,10 @@ function iniciarReconocimientoLocalStep5() {
     const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
     const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
     console.log('🎤 [step5] Reconocido (interim):', limpio);
-
+  
+    // comandos globales de menu principal y cerrar sesion
+    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
+   
     if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
       mostrarMensajeKiosco(step5ReturnTarget === 3 ? '🎤 Volver a "herramienta en mano"' : '🎤 Volver al menú principal', 'success');
       nextStep(step5ReturnTarget);
@@ -3777,7 +3828,10 @@ function iniciarReconocimientoLocalStep6() {
     const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
     const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
     console.log('🎤 [step6] Reconocido (interim):', limpio);
-
+  
+    // comandos globales de menu principal y cerrar sesion
+    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
+   
     // Volver
     if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
       mostrarMensajeKiosco('🎤 Volver a categorías', 'success');
@@ -3839,7 +3893,10 @@ function iniciarReconocimientoLocalStep7() {
     const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
     const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
     console.log('🎤 [step7] Reconocido (interim):', limpio);
-
+  
+    // comandos globales de menu principal y cerrar sesion
+    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
+   
     // Volver
     if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
       mostrarMensajeKiosco('🎤 Volver a subcategorías', 'success');
@@ -3897,7 +3954,10 @@ function iniciarReconocimientoLocalStep9() {
     const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
     const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
     console.log('🎤 [step9] Reconocido (interim):', limpio);
-
+  
+    // comandos globales de menu principal y cerrar sesion
+    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
+   
     if (/\b(confirmar|confirm)\b/.test(limpio)) {
       const btn = document.getElementById('btnConfirmarDevolucion');
       if (btn && !btn.disabled) {
@@ -3977,6 +4037,10 @@ function iniciarReconocimientoLocalStep10() {
     const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
     console.log('🎤 [step10] Reconocido (interim):', limpio);
 
+    // comandos globales de menu principal y cerrar sesion
+    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
+
+
     if (esComandoVolver(limpio) || /\b(volver)\b/.test(limpio)) {
       recognitionGlobalPaused = false;
       safeStartRecognitionGlobal();
@@ -4050,6 +4114,51 @@ function iniciarReconocimientoLocalStep10() {
   }
 
   window._recogStep10 = recog;
+}
+
+function procesarComandosGlobalesDesdeLocal(limpio) {
+  if (!limpio || typeof limpio !== 'string') return false;
+
+  const texto = normalizarTexto(limpio).trim();
+  const step = getStepActivo();
+  const modalCerrar = document.getElementById('modalCerrarSesion');
+
+  // ✅ Solo si el modal está visible, procesamos “aceptar” y “cancelar”
+  if (modalCerrar?.classList.contains('show')) {
+    if (texto === 'aceptar') {
+      console.log('🟢 comando global: aceptar modal cerrar sesión');
+      try { bootstrap.Modal.getInstance(modalCerrar)?.hide(); } catch (e) {}
+      ejecutarCerrarSesion();
+      return true;
+    }
+
+    if (texto === 'cancelar') {
+      console.log('🔴 comando global: cancelar modal cerrar sesión');
+      try { bootstrap.Modal.getInstance(modalCerrar)?.hide(); } catch (e) {}
+      recognitionGlobalPaused = false;
+      if (!esStepConReconocimientoLocal(step)) {
+        safeStartRecognitionGlobal();
+      }
+      return true;
+    }
+  }
+
+  // 🔒 Bloquear "cerrar sesión" en step1
+  if (step !== 'step1' && /\b(cerrar sesión|cerrar sesion)\b/.test(texto)) {
+    mostrarModalCerrarSesion();
+    return true;
+  }
+
+  // 🔒 Bloquear "menu principal" en step1 y step2
+  if (step !== 'step1' && step !== 'step2' && /\b(menu principal)\b/.test(texto)) {
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+    nextStep(2);
+    getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
+    return true;
+  }
+
+  return false;
 }
 
 
@@ -4338,6 +4447,36 @@ for (const frase of frasesInicioClave) {
 
 }
 
+function detenerTodosLosRecogedoresLocales() {
+  const recogKeys = [
+    '_recogStep2',
+    '_recogStep3',
+    '_recogStep5',
+    '_recogStep6',
+    '_recogStep7',
+    '_recogStep9',
+    '_recogStep10',
+    '_recogCerrarSesion'
+
+  ];
+  recogKeys.forEach(key => {
+    try {
+      if (window[key]) {
+        window[key].stop();
+        console.log(`🛑 ${key} detenido`);
+      }
+    } catch (e) {
+      console.warn(`⚠️ No se pudo detener ${key}`, e);
+    }
+  });
+}
+
+function esStepConReconocimientoLocal(step) {
+  return ['step2','step3','step5','step6','step7','step9','step10'].includes(step);
+}
+
+
+
 // Export CommonJS para tests
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { parsearClavePorVoz };
@@ -4377,6 +4516,7 @@ function procesarComandoVoz(rawTexto) {
 
     const step = getStepActivo();
 
+    
     // boton permanente de cerrar sesión
     if (step !== 'step1') {
         if (/\b(cerrar sesión|cerrar sesion)\b/.test(limpio)) {
@@ -4386,7 +4526,7 @@ function procesarComandoVoz(rawTexto) {
         }
     }
 
-     // boton permanente de menu principal
+   /*  // boton permanente de menu principal
     if (step !== 'step1' && step !== 'step2') {
         if (/\b(menu principal)\b/.test(limpio)) {
         recognitionGlobalPaused = false;
@@ -4396,7 +4536,7 @@ function procesarComandoVoz(rawTexto) {
         return;
       }
     }
-
+*/
     // Si estamos en step10 (pantalla de recursos asignados) manejamos comandos allí
    /* if (step === 'step10') {
 
