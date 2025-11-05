@@ -42,6 +42,17 @@ function safeStopRecognitionGlobal() {
 }
 
 function safeStartRecognitionGlobal() {
+    if (window.recognitionGlobalPaused) {
+    console.log('⏸️ safeStartRecognitionGlobal: pausado, no se inicia');
+    return;
+  }
+
+  // Limpieza defensiva: evitar reinicio si ya está corriendo
+  if (recognitionRunning) {
+    console.log('⏸️ safeStartRecognitionGlobal: ya corriendo, no se reinicia');
+    return;
+  }
+  
   try {
     if (!('webkitSpeechRecognition' in window)) return;
 
@@ -427,6 +438,20 @@ function nextStep(n) {
       detenerEscaneoQRDevolucionSegura?.();
     } catch (e) {}
 
+    // 🧹 Limpiar recog local de step3 si estaba activo
+    try {
+      if (window._recogStep3) {
+        window._recogStep3.onresult = null;
+        window._recogStep3.onerror = null;
+        window._recogStep3.onend = null;
+        window._recogStep3.stop?.();
+        window._recogStep3 = null;
+      }
+    } catch (e) {
+      console.warn('nextStep: limpieza recog step3 falló', e);
+    }
+
+
     // Ocultar todos los steps
     document.querySelectorAll('.step').forEach(s => {
       s.classList.remove('active');
@@ -459,17 +484,26 @@ function nextStep(n) {
     // Acciones específicas por step
     if (n === 2) {
       cargarMenuPrincipal();
+      pausarReconocimientoGlobal();
+  iniciarReconocimientoLocalStep2();
+     // recognitionGlobalPaused = true;
+     // safeStopRecognitionGlobal();
+     // iniciarReconocimientoLocalStep2(); // 👈 nuevo
+    }
+
+    if (n === 3) {
       recognitionGlobalPaused = true;
       safeStopRecognitionGlobal();
-      iniciarReconocimientoLocalStep2(); // 👈 nuevo
+      iniciarReconocimientoLocalStep3();
     }
+
 
     if (n === 5) {
       cargarCategorias();
     }
 
     // Reiniciar reconocimiento global si no es step2
-    if (n !== 2) {
+    if (n !== 2  && n !== 3) {
       recognitionGlobalPaused = false;
       safeStopRecognitionGlobal();
       setTimeout(() => {
@@ -2938,20 +2972,18 @@ function iniciarReconocimientoGlobal() {
     procesarComandoVoz(limpio);
   };
 
- recognitionGlobal.onend = () => {
+recognitionGlobal.onend = () => {
   recognitionRunning = false;
   console.log("ℹ️ recognitionGlobal onend");
-  // Si est\u00E1 pausado, no reiniciamos. Si no está pausado, delegamos a safeStartRecognitionGlobal (que comprueba estados)
-  if (!recognitionGlobalPaused) {
-    try {
-      safeStartRecognitionGlobal();
-    } catch (e) {
-      console.warn('onend: safeStartRecognitionGlobal falló', e);
-    }
-  } else {
-    console.log("ℹ️ Reconocimiento global pausado, no se reinicia");
+
+  if (recognitionGlobalPaused) {
+    console.log("⏸️ recognitionGlobal.onend: pausado, no se reinicia");
+    return;
   }
+
+  safeStartRecognitionGlobal();
 };
+
 
 
   try {
@@ -3469,7 +3501,25 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 
-//====step 2 local======
+//globales
+function pausarReconocimientoGlobal() {
+  recognitionGlobalPaused = true;
+  safeStopRecognitionGlobal();
+  console.log('🛑 Reconocimiento global pausado');
+}
+
+function reactivarReconocimientoGlobal() {
+  recognitionGlobalPaused = false;
+  safeStartRecognitionGlobal();
+  console.log('🎤 Reconocimiento global reactivado');
+}
+
+
+
+//===============================
+// STEPS 
+// LOCALES
+//===============================
 function iniciarReconocimientoLocalStep2() {
   if (!('webkitSpeechRecognition' in window)) return;
 
@@ -3516,6 +3566,52 @@ function iniciarReconocimientoLocalStep2() {
 
   recog.start();
   window._recogStep2 = recog;
+}
+
+function iniciarReconocimientoLocalStep3() {
+  if (!('webkitSpeechRecognition' in window)) return;
+
+  const recog = new webkitSpeechRecognition();
+  recog.lang = 'es-ES';
+  recog.continuous = true;
+  recog.interimResults = true;
+
+  recog.onresult = function (event) {
+    const lastIndex = event.results.length - 1;
+    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
+    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
+    console.log('🎤 [step3] Reconocido (interim):', limpio);
+
+    if (matchOpcion(limpio, 1, "qr", "escanear")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
+      activarEscaneoQRregistroRecursos();
+    } else if (limpio.includes("cancelar")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
+      cancelarEscaneoQRregistroRecursos();
+    } else if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
+      step5ReturnTarget = 3;
+      detenerEscaneoQRregistroRecursos(5);
+    } else if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
+      detenerEscaneoQRregistroRecursos(2);
+    } else {
+      //mostrarMensajeKiosco('⚠️ Comando no reconocido en escaneo QR', 'info');
+    }
+  };
+
+  recog.onerror = function (e) {
+    console.warn('[step3] Error en reconocimiento local:', e);
+  };
+
+  recog.onend = function () {
+    if (getStepActivo() === 'step3') {
+      try { recog.start(); } catch (e) { console.warn('[step3] No se pudo reiniciar recog:', e); }
+    }
+  };
+
+  recog.start();
+  window._recogStep3 = recog;
 }
 
 
@@ -4021,7 +4117,7 @@ function procesarComandoVoz(rawTexto) {
       console.log("⚠️ Step2: No se reconoció comando válido");
       return;
     }
-*/
+*
     // === Step3: Escaneo QR ===
     if (step === 'step3') {
       if (matchOpcion(limpio, 1, "qr", "escanear")) {
@@ -4048,7 +4144,7 @@ function procesarComandoVoz(rawTexto) {
       console.log("⚠️ Step3: No se reconoció ningún comando válido");
       return;
     }
-
+*/
     // === Step5, Step6, Step7, Step8 handling (botones + paginación) ===
     // Delegamos a bloques ya implementados en tu código original
     if (step === 'step5') {
