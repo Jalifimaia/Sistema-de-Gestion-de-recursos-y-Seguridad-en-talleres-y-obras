@@ -451,6 +451,19 @@ function nextStep(n) {
       console.warn('nextStep: limpieza recog step3 falló', e);
     }
 
+    // 🧹 Limpiar recog local de step5 si estaba activo
+try {
+  if (window._recogStep5) {
+    window._recogStep5.onresult = null;
+    window._recogStep5.onerror = null;
+    window._recogStep5.onend = null;
+    window._recogStep5.stop?.();
+    window._recogStep5 = null;
+  }
+} catch (e) {
+  console.warn('nextStep: limpieza recog step5 falló', e);
+}
+
 
     // Ocultar todos los steps
     document.querySelectorAll('.step').forEach(s => {
@@ -500,10 +513,13 @@ function nextStep(n) {
 
     if (n === 5) {
       cargarCategorias();
+      pausarReconocimientoGlobal();
+      iniciarReconocimientoLocalStep5();
     }
 
+
     // Reiniciar reconocimiento global si no es step2
-    if (n !== 2  && n !== 3) {
+    if (n !== 2  && n !== 3 && n !== 5) {
       recognitionGlobalPaused = false;
       safeStopRecognitionGlobal();
       setTimeout(() => {
@@ -3614,6 +3630,52 @@ function iniciarReconocimientoLocalStep3() {
   window._recogStep3 = recog;
 }
 
+function iniciarReconocimientoLocalStep5() {
+  if (!('webkitSpeechRecognition' in window)) return;
+
+  const recog = new webkitSpeechRecognition();
+  recog.lang = 'es-ES';
+  recog.continuous = true;
+  recog.interimResults = true;
+
+  recog.onresult = function (event) {
+    const lastIndex = event.results.length - 1;
+    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
+    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
+    console.log('🎤 [step5] Reconocido (interim):', limpio);
+
+    if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
+      mostrarMensajeKiosco(step5ReturnTarget === 3 ? '🎤 Volver a "herramienta en mano"' : '🎤 Volver al menú principal', 'success');
+      nextStep(step5ReturnTarget);
+      return;
+    }
+
+    const botonesCat = document.querySelectorAll('#categoria-buttons button');
+    for (let i = 0; i < botonesCat.length; i++) {
+      const btn = botonesCat[i];
+      if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) {
+        btn.click();
+        return;
+      }
+    }
+
+    mostrarMensajeKiosco('⚠️ Comando no reconocido en selección de categoría', 'info');
+  };
+
+  recog.onerror = function (e) {
+    console.warn('[step5] Error en reconocimiento local:', e);
+  };
+
+  recog.onend = function () {
+    if (getStepActivo() === 'step5') {
+      try { recog.start(); } catch (e) { console.warn('[step5] No se pudo reiniciar recog:', e); }
+    }
+  };
+
+  recog.start();
+  window._recogStep5 = recog;
+}
+
 
 function parsearClavePorVoz(texto) {
   if (!texto) return '';
@@ -4144,7 +4206,7 @@ function procesarComandoVoz(rawTexto) {
       console.log("⚠️ Step3: No se reconoció ningún comando válido");
       return;
     }
-*/
+*
     // === Step5, Step6, Step7, Step8 handling (botones + paginación) ===
     // Delegamos a bloques ya implementados en tu código original
     if (step === 'step5') {
@@ -4160,7 +4222,7 @@ function procesarComandoVoz(rawTexto) {
       }
       console.log("⚠️ Step5: Procesada entrada (si hubo coincidencias)");
       return;
-    }
+    }*/
 
     if (step === 'step6') {
       const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
