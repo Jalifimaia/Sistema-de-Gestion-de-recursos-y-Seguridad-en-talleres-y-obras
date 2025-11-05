@@ -14,23 +14,24 @@ class AuthenticatedSessionController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
+{
+    $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
 
-            // Registrar último acceso
-            Auth::user()->update(['ultimo_acceso' => now()]);
+        // Registrar último acceso
+        Auth::user()->update(['ultimo_acceso' => now()]);
 
-            return redirect()->intended('/dashboard');
-        }
-
-
-        return back()->withErrors([
-            'email' => 'Las credenciales no son válidas.',
-        ]);
+        return redirect()->intended('/dashboard');
     }
+
+    // Si falla, conservar el email y devolver error específico de contraseña
+    return back()
+        ->withInput($request->only('email'))
+        ->withErrors(['password' => 'La contraseña es incorrecta.']);
+}
+
 
     public function destroy(Request $request)
     {

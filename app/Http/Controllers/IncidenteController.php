@@ -61,7 +61,9 @@ public function store(Request $request)
         'recursos.*.id_recurso'      => 'required|exists:recurso,id',
         'recursos.*.id_serie_recurso'=> 'required|exists:serie_recurso,id',
         'descripcion' => 'required|string|max:255',
-        'fecha_incidente' => 'required|date',
+        'fecha_incidente' => 'required|date|before_or_equal:now',
+    ], [
+        'fecha_incidente.before_or_equal' => 'La fecha del incidente no puede ser mayor a hoy.',
     ]);
 
     $usuario = Usuario::where('id', $request->id_usuario)
@@ -78,7 +80,6 @@ public function store(Request $request)
         'id_estado_incidente' => $estadoRevision?->id,
     ]);
 
-    // Guardar recursos asociados
     foreach ($request->recursos as $recurso) {
         $incidente->recursos()->attach($recurso['id_recurso'], [
             'id_serie_recurso' => $recurso['id_serie_recurso'],
@@ -87,8 +88,6 @@ public function store(Request $request)
 
     return redirect()->route('incidente.create')->with('success', '✅ Incidente registrado correctamente.');
 }
-
-
 
 
     // =======================
