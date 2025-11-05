@@ -387,15 +387,17 @@ function quitarEmojis(texto) {
 //otras cosas
 function nextStep(n) {
   try {
-    // Limpieza defensiva: detener recog locales en steps antes de cambiar
+    // 🧹 Limpiar recog locales de todos los steps
     try {
       document.querySelectorAll('.step').forEach(s => {
         try {
           if (s._recogInstance) {
-            try { s._recogInstance.onresult = null; s._recogInstance.onerror = null; s._recogInstance.onend = null; } catch(e) {}
-            try { if (typeof s._recogInstance.stop === 'function') s._recogInstance.stop(); } catch(e) {}
+            s._recogInstance.onresult = null;
+            s._recogInstance.onerror = null;
+            s._recogInstance.onend = null;
+            s._recogInstance.stop?.();
           }
-        } catch(e){}
+        } catch (e) {}
         s._recogInstance = null;
         s._opening = false;
       });
@@ -403,33 +405,35 @@ function nextStep(n) {
       console.warn('nextStep: limpieza recog locales falló', e);
     }
 
-    // Cerrar modal de recursos si está abierto (compatibilidad legacy)
-    const modalEl = document.getElementById('modalRecursos');
-    if (modalEl) {
-      const modalInstance = (window.bootstrap && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function')
-        ? bootstrap.Modal.getInstance(modalEl)
-        : null;
-      if (modalInstance && typeof modalInstance.hide === 'function') {
-        try { modalInstance.hide(); } catch(e) { console.warn('nextStep: hide modalRecursos fallo', e); }
+    // 🧹 Limpiar recog local de step2 si estaba activo
+    try {
+      if (window._recogStep2) {
+        window._recogStep2.onresult = null;
+        window._recogStep2.onerror = null;
+        window._recogStep2.onend = null;
+        window._recogStep2.stop?.();
+        window._recogStep2 = null;
       }
+    } catch (e) {
+      console.warn('nextStep: limpieza recog step2 falló', e);
     }
 
-    // Detener escaneo QR en cualquier flow relevante (usamos las versiones seguras)
+    // 🛑 Detener escaneos QR
     try {
       detenerEscaneoQRregistroRecursos();
       cancelarEscaneoQRregistroRecursos();
       detenerEscaneoQRLogin();
       detenerEscaneoQRDevolucion();
-      try { detenerEscaneoQRDevolucionSegura && detenerEscaneoQRDevolucionSegura(); } catch(e){}
-      console.log('🛑 Escaneo QR detenido en nextStep');
-    } catch (e) { /* no bloquear flujo por errores en stop */ }
+      detenerEscaneoQRDevolucionSegura?.();
+    } catch (e) {}
 
     // Ocultar todos los steps
     document.querySelectorAll('.step').forEach(s => {
-      try { s.classList.remove('active'); s.classList.add('d-none'); } catch(e){}
+      s.classList.remove('active');
+      s.classList.add('d-none');
     });
 
-    // Activar el step deseado
+    // Activar el nuevo step
     const stepEl = document.getElementById('step' + n);
     if (stepEl && stepEl.classList) {
       stepEl.classList.remove('d-none');
@@ -438,7 +442,7 @@ function nextStep(n) {
       console.warn('nextStep: step element not found:', 'step' + n);
     }
 
-    // Desactivar botón de menú principal si estamos en step 2
+    // Botones flotantes
     const btnMenu = document.getElementById('boton-flotante-menu-principal');
     if (btnMenu) {
       if (n === 2) {
@@ -453,25 +457,32 @@ function nextStep(n) {
     }
 
     // Acciones específicas por step
-    try { if (n === 2) cargarMenuPrincipal(); } catch (e) { console.warn('nextStep: cargarMenuPrincipal falló', e); }
-    try { if (n === 5) window.cargarCategorias(); } catch (e) { console.warn('nextStep: cargarCategorias falló', e); }
-
-    // Reiniciar reconocimiento global al cambiar de step (con pequeño delay para evitar conflictos)
-    try {
+    if (n === 2) {
+      cargarMenuPrincipal();
+      recognitionGlobalPaused = true;
       safeStopRecognitionGlobal();
-      setTimeout(() => {
-        try { safeStartRecognitionGlobal(); console.log('🎤 Reconocimiento reiniciado tras cambio de step'); } catch(e){}
-      }, 300);
-    } catch (e) {
-      console.warn('⚠️ No se pudo reiniciar reconocimiento tras cambio de step', e);
+      iniciarReconocimientoLocalStep2(); // 👈 nuevo
     }
 
-    // Ajuste: actualizar visibilidad de botones flotantes si existe wrapper de nextStep envuelto
+    if (n === 5) {
+      cargarCategorias();
+    }
+
+    // Reiniciar reconocimiento global si no es step2
+    if (n !== 2) {
+      recognitionGlobalPaused = false;
+      safeStopRecognitionGlobal();
+      setTimeout(() => {
+        safeStartRecognitionGlobal();
+        console.log('🎤 Reconocimiento reiniciado tras cambio de step');
+      }, 300);
+    }
+
+    // Visibilidad de botones flotantes
     try {
       if (typeof window._nextStepWrappedVisibilityUpdater === 'function') {
         window._nextStepWrappedVisibilityUpdater('step' + n);
       } else {
-        // fallback local
         const ocultar = (n === 1 || 'step' + n === 'step1');
         const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
         const btnMenu2 = document.getElementById('boton-flotante-menu-principal');
@@ -484,6 +495,7 @@ function nextStep(n) {
     console.warn('nextStep: excepción general', err);
   }
 }
+
 
 
 function identificarTrabajador() {
@@ -3457,6 +3469,55 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 
+//====step 2 local======
+function iniciarReconocimientoLocalStep2() {
+  if (!('webkitSpeechRecognition' in window)) return;
+
+  const recog = new webkitSpeechRecognition();
+  recog.lang = 'es-ES';
+  recog.continuous = true;
+  recog.interimResults = true;
+
+  recog.onresult = function (event) {
+ const lastIndex = event.results.length - 1;
+  const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
+  const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
+  console.log('🎤 [step2] Reconocido (interim):', limpio);
+
+  
+    if (matchOpcion(limpio, 1, "herramienta en mano")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
+      setModoEscaneo('manual');
+    } else if (matchOpcion(limpio, 2, "solicitar herramienta")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
+      step5ReturnTarget = 2;
+      nextStep(5);
+    } else if (matchOpcion(limpio, 3, "ver recursos", "recursos asignados")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
+      cargarRecursos().then(() => abrirStepRecursos());
+    } else if (matchOpcion(limpio, 4, "volver", "inicio", "cerrar")) {
+      mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
+      volverAInicio();
+    } else {
+      mostrarMensajeKiosco('⚠️ Comando no reconocido en menú principal', 'info');
+    }
+  };
+
+  recog.onerror = function (e) {
+    console.warn('[step2] Error en reconocimiento local:', e);
+  };
+
+  recog.onend = function () {
+    // Reiniciar si el step sigue activo
+    if (getStepActivo() === 'step2') {
+      try { recog.start(); } catch (e) { console.warn('[step2] No se pudo reiniciar recog:', e); }
+    }
+  };
+
+  recog.start();
+  window._recogStep2 = recog;
+}
+
 
 function parsearClavePorVoz(texto) {
   if (!texto) return '';
@@ -3907,7 +3968,7 @@ function procesarComandoVoz(rawTexto) {
 }
 
 
-    // === Step2: Menú principal y navegación ===
+  /*  // === Step2: Menú principal y navegación ===
     if (step === 'step2') {
       // normalizar repeticiones
       const textoSimple = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
@@ -3960,7 +4021,7 @@ function procesarComandoVoz(rawTexto) {
       console.log("⚠️ Step2: No se reconoció comando válido");
       return;
     }
-
+*/
     // === Step3: Escaneo QR ===
     if (step === 'step3') {
       if (matchOpcion(limpio, 1, "qr", "escanear")) {
