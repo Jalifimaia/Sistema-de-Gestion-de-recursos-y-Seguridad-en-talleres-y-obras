@@ -22,7 +22,7 @@
       <h2 class="mb-4 text-center">Identificar Trabajador</h2>
 
       <input type="text" id="clave" class="form-control form-control-lg mb-4" placeholder="Ingresar clave ...">
-      <small class="text-muted d-block text-start mb-3">Deci "INGRESAR CLAVE" antes de decir tu clave</small>
+      <p class="text-muted d-block text-start mb-3">Deci <b>"INGRESAR CLAVE"</b> antes de decir tu clave</p>
 
 
       <button class="btn btn-primary btn-lg mb-3" onclick="identificarTrabajador()">Continuar</button>
