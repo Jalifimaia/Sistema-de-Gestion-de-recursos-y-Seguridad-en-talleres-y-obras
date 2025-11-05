@@ -218,7 +218,7 @@
 <div class="modal fade" id="modalFaltaResolucion" tabindex="-1" aria-labelledby="modalFaltaResolucionLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
+      <div class="modal-header bg-orange text-white">
         <h5 class="modal-title" id="modalFaltaResolucionLabel">Falta resolución</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
@@ -226,7 +226,7 @@
         Para marcar el incidente como <strong>Resuelto</strong>, debe ingresar una resolución.
       </div>
       <div class="modal-footer">
-        <button type="button" id="btnCompletarResolucion" class="btn btn-outline-danger" data-bs-dismiss="modal">Completar resolución</button>
+        <button type="button" id="btnCompletarResolucion" class="btn btn-outline-orange" data-bs-dismiss="modal">Completar resolución</button>
       </div>
     </div>
   </div>

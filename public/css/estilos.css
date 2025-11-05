@@ -93,6 +93,23 @@
 .toggle-btn.hidden {
   display: none;
 }
+.bg-orange {
+  background-color: #d06842;/* !important; /* Naranja Bootstrap */
+}
+
+.btn-outline-orange {
+  border: 1px solid #b85c3a; /* Borde naranja completo */
+  color: #b85c3a;            /* Texto naranja */
+  background-color: transparent;
+}
+
+.btn-outline-orange:hover {
+  background-color: #d06842; /* Naranja más fuerte al pasar el mouse */
+  color: white;
+  border-color: #d06842;
+}
+
+
 
 /* Ocultar botón ☰ cuando el sidebar está abierto */
 #sidebar.active ~ .toggle-btn {
