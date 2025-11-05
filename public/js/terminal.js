@@ -47,6 +47,12 @@ function safeStartRecognitionGlobal() {
     return;
   }
 
+  if (getStepActivo() === 'step10') {
+  console.log('⛔️ safeStartRecognitionGlobal: bloqueado en step10');
+  return;
+}
+
+
   // Limpieza defensiva: evitar reinicio si ya está corriendo
   if (recognitionRunning) {
     console.log('⏸️ safeStartRecognitionGlobal: ya corriendo, no se reinicia');
@@ -1465,6 +1471,14 @@ function volverARecursosAsignadosDesdeDevolucionQR() {
   } catch (e) {
     console.warn('⚠️ Error al ejecutar volver desde devolución QR', e);
   }
+
+setTimeout(() => {
+  if (getStepActivo() === 'step10') {
+    console.log('🔁 Reiniciando reconocimiento local step10 tras volver desde step9');
+    iniciarReconocimientoLocalStep10();
+  }
+}, 100);
+
 }
 
 // Bind del botón de confirmación
@@ -2710,8 +2724,8 @@ function volverDesdeStep5() {
   window.nextStep(step5ReturnTarget);
 }
 
-// modal de recursos asignados
-function abrirStepRecursos() {
+// step 10 - recursos asignados
+function abrirStepRecursos(forceRestart = false) {
   const stepId = 'step10';
   let stepEl = document.getElementById(stepId);
 
@@ -2751,22 +2765,18 @@ function abrirStepRecursos() {
       <div class="text-center mt-3">
         <button id="btnVolverStepRecursos" class="btn btn-primary">Volver</button>
       </div>
-
     `;
     document.querySelector('.container-kiosk')?.appendChild(stepEl);
   }
 
-  if (stepEl._opening) return;
+  if (stepEl._opening && !forceRestart) return;
   stepEl._opening = true;
 
   recognitionGlobalPaused = true;
   try { safeStopRecognitionGlobal(); } catch (e) { console.warn('abrirStepRecursos: safeStopRecognitionGlobal failed', e); }
 
-  // Mostrar step10 (nextStep ya oculta otros steps y maneja recognition restarts)
-  // pequeño delay para evitar races si lo necesitás
   try { nextStep(10); } catch (e) { console.warn('abrirStepRecursos: nextStep(10) falló', e); }
 
-  // asegurar estado visual inicial de tabs/panels
   try {
     const tabEPP = document.getElementById('tab-epp-step');
     const tabHerr = document.getElementById('tab-herramientas-step');
@@ -2778,25 +2788,22 @@ function abrirStepRecursos() {
     if (panelEPP) { panelEPP.classList.add('show','active'); }
     if (panelHerr) { panelHerr.classList.remove('show','active'); }
 
-    // Renderizar contenidos si ya están cargados
     if (window.recursosEPP) renderTablaRecursosStep('tablaEPP-step', window.recursosEPP, window.paginaEPPActual || 1, 'paginadorEPP-step');
     else document.getElementById('tablaEPP-step').innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
 
     if (window.recursosHerramientas) renderTablaRecursosStep('tablaHerramientas-step', window.recursosHerramientas, window.paginaHerramientasActual || 1, 'paginadorHerramientas-step');
   } catch (e) { console.warn('abrirStepRecursos: preparar UI falló', e); }
 
-  // listeners idempotentes
   try {
-      const btnVolver = document.getElementById('btnVolverStepRecursos');
-      if (btnVolver && !btnVolver._connected) {
-        btnVolver.addEventListener('click', () => {
-          recognitionGlobalPaused = false;
-          safeStartRecognitionGlobal();
-          nextStep(2);
-        });
-        btnVolver._connected = true;
-      }
-
+    const btnVolver = document.getElementById('btnVolverStepRecursos');
+    if (btnVolver && !btnVolver._connected) {
+      btnVolver.addEventListener('click', () => {
+        recognitionGlobalPaused = false;
+        safeStartRecognitionGlobal();
+        nextStep(2);
+      });
+      btnVolver._connected = true;
+    }
 
     const tabEPPBtn = document.getElementById('tab-epp-step');
     const tabHerrBtn = document.getElementById('tab-herramientas-step');
@@ -2822,57 +2829,11 @@ function abrirStepRecursos() {
     }
   } catch (e) { console.warn('abrirStepRecursos: conectar listeners falló', e); }
 
-  // reconocimiento local para step10 (gestiona comandos de cambio de tab, opción N y paginación)
   try {
-    const stepRec = stepEl;
-    if ('webkitSpeechRecognition' in window) {
-      if (stepRec._recogInstance) {
-        try { stepRec._recogInstance.onresult = null; stepRec._recogInstance.onerror = null; stepRec._recogInstance.stop(); } catch(e) {}
-        stepRec._recogInstance = null;
-      }
-      const recog = new webkitSpeechRecognition();
-      recog.lang = 'es-ES';
-      recog.continuous = true;
-      recog.interimResults = false;
-
-      recog.onresult = function(event) {
-        const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
-        const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-        // cerrar / volver
-        if (/\b(cerrar|cerrar recursos asignados|cerrar pantalla|cerrar modal)\b/.test(limpio)) {
-          try { recognitionGlobalPaused = false; safeStartRecognitionGlobal(); } catch(e) {}
-          nextStep(2);
-          getRenderer('mostrarMensajeKiosco')('Pantalla cerrada por voz', 'info');
-          return;
-        }
-        // tabs
-        const tabCambio = matchTabCambio(limpio);
-        if (tabCambio === 'epp') { document.getElementById('tab-epp-step')?.click(); getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP','success'); return; }
-        if (tabCambio === 'herramientas') { document.getElementById('tab-herramientas-step')?.click(); getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas','success'); return; }
-        // opcion N
-        const match = limpio.match(/opcion\s*(\d{1,2})/i);
-        if (match) { confirmarDevolucionPorVozStep10(parseInt(match[1],10)); return; }
-        // pagina N
-        const mp = limpio.match(/^pagina\s*(\d{1,2})$/i);
-        if (mp) { handleStep10Pagina(parseInt(mp[1],10)); return; }
-      };
-
-      recog.onerror = function (e) {
-  console.warn('Reconocimiento stepRecursos falló', e);
-  try {
-    recog.stop();
-    stepRec._recogInstance = null;
-    recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal(); // reactiva el global si el local falló
-    console.log('🎤 Reconocimiento global reactivado tras fallo en stepRecursos');
-  } catch (err) {
-    console.warn('No se pudo reiniciar reconocimiento global tras error local', err);
+    iniciarReconocimientoLocalStep10();
+  } catch (e) {
+    console.warn('abrirStepRecursos: iniciarReconocimientoLocalStep10 falló', e);
   }
-};
-      stepRec._recogInstance = recog;
-      try { recog.start(); console.log('🎤 reconocimiento local (stepRecursos) iniciado'); } catch(e) { console.warn('abrirStepRecursos recog.start falló', e); }
-    }
-  } catch (e) { console.warn('abrirStepRecursos: start local recog failed', e); }
 
   stepEl._opening = false;
 }
@@ -2883,20 +2844,28 @@ function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId
   const tabla = document.getElementById(tablaId);
   const paginador = document.getElementById(paginadorId);
   if (!tabla || !paginador) {
-    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+    try {
+      if (getStepActivo() !== 'step10') {
+        setTimeout(() => safeStartRecognitionGlobal(), 80);
+      }
+    } catch (e) {}
     return;
   }
 
   const porPagina = 5;
-  const totalPaginas = Math.max(1, Math.ceil((recursos||[]).length / porPagina));
+  const totalPaginas = Math.max(1, Math.ceil((recursos || []).length / porPagina));
   const inicio = (pagina - 1) * porPagina;
-  const visibles = (recursos||[]).slice(inicio, inicio + porPagina);
+  const visibles = (recursos || []).slice(inicio, inicio + porPagina);
 
   tabla.innerHTML = '';
   if (visibles.length === 0) {
     tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
     paginador.innerHTML = '';
-    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+    try {
+      if (getStepActivo() !== 'step10') {
+        setTimeout(() => safeStartRecognitionGlobal(), 80);
+      }
+    } catch (e) {}
     return;
   }
 
@@ -2928,14 +2897,21 @@ function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId
     const b = document.createElement('button');
     b.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
     b.textContent = `Pagina ${i}`;
-    b.onclick = () => { try { safeStopRecognitionGlobal(); } catch(e){}; setTimeout(() => renderTablaRecursosStep(tablaId, recursos, i, paginadorId), 60); };
+    b.onclick = () => {
+      try { safeStopRecognitionGlobal(); } catch (e) {}
+      setTimeout(() => renderTablaRecursosStep(tablaId, recursos, i, paginadorId), 60);
+    };
     paginador.appendChild(b);
   }
 
   if (tablaId === 'tablaEPP-step') window.paginaEPPActual = pagina;
   if (tablaId === 'tablaHerramientas-step') window.paginaHerramientasActual = pagina;
 
-  try { setTimeout(() => { safeStartRecognitionGlobal(); }, 80); } catch (e) {}
+  try {
+    if (getStepActivo() !== 'step10') {
+      setTimeout(() => safeStartRecognitionGlobal(), 80);
+    }
+  } catch (e) {}
 }
 
 function confirmarDevolucionPorVozStep10(index) {
@@ -3102,6 +3078,12 @@ recognitionGlobal.onend = () => {
     console.log("⏸️ recognitionGlobal.onend: pausado, no se reinicia");
     return;
   }
+
+  if (getStepActivo() === 'step10') {
+  console.log('⛔️ recognitionGlobal.onend: no se reinicia en step10');
+  return;
+}
+
 
   safeStartRecognitionGlobal();
 };
@@ -3981,6 +3963,96 @@ function reactivarReconocimientoLocalStep9SiAplica() {
   }
 }
 
+function iniciarReconocimientoLocalStep10() {
+  if (!('webkitSpeechRecognition' in window)) return;
+
+  const recog = new webkitSpeechRecognition();
+  recog.lang = 'es-ES';
+  recog.continuous = true;
+  recog.interimResults = true;
+
+  recog.onresult = function(event) {
+    const lastIndex = event.results.length - 1;
+    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
+    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
+    console.log('🎤 [step10] Reconocido (interim):', limpio);
+
+    if (esComandoVolver(limpio) || /\b(volver)\b/.test(limpio)) {
+      recognitionGlobalPaused = false;
+      safeStartRecognitionGlobal();
+      nextStep(2);
+      getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
+      return;
+    }
+
+    const tabCambio = matchTabCambio(limpio);
+    if (tabCambio === 'epp') {
+      document.getElementById('tab-epp-step')?.click();
+      getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
+      return;
+    }
+    if (tabCambio === 'herramientas') {
+      document.getElementById('tab-herramientas-step')?.click();
+      getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
+      return;
+    }
+
+    const match = limpio.match(/opcion\s*(\d{1,2})/i);
+    if (match) {
+      const index = parseInt(match[1], 10);
+      if (!isNaN(index)) {
+        confirmarDevolucionPorVozStep10(index);
+      } else {
+        getRenderer('mostrarMensajeKiosco')('Opción no reconocida', 'warning');
+      }
+      return;
+    }
+
+    const mp = limpio.match(/^pagina\s*(\d{1,2})$/i);
+    if (mp) {
+      const numero = parseInt(mp[1], 10);
+      if (!isNaN(numero)) {
+        handleStep10Pagina(numero);
+      } else {
+        getRenderer('mostrarMensajeKiosco')('Número de página no reconocido', 'warning');
+      }
+      return;
+    }
+
+    console.log('⚠️ [step10] Comando no reconocido:', limpio);
+  };
+
+  recog.onerror = function(e) {
+    console.warn('[step10] Error en reconocimiento local:', e);
+    if (e.error === 'aborted') {
+  console.log('⏸️ Abortado, pero se reinicia recogedor local step10');
+}
+
+    try {
+      recog.stop();
+      setTimeout(() => {
+        if (getStepActivo() === 'step10') {
+          console.log('🔁 Reiniciando recogedor local step10 tras error');
+          iniciarReconocimientoLocalStep10();
+        }
+      }, 200);
+    } catch (err) {
+      console.warn('No se pudo reiniciar recogedor local step10 tras error', err);
+    }
+  };
+
+  try {
+    safeStopRecognitionGlobal();
+    recog.start();
+    console.log('🎤 reconocimiento local (step10) iniciado');
+  } catch (e) {
+    console.warn('step10 recog.start falló', e);
+  }
+
+  window._recogStep10 = recog;
+}
+
+
 
 function parsearClavePorVoz(texto) {
   if (!texto) return '';
@@ -4326,7 +4398,7 @@ function procesarComandoVoz(rawTexto) {
     }
 
     // Si estamos en step10 (pantalla de recursos asignados) manejamos comandos allí
-    if (step === 'step10') {
+   /* if (step === 'step10') {
 
       if (esComandoVolver(limpio) || /\b(volver)\b/.test(limpio)) {
       recognitionGlobalPaused = false;
@@ -4373,7 +4445,7 @@ function procesarComandoVoz(rawTexto) {
 
       console.log('⚠️ step10: comando no reconocido', limpio);
       return;
-    }
+    }*/
 
     // Comandos globales cuando no estamos bloqueados por modales ni step10
     if (recognitionGlobalPaused) {
