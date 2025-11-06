@@ -5203,12 +5203,32 @@ if (modalRegistroVisible && esperandoAceptar) {
           return;
         }
       }
+
+        if (step !== 'step1' && step !== 'step2' && /\b(menu principal)\b/.test(texto)) {
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+    nextStep(2);
+    getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
+    return true;
+  }
       if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) { window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success'); window.nextStep(7); return; }
       const botonesSeries = document.querySelectorAll('#serie-buttons button');
       botonesSeries.forEach((btn, index) => { try { if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) { btn.click(); } } catch (e) { console.warn('Error al procesar botón serie', e); } });
       console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
       return;
+
+        // 🔒 Bloquear "menu principal" en step1 y step2
+
     }
+
+      // 🔒 Bloquear "cerrar sesión" en step1
+/*  if (step !== 'step1' && /\b(cerrar sesión|cerrar sesion)\b/.test(texto)) {
+    mostrarModalCerrarSesion();
+    return true;
+  }*/
+
+
+
 
     // === Step9: Devolución por QR ===
    /* if (step === 'step9') {
