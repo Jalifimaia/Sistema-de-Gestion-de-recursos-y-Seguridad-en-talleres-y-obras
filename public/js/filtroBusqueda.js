@@ -1,29 +1,59 @@
 document.addEventListener('DOMContentLoaded', function () {
   const filtroSelect = document.getElementById('filtroInventario');
-  if (filtroSelect) {
-    filtroSelect.addEventListener('change', function () {
-      const filtro = this.value;
-      const filas = document.querySelectorAll('table tbody tr');
+  const buscador = document.getElementById('buscador');
 
-      filas.forEach(fila => {
-        const categoria = fila.querySelector('td:nth-child(5)').textContent.trim().toLowerCase();
-        const estadoSerie = fila.querySelector('.estado-vencimiento')?.textContent?.toLowerCase() || '';
+  const normalizar = str => str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // elimina tildes
+    .replace(/\s+/g, ' ')
+    .trim();
 
-        let mostrar = true;
+  function filtrarFilas() {
+    const filtro = filtroSelect ? filtroSelect.value : 'todos';
+    const textoBusqueda = buscador ? normalizar(buscador.value) : '';
+    const filas = document.querySelectorAll('table tbody tr');
 
-        if (filtro === 'herramienta' && !categoria.includes('herramienta')) {
-          mostrar = false;
-        } else if (filtro === 'epp' && !categoria.includes('epp')) {
-          mostrar = false;
-        } else if (filtro === 'reparacion' && !estadoSerie.includes('reparación')) {
-          mostrar = false;
-        }
+    filas.forEach(fila => {
+      const categoria = normalizar(fila.querySelector('td:nth-child(4)')?.textContent || '');
+      const nombre = normalizar(fila.querySelector('td:nth-child(1)')?.textContent || '');
+      const estados = Array.from(fila.querySelectorAll('select option'))
+        .map(opt => opt.getAttribute('data-estado')?.toLowerCase())
+        .filter(Boolean);
 
-        fila.style.display = mostrar ? '' : 'none';
-      });
+      let mostrar = true;
+
+      // --- Filtro por tipo ---
+      if (filtro === 'herramienta' && !categoria.includes('herramienta')) mostrar = false;
+      else if (filtro === 'epp' && !categoria.includes('epp')) mostrar = false;
+      else if (filtro === 'reparacion' && !estados.includes('en reparación')) mostrar = false;
+      else if (filtro === 'baja') {
+        // mostrar solo si todas las series están dadas de baja
+        const todasBaja = estados.length > 0 && estados.every(e => e === 'baja');
+        if (!todasBaja) mostrar = false;
+      }
+      else if (filtro === 'devueltos' && !estados.includes('devuelto')) mostrar = false;
+      else if (filtro === 'sin-series' && fila.querySelector('select option')) mostrar = false;
+
+      // --- Filtro por texto (nombre) ---
+      if (textoBusqueda && !nombre.includes(textoBusqueda)) mostrar = false;
+
+      fila.style.display = mostrar ? '' : 'none';
     });
+    // Rehabilitar botones de acción aunque la fila esté filtrada
+    document.querySelectorAll('a.btn, button').forEach(btn => {
+      btn.style.pointerEvents = 'auto';
+      btn.style.position = 'relative';
+      btn.style.zIndex = '10';
+    });
+
   }
 
+  // --- Eventos de filtrado ---
+  if (filtroSelect) filtroSelect.addEventListener('change', filtrarFilas);
+  if (buscador) buscador.addEventListener('input', filtrarFilas);
+
+  // --- Mostrar estado dinámico ---
   window.mostrarEstado = function (select) {
     const selectedOption = select.options[select.selectedIndex];
     const estado = selectedOption.getAttribute('data-estado');
@@ -57,22 +87,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
-  const buscador = document.getElementById('buscador');
-  if (buscador) {
-    buscador.addEventListener('input', function () {
-      const filtro = this.value.toLowerCase();
-      const filas = document.querySelectorAll('table tbody tr');
-
-      filas.forEach(fila => {
-        const nombre = fila.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
-        const serieSelect = fila.querySelector('select');
-        const series = Array.from(serieSelect?.options || []).map(opt => opt.textContent.toLowerCase());
-
-        const coincideNombre = nombre.includes(filtro);
-        const coincideSerie = series.some(serie => serie.includes(filtro));
-
-        fila.style.display = (coincideNombre || coincideSerie) ? '' : 'none';
-      });
-    });
-  }
+  // --- Inicializar los estados ---
+  document.querySelectorAll('select[data-id]').forEach(select => {
+    const firstValid = Array.from(select.options).find(opt => opt.value && opt.getAttribute('data-estado'));
+    if (firstValid) {
+      select.value = firstValid.value;
+      mostrarEstado(select);
+    }
+  });
 });

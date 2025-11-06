@@ -5,6 +5,20 @@
 @section('content')
 <div class="container py-4">
 
+@if (session('success'))
+  <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+    {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  </div>
+@endif
+
+@if ($errors->any())
+  <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+    {{ $errors->first() }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  </div>
+@endif
+
   <header class="row mb-4">
     <div class="col-md-8">
       <h1 class="h4 fw-bold mb-1">Gestión de Inventario</h1>
@@ -20,7 +34,7 @@
     <div class="card shadow border mt-4">
       <div class="card-header bg-white border-bottom">
         <h5 class="fw-bold mb-0">📊 Estado del Inventario</h5>
-        <p class="text-muted small mb-0">Resumen general de herramientas y EPP</p>
+        <p class="text-muted small mb-0">Resumen general de las herramientas y del equipo de protección personal</p>
       </div>
       <div class="card-body">
         <div class="row g-3">
@@ -61,21 +75,31 @@
   </div>
 
   <!-- Filtro -->
-  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-    <label class="form-label mb-0">Filtrar por:</label>
-    <select id="filtroInventario" class="form-select w-auto">
-      <option value="todos">Todos</option>
-      <option value="herramienta">Herramientas</option>
-      <option value="epp">EPP</option>
-      <option value="reparacion">En reparación</option>
-    </select>
-  </div>
+  <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+  <label for="buscador" class="form-label mb-0 me-2 fw-semibold">Filtrar por:</label>
+
+  <input type="text" id="buscador"
+         class="form-control"
+         placeholder="Buscar recurso por nombre..."
+         style="width: 280px; max-width: 100%;">
+
+  <select id="filtroInventario" class="form-select w-auto">
+    <option value="todos">Todos</option>
+    <option value="herramienta">Herramientas</option>
+    <option value="epp">EPP</option>
+    <option value="reparacion">En reparación</option>
+    <option value="baja">Dado de baja</option>
+    <option value="devueltos">Devueltos</option>
+    <option value="sin-series">Sin series</option>
+  </select>
+</div>
+
 
   <!-- Tabla -->
   <div class="card shadow-sm">
     <div class="card-body">
       <h5 class="card-title fw-bold">Listado de Recursos</h5>
-      <p class="text-muted small">Elementos registrados en el sistema</p>
+      <p class="text-muted small">Recursos registrados en el sistema</p>
 
       <div class="table-responsive">
         <table class="table-naranja align-middle mb-0">
@@ -129,22 +153,43 @@
               <td>{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
               <td>{{ $recurso->descripcion }}</td>
               <td class="text-nowrap">
-                <a href="{{ route('recursos.edit', $recurso->id) }}" class="btn btn-sm btn-orange">
-                  <i class="bi bi-pencil"></i>
-                </a>
+  @php
+    // Detectar si todas las series del recurso están dadas de baja
+    $estadosSeries = $recurso->serieRecursos->pluck('estado.nombre_estado')->map(fn($e) => strtolower($e ?? ''))->toArray();
+    $todasBaja = count($estadosSeries) > 0 && count(array_unique($estadosSeries)) === 1 && in_array('baja', $estadosSeries);
+  @endphp
 
-                <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" class="d-inline eliminar-recurso-form" data-nombre="{{ $recurso->nombre }}" data-id="{{ $recurso->id }}">
-                  @csrf
-                  @method('DELETE')
-                  <button type="button" class="btn btn-sm btn-danger btn-eliminar" data-id="{{ $recurso->id }}">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </form>
+  @if (!$todasBaja)
+    <!-- Botones habilitados -->
+    <a href="{{ route('recursos.edit', $recurso->id) }}" class="btn btn-sm btn-orange">
+      <i class="bi bi-pencil"></i>
+    </a>
 
-                <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-secondary">
-                  <i class="bi bi-plus-circle"> Agregar serie</i>
-                </a>
-              </td>
+    <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" class="d-inline eliminar-recurso-form" data-nombre="{{ $recurso->nombre }}" data-id="{{ $recurso->id }}">
+      @csrf
+      @method('DELETE')
+      <button type="button" class="btn btn-sm btn-danger btn-eliminar" data-id="{{ $recurso->id }}">
+        <i class="bi bi-trash"></i>
+      </button>
+    </form>
+
+    <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-secondary">
+      <i class="bi bi-plus-circle"> Agregar serie</i>
+    </a>
+  @else
+    <!-- Botones deshabilitados -->
+    <button class="btn btn-sm btn-secondary" disabled title="Recurso dado de baja">
+      <i class="bi bi-pencil"></i>
+    </button>
+    <button class="btn btn-sm btn-secondary" disabled title="Recurso dado de baja">
+      <i class="bi bi-trash"></i>
+    </button>
+    <button class="btn btn-sm btn-secondary" disabled title="Recurso dado de baja">
+      <i class="bi bi-plus-circle"></i>
+    </button>
+  @endif
+</td>
+
             </tr>
             @endforeach
           </tbody>
@@ -156,9 +201,77 @@
 </div>
 @endsection
 
-@section('scripts')
-  <script src="{{ asset('js/inventario.js') }}?v={{ time() }}"></script>
-  <script src="{{ asset('js/filtroBusqueda.js') }}?v={{ time() }}"></script>
+@push('scripts')
+<script src="{{ asset('js/inventario.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/filtroBusqueda.js') }}?v={{ time() }}"></script>
+
+<!-- Modal de Éxito -->
+<div class="modal fade" id="modalSuccess" tabindex="-1" aria-labelledby="modalSuccessLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border border-success shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title text-success fw-bold" id="modalSuccessLabel">
+          Acción completada
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="text-center mb-2">
+          <i class="bi bi-check-circle text-success fs-1"></i>
+        </div>
+        <p class="text-success fw-semibold mb-0">
+          {{ session('success_modal') }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (session('success_modal'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modalSuccess = new bootstrap.Modal(document.getElementById('modalSuccess'));
+  modalSuccess.show();
+});
+</script>
+@endif
+
+
+<!-- Modal de Error -->
+<div class="modal fade" id="modalError" tabindex="-1" aria-labelledby="modalErrorLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border border-danger shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title text-danger fw-bold" id="modalErrorLabel">
+          No se puede eliminar
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-center text-danger fw-semibold mb-0">
+          {{ session('error_modal') }}
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (session('error_modal'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modalError = new bootstrap.Modal(document.getElementById('modalError'));
+  modalError.show();
+});
+</script>
+@endif
+
+
 
 <!-- Modal Confirmar Eliminación (global) -->
 <div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel" aria-hidden="true">
@@ -179,45 +292,31 @@
   </div>
 </div>
 
-@endsection
-
-@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // Variables del modal
   const modalEl = document.getElementById('modalConfirmDelete');
   const modalText = document.getElementById('modalConfirmDeleteText');
   const modalConfirmBtn = document.getElementById('modalConfirmDeleteBtn');
   const bsModal = new bootstrap.Modal(modalEl);
-
-  // Form objetivo a enviar al confirmar
   let targetForm = null;
 
-  // Handler: abrir modal al click de cualquier .btn-eliminar
   document.querySelectorAll('.btn-eliminar').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-      const id = this.dataset.id;
-      // buscar el form asociado (ascendiendo en DOM)
+    btn.addEventListener('click', function () {
       const form = this.closest('.eliminar-recurso-form');
-      if (!form) return console.warn('Formulario de eliminación no encontrado para id', id);
-
-      const nombre = form.dataset.nombre || `ID ${id}`;
-      // personalizar texto del modal
+      if (!form) return;
+      const nombre = form.dataset.nombre || `ID ${form.dataset.id}`;
       modalText.textContent = `¿Seguro que quieres eliminar este recurso "${nombre}"?`;
       targetForm = form;
       bsModal.show();
     });
   });
 
-  // Confirmar eliminación: enviar form guardado
   modalConfirmBtn.addEventListener('click', function () {
     if (!targetForm) return;
-    // opcional: deshabilitar botón para evitar doble submit
     modalConfirmBtn.disabled = true;
     targetForm.submit();
   });
 
-  // Reiniciar estado del modal al cerrarlo
   modalEl.addEventListener('hidden.bs.modal', function () {
     targetForm = null;
     modalConfirmBtn.disabled = false;
@@ -226,3 +325,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+

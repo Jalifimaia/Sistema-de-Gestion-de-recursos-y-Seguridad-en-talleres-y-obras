@@ -117,7 +117,7 @@
         
 
         <button type="submit" class="btn btn-success" id="btnGuardar" disabled>Guardar Series</button>
-        <a href="{{ route('inventario') }}" class="btn btn-secondary ms-2">Volver</a>
+        <a href="{{ route('inventario.index') }}" class="btn btn-secondary ms-2">Volver</a>
     </form>
     
 </div>
@@ -134,7 +134,7 @@
         Las series fueron agregadas correctamente.
       </div>
       <div class="modal-footer">
-        <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
+        <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
         <a href="{{ url()->current() }}" class="btn btn-success">Agregar más series</a>
       </div>
     </div>

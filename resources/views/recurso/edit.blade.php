@@ -69,7 +69,7 @@
     </form>
 
     <div class="d-flex justify-content-between align-items-center">
-        <a href="{{ route('inventario') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
+        <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
 
         <!-- Botón que abre modal de confirmación de eliminación -->
         <form id="deleteRecursoForm" action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" style="display:inline;">
@@ -116,7 +116,7 @@
         {{ session('success') }}
       </div>
       <div class="modal-footer">
-        <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
+        <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
         <button type="button" class="btn btn-success" data-bs-dismiss="modal">Continuar editando</button>
       </div>
     </div>

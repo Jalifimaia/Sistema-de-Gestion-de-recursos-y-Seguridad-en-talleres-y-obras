@@ -76,6 +76,7 @@ Route::prefix('terminal')->group(function () {
     Route::get('/subcategorias-disponibles/{categoriaId}', [KioskoController::class, 'getSubcategoriasConDisponibles']);
     Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
     Route::get('/recursos-asignados/{usuarioId}', [KioskoController::class, 'recursosAsignados']);
+    
 
     // ✅ Devolución
     Route::post('/validar-qr-devolucion', [PrestamoTerminalController::class, 'validarQRDevolucion']);
@@ -180,7 +181,9 @@ Route::get('/epp/disponibles/{tipo}', [ControlEPPController::class, 'buscarSerie
 | Rutas de Inventario
 |--------------------------------------------------------------------------
 */
-Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
+Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
+Route::delete('/recursos/{id}', [RecursoController::class, 'destroy'])->name('recursos.destroy');
+//Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
 Route::get('/inventario/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::get('/inventario/ajax/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::resource('recursos', RecursoController::class);
@@ -277,7 +280,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario');
+Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
+
 Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])->name('inventario.exportar');
 
 

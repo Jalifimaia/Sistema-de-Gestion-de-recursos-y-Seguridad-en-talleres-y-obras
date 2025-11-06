@@ -10,7 +10,7 @@
           Bienvenido, {{ auth()->user()->name }} <em>[{{ auth()->user()->rol->nombre_rol }}]</em>
         </p>
         <h1 class="h4 fw-bold mb-1">Resumen del Taller</h1>
-        <p class="text-muted small">Estado general de herramientas y seguridad</p>
+        <p class="text-muted small">Estado general de las herramientas y de la seguridad de los trabajadores.</p>
     </div>
     <div class="text-muted small">Fecha: <strong id="today"></strong></div>
   </header>
