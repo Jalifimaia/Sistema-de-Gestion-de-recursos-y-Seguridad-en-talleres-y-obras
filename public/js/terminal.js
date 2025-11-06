@@ -539,17 +539,15 @@ function quitarEmojis(texto) {
 //otras cosas
 function nextStep(n) {
   try {
-    // 🧹 Limpiar recog locales de todos los steps
+    // Limpieza defensiva: detener recog locales en steps antes de cambiar
     try {
       document.querySelectorAll('.step').forEach(s => {
         try {
           if (s._recogInstance) {
-            s._recogInstance.onresult = null;
-            s._recogInstance.onerror = null;
-            s._recogInstance.onend = null;
-            s._recogInstance.stop?.();
+            try { s._recogInstance.onresult = null; s._recogInstance.onerror = null; s._recogInstance.onend = null; } catch(e) {}
+            try { if (typeof s._recogInstance.stop === 'function') s._recogInstance.stop(); } catch(e) {}
           }
-        } catch (e) {}
+        } catch(e){}
         s._recogInstance = null;
         s._opening = false;
       });
@@ -557,27 +555,26 @@ function nextStep(n) {
       console.warn('nextStep: limpieza recog locales falló', e);
     }
 
-    // 🧹 Limpiar recog local de step2 si estaba activo
-    try {
-      if (window._recogStep2) {
-        window._recogStep2.onresult = null;
-        window._recogStep2.onerror = null;
-        window._recogStep2.onend = null;
-        window._recogStep2.stop?.();
-        window._recogStep2 = null;
+    // Cerrar modal de recursos si está abierto (compatibilidad legacy)
+    const modalEl = document.getElementById('modalRecursos');
+    if (modalEl) {
+      const modalInstance = (window.bootstrap && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function')
+        ? bootstrap.Modal.getInstance(modalEl)
+        : null;
+      if (modalInstance && typeof modalInstance.hide === 'function') {
+        try { modalInstance.hide(); } catch(e) { console.warn('nextStep: hide modalRecursos fallo', e); }
       }
-    } catch (e) {
-      console.warn('nextStep: limpieza recog step2 falló', e);
     }
 
-    // 🛑 Detener escaneos QR
+    // Detener escaneo QR en cualquier flow relevante (usamos las versiones seguras)
     try {
       detenerEscaneoQRregistroRecursos();
       cancelarEscaneoQRregistroRecursos();
       detenerEscaneoQRLogin();
       detenerEscaneoQRDevolucion();
-      detenerEscaneoQRDevolucionSegura?.();
-    } catch (e) {}
+      try { detenerEscaneoQRDevolucionSegura && detenerEscaneoQRDevolucionSegura(); } catch(e){}
+      console.log('🛑 Escaneo QR detenido en nextStep');
+    } catch (e) { /* no bloquear flujo por errores en stop */ }
 
     // 🧹 Limpiar recog local de step3 si estaba activo
     try {
@@ -644,11 +641,10 @@ try {
 
     // Ocultar todos los steps
     document.querySelectorAll('.step').forEach(s => {
-      s.classList.remove('active');
-      s.classList.add('d-none');
+      try { s.classList.remove('active'); s.classList.add('d-none'); } catch(e){}
     });
 
-    // Activar el nuevo step
+    // Activar el step deseado
     const stepEl = document.getElementById('step' + n);
     if (stepEl && stepEl.classList) {
       stepEl.classList.remove('d-none');
@@ -657,7 +653,7 @@ try {
       console.warn('nextStep: step element not found:', 'step' + n);
     }
 
-    // Botones flotantes
+    // Desactivar botón de menú principal si estamos en step 2
     const btnMenu = document.getElementById('boton-flotante-menu-principal');
     if (btnMenu) {
       if (n === 2) {
@@ -672,59 +668,25 @@ try {
     }
 
     // Acciones específicas por step
-    if (n === 2) {
-      cargarMenuPrincipal();
-      pausarReconocimientoGlobal();
-  iniciarReconocimientoLocalStep2();
-     // recognitionGlobalPaused = true;
-     // safeStopRecognitionGlobal();
-     // iniciarReconocimientoLocalStep2(); // 👈 nuevo
-    }
+    try { if (n === 2) cargarMenuPrincipal(); } catch (e) { console.warn('nextStep: cargarMenuPrincipal falló', e); }
+    try { if (n === 5) window.cargarCategorias(); } catch (e) { console.warn('nextStep: cargarCategorias falló', e); }
 
-    if (n === 3) {
-      recognitionGlobalPaused = true;
-      safeStopRecognitionGlobal();
-      iniciarReconocimientoLocalStep3();
-    }
-
-
-    if (n === 5) {
-      cargarCategorias();
-      pausarReconocimientoGlobal();
-      iniciarReconocimientoLocalStep5();
-    }
-
-if (n === 6) {
-  pausarReconocimientoGlobal();
-  iniciarReconocimientoLocalStep6();
-}
-
-if (n === 7) {
-  pausarReconocimientoGlobal();
-  iniciarReconocimientoLocalStep7();
-}
-
-
-if (n === 9) {
-  pausarReconocimientoGlobal();
-  iniciarReconocimientoLocalStep9();
-}
-
-    // Reiniciar reconocimiento global si no es step2
-    if (n !== 2  && n !== 3 && n !== 5 && n !== 6 && n !== 7 && n !== 9) {
-      recognitionGlobalPaused = false;
+    // Reiniciar reconocimiento global al cambiar de step (con pequeño delay para evitar conflictos)
+    try {
       safeStopRecognitionGlobal();
       setTimeout(() => {
-        safeStartRecognitionGlobal();
-        console.log('🎤 Reconocimiento reiniciado tras cambio de step');
+        try { safeStartRecognitionGlobal(); console.log('🎤 Reconocimiento reiniciado tras cambio de step'); } catch(e){}
       }, 300);
+    } catch (e) {
+      console.warn('⚠️ No se pudo reiniciar reconocimiento tras cambio de step', e);
     }
 
-    // Visibilidad de botones flotantes
+    // Ajuste: actualizar visibilidad de botones flotantes si existe wrapper de nextStep envuelto
     try {
       if (typeof window._nextStepWrappedVisibilityUpdater === 'function') {
         window._nextStepWrappedVisibilityUpdater('step' + n);
       } else {
+        // fallback local
         const ocultar = (n === 1 || 'step' + n === 'step1');
         const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
 
@@ -739,7 +701,6 @@ if (n === 9) {
     console.warn('nextStep: excepción general', err);
   }
 }
-
 
 
 function identificarTrabajador() {
@@ -3974,582 +3935,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 
-//globales
-function pausarReconocimientoGlobal() {
-  recognitionGlobalPaused = true;
-  safeStopRecognitionGlobal();
-  console.log('🛑 Reconocimiento global pausado');
-}
-
-function reactivarReconocimientoGlobal() {
-  recognitionGlobalPaused = false;
-  safeStartRecognitionGlobal();
-  console.log('🎤 Reconocimiento global reactivado');
-}
-
-
-
-//===============================
-// STEPS 
-// LOCALES
-//===============================
-function iniciarReconocimientoLocalStep2() {
-
-  window.iniciarReconocimientoLocalStep2 = iniciarReconocimientoLocalStep2;
-
-  if (!('webkitSpeechRecognition' in window)) return;
-
-  const recog = new webkitSpeechRecognition();
-  recog.lang = 'es-ES';
-  recog.continuous = true;
-  recog.interimResults = true;
-
-  recog.onresult = function (event) {
- const lastIndex = event.results.length - 1;
-  const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
-  const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-  console.log('🎤 [step2] Reconocido (interim):', limpio);
-
-  
-    // comandos globales de menu principal y cerrar sesion
-    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
-
-    if (matchOpcion(limpio, 1, "herramienta en mano")) {
-      mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
-      setModoEscaneo('manual');
-    } else if (matchOpcion(limpio, 2, "solicitar herramienta")) {
-      mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
-      step5ReturnTarget = 2;
-      nextStep(5);
-    } else if (matchOpcion(limpio, 3, "ver recursos", "recursos asignados")) {
-      mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
-      cargarRecursos().then(() => abrirStepRecursos());
-    } else {
-      mostrarMensajeKiosco('⚠️ Comando no reconocido en menú principal', 'info');
-    }
-  };
-
-  recog.onerror = function (e) {
-    console.warn('[step2] Error en reconocimiento local:', e);
-  };
-
-  recog.onend = function () {
-    // Reiniciar si el step sigue activo
-    if (getStepActivo() === 'step2') {
-      try { recog.start(); } catch (e) { console.warn('[step2] No se pudo reiniciar recog:', e); }
-    }
-  };
-
-  recog.start();
-  window._recogStep2 = recog;
-}
-
-function iniciarReconocimientoLocalStep3() {
-
-  window.iniciarReconocimientoLocalStep3 = iniciarReconocimientoLocalStep3;
-
-  if (!('webkitSpeechRecognition' in window)) return;
-
-  const recog = new webkitSpeechRecognition();
-  recog.lang = 'es-ES';
-  recog.continuous = true;
-  recog.interimResults = true;
-
-  recog.onresult = function (event) {
-    const lastIndex = event.results.length - 1;
-    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
-    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-    console.log('🎤 [step3] Reconocido (interim):', limpio);
-  
-    // comandos globales de menu principal y cerrar sesion
-    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
-   
-    if (matchOpcion(limpio, 1, "qr", "escanear")) {
-      mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
-      activarEscaneoQRregistroRecursos();
-    } else if (limpio.includes("cancelar")) {
-      mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
-      cancelarEscaneoQRregistroRecursos();
-    } else if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
-      mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
-      step5ReturnTarget = 3;
-      detenerEscaneoQRregistroRecursos(5);
-    } else if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
-      mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
-      detenerEscaneoQRregistroRecursos(2);
-    } else {
-      //mostrarMensajeKiosco('⚠️ Comando no reconocido en escaneo QR', 'info');
-    }
-  };
-
-  recog.onerror = function (e) {
-    console.warn('[step3] Error en reconocimiento local:', e);
-  };
-
-  recog.onend = function () {
-    if (getStepActivo() === 'step3') {
-      try { recog.start(); } catch (e) { console.warn('[step3] No se pudo reiniciar recog:', e); }
-    }
-  };
-
-  recog.start();
-  window._recogStep3 = recog;
-}
-
-function iniciarReconocimientoLocalStep5() {
-
-  window.iniciarReconocimientoLocalStep5 = iniciarReconocimientoLocalStep5;
-
-  if (!('webkitSpeechRecognition' in window)) return;
-
-  const recog = new webkitSpeechRecognition();
-  recog.lang = 'es-ES';
-  recog.continuous = true;
-  recog.interimResults = true;
-
-  recog.onresult = function (event) {
-    const lastIndex = event.results.length - 1;
-    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
-    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-    console.log('🎤 [step5] Reconocido (interim):', limpio);
-  
-    // comandos globales de menu principal y cerrar sesion
-    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
-   
-    if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
-      mostrarMensajeKiosco(step5ReturnTarget === 3 ? '🎤 Volver a "herramienta en mano"' : '🎤 Volver al menú principal', 'success');
-      nextStep(step5ReturnTarget);
-      return;
-    }
-
-    const botonesCat = document.querySelectorAll('#categoria-buttons button');
-    for (let i = 0; i < botonesCat.length; i++) {
-      const btn = botonesCat[i];
-      if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) {
-        btn.click();
-        return;
-      }
-    }
-
-    mostrarMensajeKiosco('⚠️ Comando no reconocido en selección de categoría', 'info');
-  };
-
-  recog.onerror = function (e) {
-    console.warn('[step5] Error en reconocimiento local:', e);
-  };
-
-  recog.onend = function () {
-    if (getStepActivo() === 'step5') {
-      try { recog.start(); } catch (e) { console.warn('[step5] No se pudo reiniciar recog:', e); }
-    }
-  };
-
-  recog.start();
-  window._recogStep5 = recog;
-}
-
-function iniciarReconocimientoLocalStep6() {
-
-  window.iniciarReconocimientoLocalStep6 = iniciarReconocimientoLocalStep6;
-
-  if (!('webkitSpeechRecognition' in window)) return;
-
-  const recog = new webkitSpeechRecognition();
-  recog.lang = 'es-ES';
-  recog.continuous = true;
-  recog.interimResults = true;
-
-  recog.onresult = function (event) {
-    const lastIndex = event.results.length - 1;
-    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
-    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-    console.log('🎤 [step6] Reconocido (interim):', limpio);
-  
-    // comandos globales de menu principal y cerrar sesion
-    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
-   
-    // Volver
-    if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
-      mostrarMensajeKiosco('🎤 Volver a categorías', 'success');
-      nextStep(5);
-      return;
-    }
-
-    // Paginación
-    const matchPagina = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
-    if (matchPagina && Array.isArray(window.subcategoriasActuales)) {
-      const token = matchPagina[1];
-      const numero = numeroDesdeToken(token);
-      const total = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
-      if (!isNaN(numero) && numero >= 1 && numero <= total) {
-        renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
-        return;
-      }
-      mostrarMensajeKiosco('Número de página inválido', 'warning');
-      return;
-    }
-
-    // Botones
-    const botonesSub = document.querySelectorAll('#subcategoria-buttons button');
-    for (let i = 0; i < botonesSub.length; i++) {
-      const btn = botonesSub[i];
-      if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) {
-        btn.click();
-        return;
-      }
-    }
-
-    mostrarMensajeKiosco('⚠️ Comando no reconocido en subcategorías', 'info');
-  };
-
-  recog.onerror = function (e) {
-    console.warn('[step6] Error en reconocimiento local:', e);
-  };
-
-  recog.onend = function () {
-    if (getStepActivo() === 'step6') {
-      try { recog.start(); } catch (e) { console.warn('[step6] No se pudo reiniciar recog:', e); }
-    }
-  };
-
-  recog.start();
-  window._recogStep6 = recog;
-}
-
-function iniciarReconocimientoLocalStep7() {
-
-  window.iniciarReconocimientoLocalStep7 = iniciarReconocimientoLocalStep7;
-
-  if (!('webkitSpeechRecognition' in window)) return;
-
-  const recog = new webkitSpeechRecognition();
-  recog.lang = 'es-ES';
-  recog.continuous = true;
-  recog.interimResults = true;
-
-  recog.onresult = function (event) {
-    const lastIndex = event.results.length - 1;
-    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
-    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-    console.log('🎤 [step7] Reconocido (interim):', limpio);
-  
-    // comandos globales de menu principal y cerrar sesion
-    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
-   
-    // Volver
-    if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
-      mostrarMensajeKiosco('🎤 Volver a subcategorías', 'success');
-      nextStep(6);
-      return;
-    }
-
-    // Paginación
-    const matchPagina = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
-    if (matchPagina && Array.isArray(window.recursosActuales)) {
-      const token = matchPagina[1];
-      const numero = numeroDesdeToken(token);
-      const total = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
-      if (!isNaN(numero) && numero >= 1 && numero <= total) {
-        renderRecursosPaginados(window.recursosActuales, numero);
-        return;
-      }
-      mostrarMensajeKiosco('Número de página inválido', 'warning');
-      return;
-    }
-
-    // Botones
-    const botonesRec = document.querySelectorAll('#recurso-buttons button');
-    botonesRec.forEach((btn, index) => {
-      if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) {
-        btn.click();
-      }
-    });
-  };
-
-  recog.onerror = function (e) {
-    console.warn('[step7] Error en reconocimiento local:', e);
-  };
-
-  recog.onend = function () {
-    if (getStepActivo() === 'step7') {
-      try { recog.start(); } catch (e) { console.warn('[step7] No se pudo reiniciar recog:', e); }
-    }
-  };
-
-  recog.start();
-  window._recogStep7 = recog;
-}
-
-function iniciarReconocimientoLocalStep9() {
-
-  window.iniciarReconocimientoLocalStep9 = iniciarReconocimientoLocalStep9;
-
-  if (!('webkitSpeechRecognition' in window)) return;
-
-  const recog = new webkitSpeechRecognition();
-  recog.lang = 'es-ES';
-  recog.continuous = true;
-  recog.interimResults = true;
-
-  recog.onresult = function (event) {
-    const lastIndex = event.results.length - 1;
-    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
-    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-    console.log('🎤 [step9] Reconocido (interim):', limpio);
-  
-    // comandos globales de menu principal y cerrar sesion
-    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
-   
-    if (/\b(confirmar|confirm)\b/.test(limpio)) {
-      const btn = document.getElementById('btnConfirmarDevolucion');
-      if (btn && !btn.disabled) {
-        try { btn.click(); } catch (e) { confirmarDevolucionQRActual(); }
-      } else {
-        if (!window.modalKioscoActivo) {
-          mostrarMensajeKiosco('Aún no se detectó un QR válido para confirmar', 'warning');
-        } else {
-          console.log('⏸️ Modal ya activo, no se vuelve a mostrar');
-        }
-      }
-      return;
-    }
-
-
-    if (esComandoVolver(limpio) || /\b(volver|regresar|atrás)\b/.test(limpio)) {
-      mostrarMensajeKiosco('🎤 Volver a recursos asignados', 'success');
-      volverARecursosAsignadosDesdeDevolucionQR();
-      return;
-    }
-
-    mostrarMensajeKiosco('⚠️ Comando no reconocido. Decí "confirmar" o "volver".', 'info');
-  };
-
-  recog.onerror = function (e) {
-    console.warn('[step9] Error en reconocimiento local:', e);
-  };
-
-  recog.onend = function () {
-  if (getStepActivo() === 'step9' && !window._recogStep9PausadoPorModal) {
-    try { recog.start(); } catch (e) { console.warn('[step9] No se pudo reiniciar recog:', e); }
-  } else {
-    console.log('[step9] onend ignorado por pausa modal');
-  }
-};
-
-
-  recog.start();
-  window._recogStep9 = recog;
-}
-
-function pausarReconocimientoLocalStep9PorModal() {
-  window._recogStep9PausadoPorModal = true;
-  if (window._recogStep9) {
-    try {
-      window._recogStep9.onresult = null;
-      window._recogStep9.onerror = null;
-      window._recogStep9.onend = null;
-      window._recogStep9.stop?.();
-      window._recogStep9 = null;
-      console.log('🛑 Reconocimiento local step9 pausado por modal');
-    } catch (e) {
-      console.warn('⚠️ No se pudo pausar recog step9', e);
-    }
-  }
-}
-
-function reactivarReconocimientoLocalStep9SiAplica() {
-  window._recogStep9PausadoPorModal = false;
-  if (getStepActivo() === 'step9') {
-    iniciarReconocimientoLocalStep9();
-    console.log('🎤 Reconocimiento local step9 reactivado tras cierre de modal');
-  }
-}
-
-function iniciarReconocimientoLocalStep10() {
-
-  if (window._recogStep10 && typeof window._recogStep10.stop === 'function') {
-  try { window._recogStep10.stop(); } catch (e) {}
-  window._recogStep10 = null;
-}
-
-  window.iniciarReconocimientoLocalStep10 = iniciarReconocimientoLocalStep10;
-
-  if (!('webkitSpeechRecognition' in window)) return;
-
-  const recog = new webkitSpeechRecognition();
-  recog.lang = 'es-ES';
-  recog.continuous = true;
-  recog.interimResults = true;
-
-  recog.onresult = function(event) {
-    const lastIndex = event.results.length - 1;
-    const texto = (event.results[lastIndex][0]?.transcript || '').toLowerCase().trim();
-    const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-    console.log('🎤 [step10] Reconocido (interim):', limpio);
-
-    // comandos globales de menu principal y cerrar sesion
-    if (procesarComandosGlobalesDesdeLocal(limpio)) return;
-
-
-    if (esComandoVolver(limpio) || /\b(volver)\b/.test(limpio)) {
-      recognitionGlobalPaused = false;
-      safeStartRecognitionGlobal();
-      nextStep(2);
-      getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
-      return;
-    }
-
-    const tabCambio = matchTabCambio(limpio);
-    if (tabCambio === 'epp') {
-      document.getElementById('tab-epp-step')?.click();
-      getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
-      return;
-    }
-    if (tabCambio === 'herramientas') {
-      document.getElementById('tab-herramientas-step')?.click();
-      getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
-      return;
-    }
-
-    const match = limpio.match(/opcion\s*(\d{1,2})/i);
-    if (match) {
-      const index = parseInt(match[1], 10);
-      if (!isNaN(index)) {
-        confirmarDevolucionPorVozStep10(index);
-      } else {
-        getRenderer('mostrarMensajeKiosco')('Opción no reconocida', 'warning');
-      }
-      return;
-    }
-
-    const mp = limpio.match(/^pagina\s*(\d{1,2})$/i);
-    if (mp) {
-      const numero = parseInt(mp[1], 10);
-      if (!isNaN(numero)) {
-        handleStep10Pagina(numero);
-      } else {
-        getRenderer('mostrarMensajeKiosco')('Número de página no reconocido', 'warning');
-      }
-      return;
-    }
-
-    console.log('⚠️ [step10] Comando no reconocido:', limpio);
-  };
-
-recog.onerror = function(e) {
-  console.warn('[step10] Error en reconocimiento local:', e);
-  if (e.error === 'aborted') {
-    console.log('⏸️ Abortado, pero se reinicia recogedor local step10');
-  }
-
-  if (getStepActivo() !== 'step10') return;
-
-  try {
-    recog.stop();
-  } catch (err) {}
-
-  setTimeout(() => {
-    if (!window._recogStep10) {
-      console.log('🔁 Reiniciando recogedor local step10 tras error');
-      iniciarReconocimientoLocalStep10();
-    } else {
-      console.log('⏸️ recogedor step10 ya activo, no se reinicia');
-    }
-  }, 300);
-};
-
-
-
-  try {
-    safeStopRecognitionGlobal();
-    recog.start();
-    console.log('🎤 reconocimiento local (step10) iniciado');
-  } catch (e) {
-    console.warn('step10 recog.start falló', e);
-  }
-
-  window._recogStep10 = recog;
-}
-
-function reiniciarReconocimientoLocalDelStepActual() {
-  const step = getStepActivo();
-  const fnName = `iniciarReconocimientoLocal${step.charAt(4).toUpperCase()}${step.slice(5)}`;
-  const fn = window[fnName];
-  if (typeof fn === 'function') {
-    try {
-      fn();
-      console.log(`🎤 recogedor local reiniciado en ${step}`);
-    } catch (e) {
-      console.warn(`⚠️ Error al reiniciar recogedor local en ${step}`, e);
-    }
-  } else {
-    console.warn(`⚠️ No se encontró función para reiniciar recogedor en ${step}`);
-  }
-}
-
-
-function procesarComandosGlobalesDesdeLocal(limpio) {
-  if (!limpio || typeof limpio !== 'string') return false;
-
-  const texto = normalizarTexto(limpio).trim();
-  const step = getStepActivo();
-  const modalCerrar = document.getElementById('modalCerrarSesion');
-
-  // ✅ Solo si el modal está visible, procesamos “aceptar” y “cancelar”
-  if (modalCerrar?.classList.contains('show')) {
-    if (texto === 'aceptar') {
-      console.log('🟢 comando global: aceptar modal cerrar sesión');
-      try { bootstrap.Modal.getInstance(modalCerrar)?.hide(); } catch (e) {}
-      ejecutarCerrarSesion();
-      return true;
-    }
-
-    if (texto === 'cancelar') {
-      console.log('🔴 comando global: cancelar modal cerrar sesión');
-      try { bootstrap.Modal.getInstance(modalCerrar)?.hide(); } catch (e) {}
-      recognitionGlobalPaused = false;
-
-      if (esStepConReconocimientoLocal(step)) {
-        // ✅ Reiniciar recogedor local del step actual
-        try {
-          const fnName = `iniciarReconocimientoLocal${step.charAt(4).toUpperCase()}${step.slice(5)}`;
-          const fn = window[fnName];
-          if (typeof fn === 'function') {
-            fn();
-            console.log(`🎤 recogedor local reiniciado tras cancelar en ${step}`);
-          } else {
-            console.warn(`⚠️ No se encontró función para reiniciar recogedor en ${step}`);
-          }
-        } catch (e) {
-          console.warn(`⚠️ Error al reiniciar recogedor local en ${step}`, e);
-        }
-      } else {
-        safeStartRecognitionGlobal();
-      }
-
-      return true;
-    }
-  }
-
-  // 🔒 Bloquear "cerrar sesión" en step1
-  if (step !== 'step1' && /\b(cerrar sesión|cerrar sesion)\b/.test(texto)) {
-    mostrarModalCerrarSesion();
-    return true;
-  }
-
-  // 🔒 Bloquear "menu principal" en step1 y step2
-  if (step !== 'step1' && step !== 'step2' && /\b(menu principal)\b/.test(texto)) {
-    recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal();
-    nextStep(2);
-    getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
-    return true;
-  }
-
-  return false;
-}
-
-
 
 function parsearClavePorVoz(texto) {
   if (!texto) return '';
@@ -5054,7 +4439,7 @@ if (modalRegistroVisible && esperandoAceptar) {
 }
 
 
-/*  // === Step2: Menú principal y navegación ===
+    // === Step2: Menú principal y navegación ===
     if (step === 'step2') {
       // normalizar repeticiones
       const textoSimple = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
@@ -5189,7 +4574,7 @@ if (modalRegistroVisible && esperandoAceptar) {
       console.log("⚠️ Step7: Procesada entrada (si hubo coincidencias)");
       return;
     }
-*/
+
 
     if (step === 'step8') {
       const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
