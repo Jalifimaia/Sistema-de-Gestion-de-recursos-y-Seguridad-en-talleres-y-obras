@@ -6,7 +6,9 @@
 <div class="container py-4">
   <header class="d-flex justify-content-between align-items-start mb-4">
     <div>
-        <p class="text-muted mb-1">Bienvenida, {{ auth()->user()->name }} (Rol: {{ auth()->user()->rol->nombre_rol }})</p>
+        <p class="text-muted mb-1">
+          Bienvenido, {{ auth()->user()->name }} <em>[{{ auth()->user()->rol->nombre_rol }}]</em>
+        </p>
         <h1 class="h4 fw-bold mb-1">Resumen del Taller</h1>
         <p class="text-muted small">Estado general de herramientas y seguridad</p>
     </div>
