@@ -25,8 +25,8 @@
         Identificar Trabajador
       </h2>
 
-      <input type="text" id="clave" class="form-control form-control-lg mb-4" placeholder="Ingresar clave ...">
-      <p class="text-muted d-block text-start mb-3">Deci <b>"INGRESAR CLAVE"</b> antes de decir tu clave.</p>
+      <input type="text" id="clave" class="form-control form-control-lg mb-4" placeholder="Ingresar clave">
+      <p class="text-muted d-block text-start mb-3">Podes dictar tu clave</p>
 
 
       <button class="btn btn-primary btn-lg mb-3 boton-continuar" onclick="identificarTrabajador()">
