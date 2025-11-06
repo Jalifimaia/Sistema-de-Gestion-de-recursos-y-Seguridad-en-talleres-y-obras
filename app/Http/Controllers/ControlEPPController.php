@@ -227,7 +227,7 @@ class ControlEPPController extends Controller
     return view('checklistEPP', compact('trabajadores', 'preseleccionado'));
 }
 
-    public function store(Request $request)
+public function store(Request $request)
 {
     $request->validate([
         'trabajador_id' => 'required|exists:usuario,id',
@@ -242,9 +242,35 @@ class ControlEPPController extends Controller
     ]);
 
     $request->merge([
-    'observaciones' => $request->observaciones ?: 'Sin observaciones',
+        'observaciones' => $request->observaciones ?: 'Sin observaciones',
     ]);
 
+    // 🔎 Validar que los EPP marcados como usados estén asignados
+    $eppsMarcados = collect([
+        'casco' => $request->boolean('casco'),
+        'guantes' => $request->boolean('guantes'),
+        'lentes' => $request->boolean('anteojos'),
+        'botas' => $request->boolean('botas'),
+        'chaleco' => $request->boolean('chaleco'),
+        'arnes' => $request->boolean('arnes'),
+    ]);
+
+    $tiposMarcados = $eppsMarcados->filter()->keys()->map(fn($epp) => strtolower(trim($epp)))->toArray();
+
+    $tiposAsignados = UsuarioRecurso::where('id_usuario', $request->trabajador_id)
+        ->pluck('tipo_epp')
+        ->filter()
+        ->map(fn($t) => strtolower(trim($t)))
+        ->unique()
+        ->toArray();
+
+    $faltantes = array_diff($tiposMarcados, $tiposAsignados);
+
+    if (count($faltantes) > 0) {
+        return back()->withErrors([
+            'epp_asignacion' => 'No se puede registrar el checklist: hay EPP marcados como usados pero no asignados.'
+        ])->withInput();
+    }
 
     // 🔎 Buscar si ya existe un checklist del mismo trabajador hoy
     $checklist = Checklist::where('trabajador_id', $request->trabajador_id)
@@ -288,6 +314,7 @@ class ControlEPPController extends Controller
 
     return redirect()->route('controlEPP')->with('success', 'Checklist registrado correctamente.');
 }
+
 
 
     public function createAsignacionEPP()
@@ -456,7 +483,6 @@ public function storeAsignacionEPP(Request $request)
 }
 
 
-
 public function buscarSeriesEPP(Request $request)
 {
     $tipo = $request->input('tipo');
@@ -508,39 +534,6 @@ public function buscarSeriesEPP(Request $request)
     }));
 }
 
-
-
-/*
-    public function buscarSeriesEPP(Request $request)
-{
-    $tipo = $request->input('tipo');
-    $query = $request->input('q');
-
-    $baseQuery = SerieRecurso::whereHas('recurso.subcategoria', function ($q) use ($tipo) {
-        $q->where('nombre', $tipo);
-    })
-    ->whereHas('estado', function ($q) {
-        $q->where('nombre_estado', 'Disponible'); // 🔹 Solo estado "Disponible"
-    })
-    ->whereDoesntHave('usuarioRecurso') // 🔹 No asignadas
-    ->with(['recurso', 'estado']); // 🔹 Carga relaciones necesarias
-
-    if (!empty($query)) {
-        $baseQuery->whereRaw('LOWER(TRIM(nro_serie)) LIKE ?', ['%' . strtolower(trim($query)) . '%']);
-    }
-
-    $series = $baseQuery->limit(20)->get();
-
-    return response()->json($series->map(function ($serie) {
-        return [
-            'id' => $serie->id,
-            'nro_serie' => $serie->nro_serie,
-            'recurso' => $serie->recurso->nombre,
-            'vencimiento' => Carbon::parse($serie->fecha_vencimiento)->format('d/m/Y'),
-        ];
-    }));
-}
-*/
 public function faltantes()
 {
     // Subcategorías de EPP

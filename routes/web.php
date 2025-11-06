@@ -191,7 +191,7 @@ Route::get('/series/{id}/qr-snippet', [SerieRecursoController::class, 'qrSnippet
 
 
 //QR
-Route::get('/series-qr', [SerieRecursoController::class, 'qrIndex'])->name('series.qr');
+Route::get('/series-qr', [SerieRecursoController::class, 'qrIndex'])->name('series.qr.index');
 Route::get('/series-qr/{id}/pdf', [SerieRecursoController::class, 'exportQrPdf'])->name('series.qr.pdf');
 Route::get('/series-qr-lote', [SerieRecursoController::class, 'qrLote'])->name('series.qr.lote');
 Route::get('/series-qr-lote/pdf', [SerieRecursoController::class, 'exportQrLotePdf'])

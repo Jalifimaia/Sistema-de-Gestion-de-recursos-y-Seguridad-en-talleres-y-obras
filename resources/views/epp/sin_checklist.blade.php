@@ -4,7 +4,12 @@
 
 @section('content')
 <div class="container py-4">
-  <h1 class="h4 fw-bold mb-4">📋 Checklist No Registrado</h1>
+  <div class="d-flex align-items-center mb-4">
+    <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary me-3">
+      ⬅️ Volver
+    </a>
+    <h2 class="h4 fw-bold mb-0">Checklist no registrado</h2>
+  </div>
   <p class="text-muted">Estos trabajadores no tienen checklist cargado hoy. Podés ingresar a su perfil para registrar o revisar.</p>
 
   @if ($sinChecklist->count())

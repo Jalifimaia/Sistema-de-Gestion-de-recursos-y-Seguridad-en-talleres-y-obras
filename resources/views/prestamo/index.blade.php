@@ -53,53 +53,72 @@
           <input type="date" id="fecha-fin" class="form-control">
         </div>
         <div class="col-md-4">
-          <label for="busqueda" class="form-label">Buscar por recurso, serie, trabajador o creador</label>
-          <input type="text" id="busqueda" class="form-control" placeholder="Ej: taladro, XP-001, David, Admin">
+          
+          <label for="search" class="form-label">Buscar</label>
+          <form method="GET" action="{{ route('prestamos.index') }}" class="mb-3">
+          <div class="input-group">
+            <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="🔍 Buscar por recurso, serie, trabajador o creador">
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </form>
+
+
         </div>
       </div>
 
       {{-- Tarjetas de préstamos --}}
-      <div id="contenedorPrestamos" class="row g-3">
-        @foreach ($prestamos as $p)
-          @php
-            $color = match($p->estado) {
-              'Cancelado' => 'danger',
-              'Activo' => 'success',
-              'Vencido' => 'warning',
-              default => 'secondary',
-            };
-          @endphp
+      <div id="contenedorPrestamos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+  @foreach ($prestamos as $p)
+    @php
+      $color = match($p->estado) {
+        'Cancelado' => 'danger',
+        'Activo' => 'success',
+        'Vencido' => 'warning',
+        default => 'secondary',
+      };
+    @endphp
 
-          <div class="prestamo-item col-md-4"
-               data-estado="{{ $p->estado }}"
-               data-creador="{{ $p->creado_por }}"
-               data-texto="{{ strtolower($p->recurso . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
-               data-fecha="{{ $p->fecha_creacion }}">
-            <div class="card border-secondary shadow-sm h-100">
-              <div class="card-body">
-                <h6 class="card-title mb-1">{{ $p->recurso }}</h6>
-                <p class="card-text mb-1">Serie: <strong>{{ $p->nro_serie }}</strong></p>
-                <p class="card-text mb-1">Asignado a: {{ $p->asignado }}</p>
-                <p class="card-text mb-1">Creado por: {{ $p->creado_por }}</p>
-                <p class="card-text mb-1">
-                  Fecha de creación: {{ \Carbon\Carbon::parse($p->fecha_creacion)->format('d/m/Y H:i') }}
-                </p>
-                <p class="card-text mb-0">
-                  Estado: <span class="badge bg-{{ $color }}">{{ $p->estado }}</span>
-                </p>
-                <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-sm btn-outline-primary w-100 mt-2">
-                  Editar
-                </a>
-              </div>
-            </div>
-          </div>
-        @endforeach
+    <div class="col">
+      <div class="card border-secondary shadow-sm h-100 p-1">
+        <div class="card-body p-2">
+          <h6 class="card-title mb-1 fs-6">{{ $p->recurso }}</h6>
+          <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
+          <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
+          <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
+          <p class="card-text mb-1 small">
+            Fecha: {{ \Carbon\Carbon::parse($p->fecha_creacion)->format('d/m/Y H:i') }}
+          </p>
+          <p class="card-text mb-0 small">
+            Estado: <span class="badge bg-{{ $color }}">{{ $p->estado }}</span>
+          </p>
+          <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-sm btn-outline-primary w-100 mt-2">
+            Editar
+          </a>
+        </div>
       </div>
+    </div>
+  @endforeach
+</div>
+
+<div class="mt-4 d-flex justify-content-center">
+  {{ $prestamos->links() }}
+</div>
 
     </div>
   </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+  p.small.text-muted {
+    display: none;
+  }
+</style>
+@endpush
+
 
 @push('scripts')
 <script>
