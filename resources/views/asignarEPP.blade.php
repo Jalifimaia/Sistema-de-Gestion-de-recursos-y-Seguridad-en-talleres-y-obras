@@ -75,10 +75,33 @@
         <!-- Botones -->
         <div class="d-flex justify-content-between">
             <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
-            <button type="submit" class="btn btn-primary">Guardar asignación</button>
+
+            <input type="hidden" name="todos_asignados" id="todos_asignados" value="0">
+
+
+            <button type="submit" id="submitBtn" class="btn btn-primary">Guardar asignación</button>
         </div>
     </form>
 </div>
+
+<!-- Modal: EPP ya asignado -->
+<div class="modal fade" id="modalEppCompleto" tabindex="-1" aria-labelledby="modalEppCompletoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title" id="modalEppCompletoLabel">Asignación no permitida</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Este trabajador ya tiene todos los EPP asignados. No es necesario asignar más.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('styles')
@@ -93,16 +116,49 @@ document.addEventListener('DOMContentLoaded', function () {
     const eppBox = document.getElementById('epp-asignado');
     const eppList = document.getElementById('epp-lista');
     const tipos = ['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'];
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    const hiddenTodos = document.getElementById('todos_asignados');
+
+    function actualizarEstadoBoton() {
+        const todosAsignados = tipos.every(tipo => {
+            const select = document.getElementById(tipo);
+            return select && select.disabled;
+        });
+        // marcar hidden para backend si está todo asignado
+        hiddenTodos.value = todosAsignados ? '1' : '0';
+        // deshabilitar botón visualmente para evitar intento de submit
+        if (submitBtn) submitBtn.disabled = todosAsignados;
+    }
 
     function cargarEPP(userId) {
-        if (!userId) return;
+        if (!userId) {
+            // reset
+            eppList.innerHTML = '';
+            eppBox.classList.add('d-none');
+            tipos.forEach(tipo => {
+                const select = document.getElementById(tipo);
+                if (select) {
+                    select.innerHTML = `<option value="">-- Seleccionar ${tipo} disponible --</option>`;
+                    select.disabled = false;
+                }
+                const alerta = document.getElementById('alert-' + tipo);
+                if (alerta) alerta.classList.add('d-none');
+            });
+            actualizarEstadoBoton();
+            return;
+        }
 
         fetch(`/epp/asignados/${userId}`)
             .then(res => res.json())
             .then(data => {
-                if (!Array.isArray(data)) return;
+                if (!Array.isArray(data)) {
+                    //  resetear si no viene array
+                    cargarEPP(null);
+                    return;
+                }
 
-                const asignados = data.map(epp => epp.tipo.toLowerCase());
+                const asignados = data.map(epp => (epp.tipo || '').toLowerCase());
                 eppList.innerHTML = data.length
                     ? data.map(epp => `<li>${epp.tipo}: ${epp.serie}</li>`).join('')
                     : '<li>No tiene EPP asignado</li>';
@@ -113,22 +169,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     const alerta = document.getElementById('alert-' + tipo);
 
                     if (asignados.includes(tipo)) {
-                        alerta.classList.remove('d-none');
-                        select.disabled = true;
+                        if (alerta) alerta.classList.remove('d-none');
+                        if (select) select.disabled = true;
                     } else {
-                        alerta.classList.add('d-none');
-                        select.disabled = false;
+                        if (alerta) alerta.classList.add('d-none');
+                        if (select) select.disabled = false;
                     }
 
-                    fetch(`/epp/disponibles/${tipo}`)
-                        .then(res => res.json())
-                        .then(opciones => {
-                            select.innerHTML = `<option value="">-- Seleccionar ${tipo} disponible --</option>`;
-                            opciones.forEach(epp => {
-                                select.innerHTML += `<option value="${epp.id}">${epp.serie}</option>`;
+                    // cargar opciones disponibles (si querés evitar cargas innecesarias podés condicionar)
+                    if (select && !select.disabled) {
+                        fetch(`/epp/disponibles/${tipo}`)
+                            .then(res => res.json())
+                            .then(opciones => {
+                                select.innerHTML = `<option value="">-- Seleccionar ${tipo} disponible --</option>`;
+                                opciones.forEach(epp => {
+                                    select.innerHTML += `<option value="${epp.id}">${epp.serie}</option>`;
+                                });
                             });
-                        });
+                    } else if (select) {
+                        // si está deshabilitado, limpiamos opciones para evitar que se envíen valores
+                        select.innerHTML = `<option value="">-- ${tipo} asignado --</option>`;
+                    }
                 });
+
+                actualizarEstadoBoton();
+            })
+            .catch(() => {
+                cargarEPP(null);
             });
     }
 
@@ -148,19 +215,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectTrabajador.innerHTML += `<option value="${user.id}">${user.name}</option>`;
                 });
 
-                // Cargar EPP del primer trabajador automáticamente
-                eppList.innerHTML = '';
-                eppBox.classList.add('d-none');
-                tipos.forEach(tipo => {
-                    const select = document.getElementById(tipo);
-                    select.innerHTML = `<option value="">-- Seleccionar ${tipo} disponible --</option>`;
-                    select.disabled = false;
-                    document.getElementById('alert-' + tipo).classList.add('d-none');
-                });
+                // Resetear EPP (no seleccionar trabajador aún)
+                cargarEPP(null);
             });
     });
-});
 
+    // Interceptar submit por seguridad (aun con botón deshabilitado)
+    form.addEventListener('submit', function (e) {
+        const todosAsignados = tipos.every(tipo => {
+            const select = document.getElementById(tipo);
+            return select && select.disabled;
+        });
+
+        if (todosAsignados) {
+            // evitar envío y mostrar modal
+            e.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('modalEppCompleto'));
+            if (modal) modal.show();
+            // hidden ya actualizado por actualizarEstadoBoton()
+        }
+    });
+
+    // Si la vista carga con un trabajador ya seleccionado, disparar carga
+    const initialUser = selectTrabajador.value;
+    if (initialUser) cargarEPP(initialUser);
+});
 </script>
+
+
 @endpush
 

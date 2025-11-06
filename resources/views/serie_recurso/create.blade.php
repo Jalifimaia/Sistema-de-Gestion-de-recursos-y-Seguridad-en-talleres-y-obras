@@ -72,11 +72,13 @@
         </div>
 
         <div class="mb-3">
-        <label for="fecha_adquisicion" class="form-label">Fecha de Adquisición</label>
-        <div class="input-group" onclick="this.querySelector('input').showPicker()">
+          <label for="fecha_adquisicion" class="form-label">Fecha de Adquisición</label>
+          <div class="input-group" onclick="this.querySelector('input').showPicker()">
             <input type="date" name="fecha_adquisicion" id="fecha_adquisicion" class="form-control" required>
+          </div>
+          <div id="fecha_adquisicion_error" class="invalid-feedback" style="display:none;"></div>
         </div>
-        </div>
+
 
 
         <div class="mb-3">
