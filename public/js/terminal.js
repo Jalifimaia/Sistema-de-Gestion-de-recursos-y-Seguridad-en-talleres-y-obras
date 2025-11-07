@@ -464,7 +464,21 @@ function nextStep(n) {
       console.warn('nextStep: limpieza recog locales falló', e);
     }
 
-    // Cerrar modal de recursos si está abierto (compatibilidad legacy)
+    // 🛑 Detener dictado de clave si está activo
+    try {
+      if (window._dictadoClaveActivo) {
+        window._dictadoClaveActivo.onresult = null;
+        window._dictadoClaveActivo.onerror = null;
+        window._dictadoClaveActivo.onend = null;
+        window._dictadoClaveActivo.stop?.();
+        window._dictadoClaveActivo = null;
+        console.log('🛑 Dictado de clave detenido en nextStep');
+      }
+    } catch (e) {
+      console.warn('nextStep: error al detener dictado de clave', e);
+    }
+
+    // Cerrar modal de recursos si está abierto
     const modalEl = document.getElementById('modalRecursos');
     if (modalEl) {
       const modalInstance = (window.bootstrap && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function')
@@ -475,68 +489,53 @@ function nextStep(n) {
       }
     }
 
-    // Detener escaneo QR en cualquier flow relevante (usamos las versiones seguras)
+    // Detener escaneo QR
     try {
       detenerEscaneoQRregistroRecursos();
       cancelarEscaneoQRregistroRecursos();
       detenerEscaneoQRLogin();
       detenerEscaneoQRDevolucion();
-      try { detenerEscaneoQRDevolucionSegura && detenerEscaneoQRDevolucionSegura(); } catch(e){}
+      detenerEscaneoQRDevolucionSegura?.();
       console.log('🛑 Escaneo QR detenido en nextStep');
-    } catch (e) { /* no bloquear flujo por errores en stop */ }
+    } catch (e) {}
 
     // Ocultar todos los steps
     document.querySelectorAll('.step').forEach(s => {
-      try { s.classList.remove('active'); s.classList.add('d-none'); } catch(e){}
+      try { s.classList.remove('active'); s.classList.add('d-none'); } catch (e) {}
     });
 
     // Activar el step deseado
     const stepEl = document.getElementById('step' + n);
-    if (stepEl && stepEl.classList) {
+    if (stepEl) {
       stepEl.classList.remove('d-none');
       stepEl.classList.add('active');
     } else {
       console.warn('nextStep: step element not found:', 'step' + n);
     }
 
-    // Desactivar botón de menú principal si estamos en step 2
+    // Botón flotante de menú principal
     const btnMenu = document.getElementById('boton-flotante-menu-principal');
     if (btnMenu) {
-      if (n === 2) {
-        btnMenu.disabled = true;
-        btnMenu.style.pointerEvents = 'none';
-        btnMenu.style.opacity = '0.5';
-      } else {
-        btnMenu.disabled = false;
-        btnMenu.style.pointerEvents = 'auto';
-        btnMenu.style.opacity = '1';
-      }
+      const ocultar = n === 1;
+      btnMenu.disabled = ocultar;
+      btnMenu.style.pointerEvents = ocultar ? 'none' : 'auto';
+      btnMenu.style.opacity = ocultar ? '0.5' : '1';
     }
 
     // Acciones específicas por step
     try { if (n === 2) cargarMenuPrincipal(); } catch (e) { console.warn('nextStep: cargarMenuPrincipal falló', e); }
-    try { if (n === 5) window.cargarCategorias(); } catch (e) { console.warn('nextStep: cargarCategorias falló', e); }
+    try { if (n === 5) cargarCategorias(); } catch (e) { console.warn('nextStep: cargarCategorias falló', e); }
 
-    // Reiniciar reconocimiento global al cambiar de step (con pequeño delay para evitar conflictos)
-    try {
-      safeStopRecognitionGlobal();
-      setTimeout(() => {
-        try { safeStartRecognitionGlobal(); console.log('🎤 Reconocimiento reiniciado tras cambio de step'); } catch(e){}
-      }, 300);
-    } catch (e) {
-      console.warn('⚠️ No se pudo reiniciar reconocimiento tras cambio de step', e);
-    }
+    // ✅ Reactivar reconocimiento global
+    reactivarReconocimientoGlobal();
 
-    // Ajuste: actualizar visibilidad de botones flotantes si existe wrapper de nextStep envuelto
+    // Visibilidad de botones flotantes
     try {
       if (typeof window._nextStepWrappedVisibilityUpdater === 'function') {
         window._nextStepWrappedVisibilityUpdater('step' + n);
       } else {
-        // fallback local
-        const ocultar = (n === 1 || 'step' + n === 'step1');
+        const ocultar = n === 1;
         const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
-
-        
         const btnMenu2 = document.getElementById('boton-flotante-menu-principal');
         if (btnCerrar) btnCerrar.style.display = ocultar ? 'none' : 'inline-block';
         if (btnMenu2) btnMenu2.style.display = ocultar ? 'none' : 'inline-block';
@@ -547,6 +546,7 @@ function nextStep(n) {
     console.warn('nextStep: excepción general', err);
   }
 }
+
 
 
 function identificarTrabajador() {
@@ -1905,18 +1905,12 @@ function identificarPorQRLogin(codigoQR) {
 
 // Función para botón Volver en step3
 function volverAInicio() {
-  // Limpiamos la sesión del trabajador
   localStorage.removeItem('id_usuario');
   console.log('volverAInicio: sesión limpiada');
-
-  // Volvemos al paso 1
-  window.nextStep(1);
-  // Opcional: limpiar el campo clave por si quedó algo escrito
+  nextStep(1);
   const claveInput = document.getElementById('clave');
   if (claveInput) claveInput.value = '';
-  if (claveInput) claveInput.focus();
-
-
+  reactivarReconocimientoGlobal(); // ✅ blindado
 }
 
 
@@ -2479,7 +2473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnBorrar && claveInput && !btnBorrar._borrarAttached) {
       btnBorrar.addEventListener('click', () => {
         claveInput.value = '';
-        claveInput.focus();
+        //claveInput.focus();
         getRenderer('mostrarMensajeKiosco')('🧹 clave borrada', 'info');
       });
       btnBorrar._borrarAttached = true;
@@ -2596,7 +2590,7 @@ function BorrarClave() {
   const claveInput = document.getElementById('clave');
   if (claveInput) {
     claveInput.value = '';
-    claveInput.focus();
+    //claveInput.focus();
     getRenderer('mostrarMensajeKiosco')('🧹 clave borrada', 'info');
   }
 }
@@ -3209,7 +3203,7 @@ function iniciarReconocimientoGlobal() {
 window.addEventListener('load', () => {
   iniciarReconocimientoGlobal();
   const claveInput = document.getElementById('clave');
-  if (claveInput) claveInput.focus();
+  //if (claveInput) //claveInput.focus();
 });
 
 
@@ -3304,11 +3298,11 @@ function asegurarModalCerrarSesion() {
         <div class="modal-dialog modal-dialog-centered" role="document" style="z-index:2147483650;">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="modalCerrarSesionLabel">Confirmación de cierre de sesion</h5>
+              <h5 class="modal-title" id="modalCerrarSesionLabel">Confirmación de cierre de sesión</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body" id="modalCerrarSesionBody">
-              ¿Desea cerrar sesion?
+              ¿Desea cerrar sesión?
             </div>
             <div class="modal-footer">
               <button id="btnCancelarCerrarSesion" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -3341,30 +3335,24 @@ function ejecutarCerrarSesion() {
     console.warn('⚠️ ejecutarCerrarSesion: error limpiando localStorage', e);
   }
 
-  try { window.nextStep && window.nextStep(1); } catch (e) { console.warn('⚠️ ejecutarCerrarSesion: nextStep(1) falló', e); }
-
-  // reintentar levantar reconocimiento después de un pequeño delay (opcional)
   try {
-    recognitionGlobalPaused = false;
-    setTimeout(() => {
-      safeStartRecognitionGlobal();
-      console.log('🎤 recognitionGlobal: intento de reinicio tras logout');
-    }, 120);
+    nextStep(1);
   } catch (e) {
-    console.warn('⚠️ ejecutarCerrarSesion: safeStartRecognitionGlobal falló', e);
+    console.warn('⚠️ ejecutarCerrarSesion: nextStep(1) falló', e);
   }
+
+  reactivarReconocimientoGlobal(); // ✅ blindado
 }
+
 
 // --- Mostrar modal y conectar botones (idempotente) ---
 function mostrarModalCerrarSesion() {
   const modalEl = asegurarModalCerrarSesion();
-  if (!modalEl) return;
-
-  if (modalEl._opening) return;
+  if (!modalEl || modalEl._opening) return;
   modalEl._opening = true;
 
   recognitionGlobalPaused = true;
-  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ mostrarModalCerrarSesion: safeStop falló', e); }
+  try { safeStopRecognitionGlobal(); } catch (e) {}
 
   const aceptarBtn = modalEl.querySelector('#btnAceptarCerrarSesion');
   const cancelarBtn = modalEl.querySelector('#btnCancelarCerrarSesion');
@@ -3373,38 +3361,31 @@ function mostrarModalCerrarSesion() {
     try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
     modalEl._opening = false;
     ejecutarCerrarSesion();
-    setTimeout(() => {
-      recognitionGlobalPaused = false;
-      safeStartRecognitionGlobal();
-      console.log('🎤 recognitionGlobal: reiniciado tras aceptar cierre de sesión');
-    }, 120);
   }
 
   function onCancelar() {
     try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
     modalEl._opening = false;
-    recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal();
-    console.log('🎤 recognitionGlobal: reiniciado tras cancelar cierre de sesión');
+    reactivarReconocimientoGlobal(); // ✅ blindado
   }
 
-  try { aceptarBtn && aceptarBtn.removeEventListener('click', onAceptar); } catch (e) {}
-  try { cancelarBtn && cancelarBtn.removeEventListener('click', onCancelar); } catch (e) {}
-  if (aceptarBtn) aceptarBtn.addEventListener('click', onAceptar);
-  if (cancelarBtn) cancelarBtn.addEventListener('click', onCancelar);
+  aceptarBtn?.removeEventListener('click', onAceptar);
+  cancelarBtn?.removeEventListener('click', onCancelar);
+  aceptarBtn?.addEventListener('click', onAceptar);
+  cancelarBtn?.addEventListener('click', onCancelar);
 
   try {
     const modal = new bootstrap.Modal(modalEl);
     modal.show();
   } catch (e) {
-    if (confirm('¿Desea cerrar sesion')) {
+    if (confirm('¿Desea cerrar sesión?')) {
       onAceptar();
     } else {
       onCancelar();
     }
   }
 
-  // 🎤 Reconocimiento de voz local dentro del modal
+  // 🎤 Reconocimiento local dentro del modal
   try {
     if ('webkitSpeechRecognition' in window) {
       const recog = new webkitSpeechRecognition();
@@ -3413,65 +3394,49 @@ function mostrarModalCerrarSesion() {
       recog.interimResults = false;
 
       recog.onresult = function (event) {
-  const textoRec = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
-  console.log('🎤 Texto reconocido (modal cerrar sesión):', textoRec);
-  if (modalEl._actionTaken) return;
+        const textoRec = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
+        console.log('🎤 Texto reconocido (modal cerrar sesión):', textoRec);
+        if (modalEl._actionTaken) return;
 
-  if (textoRec.includes('acept') || textoRec.includes('confirm')) {
-    modalEl._actionTaken = true;
-    console.log('🟢 cerrar sesión: voz reconocida como aceptar');
-    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch(e){}
-    ejecutarCerrarSesion();
-    setTimeout(() => {
-      recognitionGlobalPaused = false;
-      safeStartRecognitionGlobal();
-      console.log('🎤 recognitionGlobal: reiniciado tras aceptar por voz');
-    }, 120);
-    try { recog.stop(); } catch(e){}
-  } else if (textoRec.includes('cancel')) {
-    modalEl._actionTaken = true;
-    console.log('🔴 cerrar sesión: voz reconocida como cancelar');
-    try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch(e){}
-    recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal();
-    try { recog.stop(); } catch(e){}
-  } else {
-    console.log('⚠️ cerrar sesión: voz reconocida pero no válida → ignorada');
-    
-    try {
-  recog.stop();
-  setTimeout(() => {
-    try {
-      recog.start();
-      console.log('🔁 reconocimiento local (modal cerrar sesión) reiniciado tras comando no válido');
-    } catch (err) {
-      if (err.name === 'InvalidStateError') {
-        console.log('⚠️ recog.start() ignorado: ya estaba iniciado');
-      } else {
-        console.warn('⚠️ recog.start() falló:', err);
-      }
-    }
-  }, 200);
-} catch (e) {
-  console.warn('⚠️ recog.stop() falló antes de reiniciar:', e);
-}
-
-  }
-};
-
-
+        if (textoRec.includes('acept') || textoRec.includes('confirm')) {
+          modalEl._actionTaken = true;
+          console.log('🟢 cerrar sesión: voz reconocida como aceptar');
+          try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
+          ejecutarCerrarSesion();
+        } else if (textoRec.includes('cancel')) {
+          modalEl._actionTaken = true;
+          console.log('🔴 cerrar sesión: voz reconocida como cancelar');
+          try { bootstrap.Modal.getInstance(modalEl)?.hide(); } catch (e) {}
+          reactivarReconocimientoGlobal();
+        } else {
+          console.log('⚠️ cerrar sesión: voz reconocida pero no válida → ignorada');
+          try {
+            recog.stop();
+            setTimeout(() => {
+              try {
+                recog.start();
+                console.log('🔁 reconocimiento local (modal cerrar sesión) reiniciado tras comando no válido');
+              } catch (err) {
+                if (err.name === 'InvalidStateError') {
+                  console.log('⚠️ recog.start() ignorado: ya estaba iniciado');
+                } else {
+                  console.warn('⚠️ recog.start() falló:', err);
+                }
+              }
+            }, 200);
+          } catch (e) {
+            console.warn('⚠️ recog.stop() falló antes de reiniciar:', e);
+          }
+        }
+      };
 
       recog.onerror = function (e) {
         console.warn('Reconocimiento modal cerrar sesión falló', e);
       };
 
       modalEl._recogInstance = recog;
-      try {
-        recog.start();
-        console.log('🎤 reconocimiento local (modal cerrar sesión) iniciado');
-      } catch (e) {
-        console.warn('No se pudo iniciar recog modal cerrar sesión', e);
-      }
+      recog.start();
+      console.log('🎤 reconocimiento local (modal cerrar sesión) iniciado');
     }
   } catch (e) {
     console.warn('No se pudo crear reconocimiento modal cerrar sesión', e);
@@ -3486,20 +3451,14 @@ function mostrarModalCerrarSesion() {
       if (recog) {
         recog.onresult = null;
         recog.onerror = null;
-        recog.stop();
+        recog.stop?.();
       }
     } catch (e) {
       console.warn('No se pudo limpiar recog modal cerrar sesión', e);
     }
     modalEl._recogInstance = null;
     modalEl._actionTaken = false;
-    recognitionGlobalPaused = false;
-    try {
-      safeStartRecognitionGlobal();
-      console.log('🎤 recognitionGlobal: reiniciado tras cerrar modal de sesión');
-    } catch (e) {
-      console.warn('⚠️ No se pudo reiniciar reconocimiento tras cerrar modal de sesión', e);
-    }
+    reactivarReconocimientoGlobal(); // ✅ blindado
   };
   modalEl.addEventListener('hidden.bs.modal', onHidden, { once: true });
 }
@@ -4002,6 +3961,159 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { parsearClavePorVoz };
 }
 
+// input de dictado de clave por voz para el inicio de sesion
+function activarModoDictadoClave() {
+  if (!('webkitSpeechRecognition' in window)) return;
+
+  try {
+    recognitionGlobalPaused = true;
+    recognitionGlobal?.abort();
+    console.log('🛑 Reconocimiento global pausado por dictado de clave');
+  } catch (e) {
+    console.warn('⚠️ No se pudo abortar reconocimiento global:', e);
+  }
+
+  
+  const recog = new webkitSpeechRecognition();
+  recog.lang = 'es-ES';
+  recog.continuous = true;
+  recog.interimResults = false;
+  
+  const claveInput = document.getElementById('clave');
+  claveInput.focus();
+  
+  if (!claveInput) return;
+
+  let ultimoTexto = '';
+
+  recog.onresult = function (event) {
+    let texto = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (!event.results[i].isFinal) continue;
+      texto += event.results[i][0].transcript;
+    }
+
+    console.log('🔤 dictadoClave: texto original →', texto);
+
+    texto = texto.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    console.log('🔤 dictadoClave: texto normalizado →', texto);
+
+    // 🛑 Salida por voz del modo dictado
+    if (texto.includes('terminar dictado') || texto.includes('modo comandos')) {
+      recog.stop();
+      window._dictadoClaveActivo = null;
+      recognitionGlobalPaused = false;
+      safeStartRecognitionGlobal();
+      getRenderer('mostrarMensajeKiosco')('🎤 Modo dictado desactivado', 'info');
+      return;
+    }
+
+    // ✅ Comandos críticos durante dictado
+    if (texto.includes('continuar')) {
+      identificarTrabajador();
+      return;
+    }
+
+    if (texto.includes('borrar')) {
+      claveInput.value = '';
+      getRenderer('mostrarMensajeKiosco')('🧹 clave borrada por voz', 'info');
+      return;
+    }
+
+    if (texto.includes('iniciar sesion con qr') || texto === 'qr') {
+      activarEscaneoQRLogin();
+      getRenderer('mostrarMensajeKiosco')('🎤 Escaneo QR activado por voz', 'info');
+      return;
+    }
+
+    // 🧠 Evitar repetir lo ya dictado
+    const nuevoFragmento = texto.replace(ultimoTexto, '').trim();
+    if (!nuevoFragmento) {
+      console.log('🔁 dictadoClave: fragmento repetido, ignorado');
+      return;
+    }
+    ultimoTexto = texto;
+
+    // 🔢 Convertir palabras numéricas a dígitos
+    const tokens = nuevoFragmento.split(/(\d+|[a-z]+)/);
+    const mapa = {
+      cero: '0', uno: '1', dos: '2', tres: '3', cuatro: '4', cinco: '5',
+      seis: '6', siete: '7', ocho: '8', nueve: '9'
+    };
+
+    let resultado = '';
+    for (const t of tokens) {
+      if (!t) continue;
+      resultado += mapa[t] || t;
+    }
+
+    // 🔗 Acumular en el input sin espacios
+    claveInput.value = (claveInput.value || '') + resultado.replace(/\s+/g, '');
+    console.log('📝 dictadoClave: input actualizado →', claveInput.value);
+  };
+
+  recog.onerror = function (e) {
+    console.warn('⚠️ Error en dictado de clave:', e);
+  };
+
+  recog.onend = function () {
+  console.log('ℹ️ Dictado de clave finalizado');
+
+  // ✅ Reactivar reconocimiento global si el dictado terminó naturalmente
+  if (window._dictadoClaveActivo === recog) {
+    window._dictadoClaveActivo = null;
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+    console.log('🎤 Reconocimiento global reactivado tras fin de dictado');
+  }
+
+  // ✅ Quitar foco del input
+  claveInput.blur();
+};
+
+
+  recog.start();
+  window._dictadoClaveActivo = recog;
+}
+
+
+function reactivarReconocimientoGlobal() {
+  try {
+    // 🛑 Detener dictado de clave si sigue activo
+    if (window._dictadoClaveActivo) {
+      window._dictadoClaveActivo.onresult = null;
+      window._dictadoClaveActivo.onerror = null;
+      window._dictadoClaveActivo.onend = null;
+      window._dictadoClaveActivo.stop?.();
+      window._dictadoClaveActivo = null;
+      console.log('🛑 Dictado de clave detenido');
+    }
+
+    // 🛑 Detener recog local de modal si existe
+    const recogModal = document.querySelector('.modal.show')?._recogInstance;
+    if (recogModal) {
+      recogModal.onresult = null;
+      recogModal.onerror = null;
+      recogModal.onend = null;
+      recogModal.stop?.();
+      console.log('🛑 Reconocimiento local de modal detenido');
+    }
+
+    // ✅ Reactivar global
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+    console.log('🎤 Reconocimiento global reactivado');
+  } catch (e) {
+    console.warn('⚠️ reactivarReconocimientoGlobal: error al reactivar', e);
+  }
+}
+
+
 
 function procesarComandoVoz(rawTexto) {
   try {
@@ -4124,7 +4236,7 @@ function procesarComandoVoz(rawTexto) {
     const claveInput = document.getElementById('clave');
     if (claveInput) {
       claveInput.value = clave;
-      claveInput.focus();
+      //claveInput.focus();
       getRenderer('mostrarMensajeKiosco')(`🎤 Clave reconocida: ${clave}`, 'success');
       // Opcional: avanzar automáticamente
       // nextStep();
@@ -4132,12 +4244,24 @@ function procesarComandoVoz(rawTexto) {
     return;
   }
 
+  if (/\b(ingresar clave| clave)\b/.test(limpio)) {
+  const claveInput = document.getElementById('clave');
+  if (claveInput) {
+    claveInput.focus();
+    claveInput.value = ''; // opcional: limpiar antes de dictar
+    activarModoDictadoClave(); // 🔧 función que vamos a crear
+    getRenderer('mostrarMensajeKiosco')('🎤 Modo dictado de clave activado', 'info');
+  }
+  return;
+}
+
+
   // 🧹 Comando para borrar el campo clave
   if (/\b(borrar|borrar clave|borrar todo)\b/.test(limpio)) {
     const claveInput = document.getElementById('clave');
     if (claveInput) {
       claveInput.value = '';
-      claveInput.focus();
+      //claveInput.focus();
       getRenderer('mostrarMensajeKiosco')('🧹 clave borrada por voz', 'info');
     }
     return;
@@ -4163,7 +4287,7 @@ function procesarComandoVoz(rawTexto) {
     const claveInput = document.getElementById('clave');
     if (claveInput) {
       claveInput.value = limpio.replace(/\s+/g, '');
-      claveInput.focus();
+      //claveInput.focus();
       getRenderer('mostrarMensajeKiosco')('🎤 clave dictado por voz', 'info');
     }
     return;
