@@ -186,46 +186,39 @@ function esComandoVolver(limpio) {
 
 //modal de mensajes
 function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
-  mensaje = quitarEmojis(mensaje); // 🧹 Limpiar emojis
+  const step = getStepActivo();
+  const tipoNormalizado = (tipo || '').toLowerCase();
+  const mensajeLower = (mensaje || '').toLowerCase();
 
-  // 🔁 Redirigir ciertos mensajes a modal
-  const mensajeModalForzado = [
-    'Recurso asignado correctamente'
-  ];
+  // ✅ Detectar si el mensaje es crítico
+  const mensajeCritico =
+    mensajeLower.includes('clave inválida') ||
+    mensajeLower.includes('usuario no habilitado') ||
+    mensajeLower.includes('no se puede') ||
+    mensajeLower.includes('error') ||
+    mensajeLower.includes('rechazado');
 
- if (tipo === 'warning' || tipo === 'danger') {
-  mostrarModalKiosco(mensaje, tipo);
-  return;
-}
+  // ✅ Mostrar modal sin voz solo en step1 y si el mensaje es crítico
+  if (step === 'step1' && (['danger', 'warning', 'error'].includes(tipoNormalizado) || mensajeCritico)) {
+    mostrarModalKioscoSinVoz(mensaje, tipoNormalizado || 'danger');
+    console.log('🛑 mostrarMensajeKiosco: modal sin voz activado en step1');
+    return;
+  }
 
-if (mensaje.trim() === 'Recurso asignado correctamente') {
-  mostrarModalKioscoSinVoz(mensaje, tipo); // ✅ nueva función sin recog
-  return;
-}
-
-
+  // ✅ Mostrar toast normal
   const container = document.getElementById('toast-container');
   if (!container) return;
 
-  const toasts = container.querySelectorAll('.toast');
-  for (const toast of toasts) {
-    const body = toast.querySelector('.toast-body');
-    if (body && body.textContent.trim() === mensaje.trim()) {
-      return;
-    }
-  }
-
   const toast = document.createElement('div');
-  toast.className = `toast align-items-center text-white bg-${tipo} border-0 show`;
+  toast.className = `toast align-items-center text-white bg-${tipoNormalizado || 'danger'} border-0 show`;
   toast.setAttribute('role', 'alert');
   toast.setAttribute('aria-live', 'assertive');
   toast.setAttribute('aria-atomic', 'true');
-  toast.style.marginBottom = '0.5rem';
 
   toast.innerHTML = `
     <div class="d-flex">
       <div class="toast-body">${mensaje}</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
     </div>
   `;
 
@@ -239,10 +232,16 @@ if (mensaje.trim() === 'Recurso asignado correctamente') {
 }
 
 
+
 function mostrarModalKiosco(mensaje, tipo = 'danger') {
   const modalEl = document.getElementById('modal-mensaje-kiosco');
   const body = document.getElementById('modalMensajeKioscoBody');
   const cerrarBtn = document.getElementById('btnCerrarMensajeKiosco');
+
+  if (!modalEl || !body || !cerrarBtn) {
+    console.warn('⚠️ mostrarModalKiosco: elementos del DOM no encontrados');
+    return;
+  }
 
   body.textContent = mensaje;
   window.modalKioscoActivo = true;
@@ -256,32 +255,32 @@ function mostrarModalKiosco(mensaje, tipo = 'danger') {
     console.warn('⚠️ No se pudo abortar recognitionGlobal:', e);
   }
 
-  // Dentro de mostrarModalKiosco, antes de modal.show()
-try {
-  if (modalSerie && modalSerie.classList.contains('show')) {
-  const instanciaSerie = bootstrap.Modal.getInstance(modalSerie);
-  if (instanciaSerie) instanciaSerie.hide();
-
+  // 🔧 Cierre defensivo del modalConfirmarSerie si está abierto
   try {
-    const recogSerie = modalSerie._recogInstance;
-    if (recogSerie) {
-      recogSerie.onresult = null;
-      recogSerie.onerror = null;
-      recogSerie.onend = null;
-      recogSerie.stop?.();
-      modalSerie._recogInstance = null;
-      modalSerie._lastTranscript = null;
-      console.log('🧹 Reconocimiento local del modal serie detenido');
+    const modalSerie = document.getElementById('modalConfirmarSerie'); // ✅ agregado
+
+    if (modalSerie && modalSerie.classList.contains('show')) {
+      const instanciaSerie = bootstrap.Modal.getInstance(modalSerie);
+      if (instanciaSerie) instanciaSerie.hide();
+
+      try {
+        const recogSerie = modalSerie._recogInstance;
+        if (recogSerie) {
+          recogSerie.onresult = null;
+          recogSerie.onerror = null;
+          recogSerie.onend = null;
+          recogSerie.stop?.();
+          modalSerie._recogInstance = null;
+          modalSerie._lastTranscript = null;
+          console.log('🧹 Reconocimiento local del modal serie detenido');
+        }
+      } catch (e) {
+        console.warn('⚠️ No se pudo detener recog del modal serie', e);
+      }
     }
   } catch (e) {
-    console.warn('⚠️ No se pudo detener recog del modal serie', e);
+    console.warn('⚠️ No se pudo cerrar modalConfirmarSerie desde mostrarModalKiosco', e);
   }
-}
-
-} catch (e) {
-  console.warn('⚠️ No se pudo cerrar modalConfirmarSerie desde mostrarModalKiosco', e);
-}
-
 
   const modal = new bootstrap.Modal(modalEl);
   let modalActionTaken = false;
@@ -346,7 +345,6 @@ try {
         }
       };
 
-
       recog.onerror = function (e) {
         if (e?.error !== 'aborted') console.warn('Error en reconocimiento modal kiosco:', e);
       };
@@ -360,6 +358,7 @@ try {
 
   modal.show();
 }
+
 
 function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
   const modalEl = document.getElementById('modal-mensaje-kiosco');
@@ -3973,18 +3972,21 @@ function activarModoDictadoClave() {
     console.warn('⚠️ No se pudo abortar reconocimiento global:', e);
   }
 
-  
   const recog = new webkitSpeechRecognition();
   recog.lang = 'es-ES';
   recog.continuous = true;
   recog.interimResults = false;
-  
+
   const claveInput = document.getElementById('clave');
-  claveInput.focus();
-  
   if (!claveInput) return;
 
-  let ultimoTexto = '';
+  if (!document.activeElement.isSameNode(claveInput)) {
+    claveInput.focus();
+  }
+
+  claveInput.classList.add('dictado-activo');
+
+  let ultimoFragmento = '';
 
   recog.onresult = function (event) {
     let texto = '';
@@ -4031,16 +4033,15 @@ function activarModoDictadoClave() {
       return;
     }
 
-    // 🧠 Evitar repetir lo ya dictado
-    const nuevoFragmento = texto.replace(ultimoTexto, '').trim();
-    if (!nuevoFragmento) {
-      console.log('🔁 dictadoClave: fragmento repetido, ignorado');
+    // 🧠 Evitar repetir fragmentos idénticos
+   /* if (texto === ultimoFragmento) {
+      console.log('🔁 dictadoClave: fragmento idéntico al anterior, ignorado');
       return;
-    }
-    ultimoTexto = texto;
+    }*/
+    ultimoFragmento = texto;
 
     // 🔢 Convertir palabras numéricas a dígitos
-    const tokens = nuevoFragmento.split(/(\d+|[a-z]+)/);
+    const tokens = texto.split(/(\d+|[a-z]+)/);
     const mapa = {
       cero: '0', uno: '1', dos: '2', tres: '3', cuatro: '4', cinco: '5',
       seis: '6', siete: '7', ocho: '8', nueve: '9'
@@ -4062,20 +4063,18 @@ function activarModoDictadoClave() {
   };
 
   recog.onend = function () {
-  console.log('ℹ️ Dictado de clave finalizado');
+    console.log('ℹ️ Dictado de clave finalizado');
 
-  // ✅ Reactivar reconocimiento global si el dictado terminó naturalmente
-  if (window._dictadoClaveActivo === recog) {
-    window._dictadoClaveActivo = null;
-    recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal();
-    console.log('🎤 Reconocimiento global reactivado tras fin de dictado');
-  }
+    if (window._dictadoClaveActivo === recog) {
+      window._dictadoClaveActivo = null;
+      recognitionGlobalPaused = false;
+      safeStartRecognitionGlobal();
+      console.log('🎤 Reconocimiento global reactivado tras fin de dictado');
+    }
 
-  // ✅ Quitar foco del input
-  claveInput.blur();
-};
-
+    claveInput.classList.remove('dictado-activo');
+    claveInput.blur();
+  };
 
   recog.start();
   window._dictadoClaveActivo = recog;
@@ -4250,7 +4249,7 @@ function procesarComandoVoz(rawTexto) {
     claveInput.focus();
     claveInput.value = ''; // opcional: limpiar antes de dictar
     activarModoDictadoClave(); // 🔧 función que vamos a crear
-    getRenderer('mostrarMensajeKiosco')('🎤 Modo dictado de clave activado', 'info');
+    //getRenderer('mostrarMensajeKiosco')('🎤 Modo dictado de clave activado', 'info');
   }
   return;
 }
@@ -4261,7 +4260,7 @@ function procesarComandoVoz(rawTexto) {
     const claveInput = document.getElementById('clave');
     if (claveInput) {
       claveInput.value = '';
-      //claveInput.focus();
+      claveInput.focus();
       getRenderer('mostrarMensajeKiosco')('🧹 clave borrada por voz', 'info');
     }
     return;
