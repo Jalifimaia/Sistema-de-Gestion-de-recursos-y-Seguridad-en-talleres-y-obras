@@ -6,18 +6,16 @@
 <div class="container py-4">
 
   <!-- 🔶 Encabezado -->
-  <header class="row mb-4">
-    <div class="col-md-8">
-      <div class="d-flex align-items-center mb-4">
-    <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary me-3">
-      ⬅️ Volver
-    </a>
-    <h2 class="h4 fw-bold mb-0">Checklist diario de EPP</h2>
-  </div>
-      <p class="text-muted small">Gestión de equipos de protección personal y checklist de seguridad</p>
-    </div>
-    <div class="col-md-4 text-md-end text-muted small">
-      Fecha: <strong class="text-nowrap">{{ \Carbon\Carbon::today()->format('d/m/Y') }}</strong>
+  <header class="mb-5 py-3 px-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+      <a href="{{ route('controlEPP') }}" class="btn btn-volver d-flex align-items-center">
+        <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+        Volver
+      </a>
+      <div class="text-center w-100 mt-3 d-flex justify-content-center align-items-center gap-2">
+        <img src="{{ asset('images/check.svg') }}" alt="Checklist" class="icono-titulo">
+        <h1 class="titulo-checklist mb-0">Checklist diario de cumplimiento de EPP</h1>
+      </div>
     </div>
   </header>
 
@@ -30,10 +28,9 @@
   <!-- 🔶 Tabla checklist diario -->
   <div class="card shadow-sm mb-4">
     <div class="card-body">
-      <h5 class="card-title fw-bold">Checklist Diario</h5>
-      <p class="text-muted small">Cumplimiento de EPP por trabajador hoy</p>
+      <!--<h5 class="card-title fw-bold text-center">Registro de hoy</h5>-->
       <div class="table-responsive">
-  <table id="tablaChecklistDiario" class="table table-bordered text-center">
+  <table id="tablaChecklistDiario" class="table table-bordered text-center tabla-epp">
     <thead>
       <tr>
         <th>Trabajador</th>
@@ -119,5 +116,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+@push('styles')
+<link href="{{ asset('css/checklistTabla.css') }}" rel="stylesheet">
+@endpush
 
 @endpush

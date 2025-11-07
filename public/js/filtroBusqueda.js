@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     filas.forEach(fila => {
       const categoria = normalizar(fila.querySelector('td:nth-child(4)')?.textContent || '');
-      const nombre = normalizar(fila.querySelector('td:nth-child(1)')?.textContent || '');
+      const recursoTexto = normalizar(fila.querySelector('td:nth-child(2)')?.textContent || '');
+      const nombre = recursoTexto.split(' - ').pop(); // toma solo el nombre del recurso
       const estados = Array.from(fila.querySelectorAll('select option'))
         .map(opt => opt.getAttribute('data-estado')?.toLowerCase())
         .filter(Boolean);

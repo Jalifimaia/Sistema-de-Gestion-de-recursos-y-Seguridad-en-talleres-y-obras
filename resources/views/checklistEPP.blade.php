@@ -4,14 +4,19 @@
 
 @section('content')
   <div class="container py-4">
-  <div class="d-flex align-items-center mb-4">
-    <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary me-3">
-      ⬅️ Volver
+  <!-- 🔶 Encabezado -->
+<header class="mb-5 py-3 px-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap">
+    <a href="{{ route('controlEPP') }}" class="btn btn-volver d-flex align-items-center">
+      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+      Volver
     </a>
-    <h2 class="h4 fw-bold mb-0">Registro de Checklist Diario</h2>
+    <div class="text-center w-100 mt-3 d-flex justify-content-center align-items-center gap-2">
+      <img src="{{ asset('images/check.svg') }}" alt="Checklist" class="icono-titulo">
+      <h1 class="titulo-checklist mb-0">Registro de Checklist Diario</h1>
+    </div>
   </div>
-
-
+</header>
 
   @if ($errors->any())
     <div class="alert alert-danger">
@@ -93,7 +98,7 @@
 
     <!-- Botón -->
     <div class="mt-4 text-end">
-      <button type="submit" class="btn btn-primary">Registrar Checklist</button>
+      <button type="submit" class="btn btn-reg">Registrar Checklist</button>
     </div>
   </form>
 </div>
@@ -176,6 +181,10 @@
 
 
 @endsection
+
+@push('styles')
+<link href="{{ asset('css/registroCheck.css') }}" rel="stylesheet">
+@endpush
 
 @push('scripts')
 <script>

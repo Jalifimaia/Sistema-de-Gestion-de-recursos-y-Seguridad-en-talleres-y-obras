@@ -6,9 +6,10 @@
 <div class="container py-4">
     <!-- Fecha arriba a la derecha -->
     <div class="row mb-2">
-        <div class="col-12 text-end text-muted small pt-1">
-            Fecha: <strong id="today" class="text-nowrap"></strong>
-        </div>
+        <div class="col-md-14 text-md-end fecha-destacada">
+      <span class="etiqueta-fecha">Fecha:</span>
+      <strong id="today" class="valor-fecha text-nowrap"></strong>
+    </div>
     </div>
 
     <!-- Título -->

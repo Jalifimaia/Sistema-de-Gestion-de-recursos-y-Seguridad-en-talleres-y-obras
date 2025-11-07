@@ -18,8 +18,9 @@
       <h1 class="h4 fw-bold mb-1">Gestión de Usuarios y Roles</h1>
       <p class="text-muted small">Administración de usuarios, permisos y roles del sistema</p>
     </div>
-    <div class="col-md-4 text-md-end text-muted small">
-      Fecha: <strong id="today" class="text-nowrap"></strong>
+    <div class="col-md-4 text-md-end fecha-destacada">
+      <span class="etiqueta-fecha">Fecha:</span>
+      <strong id="today" class="valor-fecha text-nowrap"></strong>
     </div>
   </header>
 
