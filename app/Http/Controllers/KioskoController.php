@@ -32,16 +32,49 @@ class KioskoController extends Controller
 
 public function identificarTrabajador(Request $request)
 {
-    $clave = $request->input('clave'); // lo que se dijo por voz
-    \Log::info('🔍 identificando por clave hablada', ['clave' => $clave]);
+    $clave = $request->input('clave');
+    $codigoQR = $request->input('codigo_qr');
 
-    // Buscar usuarios que tengan esa clave (comparando con el hash)
-    $usuario = Usuario::where('id_rol', 3)
+    \Log::info('🔍 identificando trabajador', ['clave' => $clave, 'codigo_qr' => $codigoQR]);
+
+    $usuario = null;
+
+    if ($clave) {
+        $usuario = Usuario::where('id_rol', 3)
+            ->where('id_estado', 1)
+            ->get()
+            ->first(function ($u) use ($clave) {
+                return Hash::check($clave, $u->password);
+            });
+    } elseif ($codigoQR) {
+        $usuario = Usuario::where('codigo_qr', $codigoQR)
+            ->where('id_rol', 3)
+            ->where('id_estado', 1)
+            ->first();
+    }
+
+    if (! $usuario) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Clave inválida o usuario no habilitado'
+        ]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'usuario' => $usuario->only(['id','name','dni','email','codigo_qr'])
+    ]);
+}
+
+public function identificarPorQR(Request $request)
+{
+    $codigoQR = $request->input('codigo_qr');
+    \Log::info('🔍 identificando por QR', ['codigo_qr' => $codigoQR]);
+
+    $usuario = Usuario::where('codigo_qr', $codigoQR)
+        ->where('id_rol', 3)
         ->where('id_estado', 1)
-        ->get()
-        ->first(function ($u) use ($clave) {
-            return Hash::check($clave, $u->password);
-        });
+        ->first();
 
     if (! $usuario) {
         return response()->json([

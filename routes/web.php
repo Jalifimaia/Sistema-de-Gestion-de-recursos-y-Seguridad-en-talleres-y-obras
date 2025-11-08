@@ -65,6 +65,8 @@ Route::prefix('terminal')->group(function () {
     Route::get('/', [KioskoController::class, 'index'])->name('terminal.index');
 
     Route::post('/identificar', [KioskoController::class, 'identificarTrabajador']);
+    Route::post('/identificar-qr', [KioskoController::class, 'identificarPorQR']);
+
     Route::post('/registrar-manual', [KioskoController::class, 'registrarManual']);
     Route::post('/solicitar', [KioskoController::class, 'solicitarRecurso']);
 

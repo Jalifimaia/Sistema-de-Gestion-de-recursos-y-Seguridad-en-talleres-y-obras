@@ -1865,7 +1865,7 @@ function identificarPorQRLogin(codigoQR) {
   const csrf = meta && meta.content ? meta.content : null;
   const headers = { 'Content-Type': 'application/json' };
   if (csrf) headers['X-CSRF-TOKEN'] = csrf;
-  fetch('/terminal/identificar', {
+  fetch('/terminal/identificar-qr', {
     method: 'POST',
     headers,
     body: JSON.stringify({ codigo_qr: codigoQR })
