@@ -11,6 +11,7 @@ function getRenderer(name, fallback = () => {}) {
 
 let mostrarMensajesMicrofono = false
 const mostrarMic = false; // mostrar microfono flotante
+window._qrValidadoParaDevolucion = false;
 
 const micButton = document.getElementById('micStatusButton');
 if (micButton) {
@@ -1159,13 +1160,13 @@ function mostrarStepDevolucionQR(serie, detalleId) {
 
   const serieEl = document.getElementById('serieEsperadaQR');
   const feedbackEl = document.getElementById('qrFeedback');
-  const btnConfirmar = document.getElementById('btnConfirmarDevolucion');
+  //const btnConfirmar = document.getElementById('btnConfirmarDevolucion');
 
   if (serieEl) serieEl.textContent = serie || '';
   if (feedbackEl) feedbackEl.textContent = '';
-  if (btnConfirmar) {
+  /*if (btnConfirmar) {
     try { btnConfirmar.disabled = true; } catch (e) {}
-  }
+  }*/
 
   nextStep(9);
 
@@ -1300,7 +1301,6 @@ function detenerEscaneoQRDevolucion() {
 window._qrDevolucionStopping = false;
 
 async function detenerEscaneoQRDevolucionSegura() {
-  // Evitar reentradas simultáneas
   if (window._qrDevolucionStopping) {
     console.log('↩️ detenerEscaneoQRDevolucionSegura: ya en curso');
     return;
@@ -1310,7 +1310,6 @@ async function detenerEscaneoQRDevolucionSegura() {
   try {
     console.log('🧹 detenerEscaneoQRDevolucionSegura: inicio');
 
-    // Detener reconocimiento de voz local si existe
     if (window._recogQRDevolucion) {
       try {
         if (typeof window._recogQRDevolucion.stop === 'function') {
@@ -1322,7 +1321,6 @@ async function detenerEscaneoQRDevolucionSegura() {
       window._recogQRDevolucion = null;
     }
 
-    // Detener y limpiar html5QrCodeDevolucion si existe
     if (window.html5QrCodeDevolucion) {
       try {
         if (typeof window.html5QrCodeDevolucion.stop === 'function') {
@@ -1341,16 +1339,16 @@ async function detenerEscaneoQRDevolucionSegura() {
       window.html5QrCodeDevolucion = null;
     }
 
-    // Limpiar DOM del contenedor
     const qrContainer = document.getElementById('qr-reader-devolucion');
     if (qrContainer) {
-      try { qrContainer.innerHTML = ''; } catch (e) { /* ignore */ }
+      try { qrContainer.innerHTML = ''; } catch (e) {}
     }
 
-    // Resetar flags
     window._qrDevolucionActivo = false;
-    console.log('🛑 Escaneo QR de devolución detenido (seguro)');
+    window._qrDevolucionProcesando = false;
+    window._qrValidadoParaDevolucion = false;
 
+    console.log('🛑 Escaneo QR de devolución detenido (seguro)');
   } catch (e) {
     console.warn('⚠️ Error en detenerEscaneoQRDevolucionSegura', e);
   } finally {
@@ -1362,6 +1360,9 @@ async function detenerEscaneoQRDevolucionSegura() {
 
 
 function volverARecursosAsignadosDesdeDevolucionQR() {
+ 
+ window._qrValidadoParaDevolucion = false;
+
   try {
     detenerEscaneoQRDevolucionSegura(); // 🔧 usa la versión segura
     nextStep(10);
@@ -1433,12 +1434,19 @@ async function activarEscaneoDevolucionQR() {
   }
 
   window._qrDevolucionActivo = true;
+  window._qrDevolucionProcesando = false;
 
   try {
     await window.html5QrCodeDevolucion.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       async (decodedText) => {
+        if (window._qrDevolucionProcesando) {
+          console.warn('⚠️ Escaneo ignorado: ya se está procesando un QR');
+          return;
+        }
+        window._qrDevolucionProcesando = true;
+
         console.log('🔎 QR detectado (decodedText):', decodedText);
         const res = await validarDevolucionQR(decodedText, idUsuario);
         console.log('📦 Respuesta de validación QR (handler):', res);
@@ -1446,6 +1454,7 @@ async function activarEscaneoDevolucionQR() {
         if (!res.success || res.estado === 'qr_invalido') {
           await detenerEscaneoQRDevolucionSegura();
           safeStopRecognitionGlobal();
+          window._qrDevolucionProcesando = false;
 
           const modalEl = document.getElementById('modalErrorQR');
           if (!modalEl) return;
@@ -1470,37 +1479,59 @@ async function activarEscaneoDevolucionQR() {
 
         if (res.success && res.coincide) {
           await detenerEscaneoQRDevolucionSegura();
+          window._qrValidadoParaDevolucion = true;
+
           detalleIdActual = res.id_detalle;
           document.getElementById('qrFeedback').textContent = '';
           mostrarMensajeKiosco('✅ QR válido. Confirma la devolución en pantalla.', 'success');
 
           const modalEl = document.getElementById('modalConfirmarQR');
-          if (modalEl) {
-            const body = document.getElementById('modalConfirmarQRBody');
-            if (body) {
-              const serie = document.getElementById('serieEsperadaQR')?.textContent || '';
-              body.textContent = serie ? `¿Deseás confirmar la devolución de la serie ${serie}?` : '¿Deseás confirmar la devolución del recurso escaneado?';
-            }
+          if (!modalEl) return;
 
-            const modal = new bootstrap.Modal(modalEl);
-            modal.show();
+          if (modalEl.classList.contains('show')) {
+            console.log('⚠️ modalConfirmarQR ya visible, se evita duplicación');
+            return;
+          }
 
-            const aceptar = document.getElementById('btnAceptarQR');
-            const cancelar = document.getElementById('btnCancelarQR');
+          if (!window._modalConfirmarQR) {
+            window._modalConfirmarQR = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+          }
 
-            const onAceptar = () => { try { modal.hide(); } catch (e){}; confirmarDevolucionQRActual(); };
-            const onCancelar = () => { try { modal.hide(); } catch (e){}; setTimeout(() => activarEscaneoDevolucionQR(), 250); };
+          const body = document.getElementById('modalConfirmarQRBody');
+          if (body) {
+            const serie = document.getElementById('serieEsperadaQR')?.textContent || '';
+            body.textContent = serie
+              ? `¿Deseás confirmar la devolución de la serie ${serie}?`
+              : '¿Deseás confirmar la devolución del recurso escaneado?';
+          }
 
-            if (aceptar) {
-              try { aceptar.removeEventListener('click', onAceptar); } catch(e){}
-              aceptar.addEventListener('click', onAceptar);
-            }
-            if (cancelar) {
-              try { cancelar.removeEventListener('click', onCancelar); } catch(e){}
-              cancelar.addEventListener('click', onCancelar);
-            }
-          } else {
+          window._modalConfirmarQR.show();
+
+          const aceptar = document.getElementById('btnAceptarQR');
+          const cancelar = document.getElementById('btnCancelarQR');
+
+          const onAceptar = () => {
+            try { window._modalConfirmarQR.hide(); } catch (e) {}
             confirmarDevolucionQRActual();
+          };
+
+          const onCancelar = () => {
+            try { window._modalConfirmarQR.hide(); } catch (e) {}
+            window._qrDevolucionProcesando = false;
+            setTimeout(() => activarEscaneoDevolucionQR(), 250);
+          };
+
+          if (aceptar) {
+            aceptar.replaceWith(aceptar.cloneNode(true));
+            const nuevoAceptar = document.getElementById('btnAceptarQR');
+            nuevoAceptar.disabled = false;
+            nuevoAceptar.addEventListener('click', onAceptar);
+          }
+
+          if (cancelar) {
+            cancelar.replaceWith(cancelar.cloneNode(true));
+            const nuevoCancelar = document.getElementById('btnCancelarQR');
+            nuevoCancelar.addEventListener('click', onCancelar);
           }
         }
       },
@@ -1519,7 +1550,7 @@ async function activarEscaneoDevolucionQR() {
     console.error('No se pudo iniciar escaneo devolución:', err);
     mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
     window._qrDevolucionActivo = false;
-    try { await detenerEscaneoQRDevolucionSegura(); } catch(e){}
+    try { await detenerEscaneoQRDevolucionSegura(); } catch (e) {}
   }
 }
 
@@ -1560,19 +1591,25 @@ function activarReconocimientoDevolucionQR() {
     const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
     console.log('🎤 Texto reconocido (devolución QR):', texto);
 
+    const btn = document.getElementById('btnConfirmarDevolucion');
+    const modalVisible = document.getElementById('modalConfirmarQR')?.classList.contains('show');
+
     if (texto === 'confirmar' || texto === 'confirmar devolución') {
-      const btn = document.getElementById('btnConfirmarDevolucion');
-      if (btn && !btn.disabled) {
+      if (window._qrValidadoParaDevolucion && btn && !btn.disabled && modalVisible) {
+        console.log('🧠 confirmación por voz permitida');
         btn.click();
         recog.stop();
+      } else {
+        console.warn('⚠️ confirmación por voz bloqueada: condiciones no cumplidas');
+        mostrarMensajeKiosco('Aún no se detectó un QR válido para confirmar', 'warning');
       }
     } else if (texto === 'volver') {
       volverARecursosAsignadosDesdeDevolucionQR();
       recog.stop();
     } else if (texto === 'cerrar') {
-      const btn = document.getElementById('btnCerrarErrorQR');
-      if (btn) {
-        btn.click();
+      const btnCerrar = document.getElementById('btnCerrarErrorQR');
+      if (btnCerrar) {
+        btnCerrar.click();
         recog.stop();
       }
     }
@@ -1583,14 +1620,16 @@ function activarReconocimientoDevolucionQR() {
   };
 
   try {
-    recog.start();
-    console.log('🎤 Reconocimiento voz activo en paso 9');
+    setTimeout(() => {
+      recog.start();
+      console.log('🎤 Reconocimiento voz activo en paso 9');
+      window._recogQRDevolucion = recog;
+    }, 300); // ✅ Delay para asegurar que el modal esté visible
   } catch (e) {
     console.warn('No se pudo iniciar reconocimiento QR', e);
   }
-
-  window._recogQRDevolucion = recog;
 }
+
 
 function cerrarModalErrorQR() {
   try {
@@ -4459,20 +4498,34 @@ function procesarComandoVoz(rawTexto) {
     }
 
     // === Step9: Devolución por QR ===
-    if (step === 'step9') {
-      if (/\b(confirmar|confirm|aceptar|accept)\b/.test(limpio)) {
-        const btn = document.getElementById('btnConfirmarDevolucion');
-        if (btn && !btn.disabled) { try { btn.click(); } catch(e) { confirmarDevolucionQRActual(); } return; }
-        getRenderer('mostrarMensajeKiosco')('Aún no se detectó un QR válido para confirmar', 'warning');
-        return;
-      }
+   /* if (step === 'step9') {
+      if (/\b(confirmar|firmar)\b/.test(limpio)) {
+  const btn = document.getElementById('btnConfirmarDevolucion');
+  const modalVisible = document.getElementById('modalConfirmarQR')?.classList.contains('show');
+
+  console.log('🧠 Voz: confirmar detectado');
+  console.log('🔍 _qrValidadoParaDevolucion:', window._qrValidadoParaDevolucion);
+  console.log('🔍 btnConfirmarDevolucion:', btn);
+  console.log('🔍 btn.disabled:', btn?.disabled);
+  console.log('🔍 modalVisible:', modalVisible);
+
+  if (window._qrValidadoParaDevolucion && btn && !btn.disabled && modalVisible) {
+    try { btn.click(); } catch(e) { confirmarDevolucionQRActual(); }
+    return;
+  }
+
+  getRenderer('mostrarMensajeKiosco')('Aún no se detectó un QR válido para confirmar', 'warning');
+  return;
+}
+
+
 
    /* if (/\b(cancelar)\b/.test(limpio)) {
         detenerEscaneoQRDevolucionSegura();
         return;
       }*/
 
-      if (/\b(cancelar)\b/.test(limpio)) {
+     /* if (/\b(cancelar)\b/.test(limpio)) {
         const modalEl = document.getElementById('modalConfirmarQR');
         if (modalEl) {
           const modal = bootstrap.Modal.getInstance(modalEl);
@@ -4488,6 +4541,50 @@ function procesarComandoVoz(rawTexto) {
       getRenderer('mostrarMensajeKiosco')('No se reconoció el comando. Decí "confirmar" o "volver".', 'info');
       return;
     }
+    */
+
+
+  // === Step9: Devolución por QR ===
+  if (step === 'step9') {
+    if (/\b(confirmar|firmar|devolucion)\b/.test(limpio)) {
+      const modalVisible = document.getElementById('modalConfirmarQR')?.classList.contains('show');
+
+      console.log('🧠 Voz: confirmar detectado');
+      console.log('🔍 _qrValidadoParaDevolucion:', window._qrValidadoParaDevolucion);
+      console.log('🔍 modalVisible:', modalVisible);
+
+      if (window._qrValidadoParaDevolucion && modalVisible) {
+        try {
+          window._modalConfirmarQR?.hide();
+        } catch (e) {}
+
+        confirmarDevolucionQRActual();
+        return;
+      }
+
+      getRenderer('mostrarMensajeKiosco')('Aún no se detectó un QR válido para confirmar', 'warning');
+      return;
+    }
+
+    if (/\b(cancelar|cerrar|volver)\b/.test(limpio)) {
+      const modalError = document.getElementById('modalErrorQR');
+      const modalConfirm = document.getElementById('modalConfirmarQR');
+
+      if (modalError?.classList.contains('show')) {
+        document.getElementById('btnCerrarErrorQR')?.click();
+        return;
+      }
+
+      if (modalConfirm?.classList.contains('show')) {
+        document.getElementById('btnCancelarQR')?.click();
+        return;
+      }
+
+      volverARecursosAsignadosDesdeDevolucionQR();
+      return;
+    }
+  }
+
     
 
     // === Paginación y navegación globales (fallback) ===
