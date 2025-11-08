@@ -2943,114 +2943,6 @@ function abrirStepRecursos() {
     }
   } catch (e) { console.warn('abrirStepRecursos: conectar listeners falló', e); }
 
-  // Inicializar reconocimiento local específico para step10
-  try {
-    const stepRec = stepEl;
-
-    // Limpiar instancia previa si existe
-    if ('webkitSpeechRecognition' in window) {
-      if (stepRec._recogInstance) {
-        try {
-          stepRec._recogInstance.onresult = null;
-          stepRec._recogInstance.onerror = null;
-          stepRec._recogInstance.onend = null;
-          if (typeof stepRec._recogInstance.stop === 'function') stepRec._recogInstance.stop();
-        } catch (e) {}
-        stepRec._recogInstance = null;
-      }
-
-      const recog = new webkitSpeechRecognition();
-      recog.lang = 'es-ES';
-      recog.continuous = true;
-      recog.interimResults = false;
-
-      recog.onresult = function (event) {
-        const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
-        const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-
-        // Cerrar pantalla por voz
-        if (/\b(cerrar|cerrar recursos asignados|cerrar pantalla|cerrar modal)\b/.test(limpio)) {
-          recognitionGlobalPaused = false;
-          safeStartRecognitionGlobal();
-          nextStep(2);
-          getRenderer('mostrarMensajeKiosco')('Pantalla cerrada por voz', 'info');
-          return;
-        }
-
-        // Cambio de tab
-        const tabCambio = matchTabCambio(limpio);
-        if (tabCambio === 'epp') {
-          document.getElementById('tab-epp-step')?.click();
-          getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
-          return;
-        }
-        if (tabCambio === 'herramientas') {
-          document.getElementById('tab-herramientas-step')?.click();
-          getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
-          return;
-        }
-
-        // Opción N -> confirmación devolución
-        const match = limpio.match(/opcion\s*(\d{1,2})/i);
-        if (match) {
-          confirmarDevolucionPorVozStep10(parseInt(match[1], 10));
-          return;
-        }
-
-        // Página N -> paginador
-        const mp = limpio.match(/^pagina\s*(\d{1,2})$/i);
-        if (mp) {
-          handleStep10Pagina(parseInt(mp[1], 10));
-          return;
-        }
-      };
-
-      // onend: reiniciar solo si el step sigue activo y no estamos en pausa global
-      recog.onend = function () {
-        try {
-          if (!stepEl.classList.contains('active')) return;
-          if (recognitionGlobalPaused) return;
-          // pequeña protección contra loops infinitos: reiniciar con delay
-          setTimeout(() => {
-            try {
-              recog.start();
-              console.log('🔁 reconocimiento local (step10) reiniciado desde onend');
-            } catch (err) {
-              console.warn('⚠️ No se pudo reiniciar recog local desde onend (ignored):', err);
-            }
-          }, 120);
-        } catch (e) {
-          console.warn('abrirStepRecursos recog.onend excep', e);
-        }
-      };
-
-      recog.onerror = function (e) {
-        console.warn('Reconocimiento de voz local (step10) error', e);
-        // Intentamos limpiar y reactivar reconocimiento global para no dejar al usuario sin mic
-        try {
-          recog.onresult = null;
-          recog.onerror = null;
-          recog.onend = null;
-          if (typeof recog.stop === 'function') recog.stop();
-        } catch (err) {}
-        stepRec._recogInstance = null;
-        recognitionGlobalPaused = false;
-        safeStartRecognitionGlobal();
-      };
-
-      stepRec._recogInstance = recog;
-      try {
-        recog.start();
-      } catch (e) {
-        console.warn('abrirStepRecursos: start local recog failed', e);
-        // fallback: reactivar reconocimiento global
-        stepRec._recogInstance = null;
-        recognitionGlobalPaused = false;
-        safeStartRecognitionGlobal();
-      }
-    }
-  } catch (e) { console.warn('abrirStepRecursos: error al iniciar reconocimiento local', e); }
-
   stepEl._opening = false;
 }
 
@@ -4644,95 +4536,47 @@ function procesarComandoVoz(rawTexto) {
     }
 
     // === Step9: Devolución por QR ===
-   /* if (step === 'step9') {
-      if (/\b(confirmar|firmar)\b/.test(limpio)) {
-  const btn = document.getElementById('btnConfirmarDevolucion');
-  const modalVisible = document.getElementById('modalConfirmarQR')?.classList.contains('show');
+    if (step === 'step9') {
+      if (/\b(confirmar|firmar|devolucion)\b/.test(limpio)) {
+        const modalVisible = document.getElementById('modalConfirmarQR')?.classList.contains('show');
 
-  console.log('🧠 Voz: confirmar detectado');
-  console.log('🔍 _qrValidadoParaDevolucion:', window._qrValidadoParaDevolucion);
-  console.log('🔍 btnConfirmarDevolucion:', btn);
-  console.log('🔍 btn.disabled:', btn?.disabled);
-  console.log('🔍 modalVisible:', modalVisible);
+        console.log('🧠 Voz: confirmar detectado');
+        console.log('🔍 _qrValidadoParaDevolucion:', window._qrValidadoParaDevolucion);
+        console.log('🔍 modalVisible:', modalVisible);
 
-  if (window._qrValidadoParaDevolucion && btn && !btn.disabled && modalVisible) {
-    try { btn.click(); } catch(e) { confirmarDevolucionQRActual(); }
-    return;
-  }
+        if (window._qrValidadoParaDevolucion && modalVisible) {
+          try {
+            window._modalConfirmarQR?.hide();
+          } catch (e) {}
 
-  getRenderer('mostrarMensajeKiosco')('Aún no se detectó un QR válido para confirmar', 'warning');
-  return;
-}
-
-
-
-   /* if (/\b(cancelar)\b/.test(limpio)) {
-        detenerEscaneoQRDevolucionSegura();
-        return;
-      }*/
-
-     /* if (/\b(cancelar)\b/.test(limpio)) {
-        const modalEl = document.getElementById('modalConfirmarQR');
-        if (modalEl) {
-          const modal = bootstrap.Modal.getInstance(modalEl);
-          if (modal) modal.hide();
+          confirmarDevolucionQRActual();
+          return;
         }
-        setTimeout(() => activarEscaneoDevolucionQR(), 250);
+
+        getRenderer('mostrarModalKioscoSinVoz')('Aún no se detectó un QR válido para confirmar', 'warning');
         return;
       }
 
+      if (/\b(cancelar|cerrar|volver)\b/.test(limpio)) {
+        const modalError = document.getElementById('modalErrorQR');
+        const modalConfirm = document.getElementById('modalConfirmarQR');
 
-      if (esComandoVolver(limpio) || /\b(v|b)ol(v|b)er\b/.test(limpio)) { volverARecursosAsignadosDesdeDevolucionQR(); return; }
-      console.warn('⚠️ step9: comando no reconocido en devoluciones:', limpio);
-      getRenderer('mostrarMensajeKiosco')('No se reconoció el comando. Decí "confirmar" o "volver".', 'info');
-      return;
+        if (modalError?.classList.contains('show')) {
+          document.getElementById('btnCerrarErrorQR')?.click();
+          return;
+        }
+
+        if (modalConfirm?.classList.contains('show')) {
+          document.getElementById('btnCancelarQR')?.click();
+          return;
+        }
+
+        volverARecursosAsignadosDesdeDevolucionQR();
+        return;
+      }
     }
-    */
-
-
-  // === Step9: Devolución por QR ===
-  if (step === 'step9') {
-    if (/\b(confirmar|firmar|devolucion)\b/.test(limpio)) {
-      const modalVisible = document.getElementById('modalConfirmarQR')?.classList.contains('show');
-
-      console.log('🧠 Voz: confirmar detectado');
-      console.log('🔍 _qrValidadoParaDevolucion:', window._qrValidadoParaDevolucion);
-      console.log('🔍 modalVisible:', modalVisible);
-
-      if (window._qrValidadoParaDevolucion && modalVisible) {
-        try {
-          window._modalConfirmarQR?.hide();
-        } catch (e) {}
-
-        confirmarDevolucionQRActual();
-        return;
-      }
-
-      getRenderer('mostrarModalKioscoSinVoz')('Aún no se detectó un QR válido para confirmar', 'warning');
-      return;
-    }
-
-    if (/\b(cancelar|cerrar|volver)\b/.test(limpio)) {
-      const modalError = document.getElementById('modalErrorQR');
-      const modalConfirm = document.getElementById('modalConfirmarQR');
-
-      if (modalError?.classList.contains('show')) {
-        document.getElementById('btnCerrarErrorQR')?.click();
-        return;
-      }
-
-      if (modalConfirm?.classList.contains('show')) {
-        document.getElementById('btnCancelarQR')?.click();
-        return;
-      }
-
-      volverARecursosAsignadosDesdeDevolucionQR();
-      return;
-    }
-  }
 
     
-
     // === Paginación y navegación globales (fallback) ===
     const matchPaginaAny = limpio.match(/^pagina\s*(número\s*)?(\d{1,2}|[a-záéíóúñ]+)$/i);
 
@@ -4780,10 +4624,3 @@ function procesarComandoVoz(rawTexto) {
     console.warn('procesarComandoVoz: excepción', err);
   }
 }
-
-/*
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = Object.assign(module.exports || {}, {
-    parsearclavePorBloques
-  });
-}*/
