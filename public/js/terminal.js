@@ -12,6 +12,7 @@ function getRenderer(name, fallback = () => {}) {
 let mostrarMensajesMicrofono = false
 const mostrarMic = false; // mostrar microfono flotante
 window._qrValidadoParaDevolucion = false;
+const cantidadRecursosPorPagina = 3;
 
 const micButton = document.getElementById('micStatusButton');
 if (micButton) {
@@ -453,10 +454,10 @@ function nextStep(n) {
       document.querySelectorAll('.step').forEach(s => {
         try {
           if (s._recogInstance) {
-            try { s._recogInstance.onresult = null; s._recogInstance.onerror = null; s._recogInstance.onend = null; } catch(e) {}
-            try { if (typeof s._recogInstance.stop === 'function') s._recogInstance.stop(); } catch(e) {}
+            try { s._recogInstance.onresult = null; s._recogInstance.onerror = null; s._recogInstance.onend = null; } catch (e) {}
+            try { if (typeof s._recogInstance.stop === 'function') s._recogInstance.stop(); } catch (e) {}
           }
-        } catch(e){}
+        } catch (e) {}
         s._recogInstance = null;
         s._opening = false;
       });
@@ -485,16 +486,16 @@ function nextStep(n) {
         ? bootstrap.Modal.getInstance(modalEl)
         : null;
       if (modalInstance && typeof modalInstance.hide === 'function') {
-        try { modalInstance.hide(); } catch(e) { console.warn('nextStep: hide modalRecursos fallo', e); }
+        try { modalInstance.hide(); } catch (e) { console.warn('nextStep: hide modalRecursos falló', e); }
       }
     }
 
     // Detener escaneo QR
     try {
-      detenerEscaneoQRregistroRecursos();
-      cancelarEscaneoQRregistroRecursos();
-      detenerEscaneoQRLogin();
-      detenerEscaneoQRDevolucion();
+      detenerEscaneoQRregistroRecursos?.();
+      cancelarEscaneoQRregistroRecursos?.();
+      detenerEscaneoQRLogin?.();
+      detenerEscaneoQRDevolucion?.();
       detenerEscaneoQRDevolucionSegura?.();
       console.log('🛑 Escaneo QR detenido en nextStep');
     } catch (e) {}
@@ -523,11 +524,11 @@ function nextStep(n) {
     }
 
     // Acciones específicas por step
-    try { if (n === 2) cargarMenuPrincipal(); } catch (e) { console.warn('nextStep: cargarMenuPrincipal falló', e); }
-    try { if (n === 5) cargarCategorias(); } catch (e) { console.warn('nextStep: cargarCategorias falló', e); }
+    try { if (n === 2) cargarMenuPrincipal?.(); } catch (e) { console.warn('nextStep: cargarMenuPrincipal falló', e); }
+    try { if (n === 5) cargarCategorias?.(); } catch (e) { console.warn('nextStep: cargarCategorias falló', e); }
 
-    // ✅ Reactivar reconocimiento global
-    reactivarReconocimientoGlobal();
+    // ✅ Reactivar reconocimiento global (si no lo maneja el step)
+    reactivarReconocimientoGlobal?.();
 
     // Visibilidad de botones flotantes
     try {
@@ -699,7 +700,7 @@ function mostrarRecursosAsignados(recursos, pagina = 1) {
   }
   contenedor.innerHTML = '';
 
-  const porPagina = 5;
+  const porPagina = cantidadRecursosPorPagina;
   const totalPaginas = Math.ceil(recursos.length / porPagina);
   const inicio = (pagina - 1) * porPagina;
   const visibles = recursos.slice(inicio, inicio + porPagina);
@@ -822,7 +823,7 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
     return;
   }
 
-  const porPagina = 5;
+  const porPagina = cantidadRecursosPorPagina;
   const totalPaginas = Math.ceil(recursos.length / porPagina);
   const inicio = (pagina - 1) * porPagina;
   const visibles = recursos.slice(inicio, inicio + porPagina);
@@ -830,7 +831,7 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
   tabla.innerHTML = '';
 
   if (visibles.length === 0) {
-    tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
+    tabla.innerHTML = `<tr><td colspan="cantidadRecursosPorPagina" class="text-center">No tiene recursos asignados</td></tr>`;
     paginador.innerHTML = '';
     try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
     return;
@@ -2003,7 +2004,7 @@ function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
-  const porPagina = 5;
+  const porPagina = cantidadRecursosPorPagina;
   const totalPaginas = Math.ceil(subcategorias.length / porPagina);
   const inicio = (pagina - 1) * porPagina;
   const visibles = subcategorias.slice(inicio, inicio + porPagina);
@@ -2074,7 +2075,7 @@ function renderRecursosPaginados(recursos, pagina = 1) {
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
-  const porPagina = 5;
+  const porPagina = cantidadRecursosPorPagina;
   const totalPaginas = Math.ceil(recursos.length / porPagina);
   const inicio = (pagina - 1) * porPagina;
   const visibles = recursos.slice(inicio, inicio + porPagina);
@@ -2148,7 +2149,7 @@ function renderSeriesPaginadas(series, pagina = 1) {
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
-  const porPagina = 5;
+  const porPagina = cantidadRecursosPorPagina;
   const totalPaginas = Math.ceil(series.length / porPagina);
   const inicio = (pagina - 1) * porPagina;
   const visibles = series.slice(inicio, inicio + porPagina);
@@ -2821,7 +2822,7 @@ function volverDesdeStep5() {
   window.nextStep(step5ReturnTarget);
 }
 
-// modal de recursos asignados
+// RECURSOS ASIGNADOS - STEP 10
 function abrirStepRecursos() {
   const stepId = 'step10';
   let stepEl = document.getElementById(stepId);
@@ -2832,7 +2833,7 @@ function abrirStepRecursos() {
     stepEl.className = 'step d-none';
 
     const rutaCasco = '/images/casco3.svg';
-const rutaHerramienta = '/images/tool.svg';
+    const rutaHerramienta = '/images/tool.svg';
 
     stepEl.innerHTML = `
       <h2 class="mb-4 text-center d-flex justify-content-center align-items-center gap-2">
@@ -2840,169 +2841,280 @@ const rutaHerramienta = '/images/tool.svg';
         <span>Recursos asignados</span>
       </h2>
 
-       <div class="d-flex justify-content-center mb-3">
-    <button class="btn btn-primary me-2 d-flex align-items-center gap-2" id="tab-epp-step" type="button" aria-selected="true">
-      <img src="${rutaCasco}" alt="EPP" class="icono-opcion">
-      <span>Ver EPP</span>
-    </button>
-
-    <button class="btn btn-primary d-flex align-items-center gap-2" id="tab-herramientas-step" type="button" aria-selected="false">
-      <img src="${rutaHerramienta}" alt="Herramientas" class="icono-opcion">
-      <span>Ver herramientas</span>
-    </button>
-  </div>
+      <div class="d-flex justify-content-center mb-3">
+        <button class="btn btn-primary me-2 d-flex align-items-center gap-2 active" id="tab-epp-step" type="button" aria-selected="true">
+          <img src="${rutaCasco}" alt="EPP" class="icono-opcion">
+          <span>Ver EPP</span>
+        </button>
+        <button class="btn btn-primary d-flex align-items-center gap-2" id="tab-herramientas-step" type="button" aria-selected="false">
+          <img src="${rutaHerramienta}" alt="Herramientas" class="icono-opcion">
+          <span>Ver herramientas</span>
+        </button>
+      </div>
 
       <div id="recursosTabContentStep" class="tab-content">
         <div id="panel-epp-step" class="tab-pane show active">
-          <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-              <thead><tr><th>Subcategoría / Recurso</th><th>Serie</th><th>Fecha de préstamo</th><th>Fecha de devolución</th><th>Devolver</th></tr></thead>
-              <tbody id="tablaEPP-step"></tbody>
-            </table>
-          </div>
+          <div id="recursos-asignados-epp" class="mb-3"></div>
           <div id="paginadorEPP-step" class="d-flex flex-wrap justify-content-center mt-3"></div>
         </div>
 
         <div id="panel-herramientas-step" class="tab-pane">
-          <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-              <thead><tr><th>Subcategoría / Recurso</th><th>Serie</th><th>Fecha de préstamo</th><th>Fecha de devolución</th><th>Devolver</th></tr></thead>
-              <tbody id="tablaHerramientas-step"></tbody>
-            </table>
-          </div>
+          <div id="recursos-asignados-herramientas" class="mb-3"></div>
           <div id="paginadorHerramientas-step" class="d-flex flex-wrap justify-content-center mt-3"></div>
         </div>
       </div>
 
       <div class="text-center mt-3">
-      <button id="btnVolverStepRecursos" class="btn btn-primary texto-volver d-flex align-items-center gap-2">
-        <img src="/images/volver.svg" alt="Volver" class="icono-opcion">
-        <span>Volver</span>
-      </button>
-    </div>`;
+        <button id="btnVolverStepRecursos" class="btn btn-primary texto-volver d-flex align-items-center gap-2">
+          <img src="/images/volver.svg" alt="Volver" class="icono-opcion">
+          <span>Volver</span>
+        </button>
+      </div>
+    `;
+
     document.querySelector('.container-kiosk')?.appendChild(stepEl);
   }
 
   if (stepEl._opening) return;
   stepEl._opening = true;
 
+  // Pausar reconocimiento global y asegurar stop
   recognitionGlobalPaused = true;
-  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('abrirStepRecursos: safeStopRecognitionGlobal failed', e); }
+  try { safeStopRecognitionGlobal(); } catch (e) {}
 
-  // Mostrar step10 (nextStep ya oculta otros steps y maneja recognition restarts)
-  // pequeño delay para evitar races si lo necesitás
-  try { nextStep(10); } catch (e) { console.warn('abrirStepRecursos: nextStep(10) falló', e); }
+  // Navegar al step y preparar UI
+  try { nextStep(10); } catch (e) {}
 
-  // asegurar estado visual inicial de tabs/panels
   try {
     const tabEPP = document.getElementById('tab-epp-step');
     const tabHerr = document.getElementById('tab-herramientas-step');
     const panelEPP = document.getElementById('panel-epp-step');
     const panelHerr = document.getElementById('panel-herramientas-step');
 
-    if (tabEPP) { tabEPP.classList.add('active'); tabEPP.setAttribute('aria-selected','true'); }
-    if (tabHerr) { tabHerr.classList.remove('active'); tabHerr.setAttribute('aria-selected','false'); }
-    if (panelEPP) { panelEPP.classList.add('show','active'); }
-    if (panelHerr) { panelHerr.classList.remove('show','active'); }
+    if (tabEPP) { tabEPP.classList.add('active'); tabEPP.setAttribute('aria-selected', 'true'); }
+    if (tabHerr) { tabHerr.classList.remove('active'); tabHerr.setAttribute('aria-selected', 'false'); }
+    if (panelEPP) { panelEPP.classList.add('show', 'active'); }
+    if (panelHerr) { panelHerr.classList.remove('show', 'active'); }
 
-    // Renderizar contenidos si ya están cargados
-    if (window.recursosEPP) renderTablaRecursosStep('tablaEPP-step', window.recursosEPP, window.paginaEPPActual || 1, 'paginadorEPP-step');
-    else document.getElementById('tablaEPP-step').innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
+    if (window.recursosEPP) {
+      renderRecursosAsignados(window.recursosEPP, window.paginaEPPActual || 1, 'recursos-asignados-epp', 'paginadorEPP-step');
+    } else {
+      document.getElementById('recursos-asignados-epp').innerHTML = `<div class="text-center text-muted">No tiene recursos asignados</div>`;
+    }
 
-    if (window.recursosHerramientas) renderTablaRecursosStep('tablaHerramientas-step', window.recursosHerramientas, window.paginaHerramientasActual || 1, 'paginadorHerramientas-step');
+    if (window.recursosHerramientas) {
+      renderRecursosAsignados(window.recursosHerramientas, window.paginaHerramientasActual || 1, 'recursos-asignados-herramientas', 'paginadorHerramientas-step');
+    }
   } catch (e) { console.warn('abrirStepRecursos: preparar UI falló', e); }
 
-  // listeners idempotentes
+  // Listeners de UI (idempotentes)
   try {
-      const btnVolver = document.getElementById('btnVolverStepRecursos');
-      if (btnVolver && !btnVolver._connected) {
-        btnVolver.addEventListener('click', () => {
-          recognitionGlobalPaused = false;
-          safeStartRecognitionGlobal();
-          nextStep(2);
-        });
-        btnVolver._connected = true;
-      }
-
+    const btnVolver = document.getElementById('btnVolverStepRecursos');
+    if (btnVolver && !btnVolver._connected) {
+      btnVolver.addEventListener('click', () => {
+        recognitionGlobalPaused = false;
+        safeStartRecognitionGlobal();
+        nextStep(2);
+      });
+      btnVolver._connected = true;
+    }
 
     const tabEPPBtn = document.getElementById('tab-epp-step');
     const tabHerrBtn = document.getElementById('tab-herramientas-step');
     if (tabEPPBtn && !tabEPPBtn._connected) {
       tabEPPBtn.addEventListener('click', () => {
-        document.getElementById('panel-epp-step')?.classList.add('show','active');
-        document.getElementById('panel-herramientas-step')?.classList.remove('show','active');
-        tabEPPBtn.classList.add('active'); tabEPPBtn.setAttribute('aria-selected','true');
-        tabHerrBtn.classList.remove('active'); tabHerrBtn.setAttribute('aria-selected','false');
+        document.getElementById('panel-epp-step')?.classList.add('show', 'active');
+        document.getElementById('panel-herramientas-step')?.classList.remove('show', 'active');
+        tabEPPBtn.classList.add('active'); tabEPPBtn.setAttribute('aria-selected', 'true');
+        tabHerrBtn.classList.remove('active'); tabHerrBtn.setAttribute('aria-selected', 'false');
         safeStartRecognitionGlobal();
       });
       tabEPPBtn._connected = true;
     }
     if (tabHerrBtn && !tabHerrBtn._connected) {
       tabHerrBtn.addEventListener('click', () => {
-        document.getElementById('panel-herramientas-step')?.classList.add('show','active');
-        document.getElementById('panel-epp-step')?.classList.remove('show','active');
-        tabHerrBtn.classList.add('active'); tabHerrBtn.setAttribute('aria-selected','true');
-        tabEPPBtn.classList.remove('active'); tabEPPBtn.setAttribute('aria-selected','false');
+        document.getElementById('panel-herramientas-step')?.classList.add('show', 'active');
+        document.getElementById('panel-epp-step')?.classList.remove('show', 'active');
+        tabHerrBtn.classList.add('active'); tabHerrBtn.setAttribute('aria-selected', 'true');
+        tabEPPBtn.classList.remove('active'); tabEPPBtn.setAttribute('aria-selected', 'false');
         safeStartRecognitionGlobal();
       });
       tabHerrBtn._connected = true;
     }
   } catch (e) { console.warn('abrirStepRecursos: conectar listeners falló', e); }
 
-  // reconocimiento local para step10 (gestiona comandos de cambio de tab, opción N y paginación)
+  // Inicializar reconocimiento local específico para step10
   try {
     const stepRec = stepEl;
+
+    // Limpiar instancia previa si existe
     if ('webkitSpeechRecognition' in window) {
       if (stepRec._recogInstance) {
-        try { stepRec._recogInstance.onresult = null; stepRec._recogInstance.onerror = null; stepRec._recogInstance.stop(); } catch(e) {}
+        try {
+          stepRec._recogInstance.onresult = null;
+          stepRec._recogInstance.onerror = null;
+          stepRec._recogInstance.onend = null;
+          if (typeof stepRec._recogInstance.stop === 'function') stepRec._recogInstance.stop();
+        } catch (e) {}
         stepRec._recogInstance = null;
       }
+
       const recog = new webkitSpeechRecognition();
       recog.lang = 'es-ES';
       recog.continuous = true;
       recog.interimResults = false;
 
-      recog.onresult = function(event) {
+      recog.onresult = function (event) {
         const texto = (event.results?.[0]?.[0]?.transcript || '').toLowerCase().trim();
         const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
-        // cerrar / volver
+
+        // Cerrar pantalla por voz
         if (/\b(cerrar|cerrar recursos asignados|cerrar pantalla|cerrar modal)\b/.test(limpio)) {
-          try { recognitionGlobalPaused = false; safeStartRecognitionGlobal(); } catch(e) {}
+          recognitionGlobalPaused = false;
+          safeStartRecognitionGlobal();
           nextStep(2);
           getRenderer('mostrarMensajeKiosco')('Pantalla cerrada por voz', 'info');
           return;
         }
-        // tabs
+
+        // Cambio de tab
         const tabCambio = matchTabCambio(limpio);
-        if (tabCambio === 'epp') { document.getElementById('tab-epp-step')?.click(); getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP','success'); return; }
-        if (tabCambio === 'herramientas') { document.getElementById('tab-herramientas-step')?.click(); getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas','success'); return; }
-        // opcion N
+        if (tabCambio === 'epp') {
+          document.getElementById('tab-epp-step')?.click();
+          getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
+          return;
+        }
+        if (tabCambio === 'herramientas') {
+          document.getElementById('tab-herramientas-step')?.click();
+          getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
+          return;
+        }
+
+        // Opción N -> confirmación devolución
         const match = limpio.match(/opcion\s*(\d{1,2})/i);
-        if (match) { confirmarDevolucionPorVozStep10(parseInt(match[1],10)); return; }
-        // pagina N
+        if (match) {
+          confirmarDevolucionPorVozStep10(parseInt(match[1], 10));
+          return;
+        }
+
+        // Página N -> paginador
         const mp = limpio.match(/^pagina\s*(\d{1,2})$/i);
-        if (mp) { handleStep10Pagina(parseInt(mp[1],10)); return; }
+        if (mp) {
+          handleStep10Pagina(parseInt(mp[1], 10));
+          return;
+        }
+      };
+
+      // onend: reiniciar solo si el step sigue activo y no estamos en pausa global
+      recog.onend = function () {
+        try {
+          if (!stepEl.classList.contains('active')) return;
+          if (recognitionGlobalPaused) return;
+          // pequeña protección contra loops infinitos: reiniciar con delay
+          setTimeout(() => {
+            try {
+              recog.start();
+              console.log('🔁 reconocimiento local (step10) reiniciado desde onend');
+            } catch (err) {
+              console.warn('⚠️ No se pudo reiniciar recog local desde onend (ignored):', err);
+            }
+          }, 120);
+        } catch (e) {
+          console.warn('abrirStepRecursos recog.onend excep', e);
+        }
       };
 
       recog.onerror = function (e) {
-  console.warn('Reconocimiento stepRecursos falló', e);
-  try {
-    recog.stop();
-    stepRec._recogInstance = null;
-    recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal(); // reactiva el global si el local falló
-    console.log('🎤 Reconocimiento global reactivado tras fallo en stepRecursos');
-  } catch (err) {
-    console.warn('No se pudo reiniciar reconocimiento global tras error local', err);
-  }
-};
+        console.warn('Reconocimiento de voz local (step10) error', e);
+        // Intentamos limpiar y reactivar reconocimiento global para no dejar al usuario sin mic
+        try {
+          recog.onresult = null;
+          recog.onerror = null;
+          recog.onend = null;
+          if (typeof recog.stop === 'function') recog.stop();
+        } catch (err) {}
+        stepRec._recogInstance = null;
+        recognitionGlobalPaused = false;
+        safeStartRecognitionGlobal();
+      };
+
       stepRec._recogInstance = recog;
-      try { recog.start(); console.log('🎤 reconocimiento local (stepRecursos) iniciado'); } catch(e) { console.warn('abrirStepRecursos recog.start falló', e); }
+      try {
+        recog.start();
+      } catch (e) {
+        console.warn('abrirStepRecursos: start local recog failed', e);
+        // fallback: reactivar reconocimiento global
+        stepRec._recogInstance = null;
+        recognitionGlobalPaused = false;
+        safeStartRecognitionGlobal();
+      }
     }
-  } catch (e) { console.warn('abrirStepRecursos: start local recog failed', e); }
+  } catch (e) { console.warn('abrirStepRecursos: error al iniciar reconocimiento local', e); }
 
   stepEl._opening = false;
 }
+
+
+function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId) {
+  try { safeStopRecognitionGlobal(); } catch (e) {}
+
+  const contenedor = document.getElementById(contenedorId);
+  const paginador = document.getElementById(paginadorId);
+  if (!contenedor || !paginador) return;
+
+  contenedor.innerHTML = '';
+  paginador.innerHTML = '';
+
+  const porPagina = cantidadRecursosPorPagina;
+  const totalPaginas = Math.ceil(recursos.length / porPagina);
+  const inicio = (pagina - 1) * porPagina;
+  const visibles = recursos.slice(inicio, inicio + porPagina);
+
+  visibles.forEach((r, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-resumen';
+    btn.dataset.detalleId = r.detalle_id;
+    btn.dataset.serie = r.serie || '';
+    btn.dataset.recurso = r.recurso || '';
+    btn.dataset.opcionIndex = index + 1;
+    btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id);
+
+btn.innerHTML = `
+  <div class="d-flex flex-row justify-content-between align-items-center w-100">
+    <span class="badge-opcion">Opción ${index + 1}</span>
+    <div class="d-flex flex-column text-start" style="flex: 1; min-width: 0;">
+      <span>${r.recurso || '-'}</span>
+      <span class="text-muted">${r.serie || '-'}</span>
+    </div>
+    <div class="d-flex flex-column text-end" style="flex-shrink: 0;">
+      <span class="text-muted">Devolución</span>
+      <span>${r.fecha_devolucion || '-'}</span>
+    </div>
+  </div>
+`;
+
+
+
+    contenedor.appendChild(btn);
+  });
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const pagBtn = document.createElement('button');
+    pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+    pagBtn.textContent = `Página ${i}`;
+    pagBtn.onclick = () => {
+      try { safeStopRecognitionGlobal(); } catch (e) {}
+      setTimeout(() => renderRecursosAsignados(recursos, i, contenedorId, paginadorId), 60);
+    };
+    paginador.appendChild(pagBtn);
+  }
+
+  if (contenedorId === 'recursos-asignados-epp') window.paginaEPPActual = pagina;
+  if (contenedorId === 'recursos-asignados-herramientas') window.paginaHerramientasActual = pagina;
+
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
+}
+
 
 function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId) {
   try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderTablaRecursosStep: safeStop failed', e); }
@@ -3014,14 +3126,14 @@ function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId
     return;
   }
 
-  const porPagina = 5;
-  const totalPaginas = Math.max(1, Math.ceil((recursos||[]).length / porPagina));
+  const porPagina = cantidadRecursosPorPagina;
+  const totalPaginas = Math.max(1, Math.ceil((recursos || []).length / porPagina));
   const inicio = (pagina - 1) * porPagina;
-  const visibles = (recursos||[]).slice(inicio, inicio + porPagina);
+  const visibles = (recursos || []).slice(inicio, inicio + porPagina);
 
   tabla.innerHTML = '';
   if (visibles.length === 0) {
-    tabla.innerHTML = `<tr><td colspan="5" class="text-center">No tiene recursos asignados</td></tr>`;
+    tabla.innerHTML = `<tr><td colspan="${porPagina}" class="text-center">No tiene recursos asignados</td></tr>`;
     paginador.innerHTML = '';
     try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
     return;
@@ -3054,81 +3166,96 @@ function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId
   for (let i = 1; i <= totalPaginas; i++) {
     const b = document.createElement('button');
     b.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
-    b.textContent = `Pagina ${i}`;
-    b.onclick = () => { try { safeStopRecognitionGlobal(); } catch(e){}; setTimeout(() => renderTablaRecursosStep(tablaId, recursos, i, paginadorId), 60); };
+    b.textContent = `Página ${i}`;
+    b.onclick = () => {
+      try { safeStopRecognitionGlobal(); } catch (e) {}
+      setTimeout(() => renderTablaRecursosStep(tablaId, recursos, i, paginadorId), 60);
+    };
     paginador.appendChild(b);
   }
 
   if (tablaId === 'tablaEPP-step') window.paginaEPPActual = pagina;
   if (tablaId === 'tablaHerramientas-step') window.paginaHerramientasActual = pagina;
 
-  try { setTimeout(() => { safeStartRecognitionGlobal(); }, 80); } catch (e) {}
+  // ✅ Emitir evento para sincronización con reconocimiento por voz
+  document.dispatchEvent(new CustomEvent('tablaRecursosRenderizada', {
+    detail: { tablaId, pagina }
+  }));
+
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
 
 function confirmarDevolucionPorVozStep10(index) {
   console.log(`🎤 confirmarDevolucionPorVozStep10: opción ${index}`);
 
-  const botonesEPP = document.querySelectorAll('#tablaEPP-step button');
-  const botonesHerr = document.querySelectorAll('#tablaHerramientas-step button');
-
   const eppActivo = document.getElementById('tab-epp-step')?.classList.contains('active');
   const herrActivo = document.getElementById('tab-herramientas-step')?.classList.contains('active');
 
-  let btn = null;
-  if (eppActivo) btn = document.querySelector(`#tablaEPP-step button[data-opcion-index="${index}"]`) || Array.from(botonesEPP)[index-1];
-  else if (herrActivo) btn = document.querySelector(`#tablaHerramientas-step button[data-opcion-index="${index}"]`) || Array.from(botonesHerr)[index-1];
-  else btn = document.querySelector(`#tablaEPP-step button[data-opcion-index="${index}"]`) || document.querySelector(`#tablaHerramientas-step button[data-opcion-index="${index}"]`);
+  const contenedorId = eppActivo ? 'recursos-asignados-epp' : herrActivo ? 'recursos-asignados-herramientas' : null;
+  if (!contenedorId) {
+    console.warn('❌ No se pudo determinar el contenedor activo');
+    return;
+  }
 
+  const btn = document.querySelector(`#${contenedorId} button[data-opcion-index="${index}"]`);
   if (!btn) {
+    console.warn(`❌ Opción ${index} no encontrada en ${contenedorId}`);
     getRenderer('mostrarModalKioscoSinVoz')(`No se encontró la opción ${index}. Verificá que esté visible.`, 'warning');
     return;
   }
 
   const detalleId = btn.dataset.detalleId;
   const serie = btn.dataset.serie || '';
-  console.log(`➡️ confirmarDevolucionPorVozStep10: detalleId=${detalleId}, serie=${serie}`);
+
+  if (!detalleId) {
+    console.warn(`❌ El botón opción ${index} no tiene detalleId`);
+    getRenderer('mostrarModalKioscoSinVoz')(`El recurso no tiene un identificador válido.`, 'warning');
+    return;
+  }
+
+  console.log(`➡️ confirmarDevolucionPorVozStep10: botón encontrado, detalleId=${detalleId}, serie=${serie}`);
 
   window._modalConfirmedByVoice = true;
   try { safeStopRecognitionGlobal(); } catch (e) {}
   mostrarStepDevolucionQR(serie, detalleId);
 }
 
-function handleStep10Pagina(numero) {
+
+function handleStep10Pagina(numero, intentos = 0) {
   if (!Number.isFinite(numero) || numero < 1) {
     getRenderer('mostrarModalKioscoSinVoz')('Número de página no reconocido', 'warning');
     return;
   }
+
   const eppActivo = document.getElementById('tab-epp-step')?.classList.contains('active');
   const herrActivo = document.getElementById('tab-herramientas-step')?.classList.contains('active');
 
-  if (eppActivo) {
-    const total = Math.max(1, Math.ceil((window.recursosEPP?.length || 0) / 5));
-    if (numero > total) { getRenderer('mostrarModalKioscoSinVoz')('Número de página inválido', 'warning'); return; }
-    renderTablaRecursosStep('tablaEPP-step', window.recursosEPP || [], numero, 'paginadorEPP-step');
+  const recursos = eppActivo
+    ? window.recursosEPP
+    : herrActivo
+    ? window.recursosHerramientas
+    : null;
+
+  if (!Array.isArray(recursos)) {
+    if (intentos < 5) {
+      console.warn('⏳ Recursos aún no disponibles, reintentando...');
+      setTimeout(() => handleStep10Pagina(numero, intentos + 1), 200);
+    } else {
+      getRenderer('mostrarModalKioscoSinVoz')('No se detectó el tab activo', 'warning');
+    }
     return;
   }
 
-  if (herrActivo) {
-    const total = Math.max(1, Math.ceil((window.recursosHerramientas?.length || 0) / 5));
-    if (numero > total) { getRenderer('mostrarModalKioscoSinVoz')('Número de página inválido', 'warning'); return; }
-    renderTablaRecursosStep('tablaHerramientas-step', window.recursosHerramientas || [], numero, 'paginadorHerramientas-step');
+  const total = Math.max(1, Math.ceil(recursos.length / cantidadRecursosPorPagina));
+  if (numero > total) {
+    getRenderer('mostrarModalKioscoSinVoz')('Número de página inválido', 'warning');
     return;
   }
 
-  getRenderer('mostrarMensajeKiosco')('No se detectó el tab activo', 'warning');
-}
+  const contenedorId = eppActivo ? 'recursos-asignados-epp' : 'recursos-asignados-herramientas';
+const paginadorId = eppActivo ? 'paginadorEPP-step' : 'paginadorHerramientas-step';
+renderRecursosAsignados(recursos, numero, contenedorId, paginadorId);
 
-
-
-
-// 🔧 Normalizar texto (quita acentos)
-function normalizarTexto(str) {
-  console.log('🔤 normalizarTexto: texto original →', str);
-  
-  return str
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
 }
 
 // Detección permisiva para cambio de tabs EPP <-> Herramientas
@@ -3166,6 +3293,17 @@ function matchTabCambio(texto) {
 
   return null;
 }
+
+// 🔧 Normalizar texto (quita acentos)
+function normalizarTexto(str) {
+  console.log('🔤 normalizarTexto: texto original →', str);
+  
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 
 
 // 🔍 Detectar qué step está activo
@@ -4378,14 +4516,14 @@ function procesarComandoVoz(rawTexto) {
       const matchPaginaHerr = textoSimple.match(/^pagina\s*herramientas\s*(\d{1,2})$/i);
       if (matchPaginaEPP) {
         const numero = parseInt(matchPaginaEPP[1], 10);
-        const total = Math.ceil((window.recursosEPP?.length || 0) / 5);
+        const total = Math.ceil((window.recursosEPP?.length || 0) / cantidadRecursosPorPagina);
         if (numero >= 1 && numero <= total) renderTablaRecursos('tablaEPP', window.recursosEPP, numero, 'paginadorEPP');
         else window.mostrarModalKioscoSinVoz('Número de página inválido para EPP', 'warning');
         return;
       }
       if (matchPaginaHerr) {
         const numero = parseInt(matchPaginaHerr[1], 10);
-        const total = Math.ceil((window.recursosHerramientas?.length || 0) / 5);
+        const total = Math.ceil((window.recursosHerramientas?.length || 0) / cantidadRecursosPorPagina);
         if (numero >= 1 && numero <= total) renderTablaRecursos('tablaHerramientas', window.recursosHerramientas, numero, 'paginadorHerramientas');
         else window.mostrarModalKioscoSinVoz('Número de página inválido para herramientas', 'warning');
         return;
@@ -4445,7 +4583,7 @@ function procesarComandoVoz(rawTexto) {
         const token = matchPaginaSub[1];
         const numero = numeroDesdeToken(token);
         if (!isNaN(numero) && numero >= 1) {
-          const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
+          const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / cantidadRecursosPorPagina));
           if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
           renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
           return;
@@ -4464,7 +4602,7 @@ function procesarComandoVoz(rawTexto) {
         const token = matchPaginaRec[1];
         const numero = numeroDesdeToken(token);
         if (!isNaN(numero) && numero >= 1) {
-          const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
+          const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / cantidadRecursosPorPagina));
           if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
           renderRecursosPaginados(window.recursosActuales, numero);
           return;
@@ -4483,7 +4621,7 @@ function procesarComandoVoz(rawTexto) {
         const token = matchPaginaSer[1];
         const numero = numeroDesdeToken(token);
         if (!isNaN(numero) && numero >= 1) {
-          const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
+          const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / cantidadRecursosPorPagina));
           if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
           renderSeriesPaginadas(window.seriesActuales, numero);
           return;
@@ -4604,19 +4742,19 @@ function procesarComandoVoz(rawTexto) {
       if (isNaN(numero) || numero < 1) { window.mostrarModalKioscoSinVoz('Número de página no reconocido', 'warning'); return; }
 
       if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
-        const total = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
+        const total = Math.max(1, Math.ceil(window.subcategoriasActuales.length / cantidadRecursosPorPagina));
         if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
         renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
         return;
       }
       if (step === 'step7' && Array.isArray(window.recursosActuales)) {
-        const total = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
+        const total = Math.max(1, Math.ceil(window.recursosActuales.length / cantidadRecursosPorPagina));
         if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
         renderRecursosPaginados(window.recursosActuales, numero);
         return;
       }
       if (step === 'step8' && Array.isArray(window.seriesActuales)) {
-        const total = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
+        const total = Math.max(1, Math.ceil(window.seriesActuales.length / cantidadRecursosPorPagina));
         if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
         renderSeriesPaginadas(window.seriesActuales, numero);
         return;

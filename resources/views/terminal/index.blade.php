@@ -193,6 +193,42 @@
       </div>
     </div>
 
+<!-- Paso 10: Recursos asignados -->
+<div id="step10" class="step d-none">
+  <h2 class="mb-4 text-center d-flex justify-content-center align-items-center gap-2">
+    <img src="/images/herramienta3.svg" alt="Recursos" class="icono-opcion">
+    <span>Recursos asignados</span>
+  </h2>
+
+  <div class="d-flex justify-content-center mb-3">
+    <button class="btn btn-primary me-2 d-flex align-items-center gap-2 active" id="tab-epp-step" type="button" aria-selected="true">
+      <img src="/images/casco3.svg" alt="EPP" class="icono-opcion">
+      <span>Ver EPP</span>
+    </button>
+    <button class="btn btn-primary d-flex align-items-center gap-2" id="tab-herramientas-step" type="button" aria-selected="false">
+      <img src="/images/tool.svg" alt="Herramientas" class="icono-opcion">
+      <span>Ver herramientas</span>
+    </button>
+  </div>
+
+  <div id="recursosTabContentStep" class="tab-content">
+    <div id="panel-epp-step" class="tab-pane show active">
+      <div id="recursos-asignados-epp" class="mb-3"></div>
+      <div id="paginadorEPP-step" class="d-flex justify-content-center flex-wrap mt-2"></div>
+    </div>
+    <div id="panel-herramientas-step" class="tab-pane">
+      <div id="recursos-asignados-herramientas" class="mb-3"></div>
+      <div id="paginadorHerramientas-step" class="d-flex justify-content-center flex-wrap mt-2"></div>
+    </div>
+  </div>
+
+  <div class="text-center mt-3">
+    <button id="btnVolverStepRecursos" class="btn btn-primary texto-volver d-flex align-items-center gap-2">
+      <img src="/images/volver.svg" alt="Volver" class="icono-opcion">
+      <span>Volver</span>
+    </button>
+  </div>
+</div>
 
   </div>
 
@@ -252,69 +288,6 @@
   </div>
 
 
-  <!-- Modal de recursos asignados -->
-  <div class="modal fade" id="modalRecursos" tabindex="-1" aria-labelledby="modalRecursosLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header d-flex justify-content-between align-items-center">
-          <h5 class="modal-title" id="modalRecursosLabel">Recursos asignados</h5>
-          <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Cerrar</button>
-        </div>
-        <div class="modal-body">
-
-        <ul class="nav nav-tabs mb-3" id="recursosTabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="btn btn-primary me-2" id="tab-epp" data-bs-toggle="tab" data-bs-target="#panel-epp" type="button" role="tab" aria-selected="true">Ver EPP</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="btn btn-primary" id="tab-herramientas" data-bs-toggle="tab" data-bs-target="#panel-herramientas" type="button" role="tab" aria-selected="false">Ver herramientas</button>
-          </li>
-        </ul>
-
-
-          <div class="tab-content" id="recursosTabContent">
-            <!-- Tabla EPP -->
-            <div class="tab-pane fade show active" id="panel-epp" role="tabpanel" aria-labelledby="tab-epp">
-              <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>Subcategoría / Recurso</th>
-                      <th>Serie</th>
-                      <th>Fecha de préstamo</th>
-                      <th>Fecha de devolución</th>
-                      <th>Devolver</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tablaEPP"></tbody>
-                </table>
-              </div>
-              <div id="paginadorEPP" class="d-flex flex-wrap justify-content-center mt-3"></div>
-            </div>
-
-            <!-- Tabla Herramientas -->
-            <div class="tab-pane fade" id="panel-herramientas" role="tabpanel" aria-labelledby="tab-herramientas">
-              <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>Subcategoría / Recurso</th>
-                      <th>Serie</th>
-                      <th>Fecha de préstamo</th>
-                      <th>Fecha de devolución</th>
-                      <th>Devolver</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tablaHerramientas"></tbody>
-                </table>
-              </div>
-              <div id="paginadorHerramientas" class="d-flex flex-wrap justify-content-center mt-3"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
 
 
