@@ -628,6 +628,10 @@ input.form-control:focus {
 
 
 
+.bg-info {
+  background-color: #007bff !important; /* Azul Bootstrap primario */
+  color: #fff !important; /* Texto blanco para contraste */
+}
 
 
 

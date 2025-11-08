@@ -22,36 +22,43 @@ class PrestamoTerminalController extends Controller
 
     // ✅ Registrar préstamo desde terminal usando id_usuario
     public function store(PrestamoTerminalRequest $request, $id_usuario): JsonResponse
-    {
-        \Log::info('ID Usuario recibido: '.$id_usuario);
-        \Log::info('Series recibidas: ', $request->input('series'));
+{
+    \Log::info('ID Usuario recibido: '.$id_usuario);
+    \Log::info('Series recibidas: ', $request->input('series'));
 
-        try {
-            $usuario = Usuario::where('id', $id_usuario)
-                ->where('id_rol', 3)
-                ->firstOrFail();
+    try {
+        $usuario = Usuario::where('id', $id_usuario)
+            ->where('id_rol', 3)
+            ->firstOrFail();
 
-            $prestamo = $this->prestamoService->crearPrestamo(
-                $usuario->id,
-                $request->input('series'),
-                'terminal'
-            );
+        $prestamo = $this->prestamoService->crearPrestamo(
+            $usuario->id,
+            $request->input('series'),
+            'terminal'
+        );
 
-            return response()->json([
-                'success'  => true,
-                'message'  => '✅ Préstamo registrado desde terminal',
-                'prestamo' => $prestamo->id,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error en préstamo desde terminal: ' . $e->getMessage());
+        // ✅ Extraer la primera serie para mostrar en el frontend
+        $serie = SerieRecurso::with('recurso')
+            ->find($request->input('series')[0]);
 
-            return response()->json([
-                'success' => false,
-                'message' => '❌ No se pudo registrar el préstamo desde la terminal',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'success'  => true,
+            'message'  => '✅ Préstamo registrado desde terminal',
+            'prestamo' => $prestamo->id,
+            'recurso'  => $serie->recurso->nombre ?? '',
+            'serie'    => $serie->nro_serie ?? '',
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error en préstamo desde terminal: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => '❌ No se pudo registrar el préstamo desde la terminal',
+            'error'   => $e->getMessage(),
+        ], 500);
     }
+}
+
 
     public function devolverPorQR(Request $request)
     {
@@ -96,7 +103,10 @@ class PrestamoTerminalController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => '✅ Recurso devuelto correctamente',
+                'recurso' => $detalle->serieRecurso->recurso->nombre ?? '',
+                'serie' => $detalle->serieRecurso->nro_serie ?? '',
             ]);
+
         } catch (\Throwable $e) {
             \Log::error('Error en devolverPorQR: ' . $e->getMessage());
             return response()->json([

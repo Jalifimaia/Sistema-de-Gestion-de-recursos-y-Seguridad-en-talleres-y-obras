@@ -556,10 +556,10 @@ function identificarTrabajador() {
     xhr.open('POST', '/terminal/identificar', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     const meta = document.querySelector('meta[name="csrf-token"]');
-const csrf = meta && meta.content ? meta.content : null;
-if (csrf) {
-  xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
-}
+    const csrf = meta && meta.content ? meta.content : null;
+    if (csrf) {
+      xhr.setRequestHeader('X-CSRF-TOKEN', csrf);
+    }
 
     xhr.onload = function () {
       try {
@@ -572,13 +572,19 @@ if (csrf) {
             <img src="/images/hola.svg" alt="Saludo" class="icono-saludo">
           `;
         } else {
-      getRenderer('mostrarMensajeKiosco')(res.message || 'Error al identificar al trabajador', 'danger');
+          getRenderer('mostrarModalKioscoSinVoz')(res.message || 'Error al identificar al trabajador', 'danger');
         }
         resolve(res);
       } catch (e) {
-      getRenderer('mostrarMensajeKiosco')('Error al identificar al trabajador', 'danger');
+        getRenderer('mostrarModalKioscoSinVoz')('Error al identificar al trabajador', 'danger');
         resolve({ success: false, error: e });
       }
+    };
+
+    xhr.onerror = function () {
+      getRenderer('mostrarModalKioscoSinVoz')('No se pudo conectar con el servidor. Verificá que esté activo.', 'danger');
+      console.warn('🛑 Modal de red activado por xhr.onerror');
+      resolve({ success: false, error: 'ERR_CONNECTION_REFUSED' });
     };
 
     xhr.send('clave=' + encodeURIComponent(clave));
@@ -624,7 +630,7 @@ function cargarCategorias() {
         contenedor.appendChild(btn);
       });
     } catch (e) {
-  getRenderer('mostrarMensajeKiosco')('No se pudieron cargar las categorías', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('No se pudieron cargar las categorías', 'danger');
       console.log('No se pudieron cargar las categorías');
     }
   };
@@ -664,13 +670,13 @@ function cargarRecursos() {
         resolve();
       } catch (e) {
         console.error('❌ cargarRecursos: error procesando respuesta', e);
-  getRenderer('mostrarMensajeKiosco')('Error al cargar recursos asignados', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('Error al cargar recursos asignados', 'danger');
         resolve();
       }
     };
 
     xhr.onerror = function () {
-  getRenderer('mostrarMensajeKiosco')('Error de red al cargar recursos asignados', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('Error de red al cargar recursos asignados', 'danger');
       resolve();
     };
 
@@ -911,15 +917,15 @@ function devolverRecurso(detalleId) {
   })
   .then(data => {
     if (data.success) {
-      mostrarMensajeKiosco('✅ Recurso devuelto correctamente', 'success');
+      mostrarModalKioscoSinVoz('✅ Recurso devuelto correctamente', 'success');
       cargarRecursos(); // actualiza el modal
     } else {
-      mostrarMensajeKiosco(data.message || 'Error al devolver recurso', 'danger');
+      mostrarModalKioscoSinVoz(data.message || 'Error al devolver recurso', 'danger');
     }
     return data;
   })
   .catch(err => {
-    mostrarMensajeKiosco('Error de red al devolver recurso', 'danger');
+    mostrarModalKioscoSinVoz('Error de red al devolver recurso', 'danger');
     return { success: false, error: err };
   });
 }
@@ -938,7 +944,7 @@ function confirmarDevolucionPorVoz(index) {
   const botones = document.querySelectorAll('#tablaEPP button, #tablaHerramientas button, #contenedorRecursos button');
   if (botones.length === 0) {
     console.warn('⚠️ No hay botones renderizados aún, ignorando comando de voz');
-    getRenderer('mostrarMensajeKiosco')('Los recursos aún se están cargando. Intentá de nuevo en unos segundos.', 'warning');
+    getRenderer('mostrarModalKioscoSinVoz')('Los recursos aún se están cargando. Intentá de nuevo en unos segundos.', 'warning');
     return;
   }
 
@@ -956,7 +962,7 @@ function confirmarDevolucionPorVoz(index) {
 
   if (!btn) {
     console.warn(`❌ confirmarDevolucionPorVoz: no se encontró botón para opción ${index}`);
-    getRenderer('mostrarMensajeKiosco')(`No se encontró la opción ${index}. Verificá que esté visible.`, 'warning');
+    getRenderer('mostrarModalKioscoSinVoz')(`No se encontró la opción ${index}. Verificá que esté visible.`, 'warning');
     return;
   }
 
@@ -1181,7 +1187,7 @@ function mostrarStepDevolucionQR(serie, detalleId) {
         setTimeout(intentarActivarCamara, 200);
       } else {
         console.warn('❌ Contenedor QR no tiene dimensiones válidas tras reintentos');
-        mostrarMensajeKiosco('No se pudo activar la cámara. Intente nuevamente.', 'danger');
+        mostrarModalKioscoSinVoz('No se pudo activar la cámara. Intente nuevamente.', 'danger');
       }
       return;
     }
@@ -1245,7 +1251,7 @@ function validarDevolucionQR(qrCode, idUsuario) {
 // --------------------------
 function confirmarDevolucionQRActual() {
   if (!detalleIdActual) {
-    mostrarMensajeKiosco('No se puede confirmar devolución: falta el recurso.', 'danger');
+    mostrarModalKioscoSinVoz('No se puede confirmar devolución: falta el recurso.', 'danger');
     return;
   }
 
@@ -1266,7 +1272,9 @@ function confirmarDevolucionQRActual() {
         return;
       }
 
-      mostrarMensajeKiosco('✅ Recurso devuelto correctamente.', 'success');
+      const mensaje = `✅ Recurso devuelto correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
+      mostrarModalKioscoSinVoz(mensaje, 'success');
+
       window._devolucionCompletada = true;
       nextStep(2); // volver al menú principal o recursos asignados
     } else {
@@ -1276,11 +1284,11 @@ function confirmarDevolucionQRActual() {
         return;
       }
 
-      mostrarMensajeKiosco(data.message || '❌ Error al devolver recurso.', 'danger');
+      mostrarModalKioscoSinVoz(data.message || 'Error al devolver recurso.', 'danger');
     }
   })
   .catch(err => {
-    mostrarMensajeKiosco('❌ Error de red al devolver recurso.', 'danger');
+    mostrarModalKioscoSinVoz('Error de red al devolver recurso.', 'danger');
     console.error('Error en confirmarDevolucionQRActual:', err);
   });
 }
@@ -1408,13 +1416,13 @@ async function activarEscaneoDevolucionQR() {
   const qrContainer = document.getElementById(contenedorId);
   if (!qrContainer) {
     console.warn(`Contenedor QR no encontrado: ${contenedorId}`);
-    mostrarMensajeKiosco('No se encontró el área de escaneo.', 'danger');
+    mostrarModalKioscoSinVoz('No se encontró el área de escaneo.', 'danger');
     return;
   }
 
   const idUsuario = localStorage.getItem('id_usuario');
   if (!idUsuario) {
-    mostrarMensajeKiosco('⚠️ Usuario no identificado', 'danger');
+    mostrarModalKioscoSinVoz('⚠️ Usuario no identificado', 'danger');
     return;
   }
 
@@ -1429,7 +1437,7 @@ async function activarEscaneoDevolucionQR() {
     window.html5QrCodeDevolucion = new Html5Qrcode(contenedorId);
   } catch (e) {
     console.error('Error creando Html5Qrcode:', e);
-    mostrarMensajeKiosco('No se pudo inicializar el escáner.', 'danger');
+    mostrarModalKioscoSinVoz('No se pudo inicializar el escáner.', 'danger');
     return;
   }
 
@@ -1548,7 +1556,7 @@ async function activarEscaneoDevolucionQR() {
     console.log('📷 Escáner QR iniciado correctamente');
   } catch (err) {
     console.error('No se pudo iniciar escaneo devolución:', err);
-    mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
+    mostrarModalKioscoSinVoz('No se pudo activar la cámara para escanear QR', 'danger');
     window._qrDevolucionActivo = false;
     try { await detenerEscaneoQRDevolucionSegura(); } catch (e) {}
   }
@@ -1559,7 +1567,7 @@ async function activarEscaneoDevolucionQR() {
 function ExitoDevolucionQR(qrCodeMessage) {
   const idUsuario = localStorage.getItem('id_usuario');
   if (!idUsuario) {
-    mostrarMensajeKiosco('⚠️ Usuario no identificado', 'danger');
+    mostrarModalKioscoSinVoz('⚠️ Usuario no identificado', 'danger');
     return;
   }
 
@@ -1568,12 +1576,12 @@ function ExitoDevolucionQR(qrCodeMessage) {
       if (res.success && res.coincide) {
         devolverRecurso(res.id_detalle);
       } else {
-        mostrarMensajeKiosco(res.message || '❌ QR no válido para devolución', 'warning');
+        mostrarModalKioscoSinVoz(res.message || 'QR no válido para devolución', 'warning');
       }
     })
     .catch(err => {
       console.error('Error validando QR:', err);
-      mostrarMensajeKiosco('❌ Error al validar QR', 'danger');
+      mostrarModalKioscoSinVoz('Error al validar QR', 'danger');
     });
 }
 
@@ -1601,7 +1609,7 @@ function activarReconocimientoDevolucionQR() {
         recog.stop();
       } else {
         console.warn('⚠️ confirmación por voz bloqueada: condiciones no cumplidas');
-        mostrarMensajeKiosco('Aún no se detectó un QR válido para confirmar', 'warning');
+        mostrarModalKioscoSinVoz('Aún no se detectó un QR válido para confirmar', 'warning');
       }
     } else if (texto === 'volver') {
       volverARecursosAsignadosDesdeDevolucionQR();
@@ -1712,7 +1720,7 @@ function activarEscaneoQRregistroRecursos() {
 
   if (!qrContainer) {
     console.error('No se encontró el contenedor de escaneo QR')
-  getRenderer('mostrarMensajeKiosco')('No se encontró el contenedor de escaneo QR', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('No se encontró el contenedor de escaneo QR', 'danger');
     return;
   }
 
@@ -1739,7 +1747,7 @@ function activarEscaneoQRregistroRecursos() {
     }
   ).catch(err => {
     console.error('Error al iniciar escaneo:', err);
-  getRenderer('mostrarMensajeKiosco')('No se pudo activar la cámara para escanear QR', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('No se pudo activar la cámara para escanear QR', 'danger');
     limpiarQRregistroRecursos();
   });
 }
@@ -1751,7 +1759,7 @@ function cancelarEscaneoQRregistroRecursos() {
 function registrarPorQRregistroRecursos(codigoQR) {
   const id_usuario = window.localStorage.getItem('id_usuario');
   if (!id_usuario) {
-  getRenderer('mostrarMensajeKiosco')('⚠️ No hay trabajador identificado', 'danger');
+    mostrarModalKioscoSinVoz('⚠️ No hay trabajador identificado', 'danger');
     return Promise.resolve({ success: false, reason: 'no_usuario' });
   }
 
@@ -1774,25 +1782,26 @@ function registrarPorQRregistroRecursos(codigoQR) {
   .then(data => {
     if (data && data.success) {
       const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
-  if (typeof window.mostrarMensajeKiosco === 'function') getRenderer('mostrarMensajeKiosco')(mensaje, 'success');
+      mostrarModalKioscoSinVoz(mensaje, 'success');
       if (typeof window.nextStep === 'function') window.nextStep(2);
     } else {
       if (data && data.message === 'QR no encontrado') {
-  getRenderer('mostrarMensajeKiosco')('❌ QR no encontrado en el sistema', 'danger');
+        mostrarModalKioscoSinVoz('QR no encontrado en el sistema', 'danger');
       } else if (data && data.message === 'Este recurso ya está asignado') {
-  getRenderer('mostrarMensajeKiosco')(`⚠️ Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
+        mostrarModalKioscoSinVoz(`Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
       } else {
-  getRenderer('mostrarMensajeKiosco')((data && data.message) || 'Error al registrar recurso por QR', 'danger');
+        mostrarModalKioscoSinVoz((data && data.message) || 'Error al registrar recurso por QR', 'danger');
       }
     }
     return data;
   })
   .catch(err => {
-    window.mostrarMensajeKiosco('Error de red al registrar recurso por QR', 'danger');
-    console.log('❌ Error de red al registrar recurso por QR', err);
+    mostrarModalKioscoSinVoz('Error de red al registrar recurso por QR', 'danger');
+    console.log('Error de red al registrar recurso por QR', err);
     return { success: false, error: err };
   });
 }
+
 
 function detenerEscaneoQRregistroRecursos(next = null) {
   const qrContainer = document.getElementById('qr-reader');
@@ -1876,7 +1885,7 @@ function activarEscaneoQRLogin() {
     }
   ).catch(err => {
     console.error('No se pudo iniciar escaneo login:', err);
-    window.mostrarMensajeKiosco('No se pudo activar la cámara para escanear QR', 'danger');
+    window.mostrarModalKioscoSinVoz('No se pudo activar la cámara para escanear QR', 'danger');
     detenerEscaneoQRLogin();
   });
 }
@@ -1921,23 +1930,23 @@ function identificarPorQRLogin(codigoQR) {
     } else {
       // Mensajes diferenciados según backend
       if (data.message === 'Usuario no encontrado') {
-        window.mostrarMensajeKiosco('❌ Usuario no encontrado en el sistema', 'danger');
+        window.mostrarModalKioscoSinVoz('Usuario no encontrado en el sistema', 'danger');
       console.log('❌ Usuario no encontrado en el sistema');
       } else if (data.message === 'Este usuario no tiene permisos para usar el kiosco') {
-        window.mostrarMensajeKiosco('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
+        window.mostrarModalKioscoSinVoz('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
       console.log('⚠️ Este usuario no tiene permisos para usar el kiosco');
       } else if (data.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
-        window.mostrarMensajeKiosco('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
+        window.mostrarModalKioscoSinVoz('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
       console.log('⛔ El usuario no está en estado Alta y no puede usar el kiosco');
       } else {
-        window.mostrarMensajeKiosco(data.message || 'Error al identificar por QR', 'danger');
+        window.mostrarModalKioscoSinVoz(data.message || 'Error al identificar por QR', 'danger');
       console.log('Error al identificar por QR');
       }
     }
   })
   .catch(err => {
     console.error('Error en fetch login QR:', err);
-    window.mostrarMensajeKiosco('Error de red al identificar por QR', 'danger');
+    window.mostrarModalKioscoSinVoz('Error de red al identificar por QR', 'danger');
   });
 }
 
@@ -1974,7 +1983,7 @@ function seleccionarCategoria(categoriaId) {
   getRenderer('renderSubcategoriasPaginadas')(window.subcategoriasActuales, 1);
       window.nextStep(6);
     } catch (e) {
-  getRenderer('mostrarMensajeKiosco')('No se pudieron cargar las subcategorías', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('No se pudieron cargar las subcategorías', 'danger');
       console.log('❌ No se pudieron cargar las subcategorías');
     }
   };
@@ -2045,7 +2054,7 @@ function seleccionarSubcategoria(subcategoriaId) {
   getRenderer('renderRecursosPaginados')(window.recursosActuales, 1);
       window.nextStep(7);
     } catch (e) {
-  getRenderer('mostrarMensajeKiosco')('No se pudieron cargar los recursos', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('No se pudieron cargar los recursos', 'danger');
       console.log('❌ No se pudieron cargar los recursos', e);
     }
   };
@@ -2115,13 +2124,13 @@ function seleccionarRecurso(recursoId) {
   getRenderer('renderSeriesPaginadas')(series, 1);
       window.nextStep(8);
     } catch (e) {
-  getRenderer('mostrarMensajeKiosco')('No se pudieron cargar las series', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('No se pudieron cargar las series', 'danger');
       console.log('❌ No se pudieron cargar las series', e);
     }
   };
 
   xhr.onerror = function () {
-  getRenderer('mostrarMensajeKiosco')('❌ Error de red al cargar las series', 'danger');
+  getRenderer('mostrarModalKioscoSinVoz')('Error de red al cargar las series', 'danger');
   };
 
   xhr.send();
@@ -2362,15 +2371,16 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
 
 async function registrarSerie(serieId, boton = null) {
   const id_usuario = window.localStorage.getItem('id_usuario');
-  
-   // validaciones inline
+
   if (!serieId) {
-  mostrarMensajeKiosco && getRenderer('mostrarMensajeKiosco')('Serie inválida', 'warning');
+    mostrarModalKioscoSinVoz && getRenderer('mostrarModalKioscoSinVoz')('Serie inválida', 'warning');
     return { success: false, reason: 'invalid_series' };
   }
-  
+
   if (!id_usuario) {
-  if (typeof window.mostrarMensajeKiosco === 'function') getRenderer('mostrarMensajeKiosco')('⚠️ No hay trabajador identificado', 'danger');
+    if (typeof window.mostrarMensajeKiosco === 'function') {
+      getRenderer('mostrarModalKioscoSinVoz')('⚠️ No hay trabajador identificado', 'danger');
+    }
     return { success: false, reason: 'no_usuario' };
   }
 
@@ -2388,24 +2398,20 @@ async function registrarSerie(serieId, boton = null) {
 
     if (!res || (typeof res.ok === 'boolean' && !res.ok)) {
       const statusText = res && res.status ? `HTTP ${res.status}` : 'network error';
-      if (typeof window.mostrarMensajeKiosco === 'function') 
-        {
-          getRenderer('mostrarMensajeKiosco')('Error de red al registrar recurso', 'danger');
-          console.log('❌ Error de red al registrar recurso');
-        }
+      if (typeof window.mostrarMensajeKiosco === 'function') {
+        getRenderer('mostrarModalKioscoSinVoz')('Error de red al registrar recurso', 'danger');
+        console.log('❌ Error de red al registrar recurso');
+      }
       return { success: false, reason: 'http_error', status: res && res.status, statusText };
     }
 
     const data = await res.json();
 
     if (data && data.success) {
-      if (typeof window.mostrarMensajeKiosco === 'function') 
-        {
-          getRenderer('mostrarMensajeKiosco')('✅ Recurso asignado correctamente', 'success');
-      console.log('✅ Recurso asignado correctamente');
-        }
+      const mensaje = `✅ Recurso asignado correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
+      getRenderer('mostrarModalKioscoSinVoz')(mensaje, 'success');
+      console.log(mensaje);
 
-      // ✅ Actualizar botón si se pasó como referencia
       if (boton && boton instanceof HTMLElement) {
         boton.innerHTML = `<span class="flex-grow-1 text-start">✅ Recurso asignado</span>`;
         boton.disabled = true;
@@ -2415,18 +2421,20 @@ async function registrarSerie(serieId, boton = null) {
 
       return { success: true, data };
     } else {
-  if (typeof window.mostrarMensajeKiosco === 'function') getRenderer('mostrarMensajeKiosco')((data && data.message) || 'Error al registrar recurso', 'danger');
+      if (typeof window.mostrarMensajeKiosco === 'function') {
+        getRenderer('mostrarModalKioscoSinVoz')((data && data.message) || 'Error al registrar recurso', 'danger');
+      }
       return { success: false, reason: 'backend_error', data };
     }
   } catch (err) {
-    if (typeof window.mostrarMensajeKiosco === 'function') 
-      {
-  getRenderer('mostrarMensajeKiosco')('Error de red al registrar recurso', 'danger');
-        console.log('❌ Error de red al registrar recurso');
-      }
+    if (typeof window.mostrarMensajeKiosco === 'function') {
+      getRenderer('mostrarModalKioscoSinVoz')('Error de red al registrar recurso', 'danger');
+      console.log('❌ Error de red al registrar recurso');
+    }
     return { success: false, reason: 'exception', error: err && (err.message || String(err)) };
   }
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   // Inicializar escáner QR de devolución de forma defensiva
@@ -2478,7 +2486,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((stepActivo === 'step1' || stepActivo === '1') && !idUsuario) {
           e.stopImmediatePropagation();
           e.preventDefault();
-          getRenderer('mostrarMensajeKiosco')('Debés identificarte antes de abrir el Menú principal', 'warning');
+          getRenderer('mostrarModalKioscoSinVoz')('Debés identificarte antes de abrir el Menú principal', 'warning');
           return;
         }
 
@@ -2512,7 +2520,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnBorrar.addEventListener('click', () => {
         claveInput.value = '';
         //claveInput.focus();
-        getRenderer('mostrarMensajeKiosco')('🧹 clave borrada', 'info');
+        getRenderer('mostrarMensajeKiosco')('clave borrada', 'info');
       });
       btnBorrar._borrarAttached = true;
     }
@@ -2629,7 +2637,7 @@ function BorrarClave() {
   if (claveInput) {
     claveInput.value = '';
     //claveInput.focus();
-    getRenderer('mostrarMensajeKiosco')('🧹 clave borrada', 'info');
+    getRenderer('mostrarMensajeKiosco')('clave borrada', 'info');
   }
 }
 
@@ -2728,7 +2736,7 @@ function cargarMenuPrincipal() {
     const id_usuario = window.localStorage.getItem('id_usuario');
     if (!id_usuario) {
       console.warn('⚠️ cargarMenuPrincipal: no hay id_usuario para solicitar herramienta');
-      window.mostrarMensajeKiosco('⚠️ No hay trabajador identificado', 'danger');
+      window.mostrarModalKioscoSinVoz('⚠️ No hay trabajador identificado', 'danger');
       return;
     }
 
@@ -2745,7 +2753,7 @@ function cargarMenuPrincipal() {
     .then(data => {
       if (!data.success) {
         console.warn('❌ No se puede solicitar herramientas:', data.message);
-        window.mostrarMensajeKiosco(data.message || 'No se puede solicitar herramientas', 'warning');
+        window.mostrarModalKioscoSinVoz(data.message || 'No se puede solicitar herramientas', 'warning');
         return;
       }
 
@@ -2755,7 +2763,7 @@ function cargarMenuPrincipal() {
     })
     .catch(() => {
       console.error('❌ Error de red al validar EPP');
-      window.mostrarMensajeKiosco('Error de red al validar EPP', 'danger');
+      window.mostrarModalKioscoSinVoz('Error de red al validar EPP', 'danger');
     });
   },
   clase: "btn-outline-dark",
@@ -3072,7 +3080,7 @@ function confirmarDevolucionPorVozStep10(index) {
   else btn = document.querySelector(`#tablaEPP-step button[data-opcion-index="${index}"]`) || document.querySelector(`#tablaHerramientas-step button[data-opcion-index="${index}"]`);
 
   if (!btn) {
-    getRenderer('mostrarMensajeKiosco')(`No se encontró la opción ${index}. Verificá que esté visible.`, 'warning');
+    getRenderer('mostrarModalKioscoSinVoz')(`No se encontró la opción ${index}. Verificá que esté visible.`, 'warning');
     return;
   }
 
@@ -3087,7 +3095,7 @@ function confirmarDevolucionPorVozStep10(index) {
 
 function handleStep10Pagina(numero) {
   if (!Number.isFinite(numero) || numero < 1) {
-    getRenderer('mostrarMensajeKiosco')('Número de página no reconocido', 'warning');
+    getRenderer('mostrarModalKioscoSinVoz')('Número de página no reconocido', 'warning');
     return;
   }
   const eppActivo = document.getElementById('tab-epp-step')?.classList.contains('active');
@@ -3095,14 +3103,14 @@ function handleStep10Pagina(numero) {
 
   if (eppActivo) {
     const total = Math.max(1, Math.ceil((window.recursosEPP?.length || 0) / 5));
-    if (numero > total) { getRenderer('mostrarMensajeKiosco')('Número de página inválido', 'warning'); return; }
+    if (numero > total) { getRenderer('mostrarModalKioscoSinVoz')('Número de página inválido', 'warning'); return; }
     renderTablaRecursosStep('tablaEPP-step', window.recursosEPP || [], numero, 'paginadorEPP-step');
     return;
   }
 
   if (herrActivo) {
     const total = Math.max(1, Math.ceil((window.recursosHerramientas?.length || 0) / 5));
-    if (numero > total) { getRenderer('mostrarMensajeKiosco')('Número de página inválido', 'warning'); return; }
+    if (numero > total) { getRenderer('mostrarModalKioscoSinVoz')('Número de página inválido', 'warning'); return; }
     renderTablaRecursosStep('tablaHerramientas-step', window.recursosHerramientas || [], numero, 'paginadorHerramientas-step');
     return;
   }
@@ -3194,7 +3202,7 @@ function iniciarReconocimientoGlobal() {
     console.log("🎤 Micrófono global activo");
 
     if (mostrarMensajesMicrofono)
-      window.mostrarMensajeKiosco('🎤 Micrófono activo: podés dar comandos por voz', 'info');
+      window.mostrarMensajeKiosco('Micrófono activo: podés dar comandos por voz', 'info');
   };
 
   recognitionGlobal.onerror = (event) => {
@@ -4050,7 +4058,7 @@ function activarModoDictadoClave() {
       window._dictadoClaveActivo = null;
       recognitionGlobalPaused = false;
       safeStartRecognitionGlobal();
-      getRenderer('mostrarMensajeKiosco')('🎤 Modo dictado desactivado', 'info');
+      getRenderer('mostrarMensajeKiosco')('Modo dictado desactivado', 'info');
       return;
     }
 
@@ -4062,13 +4070,13 @@ function activarModoDictadoClave() {
 
     if (texto.includes('borrar')) {
       claveInput.value = '';
-      getRenderer('mostrarMensajeKiosco')('🧹 clave borrada por voz', 'info');
+      getRenderer('mostrarMensajeKiosco')('clave borrada por voz', 'info');
       return;
     }
 
     if (texto.includes('iniciar sesion con qr') || texto === 'qr') {
       activarEscaneoQRLogin();
-      getRenderer('mostrarMensajeKiosco')('🎤 Escaneo QR activado por voz', 'info');
+      getRenderer('mostrarMensajeKiosco')('Escaneo QR activado por voz', 'info');
       return;
     }
 
@@ -4240,7 +4248,7 @@ function procesarComandoVoz(rawTexto) {
         if (!isNaN(index)) {
           confirmarDevolucionPorVozStep10(index);
         } else {
-          getRenderer('mostrarMensajeKiosco')('Opción no reconocida', 'warning');
+          getRenderer('mostrarModalKioscoSinVoz')('Opción no reconocida', 'warning');
         }
         return;
       }
@@ -4250,7 +4258,7 @@ function procesarComandoVoz(rawTexto) {
       if (mp) {
         const numero = parseInt(mp[1], 10);
         if (!isNaN(numero)) handleStep10Pagina(numero);
-        else getRenderer('mostrarMensajeKiosco')('Número de página no reconocido', 'warning');
+        else getRenderer('mostrarModalKioscoSinVoz')('Número de página no reconocido', 'warning');
         return;
       }
 
@@ -4300,7 +4308,7 @@ function procesarComandoVoz(rawTexto) {
     if (claveInput) {
       claveInput.value = '';
       claveInput.focus();
-      getRenderer('mostrarMensajeKiosco')('🧹 clave borrada por voz', 'info');
+      getRenderer('mostrarMensajeKiosco')('clave borrada por voz', 'info');
     }
     return;
   }
@@ -4326,7 +4334,7 @@ function procesarComandoVoz(rawTexto) {
     if (claveInput) {
       claveInput.value = limpio.replace(/\s+/g, '');
       //claveInput.focus();
-      getRenderer('mostrarMensajeKiosco')('🎤 clave dictado por voz', 'info');
+      getRenderer('mostrarMensajeKiosco')('clave dictado por voz', 'info');
     }
     return;
   }
@@ -4372,14 +4380,14 @@ function procesarComandoVoz(rawTexto) {
         const numero = parseInt(matchPaginaEPP[1], 10);
         const total = Math.ceil((window.recursosEPP?.length || 0) / 5);
         if (numero >= 1 && numero <= total) renderTablaRecursos('tablaEPP', window.recursosEPP, numero, 'paginadorEPP');
-        else window.mostrarMensajeKiosco('Número de página inválido para EPP', 'warning');
+        else window.mostrarModalKioscoSinVoz('Número de página inválido para EPP', 'warning');
         return;
       }
       if (matchPaginaHerr) {
         const numero = parseInt(matchPaginaHerr[1], 10);
         const total = Math.ceil((window.recursosHerramientas?.length || 0) / 5);
         if (numero >= 1 && numero <= total) renderTablaRecursos('tablaHerramientas', window.recursosHerramientas, numero, 'paginadorHerramientas');
-        else window.mostrarMensajeKiosco('Número de página inválido para herramientas', 'warning');
+        else window.mostrarModalKioscoSinVoz('Número de página inválido para herramientas', 'warning');
         return;
       }
 
@@ -4438,7 +4446,7 @@ function procesarComandoVoz(rawTexto) {
         const numero = numeroDesdeToken(token);
         if (!isNaN(numero) && numero >= 1) {
           const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
-          if (numero > totalPaginas) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+          if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
           renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
           return;
         }
@@ -4457,7 +4465,7 @@ function procesarComandoVoz(rawTexto) {
         const numero = numeroDesdeToken(token);
         if (!isNaN(numero) && numero >= 1) {
           const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
-          if (numero > totalPaginas) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+          if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
           renderRecursosPaginados(window.recursosActuales, numero);
           return;
         }
@@ -4476,7 +4484,7 @@ function procesarComandoVoz(rawTexto) {
         const numero = numeroDesdeToken(token);
         if (!isNaN(numero) && numero >= 1) {
           const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
-          if (numero > totalPaginas) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+          if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
           renderSeriesPaginadas(window.seriesActuales, numero);
           return;
         }
@@ -4562,7 +4570,7 @@ function procesarComandoVoz(rawTexto) {
         return;
       }
 
-      getRenderer('mostrarMensajeKiosco')('Aún no se detectó un QR válido para confirmar', 'warning');
+      getRenderer('mostrarModalKioscoSinVoz')('Aún no se detectó un QR válido para confirmar', 'warning');
       return;
     }
 
@@ -4593,23 +4601,23 @@ function procesarComandoVoz(rawTexto) {
     if (matchPaginaAny) {
       const token = matchPaginaAny[1];
       const numero = numeroDesdeToken(token);
-      if (isNaN(numero) || numero < 1) { window.mostrarMensajeKiosco('Número de página no reconocido', 'warning'); return; }
+      if (isNaN(numero) || numero < 1) { window.mostrarModalKioscoSinVoz('Número de página no reconocido', 'warning'); return; }
 
       if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
         const total = Math.max(1, Math.ceil(window.subcategoriasActuales.length / 5));
-        if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+        if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
         renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
         return;
       }
       if (step === 'step7' && Array.isArray(window.recursosActuales)) {
         const total = Math.max(1, Math.ceil(window.recursosActuales.length / 5));
-        if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+        if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
         renderRecursosPaginados(window.recursosActuales, numero);
         return;
       }
       if (step === 'step8' && Array.isArray(window.seriesActuales)) {
         const total = Math.max(1, Math.ceil(window.seriesActuales.length / 5));
-        if (numero > total) { window.mostrarMensajeKiosco('Número de página inválido', 'warning'); return; }
+        if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
         renderSeriesPaginadas(window.seriesActuales, numero);
         return;
       }
