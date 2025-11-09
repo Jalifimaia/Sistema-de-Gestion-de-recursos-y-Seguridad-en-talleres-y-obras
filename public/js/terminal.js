@@ -925,35 +925,33 @@ function actualizarVisibilidadPaginador(paginador, totalPaginas, claseOculta = '
 
 
 
-function devolverRecurso(detalleId) {
+async function devolverRecurso(detalleId) {
   if (!confirm('¿Confirmás que querés devolver este recurso?')) {
-    return Promise.resolve({ success: false, reason: 'cancelled' });
+    return { success: false, reason: 'cancelled' };
   }
 
-  return fetch(`/terminal/devolver/${detalleId}`, {
-    method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    }
-  })
-  .then(res => {
+  try {
+    const res = await fetch(`/terminal/devolver/${detalleId}`, {
+      method: 'POST',
+      headers: getHeadersSeguros()
+    });
+
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  })
-  .then(data => {
+    const data = await res.json();
+
     if (data.success) {
       mostrarModalKioscoSinVoz('Recurso devuelto correctamente', 'success');
-      cargarRecursos(); // actualiza el modal
+      cargarRecursos();
     } else {
       mostrarModalKioscoSinVoz(data.message || 'Error al devolver recurso', 'danger');
     }
+
     return data;
-  })
-  .catch(err => {
-    mostrarModalKioscoSinVoz('Error de red al devolver recurso', 'danger');
-    return { success: false, error: err };
-  });
+  } catch (err) {
+    return manejarErrorFetch(err, 'Devolución de recurso');
+  }
 }
+
 
 
 
@@ -1228,45 +1226,26 @@ function mostrarStepDevolucionQR(serie, detalleId) {
 // --------------------------
 // validarDevolucionQR (actualizada)
 // --------------------------
-function validarDevolucionQR(qrCode, idUsuario) {
+async function validarDevolucionQR(qrCode, idUsuario) {
   const serieEsperada = document.getElementById('serieEsperadaQR')?.textContent?.trim() || '';
 
-  return fetch('/terminal/validar-qr-devolucion', {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    },
-    body: JSON.stringify({
-      codigo_qr: qrCode,
-      id_usuario: idUsuario,
-      serie_esperada: serieEsperada
-    })
-  })
-  .then(async res => {
-    const data = await res.json();
+  try {
+    const res = await fetch('/terminal/validar-qr-devolucion', {
+      method: 'POST',
+      headers: getHeadersSeguros(),
+      body: JSON.stringify({ codigo_qr: qrCode, id_usuario: idUsuario, serie_esperada: serieEsperada })
+    });
 
-    // Debug: ver qué llega desde el backend
+    const data = await res.json();
     console.log('📦 Respuesta completa de validación QR:', data);
 
-    if (!res.ok) {
-      return {
-        success: false,
-        message: data?.message || `Error HTTP ${res.status}`
-      };
-    }
-
+    if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
     return data;
-  })
-  .catch(err => {
-    console.error('Error de red en fetch:', err);
-    return {
-      success: false,
-      message: 'Error de red al validar el QR'
-    };
-  });
+  } catch (err) {
+    return manejarErrorFetch(err, 'Validación QR devolución');
+  }
 }
+
 
 
 
@@ -1274,49 +1253,35 @@ function validarDevolucionQR(qrCode, idUsuario) {
 // --------------------------
 // confirmarDevolucionQRActual (actualizada)
 // --------------------------
-function confirmarDevolucionQRActual() {
+async function confirmarDevolucionQRActual() {
   if (!detalleIdActual) {
     mostrarModalKioscoSinVoz('No se puede confirmar devolución: falta el recurso.', 'danger');
     return;
   }
 
-  fetch('/terminal/devolver-recurso', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    },
-    body: JSON.stringify({ id_detalle: detalleIdActual })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      // Si el backend indica que ya fue devuelto, no mostramos nada
-      if (data.estado === 'ya_devuelto') {
-        console.log('ℹ️ Recurso ya estaba devuelto, se omite mensaje');
-        return;
-      }
+  try {
+    const res = await fetch('/terminal/devolver-recurso', {
+      method: 'POST',
+      headers: getHeadersSeguros(),
+      body: JSON.stringify({ id_detalle: detalleIdActual })
+    });
 
+    const data = await res.json();
+
+    if (data.success) {
+      if (data.estado === 'ya_devuelto') return;
       const mensaje = `Recurso devuelto correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
       mostrarModalKioscoSinVoz(mensaje, 'success');
-
       window._devolucionCompletada = true;
-      nextStep(2); // volver al menú principal o recursos asignados
+      nextStep(2);
     } else {
-      // Si no hay mensaje, no mostramos nada
-      if (!data.message) {
-        console.log('⚠️ Respuesta sin mensaje, se omite toast de error');
-        return;
-      }
-
-      mostrarModalKioscoSinVoz(data.message || 'Error al devolver recurso.', 'danger');
+      if (data.message) mostrarModalKioscoSinVoz(data.message, 'danger');
     }
-  })
-  .catch(err => {
-    mostrarModalKioscoSinVoz('Error de red al devolver recurso.', 'danger');
-    console.error('Error en confirmarDevolucionQRActual:', err);
-  });
+  } catch (err) {
+    manejarErrorFetch(err, 'Confirmar devolución QR');
+  }
 }
+
 
 
 function detenerEscaneoQRDevolucion() {
@@ -1781,51 +1746,35 @@ function cancelarEscaneoQRregistroRecursos() {
   limpiarQRregistroRecursos();
 }
 
-function registrarPorQRregistroRecursos(codigoQR) {
-  const id_usuario = window.localStorage.getItem('id_usuario');
-  if (!id_usuario) {
-    mostrarModalKioscoSinVoz('⚠️ No hay trabajador identificado', 'danger');
-    return Promise.resolve({ success: false, reason: 'no_usuario' });
-  }
+async function registrarPorQRregistroRecursos(codigoQR) {
+  const sesionOk = await verificarSesionActiva();
+  if (!sesionOk) return { success: false };
 
-  const meta = (typeof document !== 'undefined') && document.querySelector('meta[name="csrf-token"]');
-  const csrf = meta && meta.content ? meta.content : null;
-  const headers = { 'Content-Type': 'application/json' };
-  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+  const id_usuario = localStorage.getItem('id_usuario');
+  try {
+    const res = await fetch('/terminal/registrar-por-qr', {
+      method: 'POST',
+      headers: getHeadersSeguros(),
+      body: JSON.stringify({ codigo_qr: codigoQR, id_usuario })
+    });
 
-  return fetch(`/terminal/registrar-por-qr`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ codigo_qr: codigoQR, id_usuario })
-  })
-  .then(res => {
-    if (!res || (typeof res.ok === 'boolean' && !res.ok)) {
-      throw new Error(res ? `HTTP ${res.status}` : 'network error');
-    }
-    return res.json();
-  })
-  .then(data => {
-    if (data && data.success) {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    if (data.success) {
       const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
       mostrarModalKioscoSinVoz(mensaje, 'success');
-      if (typeof window.nextStep === 'function') window.nextStep(2);
+      window.nextStep?.(2);
     } else {
-      if (data && data.message === 'QR no encontrado') {
-        mostrarModalKioscoSinVoz('QR no encontrado en el sistema', 'danger');
-      } else if (data && data.message === 'Este recurso ya está asignado') {
-        mostrarModalKioscoSinVoz(`Este recurso ya está asignado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`, 'warning');
-      } else {
-        mostrarModalKioscoSinVoz((data && data.message) || 'Error al registrar recurso por QR', 'danger');
-      }
+      mostrarModalKioscoSinVoz(data.message || 'Error al registrar recurso por QR', 'danger');
     }
+
     return data;
-  })
-  .catch(err => {
-    mostrarModalKioscoSinVoz('Error de red al registrar recurso por QR', 'danger');
-    console.log('Error de red al registrar recurso por QR', err);
-    return { success: false, error: err };
-  });
+  } catch (err) {
+    return manejarErrorFetch(err, 'Registro por QR');
+  }
 }
+
 
 
 function detenerEscaneoQRregistroRecursos(next = null) {
@@ -1925,47 +1874,29 @@ function detenerEscaneoQRLogin() {
 }
 
 
-function identificarPorQRLogin(codigoQR) {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  const csrf = meta && meta.content ? meta.content : null;
-  const headers = { 'Content-Type': 'application/json' };
-  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
-  fetch('/terminal/identificar-qr', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ codigo_qr: codigoQR })
-  })
-  .then(res => res.json())
-  .then(data => {
+async function identificarPorQRLogin(codigoQR) {
+  try {
+    const res = await fetch('/terminal/identificar-qr', {
+      method: 'POST',
+      headers: getHeadersSeguros(),
+      body: JSON.stringify({ codigo_qr: codigoQR })
+    });
+
+    const data = await res.json();
     console.log('Respuesta login QR:', data);
 
     if (data.success) {
-      // Usuario válido (rol trabajador + estado Alta)
       localStorage.setItem('id_usuario', data.usuario.id);
-      window.nextStep(2);
+      window.nextStep?.(2);
       document.getElementById('saludo-trabajador').textContent = `Hola ${data.usuario.name}`;
     } else {
-      // Mensajes diferenciados según backend
-      if (data.message === 'Usuario no encontrado') {
-        window.mostrarModalKioscoSinVoz('Usuario no encontrado en el sistema', 'danger');
-      console.log('❌ Usuario no encontrado en el sistema');
-      } else if (data.message === 'Este usuario no tiene permisos para usar el kiosco') {
-        window.mostrarModalKioscoSinVoz('⚠️ Este usuario no tiene permisos para usar el kiosco', 'warning');
-      console.log('⚠️ Este usuario no tiene permisos para usar el kiosco');
-      } else if (data.message === 'El usuario no está en estado Alta y no puede usar el kiosco') {
-        window.mostrarModalKioscoSinVoz('⛔ El usuario no está en estado Alta y no puede usar el kiosco', 'danger');
-      console.log('⛔ El usuario no está en estado Alta y no puede usar el kiosco');
-      } else {
-        window.mostrarModalKioscoSinVoz(data.message || 'Error al identificar por QR', 'danger');
-      console.log('Error al identificar por QR');
-      }
+      mostrarModalKioscoSinVoz(data.message || 'Error al identificar por QR', 'danger');
     }
-  })
-  .catch(err => {
-    console.error('Error en fetch login QR:', err);
-    window.mostrarModalKioscoSinVoz('Error de red al identificar por QR', 'danger');
-  });
+  } catch (err) {
+    manejarErrorFetch(err, 'Login por QR');
+  }
 }
+
 
 //step 12: abrir escaneo QR login
 window.abrirStepQRLogin = function () {
@@ -2410,49 +2341,27 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
 
 
 async function registrarSerie(serieId, boton = null) {
-  const id_usuario = window.localStorage.getItem('id_usuario');
-
-  if (!serieId) {
-    mostrarModalKioscoSinVoz && getRenderer('mostrarModalKioscoSinVoz')('Serie inválida', 'warning');
-    return { success: false, reason: 'invalid_series' };
-  }
-
-  if (!id_usuario) {
-    if (typeof window.mostrarMensajeKiosco === 'function') {
-      getRenderer('mostrarModalKioscoSinVoz')('⚠️ No hay trabajador identificado', 'danger');
-    }
-    return { success: false, reason: 'no_usuario' };
+  const id_usuario = localStorage.getItem('id_usuario');
+  if (!serieId || !id_usuario) {
+    mostrarModalKioscoSinVoz('⚠️ Serie o usuario inválido', 'danger');
+    return { success: false };
   }
 
   try {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    const csrf = meta && meta.content ? meta.content : null;
-    const headers = { 'Content-Type': 'application/json' };
-    if (csrf) headers['X-CSRF-TOKEN'] = csrf;
-
     const res = await fetch(`/terminal/prestamos/${id_usuario}`, {
       method: 'POST',
-      headers,
+      headers: getHeadersSeguros(),
       body: JSON.stringify({ series: [serieId] })
     });
 
-    if (!res || (typeof res.ok === 'boolean' && !res.ok)) {
-      const statusText = res && res.status ? `HTTP ${res.status}` : 'network error';
-      if (typeof window.mostrarMensajeKiosco === 'function') {
-        getRenderer('mostrarModalKioscoSinVoz')('Error de red al registrar recurso', 'danger');
-        console.log('❌ Error de red al registrar recurso');
-      }
-      return { success: false, reason: 'http_error', status: res && res.status, statusText };
-    }
-
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    if (data && data.success) {
+    if (data.success) {
       const mensaje = `✅ Recurso asignado correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
-      getRenderer('mostrarModalKioscoSinVoz')(mensaje, 'success');
-      console.log(mensaje);
+      mostrarModalKioscoSinVoz(mensaje, 'success');
 
-      if (boton && boton instanceof HTMLElement) {
+      if (boton instanceof HTMLElement) {
         boton.innerHTML = `<span class="flex-grow-1 text-start">✅ Recurso asignado</span>`;
         boton.disabled = true;
         boton.classList.remove('btn-outline-success');
@@ -2461,17 +2370,11 @@ async function registrarSerie(serieId, boton = null) {
 
       return { success: true, data };
     } else {
-      if (typeof window.mostrarMensajeKiosco === 'function') {
-        getRenderer('mostrarModalKioscoSinVoz')((data && data.message) || 'Error al registrar recurso', 'danger');
-      }
-      return { success: false, reason: 'backend_error', data };
+      mostrarModalKioscoSinVoz(data.message || 'Error al registrar recurso', 'danger');
+      return { success: false, data };
     }
   } catch (err) {
-    if (typeof window.mostrarMensajeKiosco === 'function') {
-      getRenderer('mostrarModalKioscoSinVoz')('Error de red al registrar recurso', 'danger');
-      console.log('❌ Error de red al registrar recurso');
-    }
-    return { success: false, reason: 'exception', error: err && (err.message || String(err)) };
+    return manejarErrorFetch(err, 'Registro de serie');
   }
 }
 
@@ -2731,100 +2634,67 @@ function cargarMenuPrincipal() {
   contenedor.innerHTML = '';
 
   const opciones = [
-  {
-    id: 1,
-    texto: "Tengo la herramienta en mano",
-    accion: () => {
-      console.log('📦 opción seleccionada: herramienta en mano');
-      setModoEscaneo('manual');
+    {
+      id: 1,
+      texto: "Tengo la herramienta en mano",
+      accion: () => setModoEscaneo('manual'),
+      clase: "btn-outline-dark",
+      icono: "/images/trabajadorHerramienta.svg"
     },
-    clase: "btn-outline-dark",
-    icono: "/images/trabajadorHerramienta.svg"
-  },
-  {
-  id: 2,
-  texto: "Quiero solicitar una herramienta",
-  accion: () => {
-    const id_usuario = window.localStorage.getItem('id_usuario');
-    if (!id_usuario) {
-      console.warn('⚠️ cargarMenuPrincipal: no hay id_usuario para solicitar herramienta');
-      window.mostrarModalKioscoSinVoz('⚠️ No hay trabajador identificado', 'danger');
-      return;
+    {
+      id: 2,
+      texto: "Quiero solicitar una herramienta",
+      accion: async () => {
+        const sesionOk = await verificarSesionActiva();
+        if (!sesionOk) return;
+
+        const id_usuario = localStorage.getItem('id_usuario');
+        try {
+          const res = await fetch('/terminal/solicitar', {
+            method: 'POST',
+            headers: getHeadersSeguros(),
+            body: JSON.stringify({ id_usuario })
+          });
+
+          const data = await res.json();
+          if (!data.success) {
+            mostrarModalKioscoSinVoz(data.message || 'No se puede solicitar herramientas', 'warning');
+            return;
+          }
+
+          step5ReturnTarget = 2;
+          window.nextStep(5);
+        } catch (err) {
+          manejarErrorFetch(err, 'Solicitud de herramienta');
+        }
+      },
+      clase: "btn-outline-dark",
+      icono: "/images/herramienta2.svg"
+    },
+    {
+      id: 3,
+      texto: "Ver recursos asignados",
+      accion: () => {
+        window.cargarRecursos().then(() => abrirStepRecursos());
+      },
+      clase: "btn-outline-dark",
+      icono: "/images/list.svg"
     }
-
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    const csrf = meta && meta.content ? meta.content : null;
-    const headers = { 'Content-Type': 'application/json' };
-    if (csrf) headers['X-CSRF-TOKEN'] = csrf;
-    fetch('/terminal/solicitar', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ id_usuario })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success) {
-        console.warn('❌ No se puede solicitar herramientas:', data.message);
-        window.mostrarModalKioscoSinVoz(data.message || 'No se puede solicitar herramientas', 'warning');
-        return;
-      }
-
-      console.log('🛠️ opción seleccionada: solicitar herramienta');
-      step5ReturnTarget = 2;
-      window.nextStep(5);
-    })
-    .catch(() => {
-      console.error('❌ Error de red al validar EPP');
-      window.mostrarModalKioscoSinVoz('Error de red al validar EPP', 'danger');
-    });
-  },
-  clase: "btn-outline-dark",
-  icono: "/images/herramienta2.svg"
-},
-  // dentro de opciones en cargarMenuPrincipal, reemplazar accion de la opción 3 por:
- {
-  id: 3,
-  texto: "Ver recursos asignados",
-  accion: () => {
-    console.log('📋 opción seleccionada: ver recursos asignados');
-    window.cargarRecursos().then(() => {
-      abrirStepRecursos();
-    });
-  },
-  clase: "btn-outline-dark",
-  icono: "/images/list.svg"
-}
-
-
-
-];
-
-
-  console.log('📋 cargarMenuPrincipal: opciones generadas', opciones);
+  ];
 
   opciones.forEach(op => {
-  const btn = document.createElement('button');
-
-  if (op.clase.includes('simple')) {
-    // Botón limpio sin badge ni layout flex
-    btn.className = `btn btn-primary btn-lg mt-3`;
-    btn.textContent = op.texto;
-  } else {
-    // Botones con badge y layout horizontal
+    const btn = document.createElement('button');
     btn.className = `btn ${op.clase} btn-lg d-flex align-items-center justify-content-start m-2 w-100`;
     btn.innerHTML = `
-  <span class="badge-opcion">Opción ${op.id}</span>
-  <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
-    ${op.icono ? `<img src="${op.icono}" alt="Icono" class="icono-opcion">` : ''}
-    ${op.texto}
-  </span>
-`;
-  }
-
-  btn.onclick = op.accion;
-  contenedor.appendChild(btn);
-});
-
+      <span class="badge-opcion">Opción ${op.id}</span>
+      <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
+        ${op.icono ? `<img src="${op.icono}" alt="Icono" class="icono-opcion">` : ''}
+        ${op.texto}
+      </span>
+    `;
+    btn.onclick = op.accion;
+    contenedor.appendChild(btn);
+  });
 }
 
 
@@ -4706,4 +4576,58 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
   } catch (err) {
     console.warn('procesarComandoVoz: excepción', err);
   }
+}
+
+/*Actualizacion de los tokens*/
+function getHeadersSeguros() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const csrf = meta?.content;
+  const headers = { 'Content-Type': 'application/json' };
+  if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+  return headers;
+}
+
+function refrescarTokenCSRF() {
+  return fetch('/csrf-token')
+    .then(res => res.json())
+    .then(data => {
+      const meta = document.querySelector('meta[name="csrf-token"]');
+      if (meta && data.token) {
+        meta.setAttribute('content', data.token);
+        return data.token;
+      }
+      throw new Error('No se pudo actualizar el token CSRF');
+    });
+}
+
+async function verificarSesionActiva() {
+  const id_usuario = localStorage.getItem('id_usuario');
+  let csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+
+  if (!id_usuario) {
+    mostrarModalKioscoSinVoz('⚠️ No hay trabajador identificado', 'danger');
+    return false;
+  }
+
+  if (!csrf) {
+    try {
+      csrf = await refrescarTokenCSRF();
+    } catch (e) {
+      mostrarModalKioscoSinVoz('⚠️ No se pudo recuperar el token CSRF. Refrescar la página.', 'danger');
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function manejarErrorFetch(err, contexto = 'Error de red') {
+  const mensaje = typeof err === 'string' ? err :
+    err?.message?.includes('419') ? '⚠️ Sesión expirada. Refrescar la página.' :
+    err?.message?.includes('500') ? '⛔ Error interno del servidor.' :
+    `${contexto}. Verificá conexión o sesión.`;
+
+  console.error(`❌ ${contexto}:`, err);
+  mostrarModalKioscoSinVoz(mensaje, 'danger');
+  return { success: false, error: err };
 }
