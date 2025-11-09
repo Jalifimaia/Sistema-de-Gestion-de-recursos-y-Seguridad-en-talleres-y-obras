@@ -1096,12 +1096,12 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
   if (btnMenu) {
     btnMenu.disabled = true;
     btnMenu.style.pointerEvents = 'none';
-    btnMenu.style.opacity = '0.5';
+    //btnMenu.style.opacity = '0.5';
   }
   if (btnCerrar) {
     btnCerrar.disabled = true;
     btnCerrar.style.pointerEvents = 'none';
-    btnCerrar.style.opacity = '0.5';
+    //btnCerrar.style.opacity = '0.5';
   }
 
 
@@ -2529,7 +2529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnMenu.disabled = true;
         btnMenu.setAttribute('aria-disabled', 'true');
         btnMenu.style.pointerEvents = 'none';
-        btnMenu.style.opacity = '0.5';
+        //btnMenu.style.opacity = '0.5';
       } else {
         btnMenu.disabled = false;
         btnMenu.removeAttribute('aria-disabled');
@@ -2543,7 +2543,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCerrar.disabled = true;
         btnCerrar.setAttribute('aria-disabled', 'true');
         btnCerrar.style.pointerEvents = 'none';
-        btnCerrar.style.opacity = '0.5';
+       // btnCerrar.style.opacity = '0.5';
       } else {
         btnCerrar.disabled = false;
         btnCerrar.removeAttribute('aria-disabled');
@@ -3489,7 +3489,7 @@ function asegurarYConectarBotonesFlotantes() {
     // 👇 Ocultar por defecto
     btnCerrar.style.display = 'none';
     btnCerrar.style.pointerEvents = 'none';
-    btnCerrar.style.opacity = '0.5';
+    //btnCerrar.style.opacity = '0.5';
     btnCerrar.disabled = true;
     btnCerrar.setAttribute('aria-disabled', 'true');
 
@@ -3522,7 +3522,7 @@ function asegurarYConectarBotonesFlotantes() {
     // 👇 Ocultar por defecto
     btnMenu.style.display = 'none';
     btnMenu.style.pointerEvents = 'none';
-    btnMenu.style.opacity = '0.5';
+    //btnMenu.style.opacity = '0.5';
     btnMenu.disabled = true;
     btnMenu.setAttribute('aria-disabled', 'true');
 
@@ -3557,16 +3557,15 @@ function asegurarYConectarBotonesFlotantes() {
 
 
 // --- Control de visibilidad: ocultar en step1 ---
+// --- Control de visibilidad: ocultar en step1 ---
 function actualizarVisibilidadBotonesPorStep(stepId) {
-
   console.log('🔍 actualizando visibilidad para', stepId);
-  
+
   const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
   const btnMenu = document.getElementById('boton-flotante-menu-principal');
   if (!btnCerrar || !btnMenu) return;
 
   const step = typeof stepId === 'number' ? 'step' + stepId : String(stepId);
-
 
   if (step === 'step1' || stepId === '1' || step === 'step12') {
     // 🔒 Ocultar completamente en login
@@ -3578,8 +3577,7 @@ function actualizarVisibilidadBotonesPorStep(stepId) {
     btnMenu.setAttribute('aria-disabled', 'true');
     btnCerrar.style.pointerEvents = 'none';
     btnMenu.style.pointerEvents = 'none';
-    btnCerrar.style.opacity = '0.5';
-    btnMenu.style.opacity = '0.5';
+    btnMenu.classList.remove('boton-menu-deshabilitado');
     console.log('👀 Botones ocultos (step1)');
   } else if (step === 'step2' || step === '2') {
     // 🟡 Mostrar pero deshabilitado en menú principal
@@ -3591,8 +3589,7 @@ function actualizarVisibilidadBotonesPorStep(stepId) {
     btnMenu.setAttribute('aria-disabled', 'true');
     btnCerrar.style.pointerEvents = 'auto';
     btnMenu.style.pointerEvents = 'none';
-    btnCerrar.style.opacity = '1';
-    btnMenu.style.opacity = '0.5';
+    btnMenu.classList.add('boton-menu-deshabilitado');
     console.log('👀 Botón menú deshabilitado (step2)');
   } else {
     // ✅ Activos en los demás steps
@@ -3604,11 +3601,11 @@ function actualizarVisibilidadBotonesPorStep(stepId) {
     btnMenu.removeAttribute('aria-disabled');
     btnCerrar.style.pointerEvents = 'auto';
     btnMenu.style.pointerEvents = 'auto';
-    btnCerrar.style.opacity = '1';
-    btnMenu.style.opacity = '1';
+    btnMenu.classList.remove('boton-menu-deshabilitado');
     console.log('👀 Botones visibles y activos');
   }
 }
+
 
 // --- DOMContentLoaded actualizado: inicia QR devolucion, crea botones y wrap nextStep ---
 document.addEventListener('DOMContentLoaded', () => {
