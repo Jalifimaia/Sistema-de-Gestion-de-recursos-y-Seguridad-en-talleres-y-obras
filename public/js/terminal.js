@@ -1178,6 +1178,31 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
   modalEl.addEventListener('hidden.bs.modal', onHidden);
 }
 
+// paso 9, paso 3 y paso 1 - manejo de error de los QR
+const qrErrorBuffers = {};
+const qrErrorTimers = {};
+
+function manejarErrorEscaneoQR(errorMessage, contexto = 'QR') {
+  const mensaje = String(errorMessage).trim();
+  const key = contexto.toLowerCase();
+
+  if (!qrErrorBuffers[key]) qrErrorBuffers[key] = [];
+  if (!qrErrorBuffers[key].includes(mensaje)) {
+    qrErrorBuffers[key].push(mensaje);
+  }
+
+  if (qrErrorTimers[key]) return;
+
+  qrErrorTimers[key] = setTimeout(() => {
+    if (qrErrorBuffers[key].length > 0) {
+      console.warn(`❌ Error escaneo ${contexto}:`, qrErrorBuffers[key].join(' |'));
+      // Si querés mostrarlo como toast en modo demo:
+      // mostrarModalKioscoSinVoz(qrErrorBuffers[key].join(' |'), 'warning');
+    }
+    qrErrorBuffers[key] = [];
+    qrErrorTimers[key] = null;
+  }, 300);
+}
 
 
 // === paso 9: Devolución por QR ===
@@ -1540,13 +1565,14 @@ async function activarEscaneoDevolucionQR() {
         }
       },
       (errorMessage) => {
-        const msg = String(errorMessage || '');
-        if (msg.includes('No MultiFormat Readers')) {
-          console.debug('frame scan: no QR detected');
-          return;
-        }
-        console.warn('Error escaneo devolucion (frame):', errorMessage);
-      }
+  const msg = String(errorMessage || '');
+  if (msg.includes('No MultiFormat Readers')) {
+    console.debug('frame scan: no QR detected');
+    return;
+  }
+  manejarErrorEscaneoQR(errorMessage, 'devolucion');
+}
+
     );
 
     console.log('📷 Escáner QR iniciado correctamente');
@@ -1739,7 +1765,7 @@ function activarEscaneoQRregistroRecursos() {
       registrarPorQRregistroRecursos(qrCodeMessage);
     },
     errorMessage => {
-      console.warn('Error de escaneo:', errorMessage);
+      manejarErrorEscaneoQR(errorMessage, 'registro');
     }
   ).catch(err => {
     console.error('Error al iniciar escaneo:', err);
@@ -1855,7 +1881,7 @@ function activarEscaneoQRLogin() {
       identificarPorQRLogin(qrCodeMessage);
     },
     errorMessage => {
-      console.warn('Error escaneo login:', errorMessage);
+      manejarErrorEscaneoQR(errorMessage, 'login');
     }
   ).catch(err => {
     console.error('No se pudo iniciar escaneo login:', err);
