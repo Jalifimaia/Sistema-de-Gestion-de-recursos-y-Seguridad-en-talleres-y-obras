@@ -4354,6 +4354,8 @@ function procesarComandoVoz(rawTexto) {
       return;
     }
 
+
+
     // Comandos globales cuando no estamos bloqueados por modales ni step10
     if (recognitionGlobalPaused) {
       console.log('⚠️ Reconocimiento global pausado, ignorando comando:', limpio);
@@ -4409,11 +4411,12 @@ function procesarComandoVoz(rawTexto) {
   }
 
   // ▶️ Comando QR
-  if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
-    console.log('🎤 Comando de voz: Continuar login');
-    activarEscaneoQRLogin(); // tu función actual para iniciar escaneo QR
-    return;
-  }
+if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
+  console.log('🎤 Comando de voz: Iniciar sesión con QR');
+  abrirStepQRLogin(); // cambia al step12 y activa escaneo
+  return;
+}
+
 
   // 🧩 Fallback: si se dictó solo números sin frase activadora
   if (!/^[a-zA-Z]/.test(limpio) && /^\d/.test(limpio)) {
@@ -4634,7 +4637,18 @@ function procesarComandoVoz(rawTexto) {
       }
     }
 
-    
+    // === Step12: Inicio de sesión con QR ===
+    if (step === 'step12') {
+      if (/\b(cancelar|cancelar qr|cancelar inicio|cancelar inicio de sesión|cancelar inicio de sesión con qr)\b/.test(limpio)) {
+        console.log('🎤 Comando de voz: Cancelar inicio de sesión con QR');
+        cancelarEscaneoQRLogin(); // tu función actual para cerrar escáner y volver a step1
+        return;
+      }
+
+      console.log('⚠️ Step12: comando no reconocido', limpio);
+      return;
+    }
+
     // === Paginación y navegación globales (fallback) ===
     const matchPaginaAny = limpio.match(/^pagina\s*(número\s*)?(\d{1,2}|[a-záéíóúñ]+)$/i);
 
