@@ -102,7 +102,7 @@ class PrestamoTerminalController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => '✅ Recurso devuelto correctamente',
+                'message' => 'Recurso devuelto correctamente',
                 'recurso' => $detalle->serieRecurso->recurso->nombre ?? '',
                 'serie' => $detalle->serieRecurso->nro_serie ?? '',
             ]);
@@ -111,7 +111,7 @@ class PrestamoTerminalController extends Controller
             \Log::error('Error en devolverPorQR: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => '❌ Error al devolver el recurso',
+                'message' => 'Error al devolver el recurso',
             ], 500);
         }
     }

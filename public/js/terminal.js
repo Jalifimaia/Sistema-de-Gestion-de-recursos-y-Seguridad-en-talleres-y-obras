@@ -374,6 +374,11 @@ function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
   const body = document.getElementById('modalMensajeKioscoBody');
   const cerrarBtn = document.getElementById('btnCerrarMensajeKiosco');
 
+  // Si los emojis están desactivados, eliminarlos del mensaje
+  if (window.mostrarEmojisKiosco === false) {
+    mensaje = mensaje.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim(); // elimina emojis
+  }
+
   body.textContent = mensaje;
   window.modalKioscoActivo = true;
 
@@ -393,9 +398,8 @@ function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
 
   // ✅ Reactivar reconocimiento global explícitamente
   safeStartRecognitionGlobal();
-
-  
 }
+
 
 
 function cerrarModalKiosco() {
@@ -938,7 +942,7 @@ function devolverRecurso(detalleId) {
   })
   .then(data => {
     if (data.success) {
-      mostrarModalKioscoSinVoz('✅ Recurso devuelto correctamente', 'success');
+      mostrarModalKioscoSinVoz('Recurso devuelto correctamente', 'success');
       cargarRecursos(); // actualiza el modal
     } else {
       mostrarModalKioscoSinVoz(data.message || 'Error al devolver recurso', 'danger');
@@ -1293,7 +1297,7 @@ function confirmarDevolucionQRActual() {
         return;
       }
 
-      const mensaje = `✅ Recurso devuelto correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
+      const mensaje = `Recurso devuelto correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
       mostrarModalKioscoSinVoz(mensaje, 'success');
 
       window._devolucionCompletada = true;
@@ -1512,7 +1516,7 @@ async function activarEscaneoDevolucionQR() {
 
           detalleIdActual = res.id_detalle;
           document.getElementById('qrFeedback').textContent = '';
-          mostrarMensajeKiosco('✅ QR válido. Confirma la devolución en pantalla.', 'success');
+          //mostrarMensajeKiosco('✅ QR válido. Confirma la devolución en pantalla.', 'success');
 
           const modalEl = document.getElementById('modalConfirmarQR');
           if (!modalEl) return;
@@ -4327,12 +4331,12 @@ function procesarComandoVoz(rawTexto) {
       const tabPorStep = matchTabCambio(limpio);
       if (tabPorStep === 'epp') {
         document.getElementById('tab-epp-step')?.click();
-        getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
+        //getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
         return;
       }
       if (tabPorStep === 'herramientas') {
         document.getElementById('tab-herramientas-step')?.click();
-        getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
+       // getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
         return;
       }
 
@@ -4380,7 +4384,7 @@ function procesarComandoVoz(rawTexto) {
     if (claveInput) {
       claveInput.value = clave;
       //claveInput.focus();
-      getRenderer('mostrarMensajeKiosco')(`🎤 Clave reconocida: ${clave}`, 'success');
+     // getRenderer('mostrarMensajeKiosco')(`🎤 Clave reconocida: ${clave}`, 'success');
       // Opcional: avanzar automáticamente
       // nextStep();
     }
@@ -4447,26 +4451,26 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
       // Si modalRecursos estuviera abierto (en el viejo enfoque) no lo procesamos aquí,
       // pero ahora preferimos abrir step10 desde menú con la opción correspondiente.
       if (matchOpcion(textoSimple, 1, "herramienta en mano")) {
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
+        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
         setModoEscaneo('manual');
         return;
       }
 
       if (matchOpcion(textoSimple, 2, "solicitar herramienta", "quiero solicitar", "pedir herramienta")) {
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
+        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
         step5ReturnTarget = 2;
         window.nextStep(5);
         return;
       }
 
       if (matchOpcion(textoSimple, 3, "ver recursos", "recursos asignados", "mostrar recursos")) {
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
+       // window.mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
         window.cargarRecursos().then(() => abrirStepRecursos());
         return;
       }
 
       if (matchOpcion(textoSimple, 4, "volver", "inicio", "regresar", "atrás", "cerrar")) {
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
+       // window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
         volverAInicio();
         return;
       }
@@ -4496,23 +4500,23 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
     // === Step3: Escaneo QR ===
     if (step === 'step3') {
       if (matchOpcion(limpio, 1, "qr", "escanear")) {
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
+        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
         activarEscaneoQRregistroRecursos();
         return;
       }
       if (limpio.includes("cancelar")) {
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
+       // window.mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
         cancelarEscaneoQRregistroRecursos();
         return;
       }
       if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
+        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
         step5ReturnTarget = 3;
         detenerEscaneoQRregistroRecursos(5);
         return;
       }
       if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
+        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
         detenerEscaneoQRregistroRecursos(2);
         return;
       }
@@ -4524,7 +4528,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
     // Delegamos a bloques ya implementados en tu código original
     if (step === 'step5') {
       if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
-        window.mostrarMensajeKiosco(step5ReturnTarget === 3 ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"' : '🎤 Comando reconocido: Volver al menú principal', 'success');
+        //window.mostrarMensajeKiosco(step5ReturnTarget === 3 ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"' : '🎤 Comando reconocido: Volver al menú principal', 'success');
         window.nextStep(step5ReturnTarget);
         return;
       }
@@ -4549,7 +4553,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
           return;
         }
       }
-      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) { window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success'); window.nextStep(5); return; }
+      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) { /*window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success');*/ window.nextStep(5); return; }
       const botonesSub = document.querySelectorAll('#subcategoria-buttons button');
       for (let i = 0; i < botonesSub.length; i++) { const btn = botonesSub[i]; if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) { btn.click(); return; } }
       console.log("⚠️ Step6: Procesada entrada (si hubo coincidencias)");
@@ -4568,7 +4572,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
           return;
         }
       }
-      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) { window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a subcategorías', 'success'); window.nextStep(6); return; }
+      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) { /*window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a subcategorías', 'success');*/ window.nextStep(6); return; }
       const botonesRec = document.querySelectorAll('#recurso-buttons button');
       botonesRec.forEach((btn, index) => { try { if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) { btn.click(); } } catch (e) { console.warn('Error al procesar botón recurso', e); } });
       console.log("⚠️ Step7: Procesada entrada (si hubo coincidencias)");
@@ -4596,7 +4600,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
       }
     }
 
-      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) { window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success'); window.nextStep(7); return; }
+      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) { /*window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success');*/ window.nextStep(7); return; }
       const botonesSeries = document.querySelectorAll('#serie-buttons button');
       botonesSeries.forEach((btn, index) => { try { if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) { btn.click(); } } catch (e) { console.warn('Error al procesar botón serie', e); } });
       console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
@@ -4693,7 +4697,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
       if (matchOpcion(limpio, 0, "volver", "cerrar", "cerrar recursos")) {
         console.log("✅ Comando global: Cerrar modal de recursos asignados");
         try { bootstrap.Modal.getInstance(modalRec)?.hide(); } catch (e) {}
-        window.mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
+        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
         return;
       }
     }

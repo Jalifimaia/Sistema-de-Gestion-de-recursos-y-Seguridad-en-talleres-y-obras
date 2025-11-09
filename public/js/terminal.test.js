@@ -780,7 +780,7 @@ test('devolverRecurso envía solicitud de devolución y muestra mensaje', async 
   await window.devolverRecurso(1)
   await flushPromises()
   await flushPromises()
-  expect(spy).toHaveBeenCalledWith('✅ Recurso devuelto correctamente', 'success')
+  expect(spy).toHaveBeenCalledWith('Recurso devuelto correctamente', 'success')
   spy.mockRestore()
 })
 
