@@ -4631,3 +4631,23 @@ function manejarErrorFetch(err, contexto = 'Error de red') {
   mostrarModalKioscoSinVoz(mensaje, 'danger');
   return { success: false, error: err };
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🟢 Terminal cargada: iniciando ping de sesión');
+
+  // 🔄 Mantener sesión activa y renovar token CSRF cada 1 minuto
+  setInterval(() => {
+    fetch('/csrf-token')
+      .then(res => res.json())
+      .then(data => {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta && data.token) {
+          meta.setAttribute('content', data.token);
+          console.log('🔄 Token CSRF renovado automáticamente');
+        }
+      })
+      .catch(err => {
+        console.warn('⚠️ Falló el ping de sesión:', err);
+      });
+  }, 10 * 1000); // cada 10 segundos
+});

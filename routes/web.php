@@ -60,7 +60,13 @@ Route::get('/reportes', function () {
 |--------------------------------------------------------------------------
 */
 
+/*actualizacion del token para la terminal*/
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+});
 
+
+//URls de la terminal
 Route::prefix('terminal')->group(function () {
     Route::get('/', [KioskoController::class, 'index'])->name('terminal.index');
 
@@ -88,6 +94,7 @@ Route::prefix('terminal')->group(function () {
     Route::post('/prestamos/{id_usuario}', [PrestamoTerminalController::class, 'store'])->name('terminal.prestamos.store');
     Route::post('/registrar-por-qr', [PrestamoTerminalController::class, 'registrarPorQR']);
 });
+
 
 /*
 | Rutas de Reportes de Recursos
