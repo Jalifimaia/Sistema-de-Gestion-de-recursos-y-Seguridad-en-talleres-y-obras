@@ -33,30 +33,39 @@ class KioskoController extends Controller
 public function identificarTrabajador(Request $request)
 {
     $clave = $request->input('clave');
-    $codigoQR = $request->input('codigo_qr');
+    \Log::info('🔍 identificando trabajador por clave', ['clave' => $clave]);
 
-    \Log::info('🔍 identificando trabajador', ['clave' => $clave, 'codigo_qr' => $codigoQR]);
-
-    $usuario = null;
-
-    if ($clave) {
-        $usuario = Usuario::where('id_rol', 3)
-            ->where('id_estado', 1)
-            ->get()
-            ->first(function ($u) use ($clave) {
-                return Hash::check($clave, $u->password);
-            });
-    } elseif ($codigoQR) {
-        $usuario = Usuario::where('codigo_qr', $codigoQR)
-            ->where('id_rol', 3)
-            ->where('id_estado', 1)
-            ->first();
+    if (! $clave) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No se recibió ninguna clave'
+        ]);
     }
+
+    $usuarios = Usuario::whereNotNull('password')->get();
+
+    $usuario = $usuarios->first(function ($u) use ($clave) {
+        return \Hash::check($clave, $u->password);
+    });
 
     if (! $usuario) {
         return response()->json([
             'success' => false,
-            'message' => 'Clave inválida o usuario no habilitado'
+            'message' => 'Clave inválida o usuario no encontrado'
+        ]);
+    }
+
+    if ($usuario->id_rol != 3) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Este usuario no tiene permisos para usar el kiosco'
+        ]);
+    }
+
+    if ($usuario->id_estado != 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'El usuario no está en estado Alta y no puede usar el kiosco'
         ]);
     }
 
@@ -71,15 +80,33 @@ public function identificarPorQR(Request $request)
     $codigoQR = $request->input('codigo_qr');
     \Log::info('🔍 identificando por QR', ['codigo_qr' => $codigoQR]);
 
-    $usuario = Usuario::where('codigo_qr', $codigoQR)
-        ->where('id_rol', 3)
-        ->where('id_estado', 1)
-        ->first();
+    if (! $codigoQR) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No se recibió ningún código QR'
+        ]);
+    }
+
+    $usuario = Usuario::where('codigo_qr', $codigoQR)->first();
 
     if (! $usuario) {
         return response()->json([
             'success' => false,
-            'message' => 'Clave inválida o usuario no habilitado'
+            'message' => 'QR no encontrado en el sistema'
+        ]);
+    }
+
+    if ($usuario->id_rol != 3) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Este usuario no tiene permisos para usar el kiosco'
+        ]);
+    }
+
+    if ($usuario->id_estado != 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'El usuario no está en estado Alta y no puede usar el kiosco'
         ]);
     }
 
@@ -88,7 +115,6 @@ public function identificarPorQR(Request $request)
         'usuario' => $usuario->only(['id','name','dni','email','codigo_qr'])
     ]);
 }
-
 
 
     // ✅ Recursos asignados al trabajador
