@@ -394,9 +394,15 @@ function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
     btn.onclick = cerrarModalKiosco;
   });
 
-  modal.show();
+  // 🔒 Escuchar cierre por backdrop o Escape
+  modalEl.addEventListener('hidden.bs.modal', () => {
+    if (window.modalKioscoActivo) {
+      console.log('🧹 Modal cerrado por backdrop o escape, ejecutando cleanup');
+      cerrarModalKiosco();
+    }
+  }, { once: true });
 
-  // ✅ Reactivar reconocimiento global explícitamente
+  modal.show();
   safeStartRecognitionGlobal();
 }
 
@@ -438,15 +444,15 @@ function cerrarModalKiosco() {
   }
 
 // ✅ Si estamos en step12, reactivar escaneo QR login
-try {
-  const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
-  if (stepActivo === 'step12') {
-    console.log('📷 Reactivando escaneo QR login tras cerrar modal');
-    activarEscaneoQRLogin();
+  try {
+    const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
+    if (stepActivo === 'step12') {
+      console.log('📷 Reactivando escaneo QR login tras cerrar modal');
+      activarEscaneoQRLogin();
+    }
+  } catch (e) {
+    console.warn('⚠️ No se pudo reactivar escaneo QR login tras cerrar modal:', e);
   }
-} catch (e) {
-  console.warn('⚠️ No se pudo reactivar escaneo QR login tras cerrar modal:', e);
-}
 
 
   // Ocultar backdrop manual si lo usás
@@ -454,11 +460,11 @@ try {
   if (backdropManual) backdropManual.style.display = 'none';
 
 // Ocultar y eliminar backdrop manual si quedó visible
-const backdropManualModalSinVoz = document.querySelector('.modal-backdrop');
-if (backdropManualModalSinVoz) {
-  backdropManualModalSinVoz.classList.remove('show');
-  backdropManualModalSinVoz.remove();
-}
+  const backdropManualModalSinVoz = document.querySelector('.modal-backdrop');
+  if (backdropManualModalSinVoz) {
+    backdropManualModalSinVoz.classList.remove('show');
+    backdropManualModalSinVoz.remove();
+  }
 
 }
 
