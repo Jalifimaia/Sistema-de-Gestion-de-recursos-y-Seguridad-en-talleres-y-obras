@@ -13,6 +13,7 @@ use App\Models\Categoria;
 use App\Models\Estado;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 class RecursoController extends Controller
 {
@@ -357,6 +358,7 @@ class RecursoController extends Controller
         return $pdf->download('reporte_incidentes_por_tipo.pdf');
     }
 
+    
 
     public function store(RecursoRequest $request)
 {
@@ -422,13 +424,45 @@ class RecursoController extends Controller
         return redirect()->route('recursos.edit', $recurso->id)->with('success', 'Recurso actualizado correctamente.');
     }
 
-    public function destroy($id): RedirectResponse
-    {
-        Recurso::find($id)->delete();
+   public function destroy($id)
+{
+    Log::info("Entró a destroy con ID: $id");
 
-        return Redirect::route('inventario')
-            ->with('success', 'Recurso deleted successfully');
+    $recurso = Recurso::with('serieRecursos.detallePrestamos')->findOrFail($id);
+
+    // Verificar si alguna serie tiene préstamos activos
+    $tienePrestamos = $recurso->serieRecursos->some(function ($serie) {
+        return $serie->detallePrestamos()->exists();
+    });
+
+    if ($tienePrestamos) {
+        return redirect()
+            ->route('inventario.index')
+            ->with('error_modal', 'Este recurso tiene series con préstamos registrados. No se puede eliminar.');
     }
+
+    // Verificar si tiene series
+    if ($recurso->serieRecursos->isEmpty()) {
+        return redirect()
+            ->route('inventario.index')
+            ->with('error_modal', 'Este recurso no tiene series. No se puede marcar como baja.');
+    }
+
+    // Obtener el ID del estado "Baja"
+    $estadoBajaId = Estado::where('nombre_estado', 'Baja')->value('id');
+
+    // Marcar todas las series como "Baja"
+    $recurso->serieRecursos()->update([
+        'id_estado' => $estadoBajaId,
+        'updated_at' => now('UTC'),
+    ]);
+
+    return redirect()->route('inventario.index')
+    ->with('success_modal', 'Recurso marcado como dado de baja.');
+
+}
+
+
 public function create()
 {
     $categorias = Categoria::all();

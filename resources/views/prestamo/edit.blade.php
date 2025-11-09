@@ -128,7 +128,7 @@
                     <button type="button"
                             class="btn btn-sm btn-outline-danger w-100 dar-baja mt-2"
                             data-id="{{ $detalle->id }}">
-                      Dar de baja
+                      Devolver
                     </button>
                   @endif
                 </div>

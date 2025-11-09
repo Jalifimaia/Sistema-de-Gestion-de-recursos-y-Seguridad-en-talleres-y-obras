@@ -1,0 +1,94 @@
+/* 🔷 Título con ícono */
+.titulo-reportes {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.icono-titulo {
+  height: 32px;
+  width: 32px;
+  animation: pulse 1.5s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* 🔷 Fecha destacada */
+.fecha-destacada {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.etiqueta-fecha {
+  color: #888;
+  margin-right: 0.25rem;
+}
+
+.valor-fecha {
+  color: #333;
+}
+
+/* 🔷 Íconos de tarjetas */
+.card-icon {
+  font-size: 1.8rem;
+  margin-right: 0.5rem;
+  color: #f57c00;
+}
+
+/* 🔷 Movimiento en cards */
+.card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 🔷 Íconos SVG en encabezado de card */
+.icono-card {
+  height: 28px;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+/* 🔷 Botones azules consistentes */
+.btn {
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-outline-primary {
+  color: #1976d2;
+  border-color: #1976d2;
+}
+
+.btn-outline-primary:hover {
+  background-color: #1976d2;
+  color: #fff;
+  transform: scale(1.03);
+}
+
+/* 🔷 Imagen tipo banner en encabezado de card */
+.banner-card-img {
+  max-width: 100%;
+  height: 80px;
+  object-fit: contain;
+  margin: 0 auto;
+  display: block;
+}
+
+/* 🔷 Card con movimiento */
+.card-report {
+  border-left: 4px solid #f57c00;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-report:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}

@@ -126,21 +126,37 @@
     </div>
   </div>
 
-  {{-- Modal confirmar cambio trabajador --}}
-  <div class="modal fade" id="modalConfirmarCambioTrabajador" tabindex="-1" aria-labelledby="modalConfirmarCambioTrabajadorLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-warning text-dark">
-          <h5 class="modal-title" id="modalConfirmarCambioTrabajadorLabel">Confirmar cambio de trabajador</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          Al cambiar de trabajador se eliminarán los recursos agregados. ¿Desea continuar?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-action="cancel" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-warning" data-action="confirm">Sí, cambiar</button>
-        </div>
+<div class="modal fade" id="modalSerieInvalida" tabindex="-1" aria-labelledby="modalSerieInvalidaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark py-2">
+        <h6 class="modal-title" id="modalSerieInvalidaLabel">Serie inválida</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        Seleccioná una serie válida antes de continuar.
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-sm btn-primary w-100" data-bs-dismiss="modal">Entendido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="modalConfirmarCambioTrabajador" tabindex="-1" aria-labelledby="modalConfirmarCambioTrabajadorLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="modalConfirmarCambioTrabajadorLabel">Confirmar cambio de trabajador</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Al cambiar al trabajador eliminará los recursos agregados. ¿Desea continuar?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-action="cancel" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-warning" data-action="confirm">Sí, cambiar</button>
       </div>
     </div>
   </div>

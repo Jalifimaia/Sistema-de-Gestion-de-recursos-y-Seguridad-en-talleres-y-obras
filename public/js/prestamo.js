@@ -116,7 +116,16 @@ document.addEventListener('DOMContentLoaded', function () {
       const recursoText = recursoSelect.options[recursoSelect.selectedIndex]?.text || '';
 
       if (!serieId || serieSelect.selectedIndex === 0) {
-        alert('Seleccioná una serie válida.');
+        const modalInvalida = document.getElementById('modalSerieInvalida');
+        if (modalInvalida && typeof bootstrap !== 'undefined') {
+          limpiarBackdropsYBody();
+          const modal = new bootstrap.Modal(modalInvalida);
+          modal.show();
+          modalInvalida.addEventListener('hidden.bs.modal', () => {
+            try { modal.dispose(); } catch (e) {}
+            limpiarBackdropsYBody();
+          }, { once: true });
+        }
         return;
       }
 

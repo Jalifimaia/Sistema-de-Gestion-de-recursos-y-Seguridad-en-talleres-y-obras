@@ -7,7 +7,7 @@
   <div class="card shadow-sm">
     <div class="card-body">
       <h5 class="card-title fw-bold mb-1">Agregar Nuevo Recurso</h5>
-      <p class="text-muted small mb-4">Complete los campos para registrar un nuevo recurso.</p>
+      <p></p>
 
 
       <form id="recursoForm" method="POST" action="{{ route('recursos.store') }}">
@@ -57,7 +57,7 @@
         </div>
 
         <div class="text-end">
-          <a href="{{ route('inventario') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
+          <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
           <button type="submit" class="btn btn-primary">Guardar Recurso</button>
         </div>
       </form>
@@ -76,7 +76,7 @@
         El recurso fue creado correctamente.
       </div>
       <div class="modal-footer">
-        <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
+        <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
         <a href="{{ route('recursos.create') }}" class="btn btn-success">Seguir agregando</a>
       </div>
     </div>

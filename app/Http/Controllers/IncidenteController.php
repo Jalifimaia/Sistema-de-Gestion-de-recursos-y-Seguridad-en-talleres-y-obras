@@ -142,6 +142,13 @@ class IncidenteController extends Controller
             }
 
             $incidente->recursos()->sync($attach);
+
+            foreach ($request->recursos as $r) {
+                SerieRecurso::where('id', $r['id_serie_recurso'])->update([
+                    'id_estado' => $r['id_estado'],
+                    'updated_at' => Carbon::now('UTC')->format('Y-m-d H:i:s'),
+                ]);
+            }
         });
 
         return redirect()->route('incidente.create')->with('success', '✅ Incidente registrado correctamente.');
@@ -277,8 +284,10 @@ class IncidenteController extends Controller
             }
             $incidente->recursos()->sync($attach);
 
-            if ($request->id_estado_incidente == optional($estadoResuelto)->id && !$incidente->fecha_cierre_incidente) {
-                $incidente->update(['fecha_cierre_incidente' => Carbon::now('UTC')->format('Y-m-d H:i:s')]);
+            
+
+            foreach ($request->recursos as $r) {
+                SerieRecurso::where('id', $r['id_serie_recurso'])->update(['id_estado' => $r['id_estado']]);
             }
 
             DB::commit();
