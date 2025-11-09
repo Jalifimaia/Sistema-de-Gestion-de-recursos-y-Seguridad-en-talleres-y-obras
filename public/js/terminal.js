@@ -333,7 +333,7 @@ function mostrarModalKiosco(mensaje, tipo = 'danger') {
           cerrarModal();
           recog.stop();
         } else {
-          mostrarMensajeKiosco('No se reconoció el comando. Decí “cerrar” o “entendido”.', 'info');
+         // mostrarMensajeKiosco('No se reconoció el comando. Decí “cerrar” o “entendido”.', 'info');
         }
       };
 
@@ -1049,7 +1049,7 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
     console.log('🔴 mostrarModalConfirmarDevolucion: Cancelar pulsado');
     finishAndClose(() => {
       window._modalConfirmedByVoice = false;
-      getRenderer('mostrarMensajeKiosco')('Devolución cancelada.', 'info');
+     // getRenderer('mostrarMensajeKiosco')('Devolución cancelada.', 'info');
     });
   }
 
@@ -2238,7 +2238,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
     modalActionTaken = true;
     modal.hide();
     cleanup();
-    if (typeof mostrarMensaje === 'function') mostrarMensaje('Solicitud cancelada.', 'info');
+   // if (typeof mostrarMensaje === 'function') mostrarMensaje('Solicitud cancelada.', 'info');
   }
 
   try {
@@ -2300,7 +2300,7 @@ function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie 
         // Comando no reconocido: feedback y no forzar stop/start aquí
         console.log('🗣️ Comando no reconocido en modal serie:', texto);
         if (typeof mostrarMensaje === 'function') {
-          mostrarMensaje('No se reconoció el comando. Decí “aceptar” o “cancelar”.', 'info');
+        //  mostrarMensaje('No se reconoció el comando. Decí “aceptar” o “cancelar”.', 'info');
         }
         // No hacemos stop/start; onend decidirá si reiniciar
       };
@@ -2521,7 +2521,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnBorrar.addEventListener('click', () => {
         claveInput.value = '';
         //claveInput.focus();
-        getRenderer('mostrarMensajeKiosco')('clave borrada', 'info');
+       // getRenderer('mostrarMensajeKiosco')('clave borrada', 'info');
       });
       btnBorrar._borrarAttached = true;
     }
@@ -2638,7 +2638,7 @@ function BorrarClave() {
   if (claveInput) {
     claveInput.value = '';
     //claveInput.focus();
-    getRenderer('mostrarMensajeKiosco')('clave borrada', 'info');
+    //getRenderer('mostrarMensajeKiosco')('clave borrada', 'info');
   }
 }
 
@@ -3231,8 +3231,8 @@ function iniciarReconocimientoGlobal() {
     recognitionRunning = true;
     console.log("🎤 Micrófono global activo");
 
-    if (mostrarMensajesMicrofono)
-      window.mostrarMensajeKiosco('Micrófono activo: podés dar comandos por voz', 'info');
+   // if (mostrarMensajesMicrofono)
+   //   window.mostrarMensajeKiosco('Micrófono activo: podés dar comandos por voz', 'info');
   };
 
   recognitionGlobal.onerror = (event) => {
@@ -4130,7 +4130,7 @@ function activarModoDictadoClave() {
       window._dictadoClaveActivo = null;
       recognitionGlobalPaused = false;
       safeStartRecognitionGlobal();
-      getRenderer('mostrarMensajeKiosco')('Modo dictado desactivado', 'info');
+     // getRenderer('mostrarMensajeKiosco')('Modo dictado desactivado', 'info');
       return;
     }
 
@@ -4142,13 +4142,13 @@ function activarModoDictadoClave() {
 
     if (texto.includes('borrar')) {
       claveInput.value = '';
-      getRenderer('mostrarMensajeKiosco')('clave borrada por voz', 'info');
+      //getRenderer('mostrarMensajeKiosco')('clave borrada por voz', 'info');
       return;
     }
 
     if (texto.includes('iniciar sesion con qr') || texto === 'qr') {
       activarEscaneoQRLogin();
-      getRenderer('mostrarMensajeKiosco')('Escaneo QR activado por voz', 'info');
+      //getRenderer('mostrarMensajeKiosco')('Escaneo QR activado por voz', 'info');
       return;
     }
 
@@ -4283,7 +4283,7 @@ function procesarComandoVoz(rawTexto) {
         recognitionGlobalPaused = false;
         safeStartRecognitionGlobal();
         nextStep(2);
-        getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
+       // getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
         return;
       }
     }
@@ -4295,7 +4295,7 @@ function procesarComandoVoz(rawTexto) {
       recognitionGlobalPaused = false;
       safeStartRecognitionGlobal();
       nextStep(2);
-      getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
+    //  getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
       return;
     }
 
@@ -4380,7 +4380,7 @@ function procesarComandoVoz(rawTexto) {
     if (claveInput) {
       claveInput.value = '';
       claveInput.focus();
-      getRenderer('mostrarMensajeKiosco')('clave borrada por voz', 'info');
+      //getRenderer('mostrarMensajeKiosco')('clave borrada por voz', 'info');
     }
     return;
   }
@@ -4406,7 +4406,7 @@ function procesarComandoVoz(rawTexto) {
     if (claveInput) {
       claveInput.value = limpio.replace(/\s+/g, '');
       //claveInput.focus();
-      getRenderer('mostrarMensajeKiosco')('clave dictado por voz', 'info');
+      //getRenderer('mostrarMensajeKiosco')('clave dictado por voz', 'info');
     }
     return;
   }

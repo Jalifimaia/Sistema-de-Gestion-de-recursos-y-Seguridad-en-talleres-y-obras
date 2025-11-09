@@ -41,6 +41,7 @@
   margin-left: 0.75rem;          /* 👈 separación del texto central */
   flex-shrink: 0;
   white-space: nowrap;
+  display: none;
 }
 
 /* Ajustes generales de los botones dinámicos */
@@ -227,8 +228,8 @@ input.form-control:focus {
 
 /* Estilo para todos los botones generados dinámicamente con clases Bootstrap */
 .btn-outline-dark.btn-lg.d-flex {
-  font-size: 18px;              /* 👈 Más contenido */
-  font-weight: 600;
+  font-size: 22px;              /* 👈 Más contenido */
+  font-weight: 700;
   padding: 0.75rem 1rem;
   border-radius: 10px;
   background-color: #fff;
