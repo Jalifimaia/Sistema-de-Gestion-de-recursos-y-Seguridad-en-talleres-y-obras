@@ -192,15 +192,7 @@ input.form-control:focus {
   line-height: 1.4;
 }
 
-/* Hover con más contraste */
-#categoria-buttons button:hover,
-#subcategoria-buttons button:hover,
-#recurso-buttons button:hover,
-#serie-buttons button:hover {
-  background-color: #fff3e0;
-  border-color: #e67e22;
-  box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
-}
+
 /*
 #menu-principal-buttons button {
   font-size: 24px;              / 👈 ¡Bien grande! *
@@ -248,12 +240,7 @@ input.form-control:focus {
   word-break: break-word;
 }
 
-/* Hover para esos botones */
-.btn-outline-dark.btn-lg.d-flex:hover {
-  background-color: #fff3e0;
-  border-color: #e67e22;
-  box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
-}
+
 
 /* Botones de opciones principales en step3 */
 #step3 button .badge-opcion + .flex-grow-1 {
@@ -709,4 +696,19 @@ input.form-control:focus {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+}
+
+/* Hover con contraste unificado para botones interactivos */
+#categoria-buttons button:hover,
+#subcategoria-buttons button:hover,
+#recurso-buttons button:hover,
+#serie-buttons button:hover,
+#btn-escanear-qr:hover,
+#herramienta-en-mano-solicitar:hover,
+.btn-outline-dark.btn-lg.d-flex:hover,
+.btn-outline-dark:hover,
+.btn-resumen:hover {
+  background-color: #fdb748 !important;
+  border-color: #e67e22;
+  box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
 }

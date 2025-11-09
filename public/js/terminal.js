@@ -192,6 +192,12 @@ function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
   const tipoNormalizado = (tipo || '').toLowerCase();
   const mensajeLower = (mensaje || '').toLowerCase();
 
+  // ❌ Ignorar mensajes de comandos reconocidos por voz
+  if (mensaje && mensaje.trim().startsWith('🎤 Comando reconocido:')) {
+    console.log('🔇 mostrarMensajeKiosco: mensaje omitido por ser comando reconocido');
+    return;
+  }
+
   // ✅ Detectar si el mensaje es crítico
   const mensajeCritico =
     mensajeLower.includes('clave inválida') ||
@@ -232,6 +238,7 @@ function mostrarMensajeKiosco(mensaje, tipo = 'danger', duracion = 5000) {
     setTimeout(() => toast.remove(), 500);
   }, duracion);
 }
+
 
 
 

@@ -86,13 +86,14 @@
 <div id="step3" class="step">
   <h2 id="titulo-step3" class="mb-4 text-center">Escanear Recurso</h2>
   <h5 id="texto-camara-activa" class="text-center mb-3 d-none d-flex justify-content-center align-items-center gap-2">
-  <img src="/images/camara.svg" alt="Cámara activa" class="icono-opcion">
-  <span>Cámara activa — escaneá el código QR</span>
-</h5>
+    <img src="/images/camara.svg" alt="Cámara activa" class="icono-opcion">
+    <span>Cámara activa — escaneá el código QR</span>
+  </h5>
+
   <div id="qr-reader" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
 
   <div class="text-center mt-3">
-    <button id="btn-escanear-qr" class="btn btn-outline-dark btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="activarEscaneoQRregistroRecursos()">
+    <button id="btn-escanear-qr" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="activarEscaneoQRregistroRecursos()">
       <span class="badge-opcion">Opción 1</span>
       <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
         <img src="{{ asset('images/qr2.svg') }}" alt="QR" class="icono-opcion">
@@ -100,15 +101,13 @@
       </span>
     </button>
 
-
     <button id="btn-cancelar-qr" class="btn btn-outline-danger btn-lg d-none m-2 w-100 texto-cancelar" onclick="cancelarEscaneoQRregistroRecursos()">
-    Cancelar escaneo
-  </button>
-
+      Cancelar escaneo
+    </button>
   </div>
 
   <div class="text-center">
-    <button class="btn btn-outline-dark btn-lg d-flex align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(5)">
+    <button id="herramienta-en-mano-solicitar" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(5)">
       <span class="badge-opcion">Opción 2</span>
       <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
         <img src="{{ asset('images/hand2.svg') }}" alt="Mano" class="icono-opcion">
@@ -122,9 +121,9 @@
         <span>Volver</span>
       </button>
     </div>
-
   </div>
 </div>
+
 
 
     <!-- Paso 5: Categoría -->
