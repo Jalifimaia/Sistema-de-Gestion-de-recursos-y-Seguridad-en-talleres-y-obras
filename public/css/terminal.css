@@ -777,3 +777,35 @@ input.form-control:focus {
   z-index: 999;
   display: none;
 }
+
+
+/*FONDO*/
+body {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-image: url('/images/pexels-mikebirdy-34643883.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* 🔒 mantiene la imagen fija al hacer scroll */
+  overflow-x: hidden;
+}
+
+
+html::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4); /* oscurece sin desenfocar */
+  z-index: -1;
+}
+
+body.modal-open {
+  padding-right: 0 !important;
+  overflow-y: scroll !important;
+}
