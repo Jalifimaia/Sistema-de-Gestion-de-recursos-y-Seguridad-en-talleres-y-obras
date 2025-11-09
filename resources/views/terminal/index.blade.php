@@ -29,20 +29,20 @@
       <p class="text-muted d-block text-start mb-3">Podes dictar tu clave diciendo <b>"INGRESAR CLAVE"</b></p>
 
 
-      <button class="btn btn-primary btn-lg mb-3 boton-continuar" onclick="identificarTrabajador()">
-        Continuar
-        <img src="{{ asset('images/continuar.svg') }}" alt="Flecha continuar" class="icono-flecha">
-      </button>
+      <div class="d-flex flex-wrap justify-content-start gap-3 mb-3">
+        <button class="btn btn-primary btn-lg boton-continuar" onclick="identificarTrabajador()">
+          Continuar
+          <img src="{{ asset('images/continuar.svg') }}" alt="Flecha continuar" class="icono-flecha">
+        </button>
 
-      <button id="btnBorrarClave" class="btn btn-danger btn-lg mb-3 boton-borrar" onclick="BorrarClave()">
-        <img src="{{ asset('images/cruz.svg') }}" alt="Cruz borrar" class="icono-cruz">
-        Borrar clave
-      </button>
+        <button id="btnBorrarClave" class="btn btn-danger btn-lg boton-borrar" onclick="BorrarClave()">
+          <img src="{{ asset('images/cruz.svg') }}" alt="Cruz borrar" class="icono-cruz">
+          Borrar clave
+        </button>
 
-      <div class="text-center mt-4">
-        <button class="btn btn-primary btn-lg boton-qr-personalizado" onclick="activarEscaneoQRLogin()">
-          <img src="{{ asset('images/qr.svg') }}" alt="Ícono QR" class="icono-qr">
-          Iniciar sesión con QR
+        <button class="btn btn-primary btn-lg boton-qr-personalizado d-flex align-items-center gap-2 ms-auto" onclick="activarEscaneoQRLogin()">
+          <img src="images/qr.svg" alt="Ícono QR" class="icono-qr">
+          <span>Iniciar sesión con QR</span>
         </button>
       </div>
 
