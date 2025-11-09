@@ -4293,7 +4293,7 @@ function procesarComandoVoz(rawTexto) {
     const step = getStepActivo();
 
     //botones globales de menu principal y cerrar sesion
-    if (step !== 'step1') {
+    if (step !== 'step1' && step !== 'step12') {
         if (/\b(cerrar sesión|cerrar sesion)\b/.test(limpio)) {
           console.log('🔐 Comando de voz detectado: cerrar sesión');
           mostrarModalCerrarSesion(); // tu función actual para abrir el modal
@@ -4301,7 +4301,7 @@ function procesarComandoVoz(rawTexto) {
         }
     }
 
-    if (step !== 'step1' && step !== 'step2') {
+    if (step !== 'step1' && step !== 'step2' && step !== 'step12') {
         if (/\b(menu principal)\b/.test(limpio)) {
         recognitionGlobalPaused = false;
         safeStartRecognitionGlobal();
