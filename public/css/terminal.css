@@ -121,13 +121,13 @@ button.btn-danger:hover {
   background-color: #c0392b;
 }
 
-/* Botones flotantes con sombra y naranja */
+/* Botones flotantes con sombra y naranja *
 #boton-flotante-menu-principal {
   background-color: #f39c12;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-
+*/
 #boton-flotante-cerrar-sesion {
   background-color: #e74c3c;
   font-weight: 700;
@@ -200,14 +200,14 @@ input.form-control:focus {
   border-color: #e67e22;
   box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
 }
-
+/*
 #menu-principal-buttons button {
-  font-size: 24px;              /* 👈 ¡Bien grande! */
-  font-weight: 700;             /* 👈 Letras marcadas */
-  padding: 1.2rem 1.5rem;       /* 👈 Espacio generoso */
+  font-size: 24px;              / 👈 ¡Bien grande! *
+  font-weight: 700;             /* 👈 Letras marcadas *
+  padding: 1.2rem 1.5rem;       /* 👈 Espacio generoso *
   border-radius: 12px;
   background-color: #fff;
-  border: 2px solid #f39c12;    /* 👈 Borde naranja */
+  border: 2px solid #f39c12;    /* 👈 Borde naranja *
   color: #333;
   box-shadow: 0 3px 8px rgba(0,0,0,0.08);
   display: flex;
@@ -223,6 +223,7 @@ input.form-control:focus {
   border-color: #e67e22;
   box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
 }
+*/
 
 /* Estilo para todos los botones generados dinámicamente con clases Bootstrap */
 .btn-outline-dark.btn-lg.d-flex {
@@ -393,11 +394,11 @@ input.form-control:focus {
   color: #e67e22;   
 }
 
-/* Botón flotante: Menú principal */
+/* Botón flotante: Menú principal *
 #boton-flotante-menu-principal {
-  font-size: 18px;              /* 👈 Texto más grande */
+  font-size: 18px;              /* 👈 Texto más grande *
   font-weight: 700;
-  padding: 0.8rem 1.2rem;       /* 👈 Área de toque más generosa */
+  padding: 0.8rem 1.2rem;       /* 👈 Área de toque más generosa *
   border-radius: 12px;
   background-color: #f39c12;
   color: #fff;
@@ -407,9 +408,11 @@ input.form-control:focus {
 }
 
 /* Hover para Menú principal */
+/*
 #boton-flotante-menu-principal:hover {
   background-color: #e67e22;
 }
+*/
 
 /* Botón flotante: Cerrar sesión */
 #boton-flotante-cerrar-sesion {
@@ -429,7 +432,7 @@ input.form-control:focus {
   background-color: #c9302c;
 }
 
-/* Botón flotante: Menú principal */
+/* Botón flotante: Menú principal *
 #boton-flotante-menu-principal {
   position: fixed;
   bottom: 20px;
@@ -438,15 +441,16 @@ input.form-control:focus {
   background: #0d6efd;
   color: #fff;
   border: none;
-  padding: 14px 22px;           /* 👈 Más área de toque */
-  border-radius: 12px;          /* 👈 Más redondeado */
+  padding: 14px 22px;           /* 👈 Más área de toque *
+  border-radius: 12px;          /* 👈 Más redondeado *
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-  font-size: 18px;              /* 👈 Más grande */
-  font-weight: 700;             /* 👈 Más marcado */
+  font-size: 18px;              /* 👈 Más grande *
+  font-weight: 700;             /* 👈 Más marcado *
   cursor: pointer;
   display: none;
   transition: all 0.3s ease;
 }
+*/
 
 /* Botón flotante: Cerrar sesión */
 #boton-flotante-cerrar-sesion {
@@ -467,10 +471,35 @@ input.form-control:focus {
   transition: all 0.3s ease;
 }
 
-/* Hover para ambos */
+/* Hover para ambos *
 #boton-flotante-menu-principal:hover {
   background-color: #0b5ed7;
 }
+*/
+
+
+#boton-flotante-menu-principal {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1040;
+  background-color: #f39c12;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 14px 22px;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: none; /* default hidden */
+}
+
+#boton-flotante-menu-principal:hover {
+  background-color: #e67e22;
+}
+
 
 #boton-flotante-cerrar-sesion:hover {
   background-color: #c82333;

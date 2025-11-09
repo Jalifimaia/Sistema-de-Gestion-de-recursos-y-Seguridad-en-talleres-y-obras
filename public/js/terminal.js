@@ -3630,13 +3630,55 @@ function asegurarYConectarBotonesFlotantes() {
 
 // --- Control de visibilidad: ocultar en step1 ---
 function actualizarVisibilidadBotonesPorStep(stepId) {
+
+  console.log('🔍 actualizando visibilidad para', stepId);
+  
   const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
   const btnMenu = document.getElementById('boton-flotante-menu-principal');
   if (!btnCerrar || !btnMenu) return;
-  const ocultar = (stepId === 'step1' || stepId === 1);
-  btnCerrar.style.display = ocultar ? 'none' : 'inline-block';
-  btnMenu.style.display = ocultar ? 'none' : 'inline-block';
-  console.log(ocultar ? '👀 Botones ocultos (step1)' : '👀 Botones visibles (no-step1)');
+
+  const step = String(stepId);
+
+  if (step === 'step1' || stepId === '1') {
+    // 🔒 Ocultar completamente en login
+    btnCerrar.style.display = 'none';
+    btnMenu.style.display = 'none';
+    btnCerrar.disabled = true;
+    btnMenu.disabled = true;
+    btnCerrar.setAttribute('aria-disabled', 'true');
+    btnMenu.setAttribute('aria-disabled', 'true');
+    btnCerrar.style.pointerEvents = 'none';
+    btnMenu.style.pointerEvents = 'none';
+    btnCerrar.style.opacity = '0.5';
+    btnMenu.style.opacity = '0.5';
+    console.log('👀 Botones ocultos (step1)');
+  } else if (step === 'step2' || step === '2') {
+    // 🟡 Mostrar pero deshabilitado en menú principal
+    btnCerrar.style.display = 'inline-block';
+    btnMenu.style.display = 'inline-block';
+    btnCerrar.disabled = false;
+    btnMenu.disabled = true;
+    btnCerrar.removeAttribute('aria-disabled');
+    btnMenu.setAttribute('aria-disabled', 'true');
+    btnCerrar.style.pointerEvents = 'auto';
+    btnMenu.style.pointerEvents = 'none';
+    btnCerrar.style.opacity = '1';
+    btnMenu.style.opacity = '0.5';
+    console.log('👀 Botón menú deshabilitado (step2)');
+  } else {
+    // ✅ Activos en los demás steps
+    btnCerrar.style.display = 'inline-block';
+    btnMenu.style.display = 'inline-block';
+    btnCerrar.disabled = false;
+    btnMenu.disabled = false;
+    btnCerrar.removeAttribute('aria-disabled');
+    btnMenu.removeAttribute('aria-disabled');
+    btnCerrar.style.pointerEvents = 'auto';
+    btnMenu.style.pointerEvents = 'auto';
+    btnCerrar.style.opacity = '1';
+    btnMenu.style.opacity = '1';
+    console.log('👀 Botones visibles y activos');
+  }
 }
 
 // --- DOMContentLoaded actualizado: inicia QR devolucion, crea botones y wrap nextStep ---

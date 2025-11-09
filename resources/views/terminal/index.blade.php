@@ -352,13 +352,13 @@
 </div>
 
 <!-- Botón fijo inferior izquierda (Menu principal) -->
-<button id="boton-flotante-menu-principal" type="button" title="Menu principal" aria-label="Menu principal" class="d-flex align-items-center gap-2">
+<button id="boton-flotante-menu-principal" type="button" title="Menu principal" aria-label="Menu principal" class="align-items-center gap-2" style="display: none">
   <img src="{{ asset('images/menu.svg') }}" alt="Menú" class="icono-opcion">
   <span>Menu principal</span>
 </button>
 
 <!-- Botón fijo inferior derecha (Cerrar sesión) -->
-<button id="boton-flotante-cerrar-sesion" type="button" title="Cerrar sesión" aria-label="Cerrar sesión" class="d-flex align-items-center gap-2">
+<button id="boton-flotante-cerrar-sesion" type="button" title="Cerrar sesión" aria-label="Cerrar sesión" class="align-items-center gap-2">
   <img src="{{ asset('images/out.svg') }}" alt="Cerrar sesión" class="icono-opcion">
   <span>Cerrar sesión</span>
 </button>
