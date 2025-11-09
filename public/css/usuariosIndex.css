@@ -1,0 +1,130 @@
+/* 🔷 Cards resumen con movimiento */
+.card-resumen {
+  border-left: 4px solid #c45912;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.card-resumen:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 🔷 Íconos SVG en cards */
+.icono-resumen {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+  margin: 0 auto;
+  display: block;
+}
+
+/* 🔷 Cards resumen más chicas y compactas */
+.card-resumen .card-body {
+  padding: 0.5rem 0.75rem;
+  min-height: auto;
+}
+
+.card-resumen h6.card-title {
+  font-size: 1.55rem;
+  margin-bottom: 0.2rem;
+}
+
+.card-resumen h3,
+.card-resumen p.card-text {
+  font-size: 1.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.card-resumen small {
+  font-size: 1.2rem;
+}
+
+/* 🔷 Card general: achicada y con movimiento */
+.card-resumen {
+  height: auto !important;
+  min-height: 100px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-resumen:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 🔷 Íconos en títulos de cards resumen */
+.icono-card-titulo {
+  height: 30px;
+  width: 30px;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+/* 🔷 Card especial para "Crear usuario" */
+.card-crear {
+  background-color: #d8ad37; /* azul claro */
+  color: #f1f1f1;
+}
+
+.card-crear:hover {
+  background-color: #d8ad37;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 🔷 Asegurar que el ícono se vea */
+.icono-card-titulo {
+  height: 30px;
+  width: 30px;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.card.card-crear {
+  background-color: #d8ad37 !important; /* azul claro */
+  border-left: 4px solid #c45912;
+  color: #1d1d1d;
+}
+
+.card.card-crear:hover {
+  background-color: #d8ad37 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card.card-crear h6.card-title,
+.card.card-crear h6.card-title * {
+  color: inherit !important;
+  transition: none !important;
+}
+
+/* 🔶 Estilo de filtro y búsqueda */
+.buscador-destacado,
+.filtro-destacado {
+  border: 2px solid #d06842;
+  border-radius: 6px;
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+
+.buscador-destacado:focus,
+.filtro-destacado:focus {
+  border-color: #ef6c00;
+  outline: none;
+}
+
+.filtrar-por {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.filtro-destacado {
+  border: 2px solid #d06842;
+  border-radius: 6px;
+  padding-right: 2rem; /* 🔧 espacio extra para la flechita */
+  min-width: 160px;     /* 🔧 ancho mínimo para evitar recortes */
+}
+
+
+

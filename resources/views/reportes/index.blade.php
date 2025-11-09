@@ -5,102 +5,102 @@
 @section('content')
 <div class="container py-4">
   
-  <div class="row mb-2">
-    <div class="col-md-14 text-md-end fecha-destacada">
-      <span class="etiqueta-fecha">Fecha:</span>
-      <strong id="today" class="valor-fecha text-nowrap"></strong>
-    </div>
+  <!-- 🔶 Encabezado -->
+<header class="row mb-4 align-items-center">
+  <div class="col-md-8">
+    <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+      <img src="{{ asset('images/estadistica.svg') }}" alt="Icono Estadísticas" style="height: 35px;">
+      Panel de Reportes
+    </h1>
+    <p class="text-muted">Visualización de movimientos, asignaciones e incidentes registrados en el sistema</p>
   </div>
 
-  <div class="row mb-4">
-    <div class="col-12">
-      <h1 class="text-center text-orange">📊 Panel de Reportes</h1>
-    </div>
+  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
+    <strong id="today" class="valor-fecha text-nowrap"></strong>
   </div>
+</header>
+
+
 
   <div class="row g-4">
-    <!-- Tarjeta: Préstamos registrados -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
-        <div class="card-body d-flex flex-column">
-          <div class="mb-3">
-            <h5 class="card-title"><i class="bi bi-clock-history card-icon"></i> Préstamos registrados</h5>
-            <p class="card-text">Visualizá los movimientos registrados en el sistema.</p>
-          </div>
-          <a href="{{ route('reportes.prestamos') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
-        </div>
+  <!-- Tarjeta: Préstamos registrados -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm h-100 d-flex flex-column justify-content-between">
+      <div class="card-header text-center bg-white border-0 pb-0">
+        <img src="{{ asset('images/prestamos.svg') }}" alt="Préstamos" class="banner-card-img">
+      </div>
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title fw-bold text-center mt-2">Préstamos registrados</h5>
+        <p class="card-text text-center">Visualizá los movimientos registrados en el sistema.</p>
+        <a href="{{ route('reportes.prestamos') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
       </div>
     </div>
-
-    <!-- Tarjeta: Recursos más prestados -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
-        <div class="card-body d-flex flex-column">
-          <div class="mb-3">
-            <h5 class="card-title"><i class="bi bi-bar-chart-line card-icon"></i> Recursos más prestados</h5>
-            <p class="card-text">Ranking de recursos por cantidad de préstamos registrados en el sistema.</p>
-          </div>
-          <a href="{{ route('reportes.masPrestados') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tarjeta: Recursos en reparación -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
-        <div class="card-body d-flex flex-column">
-          <div class="mb-3">
-            <h5 class="card-title"><i class="bi bi-wrench-adjustable-circle card-icon"></i> Recursos en reparación</h5>
-            <p class="card-text">Listado de recursos que están actualmente en estado de reparación.</p>
-          </div>
-          <a href="{{ route('reportes.enReparacion') }}" class="btn btn-outline-danger btn-sm mt-auto w-100">Ver reporte</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tarjeta: Herramientas por trabajador -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
-        <div class="card-body d-flex flex-column">
-          <div class="mb-3">
-            <h5 class="card-title"><i class="bi bi-person-badge card-icon"></i> Herramientas por trabajador</h5>
-            <p class="card-text">Asignaciones de herramientas por usuario para trazabilidad y control.</p>
-          </div>
-          <a href="{{ route('reportes.herramientasPorTrabajador') }}" class="btn btn-outline-secondary btn-sm mt-auto w-100">Ver reporte</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tarjeta: Incidentes por tipo de recurso -->
-    <div class="col-md-6 col-lg-4">
-      <div class="card shadow-sm h-100 d-flex flex-column justify-content-between" style="border-left: 4px solid #f57c00;">
-        <div class="card-body d-flex flex-column">
-          <div class="mb-3">
-            <h5 class="card-title"><i class="bi bi-exclamation-triangle card-icon"></i> Incidentes por tipo de recurso</h5>
-            <p class="card-text">Análisis de incidentes agrupados por categoría de recurso.</p>
-          </div>
-          <a href="{{ route('reportes.incidentesPorTipo') }}" class="btn btn-outline-warning btn-sm mt-auto w-100">Ver reporte</a>
-        </div>
-      </div>
-    </div>
-
   </div>
+
+  <!-- Tarjeta: Recursos más prestados -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm h-100 d-flex flex-column justify-content-between">
+      <div class="card-header text-center bg-white border-0 pb-0">
+        <img src="{{ asset('images/prestados.svg') }}" alt="Más prestados" class="banner-card-img">
+      </div>
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title fw-bold text-center mt-2">Recursos más prestados</h5>
+        <p class="card-text text-center">Ranking de recursos por cantidad de préstamos registrados en el sistema.</p>
+        <a href="{{ route('reportes.masPrestados') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarjeta: Recursos en reparación -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm h-100 d-flex flex-column justify-content-between">
+      <div class="card-header text-center bg-white border-0 pb-0">
+        <img src="{{ asset('images/reparacion.svg') }}" alt="Reparación" class="banner-card-img">
+      </div>
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title fw-bold text-center mt-2">Recursos en reparación</h5>
+        <p class="card-text text-center">Listado de recursos que están actualmente en estado de reparación.</p>
+        <a href="{{ route('reportes.enReparacion') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarjeta: Herramientas por trabajador -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm h-100 d-flex flex-column justify-content-between">
+      <div class="card-header text-center bg-white border-0 pb-0">
+        <img src="{{ asset('images/herram.svg') }}" alt="Herramientas" class="banner-card-img">
+      </div>
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title fw-bold text-center mt-2">Herramientas por trabajador</h5>
+        <p class="card-text text-center">Asignaciones de herramientas por usuario para trazabilidad y control.</p>
+        <a href="{{ route('reportes.herramientasPorTrabajador') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tarjeta: Incidentes por tipo de recurso -->
+  <div class="col-md-6 col-lg-4">
+    <div class="card card-report shadow-sm h-100 d-flex flex-column justify-content-between">
+      <div class="card-header text-center bg-white border-0 pb-0">
+        <img src="{{ asset('images/incidentes.svg') }}" alt="Incidentes" class="banner-card-img">
+      </div>
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title fw-bold text-center mt-2">Incidentes por tipo de recurso</h5>
+        <p class="card-text text-center">Análisis de incidentes agrupados por categoría de recurso.</p>
+        <a href="{{ route('reportes.incidentesPorTipo') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </div>
 @endsection
 
-@section('styles')
-<style>
-  .card-icon {
-    font-size: 1.8rem;
-    margin-right: 0.5rem;
-    color: #f57c00;
-  }
-
-  .text-orange {
-    color: #f57c00;
-  }
-</style>
-@endsection
+@push('styles')
+<link href="{{ asset('css/reportes.css') }}" rel="stylesheet">
+@endpush
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -108,6 +108,10 @@
     const dia = String(today.getDate()).padStart(2, '0');
     const mes = String(today.getMonth() + 1).padStart(2, '0');
     const año = today.getFullYear();
-    document.getElementById('today').textContent = `${dia}/${mes}/${año}`;
+    const hora = String(today.getHours()).padStart(2, '0');
+    const minutos = String(today.getMinutes()).padStart(2, '0');
+
+    document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
   });
 </script>
+

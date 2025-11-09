@@ -28,7 +28,7 @@
       <p class="text-muted">Control de herramientas y equipos de protección personal</p>
     </div>
 
-    <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end"">
+    <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
       <!--<span class="etiqueta-fecha me-2">Fecha:</span> -->
       <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
     </div>
