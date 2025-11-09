@@ -716,11 +716,12 @@ input.form-control:focus {
 /*MICROFONO*/
 /*Boton del microfono*/
 .mic-float-latido {
+  
    pointer-events: none;
   position: fixed;
   top: 24px;           /* antes: bottom: 24px */
   left: 24px;
-  z-index: 1000;
+  z-index: 9000;
   background-color: #fff;
   border: 1px solid #fd7e14;
   border-radius: 50%;
