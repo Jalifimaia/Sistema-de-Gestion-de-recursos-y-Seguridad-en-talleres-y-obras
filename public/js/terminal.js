@@ -369,14 +369,13 @@ function mostrarModalKiosco(mensaje, tipo = 'danger') {
 }
 
 
-function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
+async function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
   const modalEl = document.getElementById('modal-mensaje-kiosco');
   const body = document.getElementById('modalMensajeKioscoBody');
   const cerrarBtn = document.getElementById('btnCerrarMensajeKiosco');
 
-  // Si los emojis están desactivados, eliminarlos del mensaje
   if (window.mostrarEmojisKiosco === false) {
-    mensaje = mensaje.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim(); // elimina emojis
+    mensaje = mensaje.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
   }
 
   body.textContent = mensaje;
@@ -388,13 +387,40 @@ function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
     console.warn('⚠️ No se pudo ajustar reconocimiento global:', e);
   }
 
+  // 🛑 Detener escaneo QR si estamos en step13
+  try {
+    const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
+    if (stepActivo === 'step13') {
+      console.log('📴 Deteniendo escaneo QR en step13 por apertura de modal');
+      await limpiarQRregistroRecursosStep13();
+    }
+  } catch (e) {
+    console.warn('⚠️ No se pudo detener escaneo QR en step13:', e);
+  }
+
   const modal = new bootstrap.Modal(modalEl);
-  cerrarBtn.onclick = cerrarModalKiosco;
+
+  // ✅ Reactivar escáner solo si el usuario cierra el modal manualmente
+  cerrarBtn.onclick = () => {
+    cerrarModalKiosco();
+    const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
+    if (stepActivo === 'step13') {
+      console.log('📷 Reactivando escaneo QR en step13 tras cierre manual');
+      setTimeout(() => activarEscaneoQRregistroRecursosStep13(), 300);
+    }
+  };
+
   document.querySelectorAll('.btn-cerrar-modal').forEach(btn => {
-    btn.onclick = cerrarModalKiosco;
+    btn.onclick = () => {
+      cerrarModalKiosco();
+      const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
+      if (stepActivo === 'step13') {
+        console.log('📷 Reactivando escaneo QR en step13 tras cierre manual');
+        setTimeout(() => activarEscaneoQRregistroRecursosStep13(), 300);
+      }
+    };
   });
 
-  // 🔒 Escuchar cierre por backdrop o Escape
   modalEl.addEventListener('hidden.bs.modal', () => {
     if (window.modalKioscoActivo) {
       console.log('🧹 Modal cerrado por backdrop o escape, ejecutando cleanup');
@@ -466,6 +492,18 @@ function cerrarModalKiosco() {
     backdropManualModalSinVoz.remove();
   }
 
+  //activar el step 13
+try {
+  const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
+  if (stepActivo === 'step13') {
+    console.log('📷 Reactivando escaneo QR en step13 tras cierre por voz');
+    setTimeout(() => activarEscaneoQRregistroRecursosStep13(), 300);
+  }
+} catch (e) {
+  console.warn('⚠️ No se pudo reactivar escaneo QR en step13 tras cierre por voz:', e);
+}
+
+
 }
 
 
@@ -476,7 +514,7 @@ function quitarEmojis(texto) {
 
 
 //otras cosas
-function nextStep(n) {
+async function nextStep(n) {
   try {
     // Limpieza defensiva: detener recog locales en steps antes de cambiar
     try {
@@ -519,6 +557,18 @@ function nextStep(n) {
       }
     }
 
+    // Limpieza específica si estamos saliendo del step13
+    try {
+      const stepActual = document.querySelector('.step.active')?.id || getStepActivo();
+      if (stepActual === 'step13') {
+        console.log('🧹 Saliendo de step13, limpiando escáner QR');
+        await limpiarQRregistroRecursosStep13?.();
+        lastQRStep13 = null;
+      }
+    } catch (e) {
+      console.warn('nextStep: limpieza de step13 falló', e);
+    }
+
     // Detener escaneo QR
     try {
       detenerEscaneoQRregistroRecursos?.();
@@ -543,15 +593,6 @@ function nextStep(n) {
     } else {
       console.warn('nextStep: step element not found:', 'step' + n);
     }
-
-    // Botón flotante de menú principal
- /*   const btnMenu = document.getElementById('boton-flotante-menu-principal');
-    if (btnMenu) {
-      const ocultar = n === 1;
-      btnMenu.disabled = ocultar;
-      btnMenu.style.pointerEvents = ocultar ? 'none' : 'auto';
-      btnMenu.style.opacity = ocultar ? '0.5' : '1';
-    }*/
 
     // Acciones específicas por step
     try { if (n === 2) cargarMenuPrincipal?.(); } catch (e) { console.warn('nextStep: cargarMenuPrincipal falló', e); }
@@ -1734,6 +1775,7 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 // === Paso 3: Escaneo QR para registrar recursos ===
+
 function activarEscaneoQRregistroRecursos() {
   const qrContainer = document.getElementById('qr-reader');
   const btnEscanear = document.getElementById('btn-escanear-qr');
@@ -1796,16 +1838,21 @@ async function registrarPorQRregistroRecursos(codigoQR) {
     if (data.success) {
       const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
       mostrarModalKioscoSinVoz(mensaje, 'success');
-      window.nextStep?.(2);
+      window.nextStep?.(3); // ← redirige al step3 después de éxito
     } else {
+      await limpiarQRregistroRecursosStep13();
       mostrarModalKioscoSinVoz(data.message || 'Error al registrar recurso por QR', 'danger');
     }
 
     return data;
   } catch (err) {
-    return manejarErrorFetch(err, 'Registro por QR');
+    manejarErrorFetch(err, 'Registro por QR');
+    await limpiarQRregistroRecursosStep13();
+    mostrarModalKioscoSinVoz('Error de red al registrar recurso por QR', 'danger');
+    return { success: false };
   }
 }
+
 
 
 
@@ -1858,6 +1905,83 @@ function limpiarQRregistroRecursos() {
     isScanning = false;
   }
 }
+
+
+// === Paso 13: 
+let lastQRStep13 = null;
+
+function activarEscaneoQRregistroRecursosStep13() {
+  const qrContainer = document.getElementById('qr-reader-step13');
+  const btnEscanear = document.getElementById('btn-escanear-qr-step13');
+  const btnCancelar = document.getElementById('btn-cancelar-qr-step13');
+  const textoCamara = document.getElementById('texto-camara-activa-step13');
+
+  if (!qrContainer || isScanning || scanner) {
+    console.warn('⚠️ Escáner ya activo o contenedor no disponible');
+    return;
+  }
+
+  qrContainer.innerHTML = '';
+  btnEscanear?.classList.add('d-none');
+  btnCancelar?.classList.remove('d-none');
+  textoCamara?.classList.remove('d-none');
+
+  scanner = new Html5Qrcode("qr-reader-step13");
+  isScanning = true;
+
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 400, height: 400 } },
+    qrCodeMessage => {
+      lastQRStep13 = qrCodeMessage;
+      console.log('QR detectado (step13):', qrCodeMessage);
+      limpiarQRregistroRecursosStep13().then(() => {
+        registrarPorQRregistroRecursos(qrCodeMessage);
+      });
+    },
+    errorMessage => {
+      manejarErrorEscaneoQR(errorMessage, 'registro');
+    }
+  ).catch(err => {
+    console.error('Error al iniciar escaneo (step13):', err);
+    mostrarModalKioscoSinVoz('No se pudo activar la cámara para escanear QR', 'danger');
+    limpiarQRregistroRecursosStep13();
+  });
+}
+
+function cancelarEscaneoQRregistroRecursosStep13() {
+  limpiarQRregistroRecursosStep13();
+}
+
+function limpiarQRregistroRecursosStep13() {
+  return new Promise(resolve => {
+    const qrContainer = document.getElementById('qr-reader-step13');
+    const btnEscanear = document.getElementById('btn-escanear-qr-step13');
+    const btnCancelar = document.getElementById('btn-cancelar-qr-step13');
+    const textoCamara = document.getElementById('texto-camara-activa-step13');
+
+    if (scanner && isScanning) {
+      scanner.stop().catch(() => {}).then(() => {
+        qrContainer.innerHTML = '';
+        btnCancelar?.classList.add('d-none');
+        btnEscanear?.classList.remove('d-none');
+        textoCamara?.classList.add('d-none');
+        isScanning = false;
+        scanner = null;
+        resolve();
+      });
+    } else {
+      qrContainer.innerHTML = '';
+      btnCancelar?.classList.add('d-none');
+      btnEscanear?.classList.remove('d-none');
+      textoCamara?.classList.add('d-none');
+      isScanning = false;
+      scanner = null;
+      resolve();
+    }
+  });
+}
+
 
 // === Paso 1: Escaneo QR para login o inicio de sesión === 
 function activarEscaneoQRLogin() {
@@ -4398,30 +4522,33 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
 
     // === Step3: Escaneo QR ===
     if (step === 'step3') {
-      if (matchOpcion(limpio, 1, "qr", "escanear")) {
-        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Escanear QR', 'success');
-        activarEscaneoQRregistroRecursos();
-        return;
-      }
+
       if (limpio.includes("cancelar")) {
-       // window.mostrarMensajeKiosco('🎤 Comando reconocido: Cancelar escaneo', 'success');
         cancelarEscaneoQRregistroRecursos();
         return;
       }
+
+      if (matchOpcion(limpio, 1, "escanear", "qr", "escanear qr", "registrar por qr")) {
+        nextStep(13);
+        activarEscaneoQRregistroRecursosStep13();
+        return;
+      }
+
       if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
-        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar manualmente', 'success');
         step5ReturnTarget = 3;
         detenerEscaneoQRregistroRecursos(5);
         return;
       }
+
       if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
-        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al menú principal', 'success');
         detenerEscaneoQRregistroRecursos(2);
         return;
       }
+
       console.log("⚠️ Step3: No se reconoció ningún comando válido");
       return;
     }
+
 
     // === Step5, Step6, Step7, Step8 handling (botones + paginación) ===
     // Delegamos a bloques ya implementados en tu código original
@@ -4556,6 +4683,18 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
       }
 
       console.log('⚠️ Step12: comando no reconocido', limpio);
+      return;
+    }
+
+    // === Step13: Registro por QR ===
+    if (step === 'step13') {
+      if (limpio.includes("cancelar") || esComandoVolver(limpio)) {
+        cancelarEscaneoQRregistroRecursosStep13();
+        nextStep(3);
+        return;
+      }
+
+      console.log("⚠️ Step13: No se reconoció ningún comando válido");
       return;
     }
 

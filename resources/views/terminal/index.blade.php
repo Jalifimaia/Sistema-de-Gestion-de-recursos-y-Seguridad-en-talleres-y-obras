@@ -83,47 +83,67 @@
     </div>
 
 
-<!-- Paso 3: Escaneo QR -->
-<div id="step3" class="step">
-  <h2 id="titulo-step3" class="mb-4 text-center">Escanear Recurso</h2>
-  <h5 id="texto-camara-activa" class="text-center mb-3 d-none d-flex justify-content-center align-items-center gap-2">
-    <img src="/images/camara.svg" alt="Cámara activa" class="icono-opcion">
-    <span>Cámara activa — escaneá el código QR</span>
-  </h5>
+    <!-- Paso 3: Escaneo QR -->
+    <div id="step3" class="step">
+      <h2 id="titulo-step3" class="mb-4 text-center">Escanear Recurso</h2>
+      <h5 id="texto-camara-activa" class="text-center mb-3 d-none d-flex justify-content-center align-items-center gap-2">
+        <img src="/images/camara.svg" alt="Cámara activa" class="icono-opcion">
+        <span>Cámara activa — escaneá el código QR</span>
+      </h5>
 
-  <div id="qr-reader" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
+      <div id="qr-reader" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
 
-  <div class="text-center mt-3">
-    <button id="btn-escanear-qr" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="activarEscaneoQRregistroRecursos()">
-      <span class="badge-opcion">Opción 1</span>
-      <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
-        <img src="{{ asset('images/qr2.svg') }}" alt="QR" class="icono-opcion">
-        <span>Escanear QR</span>
-      </span>
-    </button>
+      <div class="text-center mt-3">
+                <button id="btn-escanear-qr" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100"
+  onclick="nextStep(13); activarEscaneoQRregistroRecursosStep13()">
 
-    <button id="btn-cancelar-qr" class="btn btn-outline-danger btn-lg d-none m-2 w-100 texto-cancelar" onclick="cancelarEscaneoQRregistroRecursos()">
-      Cancelar escaneo
-    </button>
-  </div>
+          <span class="badge-opcion">Opción 1</span>
+          <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
+            <img src="{{ asset('images/qr2.svg') }}" alt="QR" class="icono-opcion">
+            <span>Escanear QR</span>
+          </span>
+        </button>
 
-  <div class="text-center">
-    <button id="herramienta-en-mano-solicitar" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(5)">
-      <span class="badge-opcion">Opción 2</span>
-      <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
-        <img src="{{ asset('images/hand2.svg') }}" alt="Mano" class="icono-opcion">
-        <span>Solicitar manualmente</span>
-      </span>
-    </button>
 
-    <div class="text-start">
-      <button class="btn btn-primary btn-lg mt-3 d-flex align-items-center gap-2 texto-volver" onclick="detenerEscaneoQRregistroRecursos(2)">
-        <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
-        <span>Volver</span>
-      </button>
+
+   
+      </div>
+
+      <div class="text-center">
+        <button id="herramienta-en-mano-solicitar" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(5)">
+          <span class="badge-opcion">Opción 2</span>
+          <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
+            <img src="{{ asset('images/hand2.svg') }}" alt="Mano" class="icono-opcion">
+            <span>Solicitar manualmente</span>
+          </span>
+        </button>
+
+        <div class="text-start">
+          <button class="btn btn-primary btn-lg mt-3 d-flex align-items-center gap-2 texto-volver" onclick="detenerEscaneoQRregistroRecursos(2)">
+            <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
+            <span>Volver</span>
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+
+    <!-- Paso 13: Registro por QR -->
+    <div id="step13" class="step d-none">
+      <h2 class="mb-4 text-center">Registro por QR</h2>
+
+      <div id="qr-reader-step13" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
+
+      <div class="text-center mt-3">
+
+       <button id="btn-cancelar-qr-step13" class="btn btn-outline-danger btn-lg texto-cancelar d-none mt-2"
+          onclick="cancelarEscaneoQRregistroRecursosStep13(); nextStep(3)">
+          Cancelar escaneo
+        </button>
+
+      </div>
+
+     
+    </div>
 
 
 
