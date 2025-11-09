@@ -14,7 +14,7 @@ const mostrarMic = false; // mostrar microfono flotante
 window._qrValidadoParaDevolucion = false;
 const cantidadRecursosPorPagina = 3;
 
-const micButton = document.getElementById('micStatusButton');
+const micButton = document.getElementById('micStatusButton_debug');
 if (micButton) {
   micButton.style.display = mostrarMic ? 'inline-block' : 'none';
 }
@@ -152,8 +152,8 @@ function safeStartRecognitionGlobal() {
 }
 */
 function actualizarEstadoMicrofono(activo = true) {
-  const icon = document.getElementById('micStatusIcon');
-  const text = document.getElementById('micStatusText');
+  const icon = document.getElementById('micStatusIcon_debug');
+  const text = document.getElementById('micStatusText_debug');
   if (!icon || !text) return;
 
   if (activo) {

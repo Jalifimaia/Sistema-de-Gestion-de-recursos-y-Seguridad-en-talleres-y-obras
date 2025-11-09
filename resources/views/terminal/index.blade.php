@@ -5,6 +5,7 @@
   <title>Gestión de Herramientas y EPP</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{{ asset('css/terminal.css') }}">
 </head>
 <body>
@@ -343,9 +344,17 @@
 
 
 
+  <!--Microfono flotante-->
+  <button id="microfono_flotante" class="mic-float-latido" title="Dictar por voz">
+    <i class="fa-solid fa-microphone"></i>
+  </button>
 
-<!-- Microfono flotante -->
-<div id="micStatusButton" style="
+  <span class="mic-label">¡Podés dictar tu DNI!</span>
+
+
+
+<!-- Microfono flotante  (indicador de microfono activo, debug)-->
+<div id="micStatusButton_debug" style="
   position: fixed;
   bottom: 16px;
   left: 16px;
@@ -361,8 +370,8 @@
   pointer-events: none;
   display:none;
 ">
-  <span id="micStatusIcon">🎤</span>
-  <span id="micStatusText" class="badge text-bg-success">Micrófono activo</span>
+  <span id="micStatusIcon_debug">🎤</span>
+  <span id="micStatusText_debug" class="badge text-bg-success">Micrófono activo</span>
 </div>
 
 <!-- Botón fijo inferior izquierda (Menu principal) -->
@@ -383,6 +392,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="{{ asset('js/terminal.js') }}"></script>
+  <script src="{{ asset('js/terminal_microfono.js') }}"></script>
 
 
 </body>

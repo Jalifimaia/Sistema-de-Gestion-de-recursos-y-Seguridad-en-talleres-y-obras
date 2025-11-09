@@ -150,7 +150,7 @@ button.btn-danger:hover {
 }
 
 /* Micrófono flotante con verde suave */
-#micStatusButton {
+#micStatusButton_debug {
   font-size: 18px;
   background-color: #e9f7ef;
   color: #27ae60;
@@ -711,4 +711,68 @@ input.form-control:focus {
   background-color: #fdb748 !important;
   border-color: #e67e22;
   box-shadow: 0 6px 12px rgba(243, 156, 18, 0.25);
+}
+
+/*MICROFONO*/
+/*Boton del microfono*/
+.mic-float-latido {
+   pointer-events: none;
+  position: fixed;
+  top: 24px;           /* antes: bottom: 24px */
+  left: 24px;
+  z-index: 1000;
+  background-color: #fff;
+  border: 1px solid #fd7e14;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  font-size: 20px;
+  color: #fd7e14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition:
+    background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*Icono del microfono*/
+.mic-float-latido i {
+  font-size: 28px; /* antes: 20px */
+}
+
+
+.mic-float-latido.pulsing{
+  animation: pulse-smooth 1.6s ease-in-out infinite;
+  background-color: #fd7e14;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes pulse-smooth {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.1); }
+  60%  { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+/*Texto del microfono*/
+.mic-label {
+  position: fixed;
+  top: 88px; /* 24px (top del botón) + 56px (alto del botón) + 8px de margen */
+  left: 24px;
+  width: 120px;
+  text-align: center;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #495057;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  z-index: 999;
+  display: none;
 }
