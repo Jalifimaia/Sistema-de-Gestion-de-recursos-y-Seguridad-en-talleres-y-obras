@@ -426,6 +426,18 @@ function cerrarModalKiosco() {
     console.warn('⚠️ No se pudo reiniciar reconocimiento global:', e);
   }
 
+// ✅ Si estamos en step12, reactivar escaneo QR login
+try {
+  const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
+  if (stepActivo === 'step12') {
+    console.log('📷 Reactivando escaneo QR login tras cerrar modal');
+    activarEscaneoQRLogin();
+  }
+} catch (e) {
+  console.warn('⚠️ No se pudo reactivar escaneo QR login tras cerrar modal:', e);
+}
+
+
   // Ocultar backdrop manual si lo usás
   const backdropManual = document.getElementById('backdrop-manual-kiosco');
   if (backdropManual) backdropManual.style.display = 'none';
@@ -508,6 +520,7 @@ function nextStep(n) {
     // Activar el step deseado
     const stepEl = document.getElementById('step' + n);
     if (stepEl) {
+      actualizarVisibilidadBotonesPorStep('step' + n);
       stepEl.classList.remove('d-none');
       stepEl.classList.add('active');
     } else {
@@ -515,13 +528,13 @@ function nextStep(n) {
     }
 
     // Botón flotante de menú principal
-    const btnMenu = document.getElementById('boton-flotante-menu-principal');
+ /*   const btnMenu = document.getElementById('boton-flotante-menu-principal');
     if (btnMenu) {
       const ocultar = n === 1;
       btnMenu.disabled = ocultar;
       btnMenu.style.pointerEvents = ocultar ? 'none' : 'auto';
       btnMenu.style.opacity = ocultar ? '0.5' : '1';
-    }
+    }*/
 
     // Acciones específicas por step
     try { if (n === 2) cargarMenuPrincipal?.(); } catch (e) { console.warn('nextStep: cargarMenuPrincipal falló', e); }
@@ -1857,14 +1870,12 @@ function limpiarQRregistroRecursos() {
 // === Paso 1: Escaneo QR para login o inicio de sesión === 
 function activarEscaneoQRLogin() {
   const qrContainer = document.getElementById('qr-login-reader');
-  const wrapper = document.getElementById('qr-login-container');
 
-  if (!qrContainer || !wrapper || isScanning) {
-    console.error('❌ activarEscaneoQRLogin: contenedor o wrapper no disponible, o escaneo ya activo');
+  if (!qrContainer || isScanning) {
+    console.error('❌ activarEscaneoQRLogin: contenedor no disponible o escaneo ya activo');
     return;
   }
 
-  wrapper.style.display = 'block';
   qrContainer.innerHTML = '';
   scanner = new Html5Qrcode("qr-login-reader");
   isScanning = true;
@@ -1874,11 +1885,7 @@ function activarEscaneoQRLogin() {
     { fps: 10, qrbox: { width: 250, height: 250 } },
     qrCodeMessage => {
       console.log('QR de login detectado:', qrCodeMessage);
-
-      // 👉 detenemos el escaneo para liberar la cámara
       detenerEscaneoQRLogin();
-
-      // 👉 llamamos al método corregido que envía { codigo_qr: ... }
       identificarPorQRLogin(qrCodeMessage);
     },
     errorMessage => {
@@ -1893,21 +1900,19 @@ function activarEscaneoQRLogin() {
 
 function detenerEscaneoQRLogin() {
   const qrContainer = document.getElementById('qr-login-reader');
-  const wrapper = document.getElementById('qr-login-container');
 
   if (scanner && isScanning) {
     scanner.stop().catch(() => {}).then(() => {
       qrContainer.innerHTML = '';
-      wrapper.style.display = 'none';
-      console.log('📴 detenerEscaneoQRLogin: escaneo login detenido y UI oculta');
+      console.log('📴 detenerEscaneoQRLogin: escaneo login detenido');
       isScanning = false;
     });
   } else {
     qrContainer.innerHTML = '';
-    wrapper.style.display = 'none';
     isScanning = false;
   }
 }
+
 
 function identificarPorQRLogin(codigoQR) {
   const meta = document.querySelector('meta[name="csrf-token"]');
@@ -1950,6 +1955,29 @@ function identificarPorQRLogin(codigoQR) {
     window.mostrarModalKioscoSinVoz('Error de red al identificar por QR', 'danger');
   });
 }
+
+//step 12: abrir escaneo QR login
+window.abrirStepQRLogin = function () {
+  console.log('🟢 abrirStepQRLogin: llamado');
+
+  safeStopRecognitionGlobal?.();
+
+  // 👇 Ocultar botones antes de cambiar de step
+  actualizarVisibilidadBotonesPorStep('step12');
+
+  nextStep(12);
+  activarEscaneoQRLogin();
+};
+
+
+window.cancelarEscaneoQRLogin = function () {
+  console.log('🔴 cancelarEscaneoQRLogin: llamado');
+  detenerEscaneoQRLogin();
+  safeStartRecognitionGlobal?.();
+  nextStep(1);
+};
+
+
 
 // Función para botón Volver en step3
 function volverAInicio() {
@@ -2589,41 +2617,13 @@ document.addEventListener('DOMContentLoaded', () => {
       window.nextStep = function (n) {
         try { origNext(n); } catch (e) { console.warn('wrapped nextStep original falló', e); }
         // reaplicar estado con pequeño delay para evitar races
-        setTimeout(() => {
           try {
-            const btnMenu = document.getElementById('boton-flotante-menu-principal');
-            const btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
-            const activo = typeof n === 'number' ? 'step' + n : (document.querySelector('.step.active')?.id || getStepActivo());
-            const enStep1 = (activo === 'step1' || activo === '1');
+            const stepId = typeof n === 'number' ? 'step' + n : n;
+            actualizarVisibilidadBotonesPorStep(stepId);
+          } catch (e) {
+            console.warn('Reaplicación visibilidad falló', e);
+          }
 
-            if (btnMenu) {
-              if (enStep1) {
-                btnMenu.disabled = true;
-                btnMenu.setAttribute('aria-disabled', 'true');
-                btnMenu.style.pointerEvents = 'none';
-                btnMenu.style.opacity = '0.5';
-              } else {
-                btnMenu.disabled = false;
-                btnMenu.removeAttribute('aria-disabled');
-                btnMenu.style.pointerEvents = 'auto';
-                btnMenu.style.opacity = '1';
-              }
-            }
-            if (btnCerrar) {
-              if (enStep1) {
-                btnCerrar.disabled = true;
-                btnCerrar.setAttribute('aria-disabled', 'true');
-                btnCerrar.style.pointerEvents = 'none';
-                btnCerrar.style.opacity = '0.5';
-              } else {
-                btnCerrar.disabled = false;
-                btnCerrar.removeAttribute('aria-disabled');
-                btnCerrar.style.pointerEvents = 'auto';
-                btnCerrar.style.opacity = '1';
-              }
-            }
-          } catch (e) { console.warn('Reaplicacion estado botones falló', e); }
-        }, 40);
       };
       window._nextStepWrappedForMenuProtection = true;
     }
@@ -3551,7 +3551,7 @@ function asegurarYConectarBotonesFlotantes() {
     document.body.appendChild(wrapper);
   }
 
-  // boton Cerrar Sesion
+  // botón Cerrar Sesión
   let btnCerrar = document.getElementById('boton-flotante-cerrar-sesion');
   if (!btnCerrar) {
     btnCerrar = document.createElement('button');
@@ -3570,19 +3570,26 @@ function asegurarYConectarBotonesFlotantes() {
     btnCerrar.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)';
     btnCerrar.style.fontSize = '14px';
     btnCerrar.style.cursor = 'pointer';
-    btnCerrar.style.pointerEvents = 'auto';
     btnCerrar.textContent = 'Cerrar sesión';
     btnCerrar.setAttribute('aria-label', 'Cerrar sesión');
+
+    // 👇 Ocultar por defecto
+    btnCerrar.style.display = 'none';
+    btnCerrar.style.pointerEvents = 'none';
+    btnCerrar.style.opacity = '0.5';
+    btnCerrar.disabled = true;
+    btnCerrar.setAttribute('aria-disabled', 'true');
+
     wrapper.appendChild(btnCerrar);
   }
 
-  // boton Menu Principal
+  // botón Menú Principal
   let btnMenu = document.getElementById('boton-flotante-menu-principal');
   if (!btnMenu) {
     btnMenu = document.createElement('button');
     btnMenu.id = 'boton-flotante-menu-principal';
     btnMenu.type = 'button';
-    btnMenu.title = 'Menu principal';
+    btnMenu.title = 'Menú principal';
     btnMenu.style.position = 'fixed';
     btnMenu.style.bottom = '18px';
     btnMenu.style.left = '50%';
@@ -3596,9 +3603,16 @@ function asegurarYConectarBotonesFlotantes() {
     btnMenu.style.boxShadow = '0 4px 10px rgba(0,0,0,0.12)';
     btnMenu.style.fontSize = '15px';
     btnMenu.style.cursor = 'pointer';
-    btnMenu.style.pointerEvents = 'auto';
-    btnMenu.textContent = 'Menu principal';
-    btnMenu.setAttribute('aria-label', 'Menu principal');
+    btnMenu.textContent = 'Menú principal';
+    btnMenu.setAttribute('aria-label', 'Menú principal');
+
+    // 👇 Ocultar por defecto
+    btnMenu.style.display = 'none';
+    btnMenu.style.pointerEvents = 'none';
+    btnMenu.style.opacity = '0.5';
+    btnMenu.disabled = true;
+    btnMenu.setAttribute('aria-disabled', 'true');
+
     wrapper.appendChild(btnMenu);
   }
 
@@ -3613,20 +3627,21 @@ function asegurarYConectarBotonesFlotantes() {
 
   if (!btnMenu._listenerAttached) {
     btnMenu.addEventListener('click', () => {
-      console.log('📋 Menu principal: botón pulsado');
-      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ Menu principal: safeStop falló', e); }
+      console.log('📋 Menú principal: botón pulsado');
+      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('⚠️ Menú principal: safeStop falló', e); }
       try {
         window.nextStep && window.nextStep(2);
         try { cargarMenuPrincipal && cargarMenuPrincipal(); } catch (e) {}
         console.log('➡️ Navegando a step2 (¿Qué querés hacer?)');
-      } catch (e) { console.warn('⚠️ Menu principal: nextStep(2) falló', e); }
-      try { setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 recognitionGlobal: intento reinicio tras ir a menu principal'); }, 120); } catch(e){}
+      } catch (e) { console.warn('⚠️ Menú principal: nextStep(2) falló', e); }
+      try { setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 recognitionGlobal: intento reinicio tras ir a menú principal'); }, 120); } catch(e){}
     });
     btnMenu._listenerAttached = true;
   }
 
   return { btnCerrar, btnMenu };
 }
+
 
 // --- Control de visibilidad: ocultar en step1 ---
 function actualizarVisibilidadBotonesPorStep(stepId) {
@@ -3637,9 +3652,10 @@ function actualizarVisibilidadBotonesPorStep(stepId) {
   const btnMenu = document.getElementById('boton-flotante-menu-principal');
   if (!btnCerrar || !btnMenu) return;
 
-  const step = String(stepId);
+  const step = typeof stepId === 'number' ? 'step' + stepId : String(stepId);
 
-  if (step === 'step1' || stepId === '1') {
+
+  if (step === 'step1' || stepId === '1' || step === 'step12') {
     // 🔒 Ocultar completamente en login
     btnCerrar.style.display = 'none';
     btnMenu.style.display = 'none';

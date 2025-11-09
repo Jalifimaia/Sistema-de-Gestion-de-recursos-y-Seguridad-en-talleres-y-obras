@@ -40,19 +40,34 @@
           Borrar clave
         </button>
 
-        <button class="btn btn-primary btn-lg boton-qr-personalizado d-flex align-items-center gap-2 ms-auto" onclick="activarEscaneoQRLogin()">
+        <button class="btn btn-primary btn-lg boton-qr-personalizado d-flex align-items-center gap-2 ms-auto" onclick="abrirStepQRLogin()">
           <img src="images/qr.svg" alt="Ícono QR" class="icono-qr">
           <span>Iniciar sesión con QR</span>
         </button>
       </div>
-
-      <div id="qr-login-container" class="mt-3 text-center" style="display:none;">
-        <div id="qr-login-reader" style="width:300px; margin:auto;"></div>
-        <p class="text-muted small">Apuntá tu QR de identificación</p>
-      </div>
-
       
     </div>
+
+    <!-- Paso 12: Inicio de sesión con QR -->
+    <div id="step12" class="step d-none">
+      <h2 class="mb-4 text-center titulo-identificar">
+        <img src="images/qr.svg" alt="Ícono QR" class="icono-qr">
+        Inicio de sesión con QR
+      </h2>
+
+      <div id="qr-login-reader" style="width:300px; margin:auto;"></div>
+      <p class="text-muted text-center mt-3">Apuntá tu QR de identificación</p>
+
+      <div class="text-center mt-4">
+        <button class="btn btn-danger btn-lg d-flex align-items-center gap-2" onclick="cancelarEscaneoQRLogin()">
+          <img src="images/cruz.svg" alt="Cancelar" class="icono-cruz">
+          <span>Cancelar inicio de sesión con QR</span>
+        </button>
+      </div>
+    </div>
+
+
+
 
     
     <!-- Paso 2: Elegir acción -->
