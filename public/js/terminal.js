@@ -1495,6 +1495,8 @@ async function activarEscaneoDevolucionQR() {
     return;
   }
 
+  qrContainer.classList.remove('qr-inactivo');
+
   const idUsuario = localStorage.getItem('id_usuario');
   if (!idUsuario) {
     mostrarModalKioscoSinVoz('⚠️ Usuario no identificado', 'danger');
@@ -1534,6 +1536,16 @@ async function activarEscaneoDevolucionQR() {
         const res = await validarDevolucionQR(decodedText, idUsuario);
         console.log('📦 Respuesta de validación QR (handler):', res);
 
+        // 🛡️ Si hubo error de red, no mostrar modal de QR inválido
+        if (res.error) {
+          console.warn('⛔ Error de red detectado, se omite modal de QR inválido');
+          await detenerEscaneoQRDevolucionSegura();
+          safeStopRecognitionGlobal();
+          window._qrDevolucionProcesando = false;
+          return;
+        }
+
+
         if (!res.success || res.estado === 'qr_invalido') {
           await detenerEscaneoQRDevolucionSegura();
           safeStopRecognitionGlobal();
@@ -1566,7 +1578,6 @@ async function activarEscaneoDevolucionQR() {
 
           detalleIdActual = res.id_detalle;
           document.getElementById('qrFeedback').textContent = '';
-          //mostrarMensajeKiosco('✅ QR válido. Confirma la devolución en pantalla.', 'success');
 
           const modalEl = document.getElementById('modalConfirmarQR');
           if (!modalEl) return;
@@ -1619,14 +1630,13 @@ async function activarEscaneoDevolucionQR() {
         }
       },
       (errorMessage) => {
-  const msg = String(errorMessage || '');
-  if (msg.includes('No MultiFormat Readers')) {
-    console.debug('frame scan: no QR detected');
-    return;
-  }
-  manejarErrorEscaneoQR(errorMessage, 'devolucion');
-}
-
+        const msg = String(errorMessage || '');
+        if (msg.includes('No MultiFormat Readers')) {
+          console.debug('frame scan: no QR detected');
+          return;
+        }
+        manejarErrorEscaneoQR(errorMessage, 'devolucion');
+      }
     );
 
     console.log('📷 Escáner QR iniciado correctamente');
@@ -4847,8 +4857,20 @@ function manejarErrorFetch(err, contexto = 'Error de red') {
 
   console.error(`❌ ${contexto}:`, err);
   mostrarModalKioscoSinVoz(mensaje, 'danger');
+
+  // 🛠️ Reactivar escáner si estamos en step9
+  try {
+    const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
+    if (stepActivo === 'step9') {
+      setTimeout(() => activarEscaneoDevolucionQR(), 500);
+    }
+  } catch (e) {
+    console.warn('⚠️ No se pudo reactivar escáner tras error de red:', e);
+  }
+
   return { success: false, error: err };
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('🟢 Terminal cargada: iniciando ping de sesión');
