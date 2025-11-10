@@ -498,7 +498,6 @@ input.form-control:focus {
 .titulo-identificar {
   font-size: 30px;
   font-weight: 700;
-  color: #333;
   display: flex;
   justify-content: center;
   align-items: center;
