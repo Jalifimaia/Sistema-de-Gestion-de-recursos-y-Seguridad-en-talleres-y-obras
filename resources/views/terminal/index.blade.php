@@ -236,11 +236,11 @@
   <div class="d-flex justify-content-center mb-3">
     <button class="btn btn-primary me-2 d-flex align-items-center gap-2 active" id="tab-epp-step" type="button" aria-selected="true">
       <img src="/images/casco3.svg" alt="EPP" class="icono-opcion">
-      <span>Ver EPP</span>
+      <span>EPP</span>
     </button>
     <button class="btn btn-primary d-flex align-items-center gap-2" id="tab-herramientas-step" type="button" aria-selected="false">
       <img src="/images/tool.svg" alt="Herramientas" class="icono-opcion">
-      <span>Ver herramientas</span>
+      <span>Herramientas</span>
     </button>
   </div>
 
