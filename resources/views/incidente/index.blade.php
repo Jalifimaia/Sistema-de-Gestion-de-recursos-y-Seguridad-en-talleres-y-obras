@@ -4,24 +4,25 @@
 
 @section('content')
 <div class="container py-4">
-    <!-- Fecha arriba a la derecha -->
-    <div class="row mb-2">
-        <div class="col-md-14 text-md-end fecha-destacada">
-      <span class="etiqueta-fecha">Fecha:</span>
-      <strong id="today" class="valor-fecha text-nowrap"></strong>
-    </div>
+
+    <!-- 🔶 Encabezado con fecha y título -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+      <h1 class="text-orange fw-bold mb-0 d-flex align-items-center gap-2">
+        <img src="{{ asset('images/list1.svg') }}" alt="Ícono lista" width="30" height="30">
+        Incidentes registrados
+      </h1>
+      <div class="text-end fecha-destacada">
+        <span class="etiqueta-fecha">Fecha:</span>
+        <strong id="today" class="valor-fecha text-nowrap"></strong>
+      </div>
     </div>
 
-    <!-- Título -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="text-center text-orange">📋 Incidentes registrados</h1>
-        </div>
+    <div class="mb-3 text-start">
+      <a href="{{ route('incidente.create') }}" class="btn btn-registrar-incidente">
+        + Registrar nuevo incidente
+      </a>
     </div>
 
-    <div class="mb-3 text-center">
-        <a href="{{ route('incidente.create') }}" class="btn btn-orange">+ Registrar nuevo incidente</a>
-    </div>
 
     @if(session('success'))
         <div id="alertaEstado" class="alert alert-success alert-dismissible fade show" role="alert">
@@ -55,22 +56,23 @@
                               {{ $incidente->fecha_incidente
                                 ? \Carbon\Carbon::parse($incidente->fecha_incidente, config('app.timezone'))->format('d/m/Y H:i')
                                 : '-' }}
-
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalIncidente{{ $incidente->id }}">
-                                    Ver detalles
+                              <button class="btn btn-detalles" data-bs-toggle="modal" data-bs-target="#modalIncidente{{ $incidente->id }}">
+                                <img src="{{ asset('images/detalles.svg') }}" alt="Detalles" width="16" height="16" class="me-1">
+                                Ver detalles
+                              </button>
+
+                              @if($incidente->estadoIncidente?->nombre_estado === 'Resuelto')
+                                <button class="btn btn-bloqueado" data-bs-toggle="modal" data-bs-target="#modalBloqueado{{ $incidente->id }}">
+                                  <i class="bi bi-lock"></i>
                                 </button>
-                                @if($incidente->estadoIncidente?->nombre_estado === 'Resuelto')
-                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalBloqueado{{ $incidente->id }}">
-                                      <i class="bi bi-lock"></i>
-                                    </button>
-                                  @else
-                                    <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-sm btn-orange">
-                                      <i class="bi bi-pencil"></i>
-                                    </a>
-                                @endif
-                            </td>
+                              @else
+                                <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-editar">
+                                  <i class="bi bi-pencil me-1"></i> Editar
+                                </a>
+                              @endif
+                        </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -212,6 +214,19 @@
               }, { once: true });
           }, 5000);
       }
+
+      const today = new Date();
+    const dia = String(today.getDate()).padStart(2, '0');
+    const mes = String(today.getMonth() + 1).padStart(2, '0');
+    const año = today.getFullYear();
+    const hora = String(today.getHours()).padStart(2, '0');
+    const minutos = String(today.getMinutes()).padStart(2, '0');
+    document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
   });
   </script>
 @endpush
+
+@push('styles')
+<link href="{{ asset('css/incidentes.css') }}" rel="stylesheet">
+@endpush
+

@@ -19,6 +19,12 @@ class PrestamoController extends Controller
 {
 public function index(): View
 {
+    $search = request('search');
+    $estado = request('estado');
+    $creador = request('creador');
+    $fechaInicio = request('fecha_inicio');
+    $fechaFin = request('fecha_fin');
+
     $query = request('search');
 
     $base = DB::table('prestamo')
@@ -40,6 +46,29 @@ public function index(): View
             'estado_prestamo.nombre as estado'
         )
         ->whereIn('prestamo.estado', [1, 2, 3])
+
+        ->when($estado, function ($q) use ($estado) {
+            $q->where('estado_prestamo.nombre', $estado);
+        })
+        ->when($creador, function ($q) use ($creador) {
+            $q->where('creador.name', $creador);
+        })
+        ->when($fechaInicio, function ($q) use ($fechaInicio) {
+            $q->whereDate('prestamo.fecha_creacion', '>=', $fechaInicio);
+        })
+        ->when($fechaFin, function ($q) use ($fechaFin) {
+            $q->whereDate('prestamo.fecha_creacion', '<=', $fechaFin);
+        })
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('recurso.nombre', 'like', "%{$search}%")
+                    ->orWhere('serie_recurso.nro_serie', 'like', "%{$search}%")
+                    ->orWhere('trabajador.name', 'like', "%{$search}%")
+                    ->orWhere('creador.name', 'like', "%{$search}%");
+            });
+        })
+
+
         ->when($query, function ($q) use ($query) {
         $q->where(function ($sub) use ($query) {
             $sub->where('recurso.nombre', 'like', "%{$query}%")
@@ -49,8 +78,20 @@ public function index(): View
         });
     })
 
+        ->groupBy(
+            'prestamo.id',
+            'trabajador.name',
+            'creador.name',
+            'recurso.nombre',
+            'serie_recurso.nro_serie',
+            'prestamo.fecha_prestamo',
+            'prestamo.fecha_devolucion',
+            'prestamo.fecha_creacion',
+            'estado_prestamo.nombre'
+        )
 
-        ->orderByDesc('prestamo.id');
+
+        ->orderByDesc('prestamo.fecha_creacion');
 
     $prestamos = DB::table(DB::raw("({$base->toSql()}) as sub"))
         ->mergeBindings($base)

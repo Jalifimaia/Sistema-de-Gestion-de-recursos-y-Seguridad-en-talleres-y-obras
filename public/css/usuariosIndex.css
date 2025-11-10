@@ -126,5 +126,104 @@
   min-width: 160px;     /* 🔧 ancho mínimo para evitar recortes */
 }
 
+/* 🔷 Botón Ver (celeste) */
+.btn-ver {
+  background-color: #03a9f4;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+}
+
+.btn-ver:hover {
+  background-color: #0288d1;
+}
+
+/* 🟠 Botón Editar (naranja) */
+.btn-editar {
+  background-color: #f57c00;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+}
+
+.btn-editar:hover {
+  background-color: #ef6c00;
+}
+
+/* 🔴 Botón Dar de baja (rojo) */
+.btn-baja {
+  background-color: #d32f2f;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+}
+
+.btn-baja:hover {
+  background-color: #b71c1c;
+}
+
+/* 🔷 Botón Ver */
+.btn-ver {
+  background-color: #03a9f4;
+  color: #fff;
+  font-size: 0.9rem;         /* antes 0.85rem */
+  padding: 6px 14px;         /* antes 4px 12px */
+  border-radius: 4px;
+  border: none;
+}
+
+/* 🟠 Botón Editar */
+.btn-editar {
+  background-color: #f57c00;
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+}
+
+/* 🔴 Botón Dar de baja */
+.btn-baja {
+  background-color: #d32f2f;
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+}
+
+.seccion-usuarios {
+  margin-top: -25px;
+}
+
+/* 🔴 Botón Dar de baja (activo) */
+.btn-baja {
+  background-color: #d32f2f;
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+}
+
+/* 🔴 Botón Dar de baja (hover) */
+.btn-baja:hover:enabled {
+  background-color: #b71c1c;
+}
+
+/* 🔴 Botón Dar de baja (deshabilitado) */
+.btn-baja:disabled {
+  background-color: rgba(223, 111, 111, 0.452);
+  color: #1d1d1d;
+  border: 2px solid #611717;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 
