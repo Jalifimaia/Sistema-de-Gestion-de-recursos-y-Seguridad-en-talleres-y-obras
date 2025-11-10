@@ -116,7 +116,7 @@
                   <button type="button"
                     class="btn btn-sm btn-info btn-ver-series"
                     data-nombre="{{ $recurso->nombre }}"
-                    data-series='@json($recurso->serieRecursos)'
+                    data-series="{{ $recurso->serieRecursos->toJson() }}"
                     data-bs-toggle="modal"
                     data-bs-target="#modalSeries">
                     <i class="bi bi-eye"></i> Ver series
@@ -134,6 +134,12 @@
             @endforeach
           </tbody>
         </table>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div id="infoPaginacion" class="text-muted small"></div>
+          <ul id="paginacion" class="pagination mb-0"></ul>
+        </div>
+
       </div>
     </div>
   </div>
@@ -170,12 +176,19 @@
               <tr>
                 <th>Serie</th>
                 <th>Estado</th>
+                <th>Color</th>
               </tr>
             </thead>
             <tbody id="tablaSeriesBody">
               <!-- Se llena por JS -->
             </tbody>
           </table>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div id="infoPaginacionSeries" class="text-muted small"></div>
+            <ul id="paginacionSeries" class="pagination mb-0"></ul>
+          </div>
+
         </div>
       </div>
     </div>
@@ -185,6 +198,7 @@
 
 @push('scripts')
 <script src="{{ asset('js/filtroBusqueda.js') }}"></script>
+<script src="{{ asset('js/cargarSeriesRecurso.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const modalEl = document.getElementById('modalConfirmDelete');
@@ -235,10 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
     filtroSelect.dispatchEvent(new Event('change'));
   }
 
-
-  // ==========================
   // Buscador por nombre
-  // ==========================
   const buscador = document.getElementById('buscador');
   if (buscador) {
     buscador.addEventListener('input', function () {
@@ -252,58 +263,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ==========================
-  // Modal Ver Series
-  // ==========================
-  const modalTitle = document.getElementById('modalSeriesLabel');
-  const tablaBody = document.getElementById('tablaSeriesBody');
-  const buscadorSerie = document.getElementById('buscadorSerie');
-  const filtroEstado = document.getElementById('filtroEstado');
-
-  document.querySelectorAll('.btn-ver-series').forEach(btn => {
-    btn.addEventListener('click', function () {
-      const nombre = this.dataset.nombre;
-      const series = JSON.parse(this.dataset.series || '[]');
-
-      modalTitle.textContent = `Series del recurso: ${nombre}`;
-      tablaBody.innerHTML = '';
-      buscadorSerie.value = '';
-      filtroEstado.value = 'todos';
-
-      if (!series.length) {
-        tablaBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No hay series registradas</td></tr>';
-        return;
-      }
-
-      series.forEach(serie => {
-        const nroSerie = serie.nro_serie || (serie.codigo?.codigo_base ?? 'SIN-CODIGO') + '-' + String(serie.correlativo ?? '00').padStart(2, '0');
-        const estado = serie.estado?.nombre_estado || serie.nombre_estado || 'Sin estado';
-
-        const fila = document.createElement('tr');
-        fila.innerHTML = `<td>${nroSerie}</td><td>${estado}</td>`;
-        fila.dataset.serie = nroSerie.toLowerCase();
-        fila.dataset.estado = estado.toLowerCase();
-        tablaBody.appendChild(fila);
-      });
-    });
-  });
-
-  function aplicarFiltrosModal() {
-    const texto = buscadorSerie.value.toLowerCase();
-    const estadoSeleccionado = filtroEstado.value.toLowerCase();
-    const filas = tablaBody.querySelectorAll('tr');
-
-    filas.forEach(fila => {
-      const serie = fila.dataset.serie || '';
-      const estado = fila.dataset.estado || '';
-      const coincideSerie = serie.includes(texto);
-      const coincideEstado = (estadoSeleccionado === 'todos') || (estado === estadoSeleccionado);
-      fila.style.display = (coincideSerie && coincideEstado) ? '' : 'none';
-    });
-  }
-
-  buscadorSerie?.addEventListener('input', aplicarFiltrosModal);
-  filtroEstado?.addEventListener('change', aplicarFiltrosModal);
 });
 </script>
 @endpush
