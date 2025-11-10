@@ -152,9 +152,10 @@ button.btn-danger:hover {
 }
 
 /* Transiciones suaves */
+/*
 .step, .modal, .btn, input {
-  transition: all 0.3s ease-in-out;
-}
+  transition: all 1.3s ease-in-out;
+}*/
 
 input.form-control {
   border: 2px solid #f39c12; /* Borde naranja suave */
@@ -832,4 +833,59 @@ body.modal-open {
   height: 270px !important;
   margin: auto;
   position: relative;
+}
+
+/*animacion*/@keyframes subirSuave {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#step1,
+#step2,
+#step3,
+#step4,
+#step5,
+#step6,
+#step7,
+#step8,
+#step9,
+#step10,
+#step11,
+#step12,
+#step13,
+#mensaje-kiosco,
+#modal-mensaje-kiosco,
+.btn-resumen,
+#modalCerrarSesion,
+#modalConfirmarSerie {
+  animation: subirSuave 0.2s ease-out;
+}
+
+@keyframes bajarSuave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.modal.cerrando {
+  animation: bajarSuave 0.2s ease-out forwards;
+}
+
+.modal-backdrop {
+  transition: opacity 0.2s ease-out;
+}
+
+.modal.cerrando + .modal-backdrop {
+  opacity: 0;
 }
