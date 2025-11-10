@@ -4549,12 +4549,6 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
         return;
       }
 
-      if (matchOpcion(textoSimple, 4, "volver", "inicio", "regresar", "atrás", "cerrar")) {
-       // window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver al inicio', 'success');
-        volverAInicio();
-        return;
-      }
-
       // paginación por tab si corresponde (comandos "pagina EPP 2", etc.)
       const matchPaginaEPP = textoSimple.match(/^pagina\s*epp\s*(\d{1,2})$/i);
       const matchPaginaHerr = textoSimple.match(/^pagina\s*herramientas\s*(\d{1,2})$/i);
@@ -4711,7 +4705,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
         return;
       }
 
-      if (/\b(cancelar|cerrar|volver)\b/.test(limpio)) {
+      if (/\b(cancelar|cancelar escaneo)\b/.test(limpio)) {
         const modalError = document.getElementById('modalErrorQR');
         const modalConfirm = document.getElementById('modalConfirmarQR');
 
@@ -4744,7 +4738,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
 
     // === Step13: Registro por QR ===
     if (step === 'step13') {
-      if (limpio.includes("cancelar") || esComandoVolver(limpio)) {
+      if (limpio.includes("cancelar")) {
         cancelarEscaneoQRregistroRecursosStep13();
         nextStep(3);
         return;

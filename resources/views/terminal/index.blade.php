@@ -60,9 +60,8 @@
       <p class="text-muted text-center mt-3">Apuntá tu QR de identificación</p>
 
       <div class="text-center mt-4">
-        <button class="btn btn-danger btn-lg d-flex align-items-center gap-2" onclick="cancelarEscaneoQRLogin()">
-          <img src="images/cruz.svg" alt="Cancelar" class="icono-cruz">
-          <span>Cancelar inicio de sesión con QR</span>
+        <button class="btn btn-outline-danger btn-lg texto-cancelar mt-2" onclick="cancelarEscaneoQRLogin()">
+          <span>Cancelar escaneo</span>
         </button>
       </div>
     </div>
@@ -204,7 +203,7 @@
 
       <!-- Contenedor del escáner QR -->
       <div class="d-flex justify-content-center">
-        <div id="qr-reader-devolucion" style="width: 300px; height: 300px; margin: auto;"></div>
+        <div id="qr-reader-devolucion" style="width: 300px; height: 225px; margin: auto;"></div>
 
       </div>
 
@@ -221,9 +220,8 @@
 
       <!-- Botones de acción -->
       <div class="text-center mt-4">
-        <button id="btnVolverDevolucionQR" class="btn btn-primary ms-2 texto-volver d-flex align-items-center gap-2" onclick="volverARecursosAsignadosDesdeDevolucionQR()">
-          <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
-          <span>Volver</span>
+        <button class="btn btn-outline-danger btn-lg texto-cancelar mt-2" onclick="volverARecursosAsignadosDesdeDevolucionQR()">
+          <span>Cancelar escaneo</span>
         </button>
       </div>
     </div>
