@@ -134,3 +134,6 @@ input[type="date"]:focus {
 }
 
 
+p.small.text-muted {
+  display: none;
+}

@@ -5,20 +5,25 @@
 @section('content')
 <div class="container py-4">
   <div class="d-flex align-items-center mb-4">
-    <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary me-3">
-      ⬅️ Volver
+    <a href="{{ route('controlEPP') }}" class="btn btn-volver d-flex align-items-center me-3">
+      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+      Volver
     </a>
-    <h2 class="h4 fw-bold mb-0">Recursos Faltantes</h2>
+    <div class="d-flex align-items-center">
+      <img src="{{ asset('images/atencion.svg') }}" alt="Atención" style="width: 28px; height: 28px;" class="me-2">
+      <h4 class="fw-bold mb-0">Recursos Faltantes</h4>
+    </div>
+
   </div>
-  <p class="text-muted">Usuarios con rol de trabajador que no tienen todos los EPP obligatorios asignados según el checklist más reciente.</p>
+  <p class="text-muted">Trabajadores que no tienen todos los EPP obligatorios asignados según el checklist diario más reciente.</p>
 
   @if (count($faltantes))
     <div class="table-responsive">
-      <table class="table table-bordered align-middle">
-        <thead class="table-light">
+      <table class="table table-bordered table-striped align-middle">
+        <thead>
           <tr>
             <th>Nombre del trabajador</th>
-            <th>Faltantes de EPP</th>
+            <th>EPP faltantes</th>
           </tr>
         </thead>
         <tbody>
@@ -40,3 +45,7 @@
   @endif
 </div>
 @endsection
+
+@push('styles')
+  <link href="{{ asset('css/faltantes.css') }}" rel="stylesheet">
+@endpush
