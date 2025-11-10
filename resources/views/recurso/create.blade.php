@@ -4,10 +4,27 @@
 
 @section('content')
 <div class="container py-4">
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <h5 class="card-title fw-bold mb-1">Agregar Nuevo Recurso</h5>
-      <p></p>
+      <div class="d-flex align-items-center justify-content-start mb-4 gap-3 flex-wrap">
+        <a href="{{ route('inventario.index') }}" class="btn btn-volver d-flex align-items-center">
+          <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+          Volver
+        </a>
+
+        <div class="d-flex align-items-center">
+          <img src="{{ asset('images/herradd.svg') }}" alt="Herramienta" style="width: 40px; height: 40px;" class="me-2">
+          <h4 class="fw-bold mb-0">Agregar Nuevo Recurso</h4>
+        </div>
+      </div>
+
+      @if ($errors->any())
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
 
 
       <form id="recursoForm" method="POST" action="{{ route('recursos.store') }}">
@@ -16,10 +33,12 @@
         <!-- Categoría -->
         <div class="mb-3">
           <label for="categoria" class="form-label">Categoría</label>
-          <select id="categoria" class="form-select" required>
+          <select id="categoria" name="categoria" class="form-select" required>
             <option value="">Seleccione una categoría</option>
             @foreach($categorias as $categoria)
-              <option value="{{ $categoria->id }}">{{ $categoria->nombre_categoria }}</option>
+              <option value="{{ $categoria->id }}" {{ old('categoria') == $categoria->id ? 'selected' : '' }}>
+                {{ $categoria->nombre_categoria }}
+              </option>
             @endforeach
           </select>
         </div>
@@ -34,14 +53,14 @@
 
         <!-- Nueva Subcategoría -->
         <div class="input-group mt-2">
-          <input type="text" id="nuevaSubcategoria" class="form-control" placeholder="Nueva subcategoría">
+          <input type="text" id="nuevaSubcategoria" name="nueva_subcategoria" class="form-control" placeholder="Nueva subcategoría" value="{{ old('nueva_subcategoria') }}">
           <button type="button" class="btn btn-outline-success" id="agregarSubcategoria">Agregar</button>
         </div>
 
         <!-- Nombre -->
         <div class="mb-3">
           <label for="nombre" class="form-label">Nombre</label>
-          <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre del recurso" required>
+          <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre del recurso" value="{{ old('nombre') }}" required>
         </div>
 
         <!-- Descripción -->
@@ -53,7 +72,7 @@
         <!-- Costo unitario -->
         <div class="mb-3">
           <label for="costo_unitario" class="form-label">Costo Unitario</label>
-          <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" placeholder="Costo unitario" step="0.01" min="0" required>
+          <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" placeholder="Costo unitario" step="0.01" min="0" value="{{ old('costo_unitario') }}" required>
         </div>
 
         <div class="text-end">
@@ -61,8 +80,9 @@
           <button type="submit" class="btn btn-primary">Guardar Recurso</button>
         </div>
       </form>
-    </div>
-  </div>
+
+
+
 </div>
 
 <div class="modal fade" id="modalRecursoCreado" tabindex="-1" aria-labelledby="modalRecursoCreadoLabel" aria-hidden="true">
@@ -88,5 +108,9 @@
 
 @push('scripts')
   <script src="{{ asset('js/recurso.js') }}?v={{ time() }}"></script>
+@endpush
+
+@push('styles')
+  <link href="{{ asset('css/agregarRecurso.css') }}" rel="stylesheet">
 @endpush
 

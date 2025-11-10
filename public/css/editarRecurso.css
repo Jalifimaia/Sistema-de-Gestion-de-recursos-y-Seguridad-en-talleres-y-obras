@@ -1,0 +1,99 @@
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #fff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  transform: translateX(-2px);
+  color: #000;
+}
+
+.icono-volver {
+  width: 20px;
+  height: 20px;
+}
+
+.icono-precaucion {
+  width: 28px;
+  height: 28px;
+  animation: parpadeo 1s infinite alternate;
+}
+
+@keyframes parpadeo {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.4; transform: scale(1.1); }
+}
+
+label.form-label {
+  font-weight: 600;
+}
+
+input.form-control,
+select.form-select,
+textarea.form-control {
+  border: 2px solid #b14910;
+  box-shadow: none;
+}
+
+input.form-control:focus,
+select.form-select:focus,
+textarea.form-control:focus {
+  border-color: #b14910;
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
+}
+
+.btn-guardar {
+  background-color: #2e7d32;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-guardar:hover {
+  background-color: #1b5e20;
+}
+
+.btn-nuevo {
+  background-color: #1976d2;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-nuevo:hover {
+  background-color: #1565c0;
+}
+
+.btn-eliminar {
+  background-color: #c62828;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-eliminar:hover {
+  background-color: #b71c1c;
+}
+
+.botones-inferiores {
+  margin-top: 0.75rem !important; /* o 0.75rem, ajustá a gusto */
+  margin-bottom: 1rem;
+}
+
+

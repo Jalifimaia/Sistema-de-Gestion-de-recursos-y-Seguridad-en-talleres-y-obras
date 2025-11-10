@@ -1,0 +1,168 @@
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #fff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  transform: translateX(-2px);
+  color: #000;
+}
+
+.icono-volver {
+  width: 20px;
+  height: 20px;
+}
+
+label.form-label {
+  font-weight: 600;
+}
+
+input.form-control,
+select.form-select,
+textarea.form-control {
+  border: 2px solid #b14910;
+  box-shadow: none;
+}
+
+input.form-control:focus,
+select.form-select:focus,
+textarea.form-control:focus {
+  border-color: #b14910;
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
+}
+
+table.table {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+table.table thead {
+  background-color: #b14910 !important;
+  color: #fff !important;
+}
+
+
+table.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table.table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+select {
+  border: 2px solid #b14910;
+  box-shadow: none;
+}
+
+select:focus {
+  border-color: #b14910;
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
+}
+
+select,
+select.form-select {
+  border: 2px solid #b14910 !important;
+  box-shadow: none !important;
+}
+
+select:focus,
+select.form-select:focus {
+  border-color: #b14910 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25) !important;
+}
+
+table.table thead tr {
+  background-color: #b14910 !important;
+}
+
+table.table thead th {
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+table.table thead tr {
+  background-color: #b14910 !important;
+}
+
+table.table thead th {
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+select,
+select.form-select {
+  border: 2px solid #b14910 !important;
+  box-shadow: none !important;
+  border-radius: 4px;
+}
+
+select:focus,
+select.form-select:focus {
+  border-color: #b14910 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25) !important;
+}
+
+table.table thead tr {
+  background-color: #b14910 !important;
+}
+
+table.table thead th {
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+table.table thead th {
+  background-color: #b14910 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.btn-combinacion {
+  background-color: #1976d2;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-combinacion:hover {
+  background-color: #1565c0;
+}
+
+.btn-guardar {
+  background-color: #2e7d32;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-guardar:hover:enabled {
+  background-color: #1b5e20;
+}
+
+/* ✅ Estilo cuando está deshabilitado */
+.btn-guardar:disabled {
+  background-color: #a5d6a7;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+
