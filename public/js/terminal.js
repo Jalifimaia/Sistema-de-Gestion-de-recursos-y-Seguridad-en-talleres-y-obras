@@ -448,7 +448,7 @@ async function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
 
 
 
-function cerrarModalKiosco() {
+function cerrarModalKiosco(callback) {
   const modalEl = document.getElementById('modal-mensaje-kiosco');
   if (!modalEl) return;
 
@@ -506,6 +506,17 @@ function cerrarModalKiosco() {
   if (backdropModal) {
     backdropModal.classList.remove('show');
     backdropModal.remove();
+  }
+
+  // ✅ Ejecutar callback si se pasó o si hay una global pendiente
+  const cb = callback || window._callbackPostModalKiosco;
+  if (typeof cb === 'function') {
+    try {
+      cb();
+    } catch (e) {
+      console.warn('⚠️ Error en callback post-modal:', e);
+    }
+    window._callbackPostModalKiosco = null;
   }
 }
 
@@ -1355,16 +1366,43 @@ async function confirmarDevolucionQRActual() {
 
     if (data.success) {
       if (data.estado === 'ya_devuelto') return;
+
       const mensaje = `Recurso devuelto correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
-      mostrarModalKioscoSinVoz(mensaje, 'success');
       window._devolucionCompletada = true;
-      nextStep(2);
+
+      // ✅ Mostrar modal de éxito
+      mostrarModalKioscoSinVoz(mensaje, 'success');
+
+      // ✅ Guardar redirección como callback global
+      window._callbackPostModalKiosco = () => {
+        window.cargarRecursos().then(() => {
+          const recursos = (ultimoTabElegido === 'herramientas') ? window.recursosHerramientas : window.recursosEPP;
+          const totalPaginas = Math.ceil((recursos?.length || 0) / cantidadRecursosPorPagina);
+          let paginaFinal = Math.min(ultimaPaginaElegida || 1, totalPaginas);
+
+          while (paginaFinal > 1 && ((paginaFinal - 1) * cantidadRecursosPorPagina) >= recursos.length) {
+            paginaFinal--;
+          }
+
+          if (ultimoTabElegido === 'herramientas') {
+            window.paginaHerramientasActual = paginaFinal;
+          } else {
+            window.paginaEPPActual = paginaFinal;
+          }
+
+          abrirStepRecursos();
+        });
+      };
+
     } else {
       if (data.message) mostrarModalKioscoSinVoz(data.message, 'danger');
     }
   } catch (err) {
     manejarErrorFetch(err, 'Confirmar devolución QR');
   }
+
+detalleIdActual = null;
+
 }
 
 
@@ -1886,6 +1924,7 @@ async function registrarPorQRregistroRecursos(codigoQR) {
       const mensaje = `Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
       mostrarModalKioscoSinVoz(mensaje, 'success');
       window.nextStep?.(3); // ← redirige al step3 después de éxito
+      //////////
     } else {
       await limpiarQRregistroRecursosStep13();
       mostrarModalKioscoSinVoz(data.message || 'Error al registrar recurso por QR', 'danger');
@@ -2926,6 +2965,9 @@ function volverDesdeStep5() {
   window.nextStep(step5ReturnTarget);
 }
 
+let ultimoTabElegido = 'epp';
+let ultimaPaginaElegida = 1;
+
 // RECURSOS ASIGNADOS - STEP 10
 function abrirStepRecursos() {
   const stepId = 'step10';
@@ -2995,10 +3037,29 @@ function abrirStepRecursos() {
     const panelEPP = document.getElementById('panel-epp-step');
     const panelHerr = document.getElementById('panel-herramientas-step');
 
-    if (tabEPP) { tabEPP.classList.add('active'); tabEPP.setAttribute('aria-selected', 'true'); }
+   /* if (tabEPP) { tabEPP.classList.add('active'); tabEPP.setAttribute('aria-selected', 'true'); }
     if (tabHerr) { tabHerr.classList.remove('active'); tabHerr.setAttribute('aria-selected', 'false'); }
     if (panelEPP) { panelEPP.classList.add('show', 'active'); }
     if (panelHerr) { panelHerr.classList.remove('show', 'active'); }
+*/
+const tab = ultimoTabElegido === 'herramientas' ? 'herramientas' : 'epp';
+
+if (tab === 'herramientas') {
+  tabHerr?.classList.add('active');
+  tabHerr?.setAttribute('aria-selected', 'true');
+  tabEPP?.classList.remove('active');
+  tabEPP?.setAttribute('aria-selected', 'false');
+  panelHerr?.classList.add('show', 'active');
+  panelEPP?.classList.remove('show', 'active');
+} else {
+  tabEPP?.classList.add('active');
+  tabEPP?.setAttribute('aria-selected', 'true');
+  tabHerr?.classList.remove('active');
+  tabHerr?.setAttribute('aria-selected', 'false');
+  panelEPP?.classList.add('show', 'active');
+  panelHerr?.classList.remove('show', 'active');
+}
+
 
     if (window.recursosEPP) {
       renderRecursosAsignados(window.recursosEPP, window.paginaEPPActual || 1, 'recursos-asignados-epp', 'paginadorEPP-step');
@@ -3032,8 +3093,11 @@ function abrirStepRecursos() {
         tabEPPBtn.classList.add('active'); tabEPPBtn.setAttribute('aria-selected', 'true');
         tabHerrBtn.classList.remove('active'); tabHerrBtn.setAttribute('aria-selected', 'false');
         safeStartRecognitionGlobal();
+        ultimoTabElegido = 'epp';
+
       });
       tabEPPBtn._connected = true;
+      
     }
     if (tabHerrBtn && !tabHerrBtn._connected) {
       tabHerrBtn.addEventListener('click', () => {
@@ -3042,6 +3106,7 @@ function abrirStepRecursos() {
         tabHerrBtn.classList.add('active'); tabHerrBtn.setAttribute('aria-selected', 'true');
         tabEPPBtn.classList.remove('active'); tabEPPBtn.setAttribute('aria-selected', 'false');
         safeStartRecognitionGlobal();
+          ultimoTabElegido = 'herramientas';
       });
       tabHerrBtn._connected = true;
     }
@@ -3049,6 +3114,7 @@ function abrirStepRecursos() {
 
   stepEl._opening = false;
 }
+
 
 
 function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId) {
@@ -3100,6 +3166,8 @@ btn.innerHTML = `
     pagBtn.textContent = `Página ${i}`;
     pagBtn.onclick = () => {
       try { safeStopRecognitionGlobal(); } catch (e) {}
+      ultimaPaginaElegida = i;
+
       setTimeout(() => renderRecursosAsignados(recursos, i, contenedorId, paginadorId), 60);
     };
     paginador.appendChild(pagBtn);
@@ -3110,6 +3178,7 @@ btn.innerHTML = `
 
   try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
+
 
 
 function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId) {
@@ -3165,6 +3234,7 @@ function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId
     b.textContent = `Página ${i}`;
     b.onclick = () => {
       try { safeStopRecognitionGlobal(); } catch (e) {}
+      ultimaPaginaElegida = i;
       setTimeout(() => renderTablaRecursosStep(tablaId, recursos, i, paginadorId), 60);
     };
     paginador.appendChild(b);
