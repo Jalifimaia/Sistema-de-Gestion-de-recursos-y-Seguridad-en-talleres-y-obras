@@ -79,6 +79,7 @@
   @endif
 </div>
 
+<div class="seccion-usuarios">
 <h5 class="card-title fw-bold">Usuarios registrados en el sistema</h5><br>
 
   <!-- Filtros -->
@@ -114,7 +115,7 @@
             <tr>
               <th>Nombre</th>
               <th>Email</th>
-              <th>Rol</th>
+              <!--<th>Rol</th>-->
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -123,22 +124,35 @@
             @foreach ($usuarios as $usuario)
               <tr data-rol="{{ $usuario->rol->nombre_rol ?? '' }}"
                   data-estado="{{ $usuario->estado->nombre ?? '' }}">
-                <td>{{ $usuario->name }}</td>
+                <td class="nombre-completo" data-nombre="{{ $usuario->name }}">
+                  {{ $usuario->name }} [<strong>{{ $usuario->rol->nombre_rol ?? '-' }}</strong>]
+                </td>
                 <td>{{ $usuario->email }}</td>
-                <td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>
-                <td class="estado">{{ $usuario->estado->nombre ?? '-' }}</td>
+                <!--<td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>-->
+                <td class="estado">
+                  @if(($usuario->estado->nombre ?? '') === 'stand by')
+                    <em>stand by</em>
+                  @else
+                    {{ $usuario->estado->nombre ?? '-' }}
+                  @endif
+                </td>
                 <td>
-                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-info">Ver</a>
-                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-sm btn-orange">
-                    <i class="bi bi-pencil"></i>
-                  </a>
-                  <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST" class="d-inline form-baja" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol ?? '-' }}">
-                    @csrf
-                    <button type="button" class="btn btn-sm btn-warning btn-confirmar-baja" @if(($usuario->estado->nombre ?? null) === 'Baja') disabled style="opacity:0.5; cursor:not-allowed;"
-                    @endif>
-                    Dar de baja
-                    </button>
-                  </form>    
+                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-ver">Ver</a>
+                    <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-editar">
+                      <i class="bi bi-pencil"></i>
+                     Editar</a>
+
+                    <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST" class="d-inline form-baja" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol ?? '-' }}">
+                      @csrf
+                      @php $esBaja = ($usuario->estado->nombre ?? null) === 'Baja'; @endphp
+                      <span @if($esBaja) title="Usuario dado de baja" @endif>
+                        <button type="button"
+                                class="btn btn-baja btn-confirmar-baja"
+                                @if($esBaja) disabled style="opacity:0.5; cursor:not-allowed;" @endif>
+                          Dar de baja
+                        </button>
+                      </span>
+                    </form>
                 </td>
               </tr>
           @endforeach
@@ -147,6 +161,8 @@
       </div>
     </div>
   
+  </div>
+
 </div>
 
 <!-- Modal de confirmación de baja -->
@@ -185,7 +201,8 @@
     filas.forEach(fila => {
       const rolFila = (fila.getAttribute('data-rol') || '').toLowerCase();
       const estadoFila = (fila.getAttribute('data-estado') || '').toLowerCase();
-      const nombre = fila.cells[0].innerText.toLowerCase();
+    const nombre = fila.querySelector('.nombre-completo').dataset.nombre.toLowerCase();
+
       const email = fila.cells[1].innerText.toLowerCase();
 
       const coincideRol = (rol === 'todos' || rolFila === rol);
@@ -268,7 +285,6 @@
     const minutos = String(today.getMinutes()).padStart(2, '0');
 
     document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
-  });
   });
 
 </script>
