@@ -374,6 +374,12 @@ async function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
   const body = document.getElementById('modalMensajeKioscoBody');
   const cerrarBtn = document.getElementById('btnCerrarMensajeKiosco');
 
+  // 🛡️ Evitar duplicación si ya está activo
+  if (window.modalKioscoActivo) {
+    console.warn('⚠️ Modal ya activo, ignorando nueva apertura');
+    return;
+  }
+
   if (window.mostrarEmojisKiosco === false) {
     mensaje = mensaje.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').trim();
   }
@@ -400,37 +406,45 @@ async function mostrarModalKioscoSinVoz(mensaje, tipo = 'success') {
 
   const modal = new bootstrap.Modal(modalEl);
 
-  // ✅ Reactivar escáner solo si el usuario cierra el modal manualmente
-  cerrarBtn.onclick = () => {
-    cerrarModalKiosco();
+  const reactivarSiStep13 = () => {
     const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
     if (stepActivo === 'step13') {
-      console.log('📷 Reactivando escaneo QR en step13 tras cierre manual');
-      setTimeout(() => activarEscaneoQRregistroRecursosStep13(), 300);
+      console.log('📷 Reactivando escaneo QR en step13 tras cierre de modal');
+      setTimeout(() => activarEscaneoQRstep13ConEspera(), 300);
     }
+  };
+
+  cerrarBtn.onclick = () => {
+    cerrarModalKiosco();
+    reactivarSiStep13();
   };
 
   document.querySelectorAll('.btn-cerrar-modal').forEach(btn => {
     btn.onclick = () => {
       cerrarModalKiosco();
-      const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
-      if (stepActivo === 'step13') {
-        console.log('📷 Reactivando escaneo QR en step13 tras cierre manual');
-        setTimeout(() => activarEscaneoQRregistroRecursosStep13(), 300);
-      }
+      reactivarSiStep13();
     };
   });
 
   modalEl.addEventListener('hidden.bs.modal', () => {
-    if (window.modalKioscoActivo) {
-      console.log('🧹 Modal cerrado por backdrop o escape, ejecutando cleanup');
-      cerrarModalKiosco();
-    }
-  }, { once: true });
+    console.log('🧹 Modal cerrado por backdrop o escape');
+    cerrarModalKiosco();
+    reactivarSiStep13();
+  });
 
   modal.show();
   safeStartRecognitionGlobal();
+
+  // 🧼 Eliminar backdrops duplicados si quedaron
+  setTimeout(() => {
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    if (backdrops.length > 1) {
+      console.warn('🧼 Eliminando backdrops duplicados');
+      backdrops.forEach((el, i) => { if (i > 0) el.remove(); });
+    }
+  }, 500);
 }
+
 
 
 
@@ -438,8 +452,11 @@ function cerrarModalKiosco() {
   const modalEl = document.getElementById('modal-mensaje-kiosco');
   if (!modalEl) return;
 
+  // Ocultar modal visualmente
   modalEl.classList.remove('show');
   modalEl.style.display = 'none';
+
+  // Resetear flag global
   window.modalKioscoActivo = false;
 
   // Limpiar reconocimiento local
@@ -457,53 +474,39 @@ function cerrarModalKiosco() {
   modalEl._recogInstance = null;
   modalEl._lastTranscript = null;
 
-  // ✅ Resetear flag y reiniciar reconocimiento global
+  // Reactivar reconocimiento global
   try {
-    if (!modalEl._recogInstance) {
-      recognitionGlobalPaused = false;
-      safeStopRecognitionGlobal(); // por si quedó colgado
-      safeStartRecognitionGlobal();
-      console.log('🎤 Reconocimiento global reactivado tras cerrar modal kiosco');
-    }
+    recognitionGlobalPaused = false;
+    safeStopRecognitionGlobal(); // por si quedó colgado
+    safeStartRecognitionGlobal();
+    console.log('🎤 Reconocimiento global reactivado tras cerrar modal kiosco');
   } catch (e) {
     console.warn('⚠️ No se pudo reiniciar reconocimiento global:', e);
   }
 
-// ✅ Si estamos en step12, reactivar escaneo QR login
+  // Reactivar escáner QR según el step activo
   try {
     const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
     if (stepActivo === 'step12') {
       console.log('📷 Reactivando escaneo QR login tras cerrar modal');
       activarEscaneoQRLogin();
+    } else if (stepActivo === 'step13') {
+      console.log('📷 Reactivando escaneo QR en step13 tras cierre de modal');
+      setTimeout(() => activarEscaneoQRstep13ConEspera(), 300);
     }
   } catch (e) {
-    console.warn('⚠️ No se pudo reactivar escaneo QR login tras cerrar modal:', e);
+    console.warn('⚠️ No se pudo reactivar escaneo QR tras cerrar modal:', e);
   }
 
-
-  // Ocultar backdrop manual si lo usás
+  // Ocultar backdrop manual si quedó visible
   const backdropManual = document.getElementById('backdrop-manual-kiosco');
   if (backdropManual) backdropManual.style.display = 'none';
 
-// Ocultar y eliminar backdrop manual si quedó visible
-  const backdropManualModalSinVoz = document.querySelector('.modal-backdrop');
-  if (backdropManualModalSinVoz) {
-    backdropManualModalSinVoz.classList.remove('show');
-    backdropManualModalSinVoz.remove();
+  const backdropModal = document.querySelector('.modal-backdrop');
+  if (backdropModal) {
+    backdropModal.classList.remove('show');
+    backdropModal.remove();
   }
-
-  //activar el step 13
-try {
-  const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
-  if (stepActivo === 'step13') {
-    console.log('📷 Reactivando escaneo QR en step13 tras cierre por voz');
-    setTimeout(() => activarEscaneoQRregistroRecursosStep13(), 300);
-  }
-} catch (e) {
-  console.warn('⚠️ No se pudo reactivar escaneo QR en step13 tras cierre por voz:', e);
-}
-
-
 }
 
 
@@ -1223,6 +1226,16 @@ function mostrarModalConfirmarDevolucion(detalleId, index = null) {
 const qrErrorBuffers = {};
 const qrErrorTimers = {};
 
+let scannerLogin = null;
+let scannerRegistro = null;
+let scannerRegistroStep13 = null;
+let scannerDevolucion = null;
+let isScanningLogin = false;
+let isScanningRegistro = false;
+let isScanningStep13 = false;
+let isScanningDevolucion = false;
+
+
 function manejarErrorEscaneoQR(errorMessage, contexto = 'QR') {
   const mensaje = String(errorMessage).trim();
   const key = contexto.toLowerCase();
@@ -1782,23 +1795,20 @@ function activarEscaneoQRregistroRecursos() {
   const btnCancelar = document.getElementById('btn-cancelar-qr');
   const textoCamara = document.getElementById('texto-camara-activa');
 
-  if (!qrContainer) {
-    console.error('No se encontró el contenedor de escaneo QR')
-  getRenderer('mostrarModalKioscoSinVoz')('No se encontró el contenedor de escaneo QR', 'danger');
+  if (!qrContainer || isScanningRegistro || scannerRegistro) {
+    console.warn('⚠️ Escáner ya activo o contenedor no disponible');
     return;
   }
 
-  if (isScanning) return; // ya está activo
-
   qrContainer.innerHTML = '';
-  if (btnEscanear) btnEscanear.classList.add('d-none');
-  if (btnCancelar) btnCancelar.classList.remove('d-none');
-  if (textoCamara) textoCamara.classList.remove('d-none');
+  btnEscanear?.classList.add('d-none');
+  btnCancelar?.classList.remove('d-none');
+  textoCamara?.classList.remove('d-none');
 
-  scanner = new Html5Qrcode("qr-reader");
-  isScanning = true;
+  scannerRegistro = new Html5Qrcode("qr-reader");
+  isScanningRegistro = true;
 
-  scanner.start(
+  scannerRegistro.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 400, height: 400 } },
     qrCodeMessage => {
@@ -1811,10 +1821,37 @@ function activarEscaneoQRregistroRecursos() {
     }
   ).catch(err => {
     console.error('Error al iniciar escaneo:', err);
-  getRenderer('mostrarModalKioscoSinVoz')('No se pudo activar la cámara para escanear QR', 'danger');
+    mostrarModalKioscoSinVoz('No se pudo activar la cámara para escanear QR', 'danger');
     limpiarQRregistroRecursos();
   });
 }
+
+function limpiarQRregistroRecursos() {
+  const qrContainer = document.getElementById('qr-reader');
+  const btnEscanear = document.getElementById('btn-escanear-qr');
+  const btnCancelar = document.getElementById('btn-cancelar-qr');
+  const textoCamara = document.getElementById('texto-camara-activa');
+
+  if (scannerRegistro && isScanningRegistro) {
+    scannerRegistro.stop().catch(() => {}).then(() => {
+      qrContainer.innerHTML = '';
+      btnCancelar?.classList.add('d-none');
+      btnEscanear?.classList.remove('d-none');
+      textoCamara?.classList.add('d-none');
+      scannerRegistro = null;
+      isScanningRegistro = false;
+    });
+  } else {
+    qrContainer.innerHTML = '';
+    btnCancelar?.classList.add('d-none');
+    btnEscanear?.classList.remove('d-none');
+    textoCamara?.classList.add('d-none');
+    scannerRegistro = null;
+    isScanningRegistro = false;
+  }
+}
+
+
 
 function cancelarEscaneoQRregistroRecursos() {
   limpiarQRregistroRecursos();
@@ -1836,7 +1873,7 @@ async function registrarPorQRregistroRecursos(codigoQR) {
     const data = await res.json();
 
     if (data.success) {
-      const mensaje = `✅ Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
+      const mensaje = `Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
       mostrarModalKioscoSinVoz(mensaje, 'success');
       window.nextStep?.(3); // ← redirige al step3 después de éxito
     } else {
@@ -1883,40 +1920,28 @@ function detenerEscaneoQRregistroRecursos(next = null) {
   }
 }
 
-function limpiarQRregistroRecursos() {
-  const qrContainer = document.getElementById('qr-reader');
-  const btnEscanear = document.getElementById('btn-escanear-qr');
-  const btnCancelar = document.getElementById('btn-cancelar-qr');
-  const textoCamara = document.getElementById('texto-camara-activa');
 
-  if (scanner && isScanning) {
-    scanner.stop().catch(() => {}).then(() => {
-      qrContainer.innerHTML = '';
-      if (btnCancelar) btnCancelar.classList.add('d-none');
-      if (btnEscanear) btnEscanear.classList.remove('d-none');
-      if (textoCamara) textoCamara.classList.add('d-none');
-      isScanning = false;
-    });
-  } else {
-    qrContainer.innerHTML = '';
-    if (btnCancelar) btnCancelar.classList.add('d-none');
-    if (btnEscanear) btnEscanear.classList.remove('d-none');
-    if (textoCamara) textoCamara.classList.add('d-none');
-    isScanning = false;
-  }
-}
 
 
 // === Paso 13: 
 let lastQRStep13 = null;
 
 function activarEscaneoQRregistroRecursosStep13() {
+  console.log('🟢 Intentando iniciar escáner en step13');
+
+if (window.qrScannerActivoStep13) {
+  console.warn('⚠️ Escáner ya activo, no se reinicia');
+  return;
+}
+window.qrScannerActivoStep13 = true;
+
+
   const qrContainer = document.getElementById('qr-reader-step13');
   const btnEscanear = document.getElementById('btn-escanear-qr-step13');
   const btnCancelar = document.getElementById('btn-cancelar-qr-step13');
   const textoCamara = document.getElementById('texto-camara-activa-step13');
 
-  if (!qrContainer || isScanning || scanner) {
+  if (!qrContainer || isScanningStep13 || scannerRegistroStep13) {
     console.warn('⚠️ Escáner ya activo o contenedor no disponible');
     return;
   }
@@ -1926,10 +1951,12 @@ function activarEscaneoQRregistroRecursosStep13() {
   btnCancelar?.classList.remove('d-none');
   textoCamara?.classList.remove('d-none');
 
-  scanner = new Html5Qrcode("qr-reader-step13");
-  isScanning = true;
+  scannerRegistroStep13 = new Html5Qrcode("qr-reader-step13");
+  isScanningStep13 = true;
 
-  scanner.start(
+  console.log('🚀 Iniciando escáner QR en step13');
+
+  scannerRegistroStep13.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 400, height: 400 } },
     qrCodeMessage => {
@@ -1949,25 +1976,24 @@ function activarEscaneoQRregistroRecursosStep13() {
   });
 }
 
-function cancelarEscaneoQRregistroRecursosStep13() {
-  limpiarQRregistroRecursosStep13();
-}
-
 function limpiarQRregistroRecursosStep13() {
+  window.qrScannerActivoStep13 = false;
+
+
   return new Promise(resolve => {
     const qrContainer = document.getElementById('qr-reader-step13');
     const btnEscanear = document.getElementById('btn-escanear-qr-step13');
     const btnCancelar = document.getElementById('btn-cancelar-qr-step13');
     const textoCamara = document.getElementById('texto-camara-activa-step13');
 
-    if (scanner && isScanning) {
-      scanner.stop().catch(() => {}).then(() => {
+    if (scannerRegistroStep13 && isScanningStep13) {
+      scannerRegistroStep13.stop().catch(() => {}).then(() => {
         qrContainer.innerHTML = '';
         btnCancelar?.classList.add('d-none');
         btnEscanear?.classList.remove('d-none');
         textoCamara?.classList.add('d-none');
-        isScanning = false;
-        scanner = null;
+        scannerRegistroStep13 = null;
+        isScanningStep13 = false;
         resolve();
       });
     } else {
@@ -1975,28 +2001,57 @@ function limpiarQRregistroRecursosStep13() {
       btnCancelar?.classList.add('d-none');
       btnEscanear?.classList.remove('d-none');
       textoCamara?.classList.add('d-none');
-      isScanning = false;
-      scanner = null;
+      scannerRegistroStep13 = null;
+      isScanningStep13 = false;
       resolve();
     }
   });
 }
 
 
+function cancelarEscaneoQRregistroRecursosStep13() {
+  limpiarQRregistroRecursosStep13();
+}
+
+
+
+async function activarEscaneoQRstep13ConEspera() {
+  // Limpieza defensiva antes de activar
+  await limpiarQRregistroRecursosStep13?.();
+  lastQRStep13 = null;
+
+  nextStep(13);
+
+  const intentarActivar = () => {
+    const container = document.getElementById('qr-reader-step13');
+    if (container) {
+      console.log('📦 Contenedor QR step13 disponible, iniciando escáner');
+      activarEscaneoQRregistroRecursosStep13();
+    } else {
+      console.warn('⏳ Esperando DOM para escáner step13...');
+      setTimeout(intentarActivar, 100);
+    }
+  };
+
+  setTimeout(intentarActivar, 300);
+}
+
+
+
 // === Paso 1: Escaneo QR para login o inicio de sesión === 
 function activarEscaneoQRLogin() {
   const qrContainer = document.getElementById('qr-login-reader');
 
-  if (!qrContainer || isScanning) {
+  if (!qrContainer || isScanningLogin || scannerLogin) {
     console.error('❌ activarEscaneoQRLogin: contenedor no disponible o escaneo ya activo');
     return;
   }
 
   qrContainer.innerHTML = '';
-  scanner = new Html5Qrcode("qr-login-reader");
-  isScanning = true;
+  scannerLogin = new Html5Qrcode("qr-login-reader");
+  isScanningLogin = true;
 
-  scanner.start(
+  scannerLogin.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 250, height: 250 } },
     qrCodeMessage => {
@@ -2009,7 +2064,7 @@ function activarEscaneoQRLogin() {
     }
   ).catch(err => {
     console.error('No se pudo iniciar escaneo login:', err);
-    window.mostrarModalKioscoSinVoz('No se pudo activar la cámara para escanear QR', 'danger');
+    mostrarModalKioscoSinVoz('No se pudo activar la cámara para escanear QR', 'danger');
     detenerEscaneoQRLogin();
   });
 }
@@ -2017,15 +2072,17 @@ function activarEscaneoQRLogin() {
 function detenerEscaneoQRLogin() {
   const qrContainer = document.getElementById('qr-login-reader');
 
-  if (scanner && isScanning) {
-    scanner.stop().catch(() => {}).then(() => {
+  if (scannerLogin && isScanningLogin) {
+    scannerLogin.stop().catch(() => {}).then(() => {
       qrContainer.innerHTML = '';
+      scannerLogin = null;
+      isScanningLogin = false;
       console.log('📴 detenerEscaneoQRLogin: escaneo login detenido');
-      isScanning = false;
     });
   } else {
     qrContainer.innerHTML = '';
-    isScanning = false;
+    scannerLogin = null;
+    isScanningLogin = false;
   }
 }
 
@@ -4529,8 +4586,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
       }
 
       if (matchOpcion(limpio, 1, "escanear", "qr", "escanear qr", "registrar por qr")) {
-        nextStep(13);
-        activarEscaneoQRregistroRecursosStep13();
+        activarEscaneoQRstep13ConEspera();
         return;
       }
 
@@ -4819,3 +4875,4 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }, 10 * 1000); // cada 10 segundos
 });
+

@@ -65,7 +65,7 @@ public function identificarTrabajador(Request $request)
     if ($usuario->id_estado != 1) {
         return response()->json([
             'success' => false,
-            'message' => 'El usuario no está en estado Alta y no puede usar el kiosco'
+            'message' => 'El usuario no está en estado de "alta" y no puede usar el kiosco'
         ]);
     }
 
@@ -106,7 +106,7 @@ public function identificarPorQR(Request $request)
     if ($usuario->id_estado != 1) {
         return response()->json([
             'success' => false,
-            'message' => 'El usuario no está en estado Alta y no puede usar el kiosco'
+            'message' => 'El usuario no está en estado de "alta" y no puede usar el kiosco'
         ]);
     }
 
