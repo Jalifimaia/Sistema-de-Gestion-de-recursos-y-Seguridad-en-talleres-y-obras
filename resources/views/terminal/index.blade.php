@@ -52,12 +52,10 @@
     <!-- Paso 12: Inicio de sesión con QR -->
     <div id="step12" class="step d-none">
       <h2 class="mb-4 text-center titulo-identificar">
-        <img src="images/qr.svg" alt="Ícono QR" class="icono-qr">
         Inicio de sesión con QR
       </h2>
 
       <div id="qr-login-reader" style="width:300px; margin:auto;"></div>
-      <p class="text-muted text-center mt-3">Apuntá tu QR de identificación</p>
 
       <div class="text-center mt-4">
         <button class="btn btn-outline-danger btn-lg texto-cancelar mt-2" onclick="cancelarEscaneoQRLogin()">
@@ -90,7 +88,7 @@
         <span>Cámara activa — escaneá el código QR</span>
       </h5>
 
-      <div id="qr-reader" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
+      <div id="qr-reader" class="rounded border shadow-sm" style="width: 100%; max-width: 300px; margin: auto;"></div>
 
       <div class="text-center mt-3">
                 <button id="btn-escanear-qr" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100"
@@ -130,7 +128,7 @@
     <div id="step13" class="step d-none">
       <h2 class="mb-4 text-center">Registro por QR</h2>
 
-      <div id="qr-reader-step13" class="rounded border shadow-sm" style="width: 100%; max-width: 400px; margin: auto;"></div>
+      <div id="qr-reader-step13" class="rounded border shadow-sm" style="width: 100%; max-width: 300px; margin: auto;"></div>
 
       <div class="text-center mt-3">
 
