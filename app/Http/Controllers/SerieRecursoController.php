@@ -245,55 +245,36 @@ public function qrLote()
 
 public function exportQrLotePdf()
 {
-    $query = SerieRecurso::with('recurso');
+    $page = request()->input('page', 1);
+    $perPage = 18;
 
-    // Filtros opcionales
-    if (request('desde')) {
-        $query->whereDate('created_at', '>=', request('desde'));
-    }
+    $seriesPaginator = SerieRecurso::with('recurso')
+        ->when(request('desde'), fn($q) => $q->whereDate('created_at', '>=', request('desde')))
+        ->when(request('hasta'), fn($q) => $q->whereDate('created_at', '<=', request('hasta')))
+        ->when(request('recurso_id'), fn($q) => $q->where('id_recurso', request('recurso_id')))
+        ->when(request('subcategoria_id'), fn($q) => $q->whereHas('recurso', fn($q2) => $q2->where('id_subcategoria', request('subcategoria_id'))))
+        ->orderByDesc('id')
+        ->paginate($perPage, ['*'], 'page', $page);
 
-    if (request('hasta')) {
-        $query->whereDate('created_at', '<=', request('hasta'));
-    }
-
-    if (request('recurso_id')) {
-        $query->where('id_recurso', request('recurso_id'));
-    }
-
-    if (request('subcategoria_id')) {
-        $query->whereHas('recurso', function ($q) {
-            $q->where('id_subcategoria', request('subcategoria_id'));
-        });
-    }
-
-    // Si no hay filtros, usar las últimas 30
-    if (!request()->hasAny(['desde', 'hasta', 'recurso_id', 'subcategoria_id'])) {
-        $query->orderByDesc('id')->take(30);
-    }
-
-    $series = $query->orderBy('id')->get();
+    $series = $seriesPaginator->items(); // ← solo los 18 de la página actual
 
     $qrBase64s = [];
     foreach ($series as $serie) {
-        if (!empty($serie->codigo_qr)) {
-            $qrBase64s[$serie->id] = base64_encode(
-                \QrCode::format('png')->size(100)->generate((string) $serie->codigo_qr)
-            );
-        } else {
-            $qrBase64s[$serie->id] = null;
-        }
+        $qrBase64s[$serie->id] = !empty($serie->codigo_qr)
+            ? base64_encode(QrCode::format('png')->size(100)->generate((string) $serie->codigo_qr))
+            : null;
     }
 
     $html = view('serie_recurso.qrlote_pdf', compact('series', 'qrBase64s'))->render();
 
-    $pdf = \Spatie\Browsershot\Browsershot::html($html)
+    $pdf = Browsershot::html($html)
         ->format('A4')
         ->margins(10, 10, 10, 10)
         ->pdf();
 
     return response($pdf)
         ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', 'attachment; filename="QR_Lote.pdf"');
+        ->header('Content-Disposition', 'attachment; filename="QR_Lote_Pagina_' . $page . '.pdf"');
 }
 
 
