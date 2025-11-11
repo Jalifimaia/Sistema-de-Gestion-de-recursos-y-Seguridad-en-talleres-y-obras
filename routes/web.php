@@ -48,6 +48,7 @@ Route::get('/reportes', function () {
     return view('reportes.index');
 })->name('reportes.index');
 
+
 /*
 |--------------------------------------------------------------------------
 | Rutas del Kiosko / Terminal
@@ -232,7 +233,8 @@ Route::delete('/incidente/{id}', [IncidenteController::class, 'destroy'])->name(
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('usuarios', UserController::class);
+    Route::resource('usuarios', UsuarioController::class); // <--- ruta de usuarios de UsuarioController
+    //Route::resource('usuarios', UserController::class);    
     Route::resource('estado_incidente', EstadoIncidenteController::class);
     Route::resource('prestamos', PrestamoController::class);
     Route::patch('/prestamos/detalle/{id}/baja', [PrestamoController::class, 'darDeBaja'])->name('prestamos.bajaDetalle');
