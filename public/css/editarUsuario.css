@@ -1,0 +1,67 @@
+input.form-control,
+select.form-select {
+  border: 2px solid #b14910;
+  box-shadow: none;
+}
+
+input.form-control:focus,
+select.form-select:focus {
+  border-color: #b14910;
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
+}
+
+label {
+  font-weight: 600;
+}
+
+.btn-volver {
+  background-color: #d3401b;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  line-height: 1.2;
+  max-width: fit-content;
+  height: auto;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  color: #000;
+  transform: translateX(-2px);
+}
+
+.icono-volver {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-guardar {
+  background-color: #43a047;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-guardar:hover {
+  background-color: #388e3c;
+}
+
+.badge-estado {
+  font-size: 1.1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: inline-block;
+}

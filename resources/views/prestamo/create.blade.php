@@ -7,8 +7,8 @@
 @section('content')
 <div class="container py-4">
   <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white text-center">
-      <h4 class="mb-0">Registrar Préstamo</h4>
+    <div class="card-header bg-orange text-white text-center">
+      <h4 class="mb-0 fw-bold">Registrar Préstamo</h4>
     </div>
     <div class="card-body bg-white">
 
@@ -100,10 +100,18 @@
           {{-- tarjetas dinámicas creadas por JS con hidden name="series[]" --}}
         </div>
 
-        <div class="text-end mt-4">
-          <a href="{{ route('prestamos.index') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
-          <button type="submit" class="btn btn-primary">Guardar Préstamo</button>
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <a href="{{ route('prestamos.index') }}" class="btn btn-volver w-100 d-inline-flex align-items-center justify-content-center">
+              <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+              Volver
+            </a>
+          </div>
+          <div class="col-md-6">
+            <button type="submit" class="btn btn-guardar w-100">Guardar Préstamo</button>
+          </div>
         </div>
+
       </form>
     </div>
   </div>
@@ -231,3 +239,8 @@
   });
   </script>
 @endpush
+
+@push('styles')
+<link href="{{ asset('css/agregarPrestamo.css') }}" rel="stylesheet">
+@endpush
+
