@@ -4467,9 +4467,11 @@ function cerrarModalAsistente() {
     window.speechSynthesis.cancel();
   } catch (e) {}
 
+  // ✅ Reset de flags TTS y eco
   window.ttsEnCurso = false;
   window.textoUltimoTTS = '';
   window.timestampUltimoTTS = 0;
+  window.bloqueoEcoTTS = false;
 
   const wrapper = document.querySelector('.subtitulo-wrapper');
   const subtituloEl = document.getElementById('asistenteSubtitulo');
@@ -4481,6 +4483,23 @@ function cerrarModalAsistente() {
   }
 
   document.getElementById('microfono_flotante')?.classList.remove('mic-muted');
+
+  // ✅ Quitar hover visual de cualquier botón activo del asistente
+  document.querySelectorAll('#modalAsistente .btn-hover-simulada').forEach(btn => {
+    btn.classList.remove('btn-hover-simulada');
+  });
+
+  // ✅ Reactivar reconocimiento si el TTS fue interrumpido
+  setTimeout(() => {
+    if (!window.ttsEnCurso) {
+      try {
+        safeStartRecognitionGlobal();
+        console.log('🎤 Reconocimiento reactivado tras cierre manual del asistente');
+      } catch (e) {
+        console.warn('safeStartRecognitionGlobal falló tras cierre manual:', e);
+      }
+    }
+  }, 300);
 
   setTimeout(() => {
     document.querySelectorAll('.modal.show').forEach(el => el.classList.remove('show'));
@@ -4497,13 +4516,13 @@ function leerAsistenteTexto(opcion) {
   let texto = '';
   switch (opcion) {
     case 1:
-      texto = 'Podés usar el sistema mediante voz, al leer el nombre de los botones como "continuar", "opción 1" o "página 2".';
+      texto = 'Podés usar el sistema mediante voz, al leer el nombre de los botones como "opción 1" o "página 2".';
       break;
     case 2:
       texto = 'Podés ingresar al sistema escribiendo tu clave o escaneando tu código QR personal. También podés dictar tu clave por voz diciendo "ingresar clave".';
       break;
     case 3:
-      texto = 'Desde el menú principal podés solicitar herramientas, registrar recursos que ya tenés en mano, o ver los recursos que tenés asignados actualmente.';
+      texto = 'Podés solicitar herramientas, registrar recursos que ya tenés en mano, o ver los recursos que tenés asignados actualmente.';
       break;
     case 4:
       texto = 'Para devolver una herramienta, seleccioná el recurso asignado y escaneá el código QR de la serie correspondiente. El sistema validará la devolución automáticamente.';
@@ -4518,89 +4537,98 @@ function leerAsistenteTexto(opcion) {
   const subtituloEl = document.getElementById('asistenteSubtitulo');
   const mic = document.getElementById('microfono_flotante');
 
-  const reproducir = () => {
-    if (!subtituloEl || !wrapper) {
-      console.warn('⚠️ asistenteSubtitulo o wrapper no encontrado en el DOM');
-      return;
+ const reproducir = () => {
+  if (!subtituloEl || !wrapper) {
+    console.warn('⚠️ asistenteSubtitulo o wrapper no encontrado en el DOM');
+    return;
+  }
+
+  // ✅ Limpiar hover de todos los botones antes de aplicar el nuevo
+  document.querySelectorAll('#modalAsistente .btn-hover-simulada').forEach(btn => {
+    btn.classList.remove('btn-hover-simulada');
+  });
+
+  const boton = document.querySelector(`#modalAsistente button[onclick="leerAsistenteTexto(${opcion})"]`);
+  if (boton) boton.classList.add('btn-hover-simulada');
+
+  // Preparar subtítulos
+  const palabras = texto.split(' ').filter(Boolean);
+  subtituloEl.innerHTML = palabras.map((p, i) => `<span id="palabra-${i}">${p}</span>`).join(' ');
+  wrapper.classList.add('visible');
+
+  if (mic) {
+    mic.classList.add('mic-muted');
+    microfono_flotante?.classList.remove('pulsing');
+  }
+
+  window.bloqueoEcoTTS = true;
+  window.textoUltimoTTS = texto;
+  window.timestampUltimoTTS = Date.now();
+  window.ttsEnCurso = true;
+  window.cierreManualAsistente = false;
+
+  const utterance = new SpeechSynthesisUtterance(texto);
+  utterance.lang = 'es-ES';
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  let palabraIndex = 0;
+  utterance.onboundary = (event) => {
+    const isWordBoundary = (event.name && event.name === 'word') || typeof event.charIndex === 'number';
+    if (!isWordBoundary) return;
+    const span = document.getElementById(`palabra-${palabraIndex}`);
+    if (span) {
+      span.style.backgroundColor = '#ffeeba';
+      span.style.borderRadius = '4px';
     }
-
-    // Preparar subtítulos
-    const palabras = texto.split(' ').filter(Boolean);
-    subtituloEl.innerHTML = palabras.map((p, i) => `<span id="palabra-${i}">${p}</span>`).join(' ');
-    wrapper.classList.add('visible');
-
-    // Micrófono en gris y quitar pulsing si corresponde
-    if (mic) {
-      mic.classList.add('mic-muted');
-      microfono_flotante?.classList.remove('pulsing');
-    }
-
-    // ✅ Activar bloqueo de eco TTS
-    window.bloqueoEcoTTS = true;
-    window.textoUltimoTTS = texto;
-    window.timestampUltimoTTS = Date.now();
-    window.ttsEnCurso = true;
-    window.cierreManualAsistente = false;
-
-    const utterance = new SpeechSynthesisUtterance(texto);
-    utterance.lang = 'es-ES';
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-
-    let palabraIndex = 0;
-    utterance.onboundary = (event) => {
-      const isWordBoundary = (event.name && event.name === 'word') || typeof event.charIndex === 'number';
-      if (!isWordBoundary) return;
-      const span = document.getElementById(`palabra-${palabraIndex}`);
-      if (span) {
-        span.style.backgroundColor = '#ffeeba';
-        span.style.borderRadius = '4px';
-      }
-      const prev = document.getElementById(`palabra-${palabraIndex - 1}`);
-      if (prev) prev.style.backgroundColor = '';
-      palabraIndex++;
-    };
-
-    utterance.onend = () => {
-      window.ttsEnCurso = false;
-
-      if (mic) mic.classList.remove('mic-muted');
-      wrapper.classList.remove('visible');
-      setTimeout(() => {
-        if (subtituloEl) subtituloEl.innerHTML = '';
-      }, 300);
-
-      const sigueVisible = !!modalEl && modalEl.classList.contains('show');
-      if (sigueVisible && !window.cierreManualAsistente) {
-        setTimeout(() => {
-          if (!window.ttsEnCurso) {
-            try {
-              safeStartRecognitionGlobal();
-            } catch (e) {
-              console.warn('safeStartRecognitionGlobal falló tras TTS:', e);
-            }
-          }
-        }, 300);
-      } else {
-        console.log('🎤 Reconocimiento no reactivado: modal cerrado durante TTS');
-      }
-
-      // ✅ Desactivar bloqueo de eco tras TTS con delay
-      setTimeout(() => {
-        window.bloqueoEcoTTS = false;
-      }, 2000);
-
-      window.cierreManualAsistente = false;
-    };
-
-    try {
-      window.speechSynthesis.cancel();
-    } catch (e) {
-      console.warn('No se pudo cancelar speechSynthesis previo:', e);
-    }
-    window.speechSynthesis.speak(utterance);
+    const prev = document.getElementById(`palabra-${palabraIndex - 1}`);
+    if (prev) prev.style.backgroundColor = '';
+    palabraIndex++;
   };
+
+  utterance.onend = () => {
+    window.ttsEnCurso = false;
+
+    if (mic) mic.classList.remove('mic-muted');
+    wrapper.classList.remove('visible');
+    setTimeout(() => {
+      if (subtituloEl) subtituloEl.innerHTML = '';
+    }, 300);
+
+    // ✅ Quitar hover visual del botón
+    if (boton) boton.classList.remove('btn-hover-simulada');
+
+    const sigueVisible = !!modalEl && modalEl.classList.contains('show');
+    if (sigueVisible && !window.cierreManualAsistente) {
+      setTimeout(() => {
+        if (!window.ttsEnCurso) {
+          try {
+            safeStartRecognitionGlobal();
+          } catch (e) {
+            console.warn('safeStartRecognitionGlobal falló tras TTS:', e);
+          }
+        }
+      }, 300);
+    } else {
+      console.log('🎤 Reconocimiento no reactivado: modal cerrado durante TTS');
+    }
+
+    setTimeout(() => {
+      window.bloqueoEcoTTS = false;
+    }, 2000);
+
+    window.cierreManualAsistente = false;
+  };
+
+  try {
+    window.speechSynthesis.cancel();
+  } catch (e) {
+    console.warn('No se pudo cancelar speechSynthesis previo:', e);
+  }
+  window.speechSynthesis.speak(utterance);
+};
+
 
   if (!modalVisible) {
     if (!!modalEl) {

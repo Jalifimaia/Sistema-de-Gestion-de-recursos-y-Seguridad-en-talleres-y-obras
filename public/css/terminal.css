@@ -991,3 +991,8 @@ body.modal-open {
 .modal-asistente-ancho {
   max-width: 700px;
 }
+
+.btn-hover-simulada {
+  background-color: #ff8d3c; /* mismo que hover de btn-outline-dark */
+  border-color: #bd5800;
+}
