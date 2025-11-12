@@ -12,3 +12,141 @@
 .table-naranja td:nth-child(5) {
   max-width: 200px;
 }
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding-left: 0;
+}
+
+.page-item {
+  margin: 0 2px;
+}
+
+.page-link {
+  color: #d06842;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #ffd1be;
+}
+
+.page-item.active .page-link {
+  background-color: #d06842;
+  color: white;
+  border-color: #d06842;
+}
+
+
+.toggle-btn {
+  height: 44px;
+  width: 44px;
+  padding: 6px 10px;
+  font-size: 1.2rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.btn-editar {
+  background-color: #f57c00;
+  color: white;
+  border: none;
+}
+
+.btn-editar:hover {
+  background-color: #e65100;
+}
+
+.btn-ver-series {
+  background-color: #0288d1;
+  color: white;
+  border: none;
+}
+
+.btn-ver-series:hover {
+  background-color: #0277bd;
+}
+
+/* Botones de acción compactos y consistentes */
+.btn-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 4px;
+  white-space: nowrap; /* evita que el texto haga wrap y aumente la altura */
+  height: 36px;
+  line-height: 1;
+  min-width: 40px;
+}
+
+/* Forzar que el contenedor permita wrap en móviles, pero los botones mantengan tamaño */
+td.text-nowrap .d-flex {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Cuando un botón se deshabilita visualmente */
+.btn-outline-secondary.disabled,
+button[disabled].btn-outline-secondary {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Filas "baja" visual */
+.table-row-baja {
+  opacity: 0.7;
+  background-color: #f5f5f5 !important;
+}
+
+/* Asegura icon+texto no empujan la altura */
+.btn-accion i {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Botones compactos con solo icono o icon+texto corto */
+.btn-sm i { font-size: 1rem; }
+
+/* Alineación: evita wrap y obliga a los botones a quedarse en línea */
+td.text-nowrap > .d-flex {
+  flex-wrap: nowrap !important;
+  gap: 6px;
+}
+
+/* Si usás botones sin texto, reducir padding para caber más */
+.btn-sm > i + span { display: none; } /* si quieres ocultar spans globalmente dentro de btn-sm */
+.btn-sm { padding: 6px 8px; min-width: 36px; }
+
+/* Alternativa más segura: clase específica para acciones compactas */
+.btn-accion-compact {
+  padding: 6px 8px;
+  min-width: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mantener separación y prevenir quiebre en móviles */
+.d-flex.gap-2 { gap: 6px; }

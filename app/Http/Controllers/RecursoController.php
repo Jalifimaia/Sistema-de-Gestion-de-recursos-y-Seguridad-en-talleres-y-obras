@@ -490,4 +490,22 @@ public function create()
             ->where('id_estado', 1) // solo disponibles
             ->get();
     }
+
+public function darDeBaja(Request $request, Recurso $recurso)
+{
+    $estadoBajaId = Estado::whereRaw('LOWER(nombre_estado) = ?', ['baja'])->value('id');
+
+    if (!$estadoBajaId) {
+        return response()->json(['error' => 'Estado "Baja" no encontrado'], 422);
+    }
+
+    // Marcar todas las series como baja
+    $recurso->serieRecursos()->update([
+        'id_estado' => $estadoBajaId,
+        'updated_at' => now(),
+    ]);
+
+    return response()->json(['ok' => true, 'message' => 'Recurso marcado como baja']);
+}
+
 }

@@ -138,7 +138,7 @@ class InventarioController extends Controller
                     $recurso->descripcion,
                     $recurso->subcategoria->categoria->nombre_categoria ?? 'Sin categoría',
                     $recurso->subcategoria->nombre ?? 'Sin subcategoría',
-                    $series ?: 'Sin series',
+                    $series ?: '',
                     $estados ?: 'Sin estado',
                     $fechas ?: 'Sin fechas'
                 ]);

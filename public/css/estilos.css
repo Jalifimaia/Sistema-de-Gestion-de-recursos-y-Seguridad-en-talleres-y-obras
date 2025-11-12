@@ -199,10 +199,9 @@
 
 /* === Tabla con estilo naranja === */
 .table-naranja {
-  min-width: 1000px;
-  border-collapse: collapse;
+  table-layout: auto;
   width: 100%;
-   border: 2px solid #d06842;
+  border: 2px solid #d06842;
   border-radius: 6px;
 }
 /*
@@ -222,9 +221,11 @@
   color: white;
 }
 
-.table-naranja th {
-  padding: 12px;
-  font-weight: bold;
+.table-naranja th,
+.table-naranja td {
+  width: 25%;
+  word-wrap: break-word;
+  padding: 12px 10px;
   border: 1px solid #e0e0e0;
 }
 
@@ -236,10 +237,19 @@
 /* Filas alternadas */
 .table-naranja tbody tr:nth-child(odd) {
   background-color: #ffffff;
+  visibility: visible;
 }
 
-.table-naranja tbody tr:nth-child(even) {
+.table-naranja tbody tr.oculto {
+  visibility: collapse;
+}
+
+.table-naranja tbody tr:nth-of-type(even) {
   background-color: #ffeddf; /* naranja claro */
+}
+
+.table-naranja tbody tr.hidden-row {
+  display: none;
 }
 
 /* Hover suave */
@@ -481,5 +491,4 @@ h1, .titulo-principal {
   align-items: center;
   justify-content: center;
 }
-
 

@@ -196,6 +196,7 @@ Route::delete('/recursos/{id}', [RecursoController::class, 'destroy'])->name('re
 Route::get('/inventario/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::get('/inventario/ajax/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::resource('recursos', RecursoController::class);
+Route::patch('/recursos/{recurso}/baja', [RecursoController::class, 'darDeBaja'])->name('recursos.darDeBaja');
 
 //QR de inventario
 Route::get('/series/{id}/qr', [SerieRecursoController::class, 'showQr'])->name('series.qr.show');
