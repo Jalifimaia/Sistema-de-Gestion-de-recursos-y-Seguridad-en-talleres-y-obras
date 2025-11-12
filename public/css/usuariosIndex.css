@@ -226,4 +226,195 @@
   cursor: not-allowed;
 }
 
+.estado-usuario {
+  font-weight: normal !important; /* fuerza a texto normal */
+}
+
+.estado {
+  text-align: center; /* centra horizontal */
+  vertical-align: middle; /* centra vertical */
+}
+
+.badge.estado-usuario {
+  font-weight: normal !important;
+}
+
+.estado-usuario {
+  font-weight: normal;   /* texto normal */
+  font-size: 1rem;       /* más grande */
+}
+#tablaUsuarios td.estado .badge.estado-usuario {
+  font-weight: 400 !important;
+  font-size: 1rem;
+}
+
+/* Estructura consistente en todas las cards resumen */
+.card-resumen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;                 /* iguala alturas con h-100 del contenedor */
+  border-left: 4px solid #c45912;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+/* Cuerpo con flex para empujar contenido y evitar variaciones de alto */
+.card-resumen .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;      /* centra contenido vertical */
+  align-items: center;          /* centra horizontal */
+  gap: 0.35rem;
+  min-height: 140px;            /* asegura altura visual uniforme */
+  padding: 0.5rem 0.75rem;
+}
+
+/* Quitar hover general en todas las cards resumen */
+.card-resumen:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Hover solo para la card "Crear usuario" */
+.card.card-crear {
+  background-color: #2ca528 !important;
+  border-left: 4px solid #f5f5f5;
+  color: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card.card-crear:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background-color: #2ca528 !important; /* mantiene color al hover */
+}
+
+/* Título e icono: respetar color y evitar transiciones indeseadas */
+.card.card-crear h6.card-title,
+.card.card-crear h6.card-title * {
+  color: inherit !important;
+  box-shadow: none;
+  transition: none !important;
+}
+
+/* Neutralizar hover en el título de la card "Crear usuario" */
+.card.card-crear h6.card-title,
+.card.card-crear h6.card-title * {
+  color: inherit !important;   /* mantiene el color original */
+  transition: none !important; /* evita animaciones de color */
+  transform: none !important;  /* evita movimiento */
+  background-color: #2ca528 !important;
+}
+
+/* Subtítulo de la card "Crear usuario" */
+.card.card-crear small {
+  color: #fff !important;       /* texto blanco */
+  font-weight: 500 !important;  /* negrita */
+}
+
+.subir-cards-usuarios {
+  margin-top: -25px; /* ajustá el valor a tu gusto */
+}
+
+/* Cards más compactas */
+.card-resumen {
+  min-height: 120px;        /* bajá la altura mínima */
+  height: auto;             /* que se ajuste al contenido */
+}
+
+.card-resumen .card-body {
+  padding: 0.5rem;          /* menos espacio interno */
+  min-height: 100px;        /* asegura altura consistente pero más baja */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  /* centra verticalmente */
+  align-items: center;      /* centra horizontalmente */
+}
+
+.card-resumen,
+.card.card-crear {
+  min-height: 160px;   /* mismo alto mínimo */
+  height: 100%;        /* se estiran igual dentro de col-md-3 */
+  display: flex;
+  flex-direction: column;
+}
+
+.card-resumen .card-body,
+.card.card-crear .card-body {
+  flex: 1;             /* ocupa todo el espacio disponible */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centra verticalmente */
+  align-items: center;     /* centra horizontalmente */
+  padding: 0.75rem;
+}
+
+td.acciones {
+  text-align: center; /* centra horizontalmente */
+}
+
+td.acciones .d-flex {
+  justify-content: center; /* centra los botones dentro del flex */
+}
+
+/* Cards más compactas */
+.card-resumen {
+  min-height: 120px;       /* altura mínima más baja */
+  height: auto;            /* se ajusta al contenido */
+}
+
+.card-resumen .card-body {
+  padding: 0.5rem;         /* menos espacio interno */
+  min-height: 100px;       /* asegura consistencia pero más chico */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centra verticalmente */
+  align-items: center;     /* centra horizontalmente */
+}
+
+/* Cards más compactas: aplica a todas, incluidas Crear usuario */
+.card-resumen,
+.card.card-crear {
+  min-height: 120px;       /* altura mínima más baja */
+  height: auto;            /* se ajusta al contenido */
+}
+
+.card-resumen .card-body,
+.card.card-crear .card-body {
+  padding: 0.5rem;         /* menos espacio interno */
+  min-height: 100px;       /* asegura consistencia pero más chico */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centra verticalmente */
+  align-items: center;     /* centra horizontalmente */
+}
+
+/* Todas las cards con el mismo tamaño compacto */
+.card-resumen,
+.card.card-crear {
+  height: 140px;        /* alto fijo igual para todas */
+  min-height: auto;     /* evita que se estiren más */
+  display: flex;
+  flex-direction: column;
+}
+
+.card-resumen .card-body,
+.card.card-crear .card-body {
+  padding: 0.5rem;      /* menos espacio interno */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centra verticalmente */
+  align-items: center;     /* centra horizontalmente */
+}
+
+.card-crear {
+  display: flex;
+  flex-direction: column;
+  height: 100%; 
+}
+
+
+
+
+
 

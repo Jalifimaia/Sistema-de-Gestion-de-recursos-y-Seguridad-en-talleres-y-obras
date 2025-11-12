@@ -472,4 +472,14 @@ h1, .titulo-principal {
   box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
 }
 
+/* Botones de login con altura uniforme */
+.btn-login {
+  min-height: 44px;         /* altura mínima consistente */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 

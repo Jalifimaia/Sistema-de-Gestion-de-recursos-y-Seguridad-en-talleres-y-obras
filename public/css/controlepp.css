@@ -16,7 +16,7 @@
   width: 28px;
   flex-shrink: 0;
 }
-
+/*
 .etiqueta-fecha {
   font-weight: 500;
   color: #6c757d;
@@ -25,7 +25,7 @@
 .valor-fecha {
   font-weight: 600 bold;
   font-size: 1rem;
-}
+}*/
 
 .titulo-seccion {
   all: unset;
@@ -36,10 +36,11 @@
   display: inline-block;
 }
 
+/*
 .fecha-destacada {
   font-size: 0.9rem;
   color: #333;
-}
+}*/
 
 .titulo-seccion {
   font-size: 1.6rem !important;

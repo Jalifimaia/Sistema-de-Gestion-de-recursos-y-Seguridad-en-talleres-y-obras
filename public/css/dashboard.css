@@ -1,5 +1,5 @@
 /* === Encabezado === */
-.fecha-destacada {
+/*.fecha-destacada {
   font-size: 0.9rem;
   color: #333;
 }
@@ -11,7 +11,7 @@
 
 .valor-fecha {
   font-weight: bold;
-}
+}*/
 
 /* === Tarjetas principales === */
 .card-resumen {
@@ -180,8 +180,8 @@ padding-top: 0.25rem;
 }
 
 .icono-checklist {
-  height: 50px;
-  width: 50px;
+  height: 25px;
+  width: 25px;
 }
 
 .mover-acordeon-arriba {
@@ -207,14 +207,9 @@ padding-top: 0.25rem;
 .accordion-button:active {
   box-shadow: rgb(58, 58, 58);
   outline: rgb(135, 145, 0);
-  background-color: transparent;
   color: rgb(44, 44, 44);
 }
 
-
-.accordion-button:not(.collapsed) {
-  background-color: transparent;
-}
 
 .accordion-button.encabezado-checklist:focus,
 .accordion-button.encabezado-checklist:active {
@@ -370,7 +365,7 @@ padding-top: 0.25rem;
   height: 28px;
   width: 28px;
 }
-
+/*
 .etiqueta-fecha {
   font-weight: 500;
   color: #6c757d;
@@ -379,8 +374,64 @@ padding-top: 0.25rem;
 .valor-fecha {
   font-weight: 600;
   font-size: 1rem;
+}*/
+
+
+/* Estado expandido en verde */
+.accordion-button.encabezado-checklist:not(.collapsed) {
+  background-color: #43a047 !important; /* verde */
+  color: #fff !important;               /* texto blanco */
 }
 
+/* Hover y focus cuando está expandido: mantener blanco */
+.accordion-button.encabezado-checklist:not(.collapsed):hover,
+.accordion-button.encabezado-checklist:not(.collapsed):focus {
+  background-color: #388e3c !important; /* verde más oscuro */
+  color: #fff !important;               /* texto blanco */
+  box-shadow: none !important;          /* quitar halo azul de Bootstrap */
+}
+
+/* Hover cuando está cerrado: mantener color original */
+.accordion-button.encabezado-checklist:hover,
+.accordion-button.encabezado-checklist:focus {
+  color: inherit !important; /* no forzar negro */
+}
+
+/* Estado expandido en verde */
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed) {
+  background-color: #43a047 !important;
+  color: #fff !important;
+}
+
+/* Hover y focus cuando está expandido */
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):hover,
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):focus {
+  background-color: #388e3c !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+/* Estado expandido en verde */
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed) {
+  background-color: #43a047 !important; /* verde */
+  color: #fff !important;               /* texto blanco */
+}
+
+/* Hover y focus cuando está expandido */
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):hover,
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):focus,
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):active {
+  background-color: #388e3c !important; /* verde más oscuro */
+  color: #fff !important;               /* texto blanco */
+  box-shadow: none !important;
+}
+
+/* Hover cuando está cerrado: mantener color original */
+.accordion .accordion-item .accordion-button.encabezado-checklist:hover,
+.accordion .accordion-item .accordion-button.encabezado-checklist:focus,
+.accordion .accordion-item .accordion-button.encabezado-checklist:active {
+  color: #ffffff !important; /* el color original, no negro */
+}
 
 
 

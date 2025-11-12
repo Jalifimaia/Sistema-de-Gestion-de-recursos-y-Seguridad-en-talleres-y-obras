@@ -1,7 +1,7 @@
 .text-orange {
   color: #252525;
 }
-
+/*
 .fecha-destacada {
   font-size: 0.9rem;
   color: #555;
@@ -11,9 +11,9 @@
   font-weight: 600;
   margin-right: 4px;
 }
-
+*/
 .valor-fecha {
-  font-weight: 500;
+  margin-top: 2px !important;
 }
 
 /* 🟡 Ver detalles (amarillo con texto negro) */
