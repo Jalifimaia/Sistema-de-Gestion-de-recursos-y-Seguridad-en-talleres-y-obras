@@ -57,3 +57,62 @@ input[type="date"].form-control:focus {
   width: 20px;
   height: 20px;
 }
+
+.btn-ver-grafico {
+  border-color: #1f1f1f;
+  outline: none;
+}
+
+.btn-ver-grafico:hover {
+  background-color: #c9c9c9;
+  border-color: #1f1f1f;
+  outline: none;
+}
+
+/* Encabezado de tabla naranja */
+.table thead {
+  background-color: #ff6600 !important;   /* naranja */
+  color: #fff !important;                 /* texto blanco para contraste */
+}
+
+/* Encabezado naranja */
+.table thead tr {
+  background-color: #ff6600 !important;
+}
+.table thead th {
+  color: #fff !important;
+}
+
+/* Striped con tono naranja claro (Bootstrap 5 usa variables) */
+.table-striped > tbody > tr:nth-of-type(odd) {
+  --bs-table-accent-bg: #fff7f0; /* naranja muy suave */
+}
+
+/* Si tenés dark mode o overrides, asegurá el contraste */
+.table td, .table th {
+  border-color: #ddd;
+}
+
+/* Encabezado naranja */
+.table thead {
+  background-color: #ff6600 !important; /* fuerza el fondo naranja */
+}
+
+.table thead th {
+  color: #fff !important; /* texto blanco */
+}
+
+.table {
+  --bs-table-bg: #fff; /* fondo base de la tabla */
+  --bs-table-striped-bg: #fff7f0; /* fondo alternado (striped) */
+  --bs-table-striped-color: #000;
+}
+
+.table thead {
+  --bs-table-bg: #d3401b; /* 👈 esto cambia el fondo del thead */
+  --bs-table-color: #fff; /* texto blanco */
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f0c096 !important; /* naranja muy claro */
+}

@@ -24,11 +24,11 @@
 
     <form method="GET" action="{{ route('reportes.prestamos') }}" class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
-            <label for="fecha_inicio" class="form-label">Desde</label>
+            <label for="fecha_inicio" class="form-label fw-bold fw-bold">Desde</label>
             <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ request('fecha_inicio') }}">
         </div>
         <div class="col-md-3">
-            <label for="fecha_fin" class="form-label">Hasta</label>
+            <label for="fecha_fin" class="form-label fw-bold">Hasta</label>
             <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ request('fecha_fin') }}">
         </div>
 
@@ -50,9 +50,9 @@
     @if($prestamos->count())
     <div class="table-responsive mb-4">
         <table class="table table-bordered table-striped align-middle">
-            <thead class="table-light">
+            <thead>
                 <tr class="text-orange">
-                    <th>Fecha préstamo</th>
+                    <th>Fecha del préstamo</th>
                     <th>Trabajador</th>
                     <th>Estado</th>
                     <th>Duración (Días)</th>
@@ -61,7 +61,7 @@
             <tbody>
                 @foreach($prestamos as $p)
                 <tr>
-                    <td>{{ $p->fecha_prestamo }}</td>
+                    <td>{{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}</td>
                     <td>{{ $p->trabajador }}</td>
                     <td>{{ $p->estado }}</td>
                     <td>

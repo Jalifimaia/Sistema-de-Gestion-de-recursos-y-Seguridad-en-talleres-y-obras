@@ -65,7 +65,7 @@
                     <td>{{ $item->herramienta }}</td>
                     <td>{{ $item->subcategoria }}</td>
                     <td>{{ $item->nro_serie }}</td>
-                    <td>{{ $item->fecha_adquisicion }}</td>
+                    <td>{{ \Carbon\Carbon::parse($item->fecha_adquisicion)->format('d/m/Y H:i') }}</td>
                 </tr>
                 @endforeach
             </tbody>

@@ -58,6 +58,13 @@ class Prestamo extends Model
         return $this->belongsTo(\App\Models\Usuario::class, 'id_usuario_creacion', 'id');
     }
 
+    public function getFechaPrestamoFormateadaAttribute()
+    {
+        return \Carbon\Carbon::parse($this->fecha_prestamo)->format('d/m/Y H:i');
+    }
+
+
+
     /**
      * Último usuario que modificó el préstamo
      */
