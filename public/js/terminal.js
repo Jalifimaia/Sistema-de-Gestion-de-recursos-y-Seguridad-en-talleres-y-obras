@@ -4420,45 +4420,49 @@ function reactivarReconocimientoGlobal() {
 
 /*TTS - TEXTO A VOZ - ASISTENTE DE SAFESTOCK*/
 
+window.usandoAsistente = false;
+window.cierreManualAsistente = false;
+window.modalAsistenteCerrando = false;
+
 function abrirModalAsistente() {
   const modalEl = document.getElementById('modalAsistente');
   if (!modalEl) return;
-
-  // Si ya está visible, no hacer nada
   if (modalEl.classList.contains('show')) return;
 
   window.modalKioscoActivo = true;
+  window.usandoAsistente = true; // ✅ Activar flag
 
   const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
   modal.show();
-
-  /*modalEl.addEventListener('hidden.bs.modal', () => {
-    cerrarModalAsistente();
-  }, { once: true });*/
 }
-
 
 function cerrarModalAsistente() {
   const modalEl = document.getElementById('modalAsistente');
   if (!modalEl) return;
 
+  // ✅ Evitar bucle si ya se está cerrando
+  if (window.modalAsistenteCerrando) return;
+  window.modalAsistenteCerrando = true;
+
   window.modalKioscoActivo = false;
+  window.usandoAsistente = false;
+  window.cierreManualAsistente = true;
 
   try {
-    bootstrap.Modal.getInstance(modalEl)?.hide();
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance && modalEl.classList.contains('show')) {
+      modalInstance.hide(); // solo si no fue disparado por Bootstrap
+    }
   } catch (e) {}
 
-  // Detener TTS si está hablando
   try {
     window.speechSynthesis.cancel();
   } catch (e) {}
 
-  // 🔧 Forzar limpieza de flags si se cerró manualmente
   window.ttsEnCurso = false;
   window.textoUltimoTTS = '';
   window.timestampUltimoTTS = 0;
 
-  // Ocultar subtítulo con animación
   const wrapper = document.querySelector('.subtitulo-wrapper');
   const subtituloEl = document.getElementById('asistenteSubtitulo');
   if (wrapper && subtituloEl) {
@@ -4468,21 +4472,12 @@ function cerrarModalAsistente() {
     }, 300);
   }
 
-  // Restaurar micrófono
-  try {
-    recognitionGlobalPaused = false;
-    safeStartRecognitionGlobal();
-  } catch (e) {
-    console.warn('No se pudo reiniciar reconocimiento tras cerrar asistente:', e);
-  }
-
   document.getElementById('microfono_flotante')?.classList.remove('mic-muted');
 
-
   setTimeout(() => {
-  document.querySelectorAll('.modal.show').forEach(el => el.classList.remove('show'));
-}, 100);
-
+    document.querySelectorAll('.modal.show').forEach(el => el.classList.remove('show'));
+    window.modalAsistenteCerrando = false; // ✅ Reset
+  }, 100);
 }
 
 
@@ -4494,12 +4489,15 @@ function leerAsistenteTexto(opcion) {
   let texto = '';
   switch (opcion) {
     case 1:
-      texto = 'Podés ingresar al sistema escribiendo tu clave o escaneando tu código QR personal. También podés dictar tu clave por voz diciendo "ingresar clave".';
+      texto = 'Podés usar el sistema mediante voz, al leer el nombre de los botones como "continuar", "opción 1" o "página 2".';
       break;
     case 2:
-      texto = 'Desde el menú principal podés solicitar herramientas, registrar recursos que ya tenés en mano, o ver los recursos que tenés asignados actualmente.';
+      texto = 'Podés ingresar al sistema escribiendo tu clave o escaneando tu código QR personal. También podés dictar tu clave por voz diciendo "ingresar clave".';
       break;
     case 3:
+      texto = 'Desde el menú principal podés solicitar herramientas, registrar recursos que ya tenés en mano, o ver los recursos que tenés asignados actualmente.';
+      break;
+    case 4:
       texto = 'Para devolver una herramienta, seleccioná el recurso asignado y escaneá el código QR de la serie correspondiente. El sistema validará la devolución automáticamente.';
       break;
     default:
@@ -4518,14 +4516,6 @@ function leerAsistenteTexto(opcion) {
       return;
     }
 
-    // Pausar reconocimiento de forma determinista (una vez)
-    try {
-      recognitionGlobalPaused = true;
-      safeStopRecognitionGlobal();
-    } catch (e) {
-      console.warn('safeStopRecognitionGlobal falló antes de TTS:', e);
-    }
-
     // Preparar subtítulos
     const palabras = texto.split(' ').filter(Boolean);
     subtituloEl.innerHTML = palabras.map((p, i) => `<span id="palabra-${i}">${p}</span>`).join(' ');
@@ -4534,13 +4524,14 @@ function leerAsistenteTexto(opcion) {
     // Micrófono en gris y quitar pulsing si corresponde
     if (mic) {
       mic.classList.add('mic-muted');
-      microfono_flotante?.classList.remove('pulsing'); // si existe VAD var
+      microfono_flotante?.classList.remove('pulsing');
     }
 
     // Guardar TTS y flags ANTES de speak para evitar race
     window.textoUltimoTTS = texto;
     window.timestampUltimoTTS = Date.now();
     window.ttsEnCurso = true;
+    window.cierreManualAsistente = false; // ✅ Reset al iniciar TTS
 
     const utterance = new SpeechSynthesisUtterance(texto);
     utterance.lang = 'es-ES';
@@ -4550,7 +4541,6 @@ function leerAsistenteTexto(opcion) {
 
     let palabraIndex = 0;
     utterance.onboundary = (event) => {
-      // Algunos navegadores no proveen name === 'word'; chequeamos event.charIndex fallback
       const isWordBoundary = (event.name && event.name === 'word') || typeof event.charIndex === 'number';
       if (!isWordBoundary) return;
       const span = document.getElementById(`palabra-${palabraIndex}`);
@@ -4564,25 +4554,17 @@ function leerAsistenteTexto(opcion) {
     };
 
     utterance.onend = () => {
-      // Marcar TTS finalizado lo antes posible
       window.ttsEnCurso = false;
 
-      // Restaurar mic visual
       if (mic) mic.classList.remove('mic-muted');
-
-      // Ocultar subtítulo con animación
       wrapper.classList.remove('visible');
       setTimeout(() => {
         if (subtituloEl) subtituloEl.innerHTML = '';
       }, 300);
 
-      // Reactivar reconocimiento de forma controlada SOLO si modal sigue abierto
       const sigueVisible = !!modalEl && modalEl.classList.contains('show');
-      if (sigueVisible) {
-        recognitionGlobalPaused = false;
-        // Dejamos un pequeño delay para asegurarnos que audio se libere
+      if (sigueVisible && !window.cierreManualAsistente) {
         setTimeout(() => {
-          // Solo arrancar si no volvió a activarse TTS
           if (!window.ttsEnCurso) {
             try {
               safeStartRecognitionGlobal();
@@ -4592,12 +4574,12 @@ function leerAsistenteTexto(opcion) {
           }
         }, 300);
       } else {
-        // Si el modal fue cerrado mientras hablaba, no reactivar reconocimiento aquí
         console.log('🎤 Reconocimiento no reactivado: modal cerrado durante TTS');
       }
+
+      window.cierreManualAsistente = false; // ✅ Reset final
     };
 
-    // Cancel posible TTS anterior y hablar (flag ya seteado)
     try {
       window.speechSynthesis.cancel();
     } catch (e) {
@@ -4607,16 +4589,15 @@ function leerAsistenteTexto(opcion) {
   };
 
   if (!modalVisible) {
-    // Mostrar modal y reproducir tras show
     if (!!modalEl) {
       window.modalKioscoActivo = true;
+      window.usandoAsistente = true;
       const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
       modal.show();
       modalEl.addEventListener('shown.bs.modal', () => {
         reproducir();
       }, { once: true });
     } else {
-      // Si no existe modal en DOM, solo reproducir (seguro)
       reproducir();
     }
   } else {
@@ -4659,21 +4640,39 @@ function procesarComandoVoz(rawTexto) {
     const modalAsistente = document.getElementById('modalAsistente');
     const modalAsistenteVisible = !!modalAsistente && modalAsistente.classList.contains('show');
 
-    if (modalAsistenteVisible) {
-      if (/\b(como ingreso|como me identifico|como entrar)\b/.test(limpio)) {
-        leerAsistenteTexto(1);
-        return;
-      }
+   if (modalAsistenteVisible) {
+  if (/\b(como usar|como puedo usar|usar sistema|ayuda sistema)\b/.test(limpio)) {
+    leerAsistenteTexto(1);
+    return;
+  }
 
-      if (/\b(que puedo hacer|menu principal|opciones disponibles)\b/.test(limpio)) {
-        leerAsistenteTexto(2);
-        return;
-      }
+  if (/\b(como ingreso|como me identifico|como entrar)\b/.test(limpio)) {
+    leerAsistenteTexto(2);
+    return;
+  }
 
-      if (/\b(como devuelvo|como devolver|como devuelve|devolver herramienta|entregar herramienta|devolver recurso|como entregar)\b/.test(limpio)) {
-        leerAsistenteTexto(3);
-        return;
-      }
+  if (/\b(que puedo hacer|menu principal|opciones disponibles)\b/.test(limpio)) {
+    leerAsistenteTexto(3);
+    return;
+  }
+
+  if (/\b(como devuelvo|como devolver|como devuelve|devolver herramienta|entregar herramienta|devolver recurso|como entregar)\b/.test(limpio)) {
+    leerAsistenteTexto(4);
+    return;
+  }
+
+  // ✅ Comando para cerrar el asistente
+  if (/\b(cerrar|cerrar asistente|salir|terminar ayuda)\b/.test(limpio)) {
+    cerrarModalAsistente();
+    return;
+  }
+}
+
+
+    // Bloqueo general si el asistente está activo
+    if (window.usandoAsistente) {
+      console.log('🚫 Comando ignorado: asistente activo');
+      return;
     }
 
     // Comando global para abrir el asistente (solo si no hay ningún modal visible)
@@ -5257,27 +5256,17 @@ document.addEventListener('show.bs.modal', (event) => {
 });
 
 // Listener seguro para hide del modal (solo si existe)
+// Listener seguro para hide del modal (solo si existe)
 (function attachModalHideHandler() {
   const modalEl = document.getElementById('modalAsistente');
   if (!modalEl) return;
+
   modalEl.addEventListener('hide.bs.modal', () => {
-    try {
-      window.speechSynthesis.cancel();
-    } catch (e) {}
-    // limpiar subtítulo
-    const wrapper = document.querySelector('.subtitulo-wrapper');
-    const subtituloEl = document.getElementById('asistenteSubtitulo');
-    if (wrapper && subtituloEl) {
-      wrapper.classList.remove('visible');
-      setTimeout(() => { subtituloEl.innerHTML = ''; }, 300);
-    }
-    // Reactivar reconocimiento si procede
-    try {
-      recognitionGlobalPaused = false;
-      safeStartRecognitionGlobal();
-    } catch (e) {}
+    cerrarModalAsistente();
   });
 })();
+
+
 
 // Cleanup adicional en beforeunload: cancelar TTS y resetear flags críticos
 window.addEventListener('beforeunload', () => {

@@ -40,7 +40,8 @@
 
   <!-- Modal del Asistente -->
   <div class="modal fade" id="modalAsistente" tabindex="-1" aria-labelledby="modalAsistenteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered  modal-asistente-ancho">
+
       <div class="modal-content">
 
         <div class="modal-header">
@@ -50,10 +51,12 @@
         </div>
 
         <div class="modal-body d-flex flex-column gap-3">
-          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(1)">¿Cómo ingreso al sistema?</button>
-          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(2)">¿Qué puedo hacer desde el menú principal?</button>
-          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(3)">¿Cómo devuelvo una herramienta?</button>
-          
+          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(1)">¿Cómo puedo usar el sistema?</button>
+          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(2)">¿Cómo ingreso al sistema?</button>
+          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(3)">¿Qué puedo hacer desde el menú principal?</button>
+          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(4)">¿Cómo devuelvo una herramienta?</button>
+
+
           <!-- Contenedor animado del subtítulo -->
           <div class="subtitulo-wrapper">
             <div id="asistenteSubtitulo"></div>

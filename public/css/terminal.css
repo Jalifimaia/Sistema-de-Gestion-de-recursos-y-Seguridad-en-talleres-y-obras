@@ -987,3 +987,7 @@ body.modal-open {
 #asistenteSubtitulo.oculto {
   animation: contraerSuave 0.2s ease-out forwards;
 }
+
+.modal-asistente-ancho {
+  max-width: 700px;
+}
