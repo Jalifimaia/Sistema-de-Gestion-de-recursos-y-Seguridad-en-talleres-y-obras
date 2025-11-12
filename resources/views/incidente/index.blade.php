@@ -5,17 +5,21 @@
 @section('content')
 <div class="container py-4">
 
-    <!-- 🔶 Encabezado con fecha y título -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-      <h1 class="text-orange fw-bold mb-0 d-flex align-items-center gap-2">
-        <img src="{{ asset('images/list1.svg') }}" alt="Ícono lista" width="30" height="30">
-        Incidentes registrados
-      </h1>
-      <div class="text-end fecha-destacada">
-        <span class="etiqueta-fecha">Fecha:</span>
-        <strong id="today" class="valor-fecha text-nowrap"></strong>
+    <!-- 🔶 Encabezado -->
+    <header class="row mb-4 align-items-center">
+      <div class="col-md-8">
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2 text-orange">
+          <img src="{{ asset('images/list1.svg') }}" alt="Ícono lista" style="height: 35px;">
+          Incidentes registrados
+        </h1>
+        <p class="text-muted small">Listado de incidentes registrados en el sistema</p>
       </div>
-    </div>
+
+      <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-3">
+        <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
+      </div>
+    </header>
+
 
     <div class="mb-3 text-start">
       <a href="{{ route('incidente.create') }}" class="btn btn-registrar-incidente">

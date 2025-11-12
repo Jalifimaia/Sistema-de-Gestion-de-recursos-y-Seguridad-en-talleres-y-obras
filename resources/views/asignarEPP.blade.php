@@ -6,12 +6,20 @@
 
 @section('content')
 <div class="container mt-4">
-    <div class="d-flex align-items-center mb-4">
-    <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary me-3">
-      ⬅️ Volver
-    </a>
-    <h2 class="h4 fw-bold mb-0">Asignación de EPP</h2>
-  </div>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ route('controlEPP') }}" class="btn btn-volver d-inline-flex align-items-center">
+            <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+            Volver
+            </a>
+
+            <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
+            <img src="{{ asset('images/workerepp.svg') }}" alt="EPP" class="me-2 icono-volver">
+            Asignación de EPP
+            </h4>
+        </div>
+    </div>
+
 
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -23,65 +31,74 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('epp.asignar.store') }}">
-        @csrf
+   <form method="POST" action="{{ route('epp.asignar.store') }}">
+  @csrf
 
+  <!-- Card: Filtros de trabajador -->
+  <div class="card mb-4">
+    <div class="card-header bg-orange-soft">
+      <h5 class="mb-0 fw-bold">Filtros de trabajador</h5>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label for="estado_filtro" class="form-label">Estado</label>
         <select id="estado_filtro" class="form-select">
-            <option value="" selected disabled>-- Filtrar por estado --</option>
-            <option value="alta">Trabajadores en alta</option>
-            <option value="standby">Trabajadores en stand by</option>
+          <option value="" selected disabled>-- Filtrar por estado --</option>
+          <option value="alta">Trabajadores en alta</option>
+          <option value="standby">Trabajadores en stand by</option>
         </select>
+      </div>
 
+      <div class="mb-3">
+        <label for="usuario_id" class="form-label">Trabajador</label>
+        <select name="usuario_id" id="usuario_id" class="form-select select2" required>
+          <option value="">-- Seleccionar trabajador --</option>
+          @foreach ($usuarios as $usuario)
+            <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
+          @endforeach
+        </select>
+      </div>
 
-        <!-- Trabajador -->
+      <div id="epp-asignado" class="alert alert-info d-none">
+        <strong>EPP ya asignado:</strong>
+        <ul id="epp-lista" class="mb-0"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Asignación de EPP -->
+  <div class="card mb-4">
+    <div class="card-header bg-yellow-soft">
+      <h5 class="mb-0 fw-bold">Asignación de elementos de protección</h5>
+    </div>
+    <div class="card-body">
+      @foreach (['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'] as $tipo)
         <div class="mb-3">
-            <label for="usuario_id" class="form-label">Trabajador</label>
-            <select name="usuario_id" id="usuario_id" class="form-select select2" required>
-                <option value="">-- Seleccionar trabajador --</option>
-                @foreach ($usuarios as $usuario)
-                    <option value="{{ $usuario->id }}">
-                        {{ $usuario->name }}
-                    </option>
-                @endforeach
-            </select>
+          <label for="{{ $tipo }}" class="form-label">{{ ucfirst($tipo) }}</label>
+          <select name="{{ $tipo }}" id="{{ $tipo }}" class="form-select select2-epp" data-tipo="{{ $tipo }}">
+            <option value="">-- Seleccionar {{ $tipo }} disponible --</option>
+          </select>
+          <div class="text-danger small d-none" id="alert-{{ $tipo }}">Ya tiene {{ $tipo }} asignado</div>
         </div>
+      @endforeach
 
-        <!-- EPP ya asignado -->
-        <div id="epp-asignado" class="alert alert-info d-none">
-            <strong>EPP ya asignado:</strong>
-            <ul id="epp-lista" class="mb-0"></ul>
+      <div class="mb-3">
+        <label for="fecha_asignacion" class="form-label">Fecha de asignación</label>
+        <div class="input-group" onclick="this.querySelector('input').showPicker()" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ') this.querySelector('input').showPicker()">
+          <input type="date" name="fecha_asignacion" id="fecha_asignacion" class="form-control" required value="{{ now()->toDateString() }}">
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Tipos de EPP -->
-        @foreach (['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'] as $tipo)
-            <div class="mb-3">
-                <label for="{{ $tipo }}" class="form-label">{{ ucfirst($tipo) }}</label>
-                <select name="{{ $tipo }}" id="{{ $tipo }}" class="form-select select2-epp" data-tipo="{{ $tipo }}">
-                    <option value="">-- Seleccionar {{ $tipo }} disponible --</option>
-                </select>
-                <div class="text-danger small d-none" id="alert-{{ $tipo }}">Ya tiene {{ $tipo }} asignado</div>
-            </div>
-        @endforeach
+  <!-- Botones -->
+  <div class="text-center mt-4">
+        <input type="hidden" name="todos_asignados" id="todos_asignados" value="0">
+        <button type="submit" id="submitBtn" class="btn btn-guardar w-75 mb-5">Guardar asignación</button>
+    </div>
 
-        <!-- Fecha de asignación -->
-        <div class="mb-3">
-            <label for="fecha_asignacion" class="form-label">Fecha de asignación</label>
-            <div class="input-group" onclick="this.querySelector('input').showPicker()" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ') this.querySelector('input').showPicker()">
-                <input type="date" name="fecha_asignacion" id="fecha_asignacion" class="form-control" required value="{{ now()->toDateString() }}">
-            </div>
-        </div>
+</form>
 
-
-        <!-- Botones -->
-        <div class="d-flex justify-content-between">
-            <a href="{{ route('controlEPP') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
-
-            <input type="hidden" name="todos_asignados" id="todos_asignados" value="0">
-
-
-            <button type="submit" id="submitBtn" class="btn btn-primary">Guardar asignación</button>
-        </div>
-    </form>
 </div>
 
 <!-- Modal: EPP ya asignado -->
@@ -103,6 +120,10 @@
 </div>
 
 @endsection
+
+@push('styles')
+<link href="{{ asset('css/asignarEpp.css') }}" rel="stylesheet">
+@endpush
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

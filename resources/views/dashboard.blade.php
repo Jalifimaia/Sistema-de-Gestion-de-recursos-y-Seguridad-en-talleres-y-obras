@@ -10,16 +10,22 @@
 @section('content')
 <div class="container py-4">
     <header class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <p class="text-muted mb-1 subir-bienvenida">
-        Bienvenido, {{ auth()->user()->name }} <em>[{{ auth()->user()->rol->nombre_rol }}]</em>
-      </p>
-      <h1 class="h4 fw-bold mb-1">Resumen del Taller</h1>
-      <p class="text-muted texto-descriptivo-alerta">Estado general de las herramientas y de la seguridad de los trabajadores.</p>
-    </div>
+      <div>
+        <p class="text-muted mb-1 subir-bienvenida">
+          Bienvenido, {{ auth()->user()->name }} <em>[{{ auth()->user()->rol->nombre_rol }}]</em>
+        </p>
 
-    <div class="col-auto fecha-destacada d-flex align-items-center justify-content-end">
-      <strong id="today" class="valor-fecha text-nowrap"></strong>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+          <img src="{{ asset('images/resumen.svg') }}" alt="Icono Resumen" style="height: 30px;">
+          Resumen diario del taller
+        </h1>
+
+        <p class="text-muted texto-descriptivo-alerta">
+          Estado general de las herramientas y de la seguridad de los trabajadores.
+        </p>
+      </div>
+    <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
+      <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
     </div>
   </header>
 
@@ -28,11 +34,11 @@
   <div class="accordion-item">
     <h2 class="accordion-header" id="headingChecklists">
       <button class="accordion-button collapsed encabezado-checklist" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChecklists" aria-expanded="false" aria-controls="collapseChecklists">
-        <img src="{{ asset('images/checklist.svg') }}" alt="Checklist Diario" class="icono-checklist me-2">
+        <img src="{{ asset('images/checkk.svg') }}" alt="Checklist Diario" class="icono-checklist me-2">
         <span>Checklists del día</span>
       </button>
     </h2>
-    <div id="collapseChecklists" class="accordion-collapse collapse show" aria-labelledby="headingChecklists" data-bs-parent="#accordionChecklists">
+    <div id="collapseChecklists" class="accordion-collapse collapse show" aria-labelledby="headingChecklists">
       <div class="accordion-body">
         @if($checklistsHoy->isEmpty())
           <div class="mensaje-checklist-vacio d-flex align-items-center">

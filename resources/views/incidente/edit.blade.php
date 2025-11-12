@@ -1,14 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-start mb-3">
-  <a href="{{ route('incidente.index') }}" class="btn btn-outline-secondary">
-    ⬅️ Volver
-  </a>
-</div>
+<div class="container py-4">
 
-<div class="container">
-    <h2>Editar incidente</h2>
+  <!-- Encabezado -->
+  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <a href="{{ route('incidente.index') }}" class="btn btn-volver d-inline-flex align-items-center">
+      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+      Volver
+    </a>
+
+    <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
+      <img src="{{ asset('images/lapiz.svg') }}" alt="Editar" class="me-2 icono-volver">
+      Editar incidente
+    </h4>
+  </div>
+
 
     @if(isset($readonly) && $readonly)
       <div class="alert alert-info">
@@ -107,84 +114,92 @@
             @endforeach
         </div>
 
-        <!-- Estado del incidente -->
         @php
-        $resueltoEstado = \App\Models\EstadoIncidente::where('nombre_estado', 'Resuelto')->first();
+          $resueltoEstado = \App\Models\EstadoIncidente::where('nombre_estado', 'Resuelto')->first();
         @endphp
 
-        <div class="mb-3">
-        <label for="id_estado_incidente" class="form-label">Estado del incidente</label>
+        <!-- Card agrupada -->
+        <div class="card mb-4">
+          <div class="card-header bg-orange text-white fw-bold">
+            Información del incidente
+          </div>
+          <div class="card-body">
 
-        @if(!empty($readonly))
-            <input type="text" class="form-control" 
-            value="{{ $incidente->estadoIncidente?->nombre_estado ?? '-' }}" readonly>
-            <input type="hidden" name="id_estado_incidente" value="{{ $incidente->id_estado_incidente }}">
-        @else
-            <select name="id_estado_incidente" id="id_estado_incidente" class="form-select" required>
-            @foreach($estados as $estado)
-                <option value="{{ $estado->id }}" {{ $incidente->id_estado_incidente == $estado->id ? 'selected' : '' }}>
-                    {{ $estado->nombre_estado }}
-                </option>
-            @endforeach
-            {{-- Agregar opción Resuelto al final (por si no está en $estados) --}}
-            @if(!$estados->firstWhere('nombre_estado', 'Resuelto'))
-              <option value="{{ optional($resueltoEstado)->id }}" {{ $incidente->id_estado_incidente == optional($resueltoEstado)->id ? 'selected' : '' }}>Resuelto</option>
-            @endif
-            </select>
-        @endif
-        </div>
+            <!-- Estado del incidente -->
+            <div class="mb-3">
+              <label for="id_estado_incidente" class="form-label">Estado del incidente</label>
+              @if(!empty($readonly))
+                <input type="text" class="form-control" 
+                      value="{{ $incidente->estadoIncidente?->nombre_estado ?? '-' }}" readonly>
+                <input type="hidden" name="id_estado_incidente" value="{{ $incidente->id_estado_incidente }}">
+              @else
+                <select name="id_estado_incidente" id="id_estado_incidente" class="form-select" required>
+                  @foreach($estados as $estado)
+                    <option value="{{ $estado->id }}" {{ $incidente->id_estado_incidente == $estado->id ? 'selected' : '' }}>
+                      {{ $estado->nombre_estado }}
+                    </option>
+                  @endforeach
+                  @if(!$estados->firstWhere('nombre_estado', 'Resuelto'))
+                    <option value="{{ optional($resueltoEstado)->id }}" {{ $incidente->id_estado_incidente == optional($resueltoEstado)->id ? 'selected' : '' }}>Resuelto</option>
+                  @endif
+                </select>
+              @endif
+            </div>
 
-        <!-- Motivo / Descripción -->
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Motivo del incidente</label>
+            <!-- Motivo / Descripción -->
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Motivo del incidente</label>
+              @if(!empty($readonly))
+                <input type="text" name="descripcion" id="descripcion" class="form-control" 
+                      value="{{ $incidente->descripcion }}" readonly>
+                <input type="hidden" name="descripcion" value="{{ $incidente->descripcion }}">
+              @else
+                <input type="text" name="descripcion" id="descripcion" class="form-control" 
+                      value="{{ old('descripcion', $incidente->descripcion) }}" required>
+              @endif
+            </div>
 
-            @if(!empty($readonly))
-              <input type="text" name="descripcion" id="descripcion" class="form-control" 
-                     value="{{ $incidente->descripcion }}" readonly>
-              <input type="hidden" name="descripcion" value="{{ $incidente->descripcion }}">
-            @else
-              <input type="text" name="descripcion" id="descripcion" class="form-control" 
-                     value="{{ old('descripcion', $incidente->descripcion) }}" required>
-            @endif
+            <!-- Fecha del incidente -->
+            <div class="mb-3">
+              <label class="form-label">Fecha del incidente</label>
+              <input type="text" class="form-control"
+                value="{{ $incidente->fecha_incidente
+                    ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
+                        ->setTimezone(config('app.timezone'))
+                        ->format('d/m/Y H:i')
+                    : '-' }}"
+                readonly>
+              <input type="hidden" name="fecha_incidente"
+                value="{{ $incidente->fecha_incidente
+                    ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
+                        ->format('Y-m-d H:i:s')
+                    : '' }}">
+            </div>
+
+          </div>
         </div>
 
         <!-- Resolución -->
         <div class="mb-3" id="resolucion-container" style="display: none;">
-            <label for="resolucion" class="form-label" >Resolución</label>
-            @if(!empty($readonly))
-            <input type="text" name="resolucion" id="resolucion" class="form-control" value="{{ $incidente->resolucion }}" readonly >
+          <label for="resolucion" class="form-label">Resolución</label>
+          @if(!empty($readonly))
+            <input type="text" name="resolucion" id="resolucion" class="form-control" value="{{ $incidente->resolucion }}" readonly>
             <input type="hidden" name="resolucion" value="{{ $incidente->resolucion }}">
-            @else
-            <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}" >
-            @endif
+          @else
+            <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}">
+          @endif
         </div>
 
-        <!-- Fecha del incidente -->
-        <div class="mb-3">
-          <label class="form-label">Fecha del incidente</label>
-          <input type="text" class="form-control"
-            value="{{ $incidente->fecha_incidente
-                ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
-                    ->setTimezone(config('app.timezone'))
-                    ->format('d/m/Y H:i')
-                : '-' }}"
-            readonly>
-
-          <input type="hidden" name="fecha_incidente"
-            value="{{ $incidente->fecha_incidente
-                ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $incidente->fecha_incidente, 'UTC')
-                    ->format('Y-m-d H:i:s')
-                : '' }}">
-        </div>
-
+        <!-- Botones -->
         <div class="d-flex justify-content-between">
-            @if(empty($readonly))
-              <button type="submit" class="btn btn-success">Actualizar incidente</button>
-            @endif
-            <a href="{{ route('incidente.index') }}" class="btn btn-secondary">Cancelar</a>
+          @if(empty($readonly))
+            <button type="submit" class="btn btn-success">Actualizar incidente</button>
+          @endif
+          <a href="{{ route('incidente.index') }}" class="btn btn-secondary">Cancelar</a>
         </div>
-    </form>
-</div>
+
+            </form>
+        </div>
 
 {{-- Modales --}}
 @if(session('success'))
@@ -314,8 +329,13 @@ document.addEventListener('DOMContentLoaded', function () {
       const resolucionContainer = document.getElementById('resolucion-container');
       if (resolucionContainer) resolucionContainer.style.display = '';
     } else {
-      let html = '<div class="text-warning"><strong>Para marcar el incidente como Resuelto, todos los recursos deben estar en estado Disponible o Baja.</strong></div>';
-      html += '<ul class="mt-1 mb-0 small text-danger">';
+      let html = `
+        <div class="d-flex align-items-center gap-2 text-warning fw-semibold">
+          <img src="/images/precaucion.svg" alt="Precaución" class="icono-precaucion">
+          <span>Para marcar el incidente como <strong>Resuelto</strong>, todos los recursos deben estar en estado <strong>Disponible</strong> o <strong>Baja</strong>.</span>
+        </div>
+        <ul class="mt-1 mb-0 small text-danger fw-semibold">
+      `;
       bloqueadores.forEach(b => {
         html += `<li>${escapeHtml(b.nombre)} — estado actual: ${escapeHtml(b.estadoText)}</li>`;
       });
@@ -463,3 +483,8 @@ document.addEventListener('DOMContentLoaded', function () {
 @endpush
 
 @endsection
+
+@push('styles')
+<link href="{{ asset('css/editarIncidente.css') }}" rel="stylesheet">
+@endpush
+

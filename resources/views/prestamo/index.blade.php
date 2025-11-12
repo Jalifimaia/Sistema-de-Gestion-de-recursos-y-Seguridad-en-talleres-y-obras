@@ -54,21 +54,24 @@
             <label for="fecha-fin" class="form-label">Hasta</label>
             <input type="date" id="fecha-fin" name="fecha_fin" class="form-control filtro-naranja" value="{{ request('fecha_fin') }}">
           </div>
-          <button type="button" id="btn-filtrar" class="btn btn-naranja d-flex align-items-center justify-content-center"
-                  style="width: 40px; height: 40px;">
-            <i class="bi bi-search"></i>
-          </button>
+          <button type="submit" class="btn btn-naranja d-flex align-items-center justify-content-center"
+                style="width: 40px; height: 40px;">
+          <img src="{{ asset('images/lupa.svg') }}" alt="Buscar" style="width:18px; height:18px;">
+        </button>
         </div> <br>
 
         <div class="col-md-6">
           <label for="search" class="form-label">Buscar</label>
           <div class="input-group">
-            <input type="text" name="search" id="busqueda" value="{{ request('search') }}" class="form-control filtro-naranja" placeholder="🔍 Buscar por recurso, serie, trabajador o creador">
+            <input type="text" name="search" id="busqueda" value="{{ request('search') }}"
+                  class="form-control filtro-naranja"
+                  placeholder="🔍 Buscar por recurso, serie, trabajador o creador">
             <button class="btn btn-naranja" type="submit">
-              <i class="bi bi-search"></i>
+              <img src="{{ asset('images/lupa.svg') }}" alt="Buscar" style="width:18px; height:18px;">
             </button>
           </div>
-        </div>
+</div>
+
       </div>
 
 </form>

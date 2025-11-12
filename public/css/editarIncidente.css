@@ -1,0 +1,121 @@
+/* Encabezado */
+.btn-volver {
+  background-color: #d3401b;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  line-height: 1.2;
+  max-width: fit-content;
+  height: auto;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #c62828;
+}
+
+.icono-volver {
+  width: 18px;
+  height: 18px;
+}
+
+h4.text-orange {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1d1d1d;
+}
+
+/* Card naranja */
+.bg-orange {
+  background-color: #f57c00;
+}
+
+/* Labels en negrita */
+label.form-label {
+  font-weight: 600;
+}
+
+/* Inputs y selects con borde gris oscuro */
+input.form-control,
+select.form-select,
+textarea.form-control {
+  border: 2px solid #424242;
+  box-shadow: none;
+}
+
+input.form-control:focus,
+select.form-select:focus,
+textarea.form-control:focus {
+  border-color: #424242;
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(66, 66, 66, 0.25);
+}
+
+/* Botón guardar */
+.btn-guardar {
+  background-color: #43a047;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-guardar:hover {
+  background-color: #388e3c;
+}
+
+/* Botón cancelar */
+.btn-secondary {
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+/* Resolución oculta por defecto */
+#resolucion-container {
+  display: none;
+}
+
+.icono-precaucion {
+  width: 20px;
+  height: 20px;
+  animation: parpadeo 1.2s infinite;
+}
+
+@keyframes parpadeo {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.1); }
+}
+
+.texto-precaucion {
+  color: #242206 !important;
+  font-size: 0.95rem;
+}
+
+.icono-precaucion {
+  width: 20px;
+  height: 20px;
+  animation: parpadeo 1.2s infinite;
+}
+
+@keyframes parpadeo {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.1); }
+}
+
+ul.text-danger li {
+  font-weight: 600;
+  color: #c62828;
+}
+
+.card-header {
+  font-weight: 600;
+}

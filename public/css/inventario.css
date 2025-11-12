@@ -1,0 +1,14 @@
+.table-naranja th:nth-child(1),
+.table-naranja td:nth-child(1) {
+  max-width: 100px;
+}
+
+.table-naranja th:nth-child(2),
+.table-naranja td:nth-child(2) {
+  max-width: 180px;
+}
+
+.table-naranja th:nth-child(5),
+.table-naranja td:nth-child(5) {
+  max-width: 200px;
+}

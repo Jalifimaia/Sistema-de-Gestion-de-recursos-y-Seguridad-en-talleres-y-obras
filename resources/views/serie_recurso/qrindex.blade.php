@@ -39,7 +39,6 @@
                 <h5 class="card-title">{{ $serie->nro_serie }}</h5>
                 <p class="card-text">
                   <strong>Recurso:</strong> {{ $serie->recurso->nombre ?? 'Sin nombre' }}<br>
-                  <strong>Código:</strong> {{ $serie->serie_recurso_codigo ?? '—' }}
                 </p>
 
                 @if($serie->codigo_qr)

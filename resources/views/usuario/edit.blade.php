@@ -1,138 +1,123 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ __('Update') }} Usuario
+    Editar Usuario
 @endsection
 
 @section('content')
-<section class="container py-4">
-    <div class="">
+<div class="container py-4">
 
-        <div class="col-md-12">
-            <div class="card card-default">
-                <div class="card-header">
-                    <span class="card-title">Editar Usuario</span>
-                </div>
+  <!-- Encabezado -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{{ route('usuarios.index') }}" class="btn btn-volver d-inline-flex align-items-center">
+        <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+        Volver
+      </a>
 
-                <div class="card-body bg-white">
-
-                    {{-- Formulario de actualización --}}
-                    <form id="formEditarUsuario" method="POST" action="{{ route('usuarios.update', $usuario->id) }}">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Nombre</label>
-                            <input type="text" name="name" class="form-control" 
-                                   value="{{ old('name', $usuario->name) }}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="dni" class="form-label">DNI</label>
-                            <input type="text" name="dni" class="form-control" 
-                                   value="{{ old('dni', $usuario->dni) }}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" 
-                                   value="{{ old('email', $usuario->email) }}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" name="password" id="password" 
-                                   class="form-control">
-                            <small class="form-text text-muted">
-                                Dejá este campo vacío si no querés cambiar la contraseña.
-                            </small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation" 
-                                   class="form-control" >
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_rol" class="form-label">Rol</label>
-                            <select name="id_rol" class="form-select" required>
-                                @foreach ($roles as $rol)
-                                    <option value="{{ $rol->id }}" 
-                                        {{ $usuario->id_rol == $rol->id ? 'selected' : '' }}>
-                                        {{ $rol->nombre_rol }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        {{-- Estado actual (solo lectura, último campo) --}}
-                        <div class="mb-3">
-                            <label class="form-label">Estado actual</label>
-                            <div>
-                                @if ($usuario->estado?->nombre === 'Alta')
-                                    <span class="badge bg-success">Activo (Alta)</span>
-                                @elseif ($usuario->estado?->nombre === 'Baja')
-                                    <span class="badge bg-danger">Inactivo (Baja)</span>
-                                @elseif ($usuario->estado?->nombre === 'stand by')
-                                    <span class="badge bg-warning text-dark">Stand by</span>
-                                @else
-                                    <span class="badge bg-secondary">Sin estado</span>
-                                @endif
-                            </div>
-                        </div>
-                        
-                        <a href="{{ route('usuarios.index') }}" class="btn btn-outline-secondary">
-                            ⬅️ Volver
-                        </a>
-                        
-                        <button type="button" class="btn btn-primary" id="btnAbrirModalGuardar">
-                            Guardar cambios
-                        </button>
-                    </form>
-
-
-
-                    {{-- Bloque de acciones de estado --}}
-                    <div class="d-flex gap-2 mt-4">
-
-                        @php $estado = $usuario->estado?->nombre; @endphp
-
-                      <form method="POST" action="{{ route('usuarios.activarConEPP', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="alta">
-                        @csrf
-                        <button type="button"
-                          class="btn btn-success btn-confirmar-estado {{ $estado === 'Alta' ? 'opacity-50' : '' }}"
-                          {{ $estado === 'Alta' ? 'disabled' : ($estado === 'Baja' ? 'disabled' : '') }}
-                          title="{{ $estado === 'Baja' ? 'Usuario en Baja: primero pasar a Stand by para asignar EPP' : ($estado === 'Alta' ? 'Ya está activo' : 'Cambiar a estado Alta') }}">
-                          Dar de alta
-                        </button>
-                      </form>
-
-
-                        {{-- Dar de Baja --}}
-                        <form method="POST" action="{{ route('usuarios.baja', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="baja">
-                        @csrf
-                        <button type="button" class="btn btn-danger btn-confirmar-estado {{ $usuario->estado->nombre === 'Baja' ? 'opacity-50' : '' }}" {{ $usuario->estado->nombre === 'Baja' ? 'disabled' : '' }} title="{{ $usuario->estado->nombre === 'Baja' ? 'Ya está dado de baja' : 'Cambiar a estado Baja' }}">
-                            Dar de baja
-                        </button>
-                        </form>
-
-                        {{-- Poner en Stand by --}}
-                        <form method="POST" action="{{ route('usuarios.standby', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="stand by">
-                          @csrf
-                          <button type="button" class="btn btn-warning btn-confirmar-estado {{ $usuario->estado->nombre === 'stand by' ? 'opacity-50' : '' }}"
-                                  {{ $usuario->estado->nombre === 'stand by' ? 'disabled' : '' }}
-                                  title="{{ $usuario->estado->nombre === 'stand by' ? 'Ya está en stand by' : 'Cambiar a estado Stand by' }}">
-                            Poner en stand by
-                          </button>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+      <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
+        <img src="{{ asset('images/userNuevo.svg') }}" alt="Usuario" class="me-2 icono-volver">
+        Editar Usuario
+      </h4>
     </div>
-</section>
+  </div>
+
+  <!-- Formulario -->
+  <form id="formEditarUsuario" method="POST" action="{{ route('usuarios.update', $usuario->id) }}">
+    @csrf
+    @method('PUT')
+
+    <div class="mb-3">
+      <label for="name" class="form-label">Nombre</label>
+      <input type="text" name="name" class="form-control" value="{{ old('name', $usuario->name) }}" required placeholder="Ejemplo: Juan Pérez">
+    </div>
+
+    <div class="mb-3">
+      <label for="dni" class="form-label">DNI</label>
+      <input type="text" name="dni" class="form-control" value="{{ old('dni', $usuario->dni) }}" required placeholder="Ejemplo: 12345678">
+    </div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" name="email" class="form-control" value="{{ old('email', $usuario->email) }}" required placeholder="Ejemplo: juan@example.com">
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label">Contraseña</label>
+      <input type="password" name="password" id="password" class="form-control" placeholder="Dejar vacío si no se cambia">
+      <small class="form-text text-muted">Dejá este campo vacío si no querés cambiar la contraseña.</small>
+    </div>
+
+    <div class="mb-3">
+      <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
+      <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Repetí la contraseña">
+    </div>
+
+    <div class="mb-3">
+      <label for="id_rol" class="form-label">Rol</label>
+      <select name="id_rol" class="form-select" required>
+        <option value="" disabled>-- Seleccionar rol --</option>
+        @foreach ($roles as $rol)
+          <option value="{{ $rol->id }}" {{ $usuario->id_rol == $rol->id ? 'selected' : '' }}>
+            {{ $rol->nombre_rol }}
+          </option>
+        @endforeach
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Estado actual</label>
+      <div>
+        @if ($usuario->estado?->nombre === 'Alta')
+          <span class="badge badge-estado bg-success text-white">Activo (Alta)</span>
+        @elseif ($usuario->estado?->nombre === 'Baja')
+          <span class="badge badge-estado bg-danger">Inactivo (Baja)</span>
+        @elseif ($usuario->estado?->nombre === 'stand by')
+          <span class="badge badge-estado bg-secondary text-white">Stand by</span>
+        @else
+          <span class="badge badge-estado bg-secondary">Sin estado</span>
+        @endif
+      </div>
+    </div>
+
+    <!-- Botón largo centrado -->
+    <div class="text-center mt-4">
+      <button type="button" class="btn btn-guardar w-75" id="btnAbrirModalGuardar">Guardar cambios</button>
+    </div>
+  </form>
+
+  <!-- Acciones de estado -->
+  <div class="d-flex gap-2 mt-4">
+    @php $estado = $usuario->estado?->nombre; @endphp
+
+    <form method="POST" action="{{ route('usuarios.activarConEPP', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="alta">
+      @csrf
+      <button type="button"
+        class="btn btn-success btn-confirmar-estado {{ $estado === 'Alta' ? 'opacity-50' : '' }}"
+        {{ $estado === 'Alta' ? 'disabled' : ($estado === 'Baja' ? 'disabled' : '') }}
+        title="{{ $estado === 'Baja' ? 'Usuario en Baja: primero pasar a Stand by para asignar EPP' : ($estado === 'Alta' ? 'Ya está activo' : 'Cambiar a estado Alta') }}">
+        Dar de alta
+      </button>
+    </form>
+
+    <form method="POST" action="{{ route('usuarios.baja', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="baja">
+      @csrf
+      <button type="button" class="btn btn-danger btn-confirmar-estado {{ $estado === 'Baja' ? 'opacity-50' : '' }}" {{ $estado === 'Baja' ? 'disabled' : '' }} title="{{ $estado === 'Baja' ? 'Ya está dado de baja' : 'Cambiar a estado Baja' }}">
+        Dar de baja
+      </button>
+    </form>
+
+    <form method="POST" action="{{ route('usuarios.standby', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="stand by">
+      @csrf
+      <button type="button" class="btn btn-warning btn-confirmar-estado {{ $estado === 'stand by' ? 'opacity-50' : '' }}"
+              {{ $estado === 'stand by' ? 'disabled' : '' }}
+              title="{{ $estado === 'stand by' ? 'Ya está en stand by' : 'Cambiar a estado Stand by' }}">
+        Poner en <em>stand by</em>
+      </button>
+    </form>
+  </div>
+</div>
+
 
 <!-- Modal de confirmación de estado -->
 <div class="modal fade" id="modalConfirmarEstado" tabindex="-1" aria-labelledby="modalConfirmarEstadoLabel" aria-hidden="true">
@@ -325,5 +310,10 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+
+@push('styles')
+<link href="{{ asset('css/editarUsuario.css') }}" rel="stylesheet">
+@endpush
+
 
 

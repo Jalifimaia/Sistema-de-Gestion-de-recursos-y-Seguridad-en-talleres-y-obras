@@ -60,7 +60,9 @@
                 <tr>
                     <td>{{ $r->nombre }}</td>
                     <td>{{ $r->cantidad_prestamos }}</td>
-                    <td>{{ $r->ultima_fecha }}</td>
+                    <td>
+                      {{ \Carbon\Carbon::parse($r->ultima_fecha)->format('d/m/Y H:i') }}
+                    </td>
                 </tr>
                 @endforeach
             </tbody>

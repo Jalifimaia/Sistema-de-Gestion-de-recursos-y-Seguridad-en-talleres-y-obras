@@ -1,14 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-start mb-3">
-  <a href="{{ route('incidente.index') }}" class="btn btn-outline-secondary">
-    ⬅️ Volver
-  </a>
-</div>
+<div class="container py-4">
 
-<div class="container">
-    <h2>Registrar nuevo incidente</h2>
+  <!-- Encabezado -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{{ route('incidente.index') }}" class="btn btn-volver d-inline-flex align-items-center">
+      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+      Volver
+    </a>
+
+    <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
+      <img src="{{ asset('images/list1.svg') }}" alt="Incidente" class="me-2 icono-volver">
+      Registrar nuevo incidente
+    </h4>
+  </div>
+
 
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
@@ -404,3 +411,8 @@ function mostrarModalAvisoRecursos(mensaje = 'Debe haber al menos un recurso car
 
 </script>
 @endsection
+
+@push('styles')
+<link href="{{ asset('css/agregarIncidente.css') }}" rel="stylesheet">
+@endpush
+

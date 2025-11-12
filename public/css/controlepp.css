@@ -16,7 +16,7 @@
   width: 28px;
   flex-shrink: 0;
 }
-
+/*
 .etiqueta-fecha {
   font-weight: 500;
   color: #6c757d;
@@ -25,7 +25,7 @@
 .valor-fecha {
   font-weight: 600 bold;
   font-size: 1rem;
-}
+}*/
 
 .titulo-seccion {
   all: unset;
@@ -36,10 +36,11 @@
   display: inline-block;
 }
 
+/*
 .fecha-destacada {
   font-size: 0.9rem;
   color: #333;
-}
+}*/
 
 .titulo-seccion {
   font-size: 1.6rem !important;
@@ -97,7 +98,7 @@
   font-weight: 500;
   padding: 0.6rem 1.2rem;
   border-radius: 6px;
-  background-color: #82b805;
+  background-color: #1e8100;
   color: #fff;
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -106,7 +107,7 @@
 .btn-checklist:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  background-color: #008b07;
+  background-color: #04750a;
   color: #fff;
 }
 
@@ -190,4 +191,11 @@
 .btn-naranja:hover {
   background-color: #e66a00;
   transform: scale(1.03);
+}
+
+/* Desactivar hover en todas las cards resumen */
+.card-resumen:hover {
+  box-shadow: none !important;   /* elimina sombra extra */
+  transform: none !important;    /* evita que se muevan si tenías animación */
+  cursor: default;               /* cursor normal */
 }

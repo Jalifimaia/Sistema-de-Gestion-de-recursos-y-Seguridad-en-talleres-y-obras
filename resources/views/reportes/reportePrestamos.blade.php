@@ -13,15 +13,22 @@
     <img src="{{ asset('images/prestamo.svg') }}" alt="Préstamos" style="width: 28px; height: 28px;" class="me-2">
     <h4 class="fw-bold text-orange mb-0">Préstamos registrados</h4>
   </div>
+
+  <div class="ms-auto">
+    <button type="button" class="btn btn-ver-grafico" data-bs-toggle="modal" data-bs-target="#modalGraficos">
+      <img src="{{ asset('images/grafico.svg') }}" alt="Gráfico" class="me-2" style="width: 18px; height: 18px;">
+      Ver gráficos
+    </button>
+  </div>
     </div>
 
     <form method="GET" action="{{ route('reportes.prestamos') }}" class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
-            <label for="fecha_inicio" class="form-label">Desde</label>
+            <label for="fecha_inicio" class="form-label fw-bold fw-bold">Desde</label>
             <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ request('fecha_inicio') }}">
         </div>
         <div class="col-md-3">
-            <label for="fecha_fin" class="form-label">Hasta</label>
+            <label for="fecha_fin" class="form-label fw-bold">Hasta</label>
             <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ request('fecha_fin') }}">
         </div>
 
@@ -43,9 +50,9 @@
     @if($prestamos->count())
     <div class="table-responsive mb-4">
         <table class="table table-bordered table-striped align-middle">
-            <thead class="table-light">
+            <thead>
                 <tr class="text-orange">
-                    <th>Fecha préstamo</th>
+                    <th>Fecha del préstamo</th>
                     <th>Trabajador</th>
                     <th>Estado</th>
                     <th>Duración (Días)</th>
@@ -54,35 +61,48 @@
             <tbody>
                 @foreach($prestamos as $p)
                 <tr>
-                    <td>{{ $p->fecha_prestamo }}</td>
+                    <td>{{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}</td>
                     <td>{{ $p->trabajador }}</td>
                     <td>{{ $p->estado }}</td>
                     <td>
                         @if(empty($p->duracion) || $p->duracion === '-' || $p->duracion === '—')
                             <span class="badge bg-warning text-dark">Sin fecha de devolución</span>
                         @else
-                            {{ $p->duracion }}
+                            {{ round($p->duracion) }}
                         @endif
-                    </td>
+                    </td>   
                 </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-    <div class="row mb-5">
-    <div class="col-md-6">
-        <h5 class="text-center text-orange mb-2">📊 Préstamos por día</h5>
-        <div style="width: 100%; height: 240px;">
-            <canvas id="graficoBarras"></canvas>
+<!-- Modal de gráficos -->
+<div class="modal fade" id="modalGraficos" tabindex="-1" aria-labelledby="modalGraficosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-orange text-white">
+        <h5 class="modal-title" id="modalGraficosLabel">Visualización de préstamos</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <h6 class="text-center text-orange mb-2">Préstamos por día</h6>
+            <div style="width: 100%; height: 240px;">
+              <canvas id="graficoBarrasModal"></canvas>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-center text-orange mb-2">Distribución por estado</h6>
+            <div style="width: 100%; height: 240px;">
+              <canvas id="graficoTortaModal"></canvas>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-    <div class="col-md-6 d-flex flex-column align-items-center">
-        <h5 class="text-center text-orange mb-2">📊 Distribución por estado</h5>
-        <div style="width: 80%; max-width: 300px; height: 240px;">
-            <canvas id="graficoTorta"></canvas>
-        </div>
-    </div>
+  </div>
 </div>
 
 
@@ -108,78 +128,80 @@
         return acc;
     }, {});
 
-    new Chart(document.getElementById('graficoBarras'), {
-        type: 'bar',
-        data: {
-            labels: Object.keys(fechaCount),
-            datasets: [{
-                label: 'Préstamos por día',
-                data: Object.values(fechaCount),
-                backgroundColor: 'rgba(255, 140, 0, 0.7)',
-                borderColor: 'rgba(255, 140, 0, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Préstamos por día',
-                    color: '#ff6600',
-                    font: { size: 16 }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { color: '#ff6600', font: { size: 12 } },
-                    grid: { display: false }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#333', font: { size: 12 } },
-                    grid: { color: '#eee' }
-                }
-            }
-        }
-    });
 
-    new Chart(document.getElementById('graficoTorta'), {
-        type: 'pie',
-        data: {
-            labels: Object.keys(estadoCount),
-            datasets: [{
-                label: 'Distribución por estado',
-                data: Object.values(estadoCount),
-                backgroundColor: ['#ff6600', '#ffc107', '#0d6efd', '#6c757d', '#198754'],
-                borderColor: '#fff',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Distribución por estado',
-                    color: '#ff6600',
-                    font: { size: 16 }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const value = context.raw;
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return `${context.label}: ${value} (${percentage}%)`;
-                        }
-                    }
-                }
-            }
+    new Chart(document.getElementById('graficoBarrasModal'), {
+  type: 'bar',
+  data: {
+    labels: Object.keys(fechaCount),
+    datasets: [{
+      label: 'Préstamos por día',
+      data: Object.values(fechaCount),
+      backgroundColor: 'rgba(255, 140, 0, 0.7)',
+      borderColor: 'rgba(255, 140, 0, 1)',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Préstamos por día',
+        color: '#ff6600',
+        font: { size: 16 }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#ff6600', font: { size: 12 } },
+        grid: { display: false }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { color: '#333', font: { size: 12 } },
+        grid: { color: '#eee' }
+      }
+    }
+  }
+});
+
+new Chart(document.getElementById('graficoTortaModal'), {
+  type: 'pie',
+  data: {
+    labels: Object.keys(estadoCount),
+    datasets: [{
+      label: 'Distribución por estado',
+      data: Object.values(estadoCount),
+      backgroundColor: ['#ff6600', '#ffc107', '#0d6efd', '#6c757d', '#198754'],
+      borderColor: '#fff',
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Distribución por estado',
+        color: '#ff6600',
+        font: { size: 16 }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const value = context.raw;
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${context.label}: ${value} (${percentage}%)`;
+          }
         }
-    });
+      }
+    }
+  }
+});
+
 </script>
 @endsection
 

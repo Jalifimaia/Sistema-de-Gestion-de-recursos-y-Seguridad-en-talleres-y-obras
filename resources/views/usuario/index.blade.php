@@ -22,13 +22,13 @@
     <p class="text-muted small">Administración de usuarios, permisos y roles del sistema</p>
   </div>
 
-  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
-    <strong id="today" class="valor-fecha text-nowrap"></strong>
-  </div>
+  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-3">
+        <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
+      </div>
 </header>
 
  
-<div class="row mb-4">
+<div class="row mb-4 subir-cards-usuarios">
   <!-- Card: Crear usuario -->
   @auth
     @if (Auth::user()->rol->nombre_rol === 'Administrador')
@@ -36,7 +36,7 @@
         <a href="{{ route('usuarios.create') }}" class="card card-resumen card-crear text-center text-decoration-none h-100">
           <div class="card-body">
             <h6 class="card-title card-crear d-flex align-items-center justify-content-center gap-2">
-              <img src="{{ asset('images/useradd3.svg') }}" alt="Crear usuario" class="icono-card-titulo">
+              <img src="{{ asset('images/useraddd.svg') }}" alt="Crear usuario" class="icono-card-titulo">
               Crear usuario
             </h6>
             <small class="text-muted">Alta de nuevo usuario</small>
@@ -80,7 +80,6 @@
 </div>
 
 <div class="seccion-usuarios">
-<h5 class="card-title fw-bold">Usuarios registrados en el sistema</h5><br>
 
   <!-- Filtros -->
   <!-- 🔶 Filtro de usuarios -->
@@ -129,14 +128,13 @@
                 </td>
                 <td>{{ $usuario->email }}</td>
                 <!--<td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>-->
-                <td class="estado">
-                  @if(($usuario->estado->nombre ?? '') === 'stand by')
-                    <em>stand by</em>
-                  @else
-                    {{ $usuario->estado->nombre ?? '-' }}
-                  @endif
+                <td class="estado text-center">
+                  <div id="estado-usuario-{{ $usuario->id }}"
+                      class="badge estado-usuario px-3 py-2 rounded"
+                      data-estado="{{ $usuario->estado->nombre ?? '-' }}">
+                  </div>
                 </td>
-                <td>
+                <td class="acciones">
                   <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-ver">Ver</a>
                     <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-editar">
                       <i class="bi bi-pencil"></i>
@@ -277,14 +275,60 @@
       }, 5000);
     }
 
-     const today = new Date();
+    const today = new Date();
+
     const dia = String(today.getDate()).padStart(2, '0');
     const mes = String(today.getMonth() + 1).padStart(2, '0');
     const año = today.getFullYear();
-    const hora = String(today.getHours()).padStart(2, '0');
-    const minutos = String(today.getMinutes()).padStart(2, '0');
 
-    document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
+    const horas = String(today.getHours()).padStart(2, '0');
+    const minutos = String(today.getMinutes()).padStart(2, '0');
+    const segundos = String(today.getSeconds()).padStart(2, '0');
+
+    const fechaFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+    document.getElementById("today").textContent = fechaFormateada;
+
+    function capitalizar(texto) {
+      return texto
+        .split(' ')
+        .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    document.querySelectorAll('[id^="estado-usuario-"]').forEach(div => {
+    const estado = (div.dataset.estado || '').toLowerCase();
+
+    if (estado) {
+      div.textContent = capitalizar(estado); 
+      div.style.display = 'inline-block';
+    } else {
+      div.style.display = 'none';
+    }
+
+    // Resetear clases base
+    div.className = 'badge px-2 py-1 rounded';
+
+    switch (estado.toLowerCase()) {
+      case 'alta':
+        div.classList.add('bg-success', 'text-white'); // verde relleno
+        div.style.fontSize = '1rem'; // más grande
+        break;
+      case 'baja':
+        div.classList.add('bg-danger', 'text-white'); // rojo relleno
+        div.style.fontSize = '1rem';
+        break;
+      case 'stand by':
+        div.classList.add('bg-secondary', 'text-white'); // gris relleno
+        div.style.fontSize = '1rem';
+        div.style.fontStyle = 'italic'; // itálica
+        break;
+      default:
+        div.classList.add('bg-light', 'text-dark');
+        div.style.fontSize = '1rem';
+        break;
+    }
+    
+  });
   });
 
 </script>

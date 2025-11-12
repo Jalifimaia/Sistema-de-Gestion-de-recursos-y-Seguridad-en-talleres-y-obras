@@ -9,22 +9,25 @@
 @section('content')
 <div class="container py-4">
 
-  <!-- Encabezado principal -->
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-  <div class="d-flex align-items-center gap-2">
-    <div>
-      <h1 class="h4 fw-bold mb-1">
-        <img src="{{ asset('images/escudo.svg') }}" alt="Icono EPP" class="icono-epp">
-        Control de Equipo de protección personal y Seguridad
-      </h1>
+  <!-- 🔶 Encabezado -->
+<header class="row mb-4 align-items-center">
+  <div class="col-md-8">
+    <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+      <img src="{{ asset('images/escudo.svg') }}" alt="Icono EPP" style="height: 35px;">
+      Control de Equipo de protección personal y Seguridad
+    </h1>
+    <p class="text-muted small mb-0">
+      Gestión de equipos de protección personal y checklist de seguridad
+    </p>
+  </div>
 
-      <p class="subtitulo-epp mb-0">Gestión de equipos de protección personal y checklist de seguridad</p>
+  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-4">
+    <div class="mt-4">
+    <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
     </div>
   </div>
-  <div class="col-auto fecha-destacada d-flex align-items-center justify-content-end">
-      <strong id="today" class="valor-fecha text-nowrap"></strong>
-    </div>
-</div>
+</header>
+
 
 <!-- 🔶 Botón para ver tabla completa del checklist -->
   <div class="text-start mb-4">
