@@ -4430,6 +4430,7 @@ function reactivarReconocimientoGlobal() {
 window.usandoAsistente = false;
 window.cierreManualAsistente = false;
 window.modalAsistenteCerrando = false;
+window.bloqueoEcoTTS = false;
 
 function abrirModalAsistente() {
   const modalEl = document.getElementById('modalAsistente');
@@ -4534,11 +4535,12 @@ function leerAsistenteTexto(opcion) {
       microfono_flotante?.classList.remove('pulsing');
     }
 
-    // Guardar TTS y flags ANTES de speak para evitar race
+    // ✅ Activar bloqueo de eco TTS
+    window.bloqueoEcoTTS = true;
     window.textoUltimoTTS = texto;
     window.timestampUltimoTTS = Date.now();
     window.ttsEnCurso = true;
-    window.cierreManualAsistente = false; // ✅ Reset al iniciar TTS
+    window.cierreManualAsistente = false;
 
     const utterance = new SpeechSynthesisUtterance(texto);
     utterance.lang = 'es-ES';
@@ -4584,7 +4586,12 @@ function leerAsistenteTexto(opcion) {
         console.log('🎤 Reconocimiento no reactivado: modal cerrado durante TTS');
       }
 
-      window.cierreManualAsistente = false; // ✅ Reset final
+      // ✅ Desactivar bloqueo de eco tras TTS con delay
+      setTimeout(() => {
+        window.bloqueoEcoTTS = false;
+      }, 2000);
+
+      window.cierreManualAsistente = false;
     };
 
     try {
@@ -4616,12 +4623,40 @@ function leerAsistenteTexto(opcion) {
 
 /* COMANDOS DE VOZ */
 
+function calcularSimilitudSemantica(a, b) {
+  if (!a || !b) return 0;
+
+  const simplificar = (str) => str
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, '') // quitar acentos
+    .replace(/[^\w\s]/g, '') // quitar signos
+    .replace(/\b(podes|podras|podras|podre|puedo|puede|podria)\b/g, 'poder')
+    .replace(/\b(tenes|tiene|tengo|tendra|tendras|tuvo|tenia)\b/g, 'tener')
+    .replace(/\b(solicitar|solicita|solicito|solicite)\b/g, 'solicitar')
+    .replace(/\b(ver|veo|vio|vea|veas)\b/g, 'ver')
+    .replace(/\b(registrar|registro|registra|registre)\b/g, 'registrar')
+    .replace(/\b(asignados|asignado|asignar)\b/g, 'asignar')
+    .toLowerCase();
+
+  const tokensA = simplificar(a).split(/\s+/);
+  const tokensB = simplificar(b).split(/\s+/);
+  const interseccion = tokensA.filter(t => tokensB.includes(t));
+  const union = new Set([...tokensA, ...tokensB]);
+  return interseccion.length / union.size;
+}
+
+
 function procesarComandoVoz(rawTexto) {
   try {
-    if (!rawTexto && typeof rawTexto !== 'string') return;
+    if (!rawTexto || typeof rawTexto !== 'string') return;
     const texto = String(rawTexto || '').toLowerCase().trim();
     const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
     console.log("👉 Reconocido (raw):", rawTexto, "| normalizado:", limpio, "| Step activo:", getStepActivo());
+
+    // ✅ Bloqueo temporal tras TTS
+    if (window.bloqueoEcoTTS) {
+      console.warn('🚫 Ignorado: bloqueo temporal tras TTS (bloqueoEcoTTS activo)');
+      return;
+    }
 
     // Protección temprana contra eco TTS: si TTS activo, ignorar todo
     if (window.ttsEnCurso) {
@@ -4634,12 +4669,12 @@ function procesarComandoVoz(rawTexto) {
     const tiempoTTS = Number(window.timestampUltimoTTS || 0);
     const ahora = Date.now();
 
-    // Normalizar textoUltimoTTS para comparación (si querés usar)
     const textoTTSNorm = textoTTS ? normalizarTexto(textoTTS) : '';
+    const tiempoReciente = (ahora - tiempoTTS < 3000);
+    const similitud = textoTTSNorm && limpio ? calcularSimilitudSemantica(textoTTSNorm, limpio) : 0;
 
-    // Si existe TTS reciente y el texto reconocido ES IGUAL al TTS normalizado y ocurrió muy reciente, ignorar
-    if (textoTTSNorm && limpio === textoTTSNorm && (ahora - tiempoTTS < 3000)) {
-      console.log('🚫 Ignorado: eco del TTS detectado (texto idéntico y <3s)');
+    if (tiempoReciente && similitud > 0.85) {
+      console.warn('🚫 Ignorado por eco TTS (similitud alta):', { limpio, textoTTSNorm, similitud });
       return;
     }
 
