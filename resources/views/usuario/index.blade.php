@@ -4,13 +4,7 @@
 
 @section('content')
 <div class="container py-4">  
-<!--para alertas-->
-  @if (session('success'))
-  <div id="alertaEstado" class="alert alert-success alert-dismissible fade show" role="alert">
-  <span id="mensajeAlertaEstado">{{ session('success') }}</span>
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-  </div>
-  @endif
+
 
 <!-- 🔶 Encabezado -->
 <header class="row mb-4 align-items-center">
