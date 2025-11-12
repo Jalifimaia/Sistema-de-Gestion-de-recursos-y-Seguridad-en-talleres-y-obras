@@ -79,8 +79,44 @@
     </div>
   </form>
 </div>
+
+<!-- Modal de éxito -->
+<div class="modal fade" id="usuarioCreadoModal" tabindex="-1" aria-labelledby="usuarioCreadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="usuarioCreadoLabel">Usuario creado correctamente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>¿Desea agregar otro usuario o volver a la lista?</p>
+      </div>
+      <div class="modal-footer d-flex justify-content-center">
+        <a href="{{ route('usuarios.create') }}" class="btn btn-primary">
+          <i class="bi bi-person-plus"></i> Agregar otro
+        </a>
+        <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">
+          <i class="bi bi-list"></i> Volver a usuarios
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('styles')
 <link href="{{ asset('css/crearUsuario.css') }}" rel="stylesheet">
 @endpush
+
+@push('scripts')
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    @if(session('usuario_creado'))
+      const modal = new bootstrap.Modal(document.getElementById('usuarioCreadoModal'));
+      modal.show();
+    @endif
+  });
+</script>
+@endpush
+

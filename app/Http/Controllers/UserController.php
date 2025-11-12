@@ -67,7 +67,9 @@ public function store(UserRequest $request): RedirectResponse
 
     User::create($data);
 
-    return Redirect::route('usuarios.index')->with('success', 'Usuario creado correctamente.');
+    return Redirect::back()->with('usuario_creado', true);
+
+
 }
 
 
