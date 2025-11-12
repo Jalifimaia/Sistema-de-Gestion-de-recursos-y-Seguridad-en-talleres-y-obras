@@ -1,0 +1,143 @@
+/* 🔷 Título con ícono */
+.titulo-checklist {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222222;
+  margin-bottom: 0.25rem;
+}
+
+.icono-titulo {
+  height: 32px;
+  width: 32px;
+  animation: pulse 1.5s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* 🔷 Botón volver */
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  transform: translateX(-2px);
+  color: #000;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+/* 🔷 Checkbox más grandes y con estilo verde */
+.form-check-input {
+  width: 1.9em;
+  height: 1.9em;
+  border: 2px solid #1e4200;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Estado marcado: verde */
+.form-check-input:checked {
+  background-color: #388e3c;
+  border-color: #388e3c;
+}
+
+/* Hover: borde más fuerte */
+.form-check-input:hover {
+  border-color: #19ce22;
+}
+
+/* Etiquetas más legibles */
+.form-check-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-left: 0.4em;
+  line-height: 1.9em; /* igual al alto del checkbox */
+  vertical-align: middle;
+}
+
+/* 🔷 Etiquetas y textos más gruesos */
+label,
+.form-check-label,
+.form-label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* 🔷 Select con borde destacado */
+select.form-select {
+  border: 2px solid #ad7600;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+select.form-select:focus {
+  border-color: #4d1f00;
+  box-shadow: 0 0 0 3px rgba(212, 235, 6, 0.2);
+  outline: none;
+}
+
+/* 🔷 Campo de observaciones con borde destacado */
+textarea.form-control {
+  border: 2px solid #ad7600;
+  border-radius: 6px;
+  padding: 0.75rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  resize: vertical;
+  min-height: 120px;
+}
+
+textarea.form-control:focus {
+  border-color: #4d1f00;
+  box-shadow: 0 0 0 3px rgba(212, 235, 6, 0.2);
+  outline: none;
+}
+
+/* 🔷 Compactar el bloque de trabajador + checklist + observaciones */
+#checklist-form .mb-3,
+#checklist-form .mt-3,
+#checklist-form .mt-4 {
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* 🔷 Subir el formulario completo */
+#checklist-form {
+  margin-top: -1rem;
+}
+
+/* 🔷 Subir el bloque de checklist */
+#epp-checklist {
+  margin-top: -0.5rem;
+}
+
+/* 🔷 Subir el campo de observaciones */
+#observaciones {
+  margin-top: -0.25rem;
+}
+
+.btn-reg {
+    background-color: #388e3c;
+    color: whitesmoke;
+}
+
+
+

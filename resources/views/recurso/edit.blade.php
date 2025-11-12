@@ -3,15 +3,30 @@
 @section('title', 'Editar Recurso')
 
 @section('content')
-<div class="container mt-5">
-    <h2 class="mb-4">Editar recurso</h2>
+<div class="container mt-4">
+    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+      <a href="{{ route('inventario.index') }}" class="btn btn-volver d-flex align-items-center">
+        <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+        Volver
+      </a>
 
-    <div class="alert alert-warning">
+  <div class="d-flex align-items-center">
+    <img src="{{ asset('images/lapiz.svg') }}" alt="Editar" style="width: 36px; height: 36px;" class="me-2">
+    <h4 class="fw-bold mb-0">Editar recurso</h4>
+  </div>
+</div>
+
+
+    <div class="alert alert-warning d-flex align-items-start gap-2">
+      <img src="{{ asset('images/precaucion.svg') }}" alt="Precaución" class="icono-precaucion mt-1">
+      <div>
         <strong>Importante:</strong> La categoría y subcategoría no pueden modificarse una vez creado el recurso.
         <br>Si necesitas cambiar la categoría (por ejemplo, de EPP a Herramienta), debes eliminar el recurso y volver a registrarlo.
+      </div>
     </div>
 
-    <form id="recursoForm" class="row g-3 mb-5" method="POST" action="{{ route('recursos.update', $recurso->id) }}">
+
+    <form id="recursoForm" class="row g-3 mb-3" method="POST" action="{{ route('recursos.update', $recurso->id) }}">
         @csrf
         @method('PUT')
 
@@ -47,41 +62,42 @@
         <!-- Nombre -->
         <div class="col-md-6">
             <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" id="nombre" name="nombre" class="form-control" value="{{ old('nombre', $recurso->nombre) }}" required>
+            <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre del recurso" value="{{ old('nombre', $recurso->nombre) }}" required>
         </div>
 
         <!-- Descripción -->
         <div class="col-12">
             <label for="descripcion" class="form-label">Descripción</label>
-            <textarea id="descripcion" name="descripcion" class="form-control" rows="3">{{ old('descripcion', $recurso->descripcion) }}</textarea>
+            <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Descripción..." rows="3">{{ old('descripcion', $recurso->descripcion) }}</textarea>
         </div>
 
         <!-- Costo unitario -->
         <div class="col-md-6">
             <label for="costo_unitario" class="form-label">Costo unitario</label>
-            <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" min="0" step="0.01" value="{{ old('costo_unitario', $recurso->costo_unitario) }}">
+            <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" placeholder="Costo unitario" min="0" step="0.01" value="{{ old('costo_unitario', $recurso->costo_unitario) }}">
         </div>
 
         <!-- Guardar cambios -->
         <div class="col-12">
-            <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
+            <button type="submit" class="btn btn-guardar w-100">Guardar cambios</button>
         </div>
     </form>
 
-    <div class="d-flex justify-content-between align-items-center">
-        <a href="{{ route('inventario') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
+    <div class="d-flex justify-content-start gap-3 flex-wrap botones-inferiores">
+      <a href="{{ route('recursos.create') }}" class="btn btn-nuevo">
+        + Registrar nuevo recurso
+      </a>
 
-        <!-- Botón que abre modal de confirmación de eliminación -->
-        <form id="deleteRecursoForm" action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" style="display:inline;">
-            @csrf
-            @method('DELETE')
-            <button type="button" class="btn btn-outline-danger" id="btnOpenEliminar">
-                Eliminar recurso
-            </button>
-        </form>
-
-        <a href="{{ route('recursos.create') }}" class="btn btn-outline-primary">Registrar nuevo recurso</a>
+      <form id="deleteRecursoForm" action="{{ route('recursos.destroy', $recurso->id) }}" method="POST">
+        @csrf
+        @method('DELETE')
+        <button type="button" class="btn btn-eliminar d-flex align-items-center gap-2" id="btnOpenEliminar">
+          <img src="{{ asset('images/delete.svg') }}" alt="Eliminar" style="width: 20px; height: 20px;">
+          Eliminar recurso
+        </button>
+      </form>
     </div>
+
 </div>
 
 <!-- Modal Confirmar Eliminación -->
@@ -116,7 +132,7 @@
         {{ session('success') }}
       </div>
       <div class="modal-footer">
-        <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
+        <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
         <button type="button" class="btn btn-success" data-bs-dismiss="modal">Continuar editando</button>
       </div>
     </div>
@@ -152,3 +168,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+
+@push('styles')
+  <link href="{{ asset('css/editarRecurso.css') }}" rel="stylesheet">
+@endpush
+

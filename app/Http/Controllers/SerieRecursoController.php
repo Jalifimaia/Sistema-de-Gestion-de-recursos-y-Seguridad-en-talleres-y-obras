@@ -44,29 +44,50 @@ public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorServic
 {
     $data = $request->validated();
 
+    if (\Carbon\Carbon::parse($data['fecha_adquisicion'])->isAfter(now())) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'fecha_adquisicion' => 'La fecha de adquisición no puede ser mayor a la fecha actual.'
+        ]);
+    }
+
     $recurso = Recurso::with('subcategoria')->findOrFail($data['id_recurso']);
     $combinaciones = json_decode($data['combinaciones'], true) ?? [];
 
-    $requiereTalle = in_array(strtolower($recurso->subcategoria->nombre ?? ''), ['chaleco', 'botas']);
+    $subcategoria = strtolower($recurso->subcategoria->nombre ?? '');
+    $requiereTalle = in_array($subcategoria, ['chaleco', 'botas']);
+    $tipoEsperado = match ($subcategoria) {
+        'chaleco' => 'Ropa',
+        'botas' => 'Calzado',
+        default => null,
+    };
 
-    foreach ($combinaciones as $combo) {
-        if (empty($combo['color_nombre'])) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'combinaciones' => 'Falta color en una combinación.'
-            ]);
+    $errores = [];
+
+    foreach ($combinaciones as $i => $combo) {
+        $tipoTalle = strtolower($combo['tipo_talle'] ?? '');
+        $talle = $combo['talle'] ?? null;
+        $color = $combo['color_nombre'] ?? null;
+        $cantidad = $combo['cantidad'] ?? null;
+
+        if (empty($color)) {
+            $errores["combinaciones.$i.color_nombre"] = ['Falta color en la combinación.'];
         }
 
-        if ($requiereTalle && (empty($combo['talle']) || empty($combo['tipo_talle']))) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'combinaciones' => 'Falta talle o tipo en una combinación.'
-            ]);
+        if ($requiereTalle && (empty($talle) || empty($tipoTalle))) {
+            $errores["combinaciones.$i.talle"] = ['Falta talle o tipo de talle.'];
         }
 
-        if (empty($combo['cantidad']) || $combo['cantidad'] < 1) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'combinaciones' => 'Cantidad inválida en una combinación.'
-            ]);
+        if ($requiereTalle && $tipoEsperado && !in_array($tipoTalle, [strtolower($tipoEsperado), 'otro'])) {
+            $errores["combinaciones.$i.tipo_talle"] = ["El tipo de talle debe ser '{$tipoEsperado}' u 'Otro' para el recurso seleccionado."];
         }
+
+        if (empty($cantidad) || $cantidad < 1) {
+            $errores["combinaciones.$i.cantidad"] = ['Cantidad inválida.'];
+        }
+    }
+
+    if (!empty($errores)) {
+        throw \Illuminate\Validation\ValidationException::withMessages($errores);
     }
 
     foreach ($combinaciones as $combo) {
@@ -81,12 +102,12 @@ public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorServic
             [
                 'fecha_adquisicion' => $data['fecha_adquisicion'],
                 'fecha_vencimiento' => $data['fecha_vencimiento'] ?? null,
-                'id_estado' => $data['id_estado'],
+                'id_estado' => Estado::where('nombre_estado', 'Disponible')->value('id') ?? 1,
             ]
         );
     }
 
-    return redirect()->route('inventario')->with('success', 'Series creadas correctamente.');
+    return response()->json(['success' => true]);
 }
 
 
@@ -94,16 +115,23 @@ public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorServic
 public function createConRecurso($id)
 {
     $recurso = Recurso::findOrFail($id);
-    $estados = Estado::all();
-    $colores = Color::all();
+    $colores = Color::select('id', 'nombre')
+    ->whereRaw("nombre REGEXP '^[^0-9]+$'") // excluye nombres numéricos
+    ->orderBy('nombre')
+    ->get();
+
 
     // ✅ Agrupar talles por tipo
     $talles = \App\Models\Talle::all()
         ->groupBy('tipo')
         ->map(fn($group) => $group->pluck('nombre')->values());
 
-    return view('serie_recurso.create', compact('recurso', 'estados', 'colores', 'talles'));
+    // ✅ Obtener estado "Disponible"
+    $estadoDisponible = Estado::where('nombre_estado', 'Disponible')->firstOrFail();
+
+    return view('serie_recurso.create', compact('recurso', 'colores', 'talles', 'estadoDisponible'));
 }
+
 
     /**
      * Display the specified resource.
@@ -148,11 +176,26 @@ public function createConRecurso($id)
             ->with('success', 'SerieRecurso deleted successfully');
     }
 
-    public function qrIndex(): View
+ public function qrIndex(): View
 {
-    $series = SerieRecurso::with('recurso')->orderByDesc('id')->get();
+    $query = request('search');
+
+    $series = SerieRecurso::with('recurso')
+        ->when($query, function ($q) use ($query) {
+            $q->where('nro_serie', 'like', $query . '%'); // ← busca por las iniciales del nro_serie
+        })
+        ->orderByDesc('id')
+        ->paginate(18)
+        ->onEachSide(1)
+        ->withQueryString(); // ← mantiene el ?search en los links de paginación
+
     return view('serie_recurso.qrindex', compact('series'));
 }
+
+
+
+
+
 
 public function exportQrPdf($id)
 {
@@ -192,7 +235,8 @@ public function qrLote()
         });
     }
 
-    $series = $query->orderByDesc('id')->get();
+    $series = $query->orderByDesc('id')->paginate(18)->onEachSide(1)->withQueryString();
+
 
     return view('serie_recurso.qrlote', compact('series'));
 }
@@ -201,55 +245,36 @@ public function qrLote()
 
 public function exportQrLotePdf()
 {
-    $query = SerieRecurso::with('recurso');
+    $page = request()->input('page', 1);
+    $perPage = 18;
 
-    // Filtros opcionales
-    if (request('desde')) {
-        $query->whereDate('created_at', '>=', request('desde'));
-    }
+    $seriesPaginator = SerieRecurso::with('recurso')
+        ->when(request('desde'), fn($q) => $q->whereDate('created_at', '>=', request('desde')))
+        ->when(request('hasta'), fn($q) => $q->whereDate('created_at', '<=', request('hasta')))
+        ->when(request('recurso_id'), fn($q) => $q->where('id_recurso', request('recurso_id')))
+        ->when(request('subcategoria_id'), fn($q) => $q->whereHas('recurso', fn($q2) => $q2->where('id_subcategoria', request('subcategoria_id'))))
+        ->orderByDesc('id')
+        ->paginate($perPage, ['*'], 'page', $page);
 
-    if (request('hasta')) {
-        $query->whereDate('created_at', '<=', request('hasta'));
-    }
-
-    if (request('recurso_id')) {
-        $query->where('id_recurso', request('recurso_id'));
-    }
-
-    if (request('subcategoria_id')) {
-        $query->whereHas('recurso', function ($q) {
-            $q->where('id_subcategoria', request('subcategoria_id'));
-        });
-    }
-
-    // Si no hay filtros, usar las últimas 30
-    if (!request()->hasAny(['desde', 'hasta', 'recurso_id', 'subcategoria_id'])) {
-        $query->orderByDesc('id')->take(30);
-    }
-
-    $series = $query->orderBy('id')->get();
+    $series = $seriesPaginator->items(); // ← solo los 18 de la página actual
 
     $qrBase64s = [];
     foreach ($series as $serie) {
-        if (!empty($serie->codigo_qr)) {
-            $qrBase64s[$serie->id] = base64_encode(
-                \QrCode::format('png')->size(100)->generate((string) $serie->codigo_qr)
-            );
-        } else {
-            $qrBase64s[$serie->id] = null;
-        }
+        $qrBase64s[$serie->id] = !empty($serie->codigo_qr)
+            ? base64_encode(QrCode::format('png')->size(100)->generate((string) $serie->codigo_qr))
+            : null;
     }
 
     $html = view('serie_recurso.qrlote_pdf', compact('series', 'qrBase64s'))->render();
 
-    $pdf = \Spatie\Browsershot\Browsershot::html($html)
+    $pdf = Browsershot::html($html)
         ->format('A4')
         ->margins(10, 10, 10, 10)
         ->pdf();
 
     return response($pdf)
         ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', 'attachment; filename="QR_Lote.pdf"');
+        ->header('Content-Disposition', 'attachment; filename="QR_Lote_Pagina_' . $page . '.pdf"');
 }
 
 

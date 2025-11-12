@@ -3,10 +3,16 @@
 @section('content')
 <div class="container py-4">
     <div class="d-flex align-items-center justify-content-start gap-3 mb-4">
-    <a href="{{ route('reportes.index') }}" class="btn btn-outline-secondary">
-        ⬅️ Volver
+    <a href="{{ route('reportes.index') }}" class="btn btn-volver d-flex align-items-center">
+
+    <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+    Volver
     </a>
-    <h2 class="mb-0 text-orange">📋 Préstamos registrados</h2>
+
+    <div class="d-flex align-items-center">
+    <img src="{{ asset('images/prestamo.svg') }}" alt="Préstamos" style="width: 28px; height: 28px;" class="me-2">
+    <h4 class="fw-bold text-orange mb-0">Préstamos registrados</h4>
+  </div>
     </div>
 
     <form method="GET" action="{{ route('reportes.prestamos') }}" class="row g-3 align-items-end mb-4">
@@ -18,14 +24,20 @@
             <label for="fecha_fin" class="form-label">Hasta</label>
             <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ request('fecha_fin') }}">
         </div>
-        <div class="col-md-3 d-grid">
-            <button type="submit" class="btn btn-orange">🔍 Aplicar filtros</button>
-        </div>
-        <div class="col-md-3 d-grid">
-            <a href="{{ url('/reportes/prestamos/pdf') }}?fecha_inicio={{ request('fecha_inicio') }}&fecha_fin={{ request('fecha_fin') }}" class="btn btn-danger">
-                🧾 Exportar a PDF
+
+        <div class="col-md-6 d-flex gap-3">
+            <button type="submit" class="btn btn-filtro d-flex align-items-center justify-content-center flex-grow-1">
+                <img src="{{ asset('images/filter.svg') }}" alt="Filtrar" class="me-2" style="width: 18px; height: 18px;">
+                Aplicar filtros
+            </button>
+
+            <a href="{{ url('/reportes/prestamos/pdf') }}?fecha_inicio={{ request('fecha_inicio') }}&fecha_fin={{ request('fecha_fin') }}"
+                class="btn btn-pdf d-flex align-items-center justify-content-center flex-grow-1">
+                <img src="{{ asset('images/pdf2.svg') }}" alt="PDF" class="me-2" style="width: 18px; height: 18px;">
+                Exportar a PDF
             </a>
         </div>
+
     </form>
 
     @if($prestamos->count())
@@ -36,7 +48,7 @@
                     <th>Fecha préstamo</th>
                     <th>Trabajador</th>
                     <th>Estado</th>
-                    <th>Duración</th>
+                    <th>Duración (Días)</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,7 +57,13 @@
                     <td>{{ $p->fecha_prestamo }}</td>
                     <td>{{ $p->trabajador }}</td>
                     <td>{{ $p->estado }}</td>
-                    <td>{{ $p->duracion }}</td>
+                    <td>
+                        @if(empty($p->duracion) || $p->duracion === '-' || $p->duracion === '—')
+                            <span class="badge bg-warning text-dark">Sin fecha de devolución</span>
+                        @else
+                            {{ $p->duracion }}
+                        @endif
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
@@ -164,3 +182,7 @@
     });
 </script>
 @endsection
+
+@push('styles')
+<link href="{{ asset('css/reportePrestamos.css') }}" rel="stylesheet">
+@endpush

@@ -1,0 +1,229 @@
+/* 🔷 Cards resumen con movimiento */
+.card-resumen {
+  border-left: 4px solid #c45912;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.card-resumen:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 🔷 Íconos SVG en cards */
+.icono-resumen {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+  margin: 0 auto;
+  display: block;
+}
+
+/* 🔷 Cards resumen más chicas y compactas */
+.card-resumen .card-body {
+  padding: 0.5rem 0.75rem;
+  min-height: auto;
+}
+
+.card-resumen h6.card-title {
+  font-size: 1.55rem;
+  margin-bottom: 0.2rem;
+}
+
+.card-resumen h3,
+.card-resumen p.card-text {
+  font-size: 1.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.card-resumen small {
+  font-size: 1.2rem;
+}
+
+/* 🔷 Card general: achicada y con movimiento */
+.card-resumen {
+  height: auto !important;
+  min-height: 100px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-resumen:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 🔷 Íconos en títulos de cards resumen */
+.icono-card-titulo {
+  height: 30px;
+  width: 30px;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+/* 🔷 Card especial para "Crear usuario" */
+.card-crear {
+  background-color: #d8ad37; /* azul claro */
+  color: #f1f1f1;
+}
+
+.card-crear:hover {
+  background-color: #d8ad37;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 🔷 Asegurar que el ícono se vea */
+.icono-card-titulo {
+  height: 30px;
+  width: 30px;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.card.card-crear {
+  background-color: #d8ad37 !important; /* azul claro */
+  border-left: 4px solid #c45912;
+  color: #1d1d1d;
+}
+
+.card.card-crear:hover {
+  background-color: #d8ad37 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card.card-crear h6.card-title,
+.card.card-crear h6.card-title * {
+  color: inherit !important;
+  transition: none !important;
+}
+
+/* 🔶 Estilo de filtro y búsqueda */
+.buscador-destacado,
+.filtro-destacado {
+  border: 2px solid #d06842;
+  border-radius: 6px;
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+
+.buscador-destacado:focus,
+.filtro-destacado:focus {
+  border-color: #ef6c00;
+  outline: none;
+}
+
+.filtrar-por {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.filtro-destacado {
+  border: 2px solid #d06842;
+  border-radius: 6px;
+  padding-right: 2rem; /* 🔧 espacio extra para la flechita */
+  min-width: 160px;     /* 🔧 ancho mínimo para evitar recortes */
+}
+
+/* 🔷 Botón Ver (celeste) */
+.btn-ver {
+  background-color: #03a9f4;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+}
+
+.btn-ver:hover {
+  background-color: #0288d1;
+}
+
+/* 🟠 Botón Editar (naranja) */
+.btn-editar {
+  background-color: #f57c00;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+}
+
+.btn-editar:hover {
+  background-color: #ef6c00;
+}
+
+/* 🔴 Botón Dar de baja (rojo) */
+.btn-baja {
+  background-color: #d32f2f;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+}
+
+.btn-baja:hover {
+  background-color: #b71c1c;
+}
+
+/* 🔷 Botón Ver */
+.btn-ver {
+  background-color: #03a9f4;
+  color: #fff;
+  font-size: 0.9rem;         /* antes 0.85rem */
+  padding: 6px 14px;         /* antes 4px 12px */
+  border-radius: 4px;
+  border: none;
+}
+
+/* 🟠 Botón Editar */
+.btn-editar {
+  background-color: #f57c00;
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+}
+
+/* 🔴 Botón Dar de baja */
+.btn-baja {
+  background-color: #d32f2f;
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+}
+
+.seccion-usuarios {
+  margin-top: -25px;
+}
+
+/* 🔴 Botón Dar de baja (activo) */
+.btn-baja {
+  background-color: #d32f2f;
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+}
+
+/* 🔴 Botón Dar de baja (hover) */
+.btn-baja:hover:enabled {
+  background-color: #b71c1c;
+}
+
+/* 🔴 Botón Dar de baja (deshabilitado) */
+.btn-baja:disabled {
+  background-color: rgba(223, 111, 111, 0.452);
+  color: #1d1d1d;
+  border: 2px solid #611717;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+

@@ -9,6 +9,7 @@
   <!-- Estilos base -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
   <link href="{{ asset('css/estilos.css') }}" rel="stylesheet">
 
   <!-- Livewire y estilos inyectados -->
@@ -56,7 +57,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end mt-2">
           <li>
-            <a href="{{ url('perfil') }}" class="dropdown-item">
+            <a href="{{ route('usuarios.show', auth()->user()->id) }}" class="dropdown-item">
               <i class="bi bi-person me-2"></i> Ver perfil
             </a>
           </li>
@@ -140,5 +141,6 @@
   <!-- Livewire y scripts inyectados -->
   @livewireScripts
   @stack('scripts')
+  
 </body>
 </html>

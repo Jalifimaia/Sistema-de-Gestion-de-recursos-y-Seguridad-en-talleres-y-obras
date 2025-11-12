@@ -1,0 +1,7 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+<svg fill="#ffffff" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" stroke="#ffffff">
+<g id="SVGRepo_bgCarrier" stroke-width="0"/>
+<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="SVGRepo_iconCarrier"> <g> <path d="M480,0H32C14.328,0,0,14.328,0,32v64c0,17.672,14.328,32,32,32s32-14.328,32-32V64h384v384H64v-32 c0-17.672-14.328-32-32-32S0,398.328,0,416v64c0,17.672,14.328,32,32,32h448c17.672,0,32-14.328,32-32V32 C512,14.328,497.672,0,480,0z"/> <path d="M143.094,163.789c-10.391-5.57-23.031-4.969-32.844,1.586l-96,64C5.344,235.313,0,245.297,0,256s5.344,20.688,14.25,26.625 l96,64c5.359,3.57,11.547,5.375,17.75,5.375c5.172,0,10.375-1.258,15.094-3.789C153.5,342.648,160,331.805,160,320v-32h192 c17.672,0,32-14.328,32-32s-14.328-32-32-32H160v-32C160,180.195,153.5,169.352,143.094,163.789z"/> </g> </g>
+</svg>

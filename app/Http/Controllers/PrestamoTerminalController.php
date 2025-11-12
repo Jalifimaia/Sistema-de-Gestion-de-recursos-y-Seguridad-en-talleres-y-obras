@@ -8,6 +8,8 @@ use App\Models\Usuario;
 use App\Models\SerieRecurso;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\DetallePrestamo;
+use Illuminate\Support\Facades\Log;
 
 class PrestamoTerminalController extends Controller
 {
@@ -20,36 +22,162 @@ class PrestamoTerminalController extends Controller
 
     // ✅ Registrar préstamo desde terminal usando id_usuario
     public function store(PrestamoTerminalRequest $request, $id_usuario): JsonResponse
+{
+    \Log::info('ID Usuario recibido: '.$id_usuario);
+    \Log::info('Series recibidas: ', $request->input('series'));
+
+    try {
+        $usuario = Usuario::where('id', $id_usuario)
+            ->where('id_rol', 3)
+            ->firstOrFail();
+
+        $prestamo = $this->prestamoService->crearPrestamo(
+            $usuario->id,
+            $request->input('series'),
+            'terminal'
+        );
+
+        // ✅ Extraer la primera serie para mostrar en el frontend
+        $serie = SerieRecurso::with('recurso')
+            ->find($request->input('series')[0]);
+
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Préstamo registrado desde terminal',
+            'prestamo' => $prestamo->id,
+            'recurso'  => $serie->recurso->nombre ?? '',
+            'serie'    => $serie->nro_serie ?? '',
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error en préstamo desde terminal: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No se pudo registrar el préstamo desde la terminal',
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+}
+
+
+    public function devolverPorQR(Request $request)
     {
-        \Log::info('ID Usuario recibido: '.$id_usuario);
-        \Log::info('Series recibidas: ', $request->input('series'));
-
         try {
-            $usuario = Usuario::where('id', $id_usuario)
-                ->where('id_rol', 3)
-                ->firstOrFail();
+            $detalle = DetallePrestamo::findOrFail($request->input('id_detalle'));
 
-            $prestamo = $this->prestamoService->crearPrestamo(
-                $usuario->id,
-                $request->input('series'),
-                'terminal'
-            );
+            if ($detalle->id_estado_prestamo != 2) {
+                return response()->json([
+                    'success' => false,
+                    'estado' => 'ya_devuelto',
+                     'message' => ''
+                   // 'message' => 'El recurso ya fue devuelto o no está asignado',
+                ]);
+            }
+
+            // Actualizar estado del detalle
+            $detalle->update([
+                'id_estado_prestamo' => 3,
+                'updated_at' => now(),
+            ]);
+
+            // Liberar la serie
+            $detalle->serieRecurso->update(['id_estado' => 1]);
+
+            // Liberar el stock
+            \DB::table('stock')->where('id_serie_recurso', $detalle->id_serie)->update([
+                'id_estado_recurso' => 1,
+                'id_usuario' => null,
+            ]);
+
+            // Actualizar préstamo si todos los detalles fueron devueltos
+            $prestamo = $detalle->prestamo;
+            $prestamo->fecha_devolucion = now();
+
+            $todosDevueltos = $prestamo->detalles()->where('id_estado_prestamo', '!=', 3)->doesntExist();
+            if ($todosDevueltos) {
+                $prestamo->estado = 3;
+            }
+
+            $prestamo->save();
 
             return response()->json([
-                'success'  => true,
-                'message'  => '✅ Préstamo registrado desde terminal',
-                'prestamo' => $prestamo->id,
+                'success' => true,
+                'message' => 'Recurso devuelto correctamente',
+                'recurso' => $detalle->serieRecurso->recurso->nombre ?? '',
+                'serie' => $detalle->serieRecurso->nro_serie ?? '',
             ]);
-        } catch (\Exception $e) {
-            \Log::error('Error en préstamo desde terminal: ' . $e->getMessage());
 
+        } catch (\Throwable $e) {
+            \Log::error('Error en devolverPorQR: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => '❌ No se pudo registrar el préstamo desde la terminal',
-                'error'   => $e->getMessage(),
+                'message' => 'Error al devolver el recurso',
             ], 500);
         }
     }
+
+
+
+public function validarQRDevolucion(Request $request)
+{
+    $codigoQR = $request->input('codigo_qr');
+    $idUsuario = $request->input('id_usuario');
+    $serieEsperada = $request->input('serie_esperada');
+
+    if (! $codigoQR || ! $idUsuario || ! $serieEsperada) {
+        return response()->json([
+            'success' => false,
+            'estado' => 'datos_incompletos',
+            'message' => 'Faltan datos requeridos: QR, usuario o serie esperada.'
+        ]);
+    }
+
+    $serie = SerieRecurso::where('codigo_qr', $codigoQR)->first();
+
+    if (! $serie) {
+        return response()->json([
+            'success' => false,
+            'estado' => 'qr_no_encontrado',
+            'message' => 'El código QR no corresponde a ningún recurso registrado.'
+        ]);
+    }
+
+    $detalle = DetallePrestamo::where('id_serie', $serie->id)
+        ->where('id_estado_prestamo', 2)
+        ->whereHas('prestamo', function ($q) use ($idUsuario) {
+            $q->where('id_usuario', $idUsuario)
+              ->where('estado', 2);
+        })
+        ->first();
+
+    if (! $detalle) {
+        return response()->json([
+            'success' => false,
+            'estado' => 'prestamo_no_encontrado',
+            'message' => 'No se encontró un préstamo activo de este recurso para el usuario.'
+        ]);
+    }
+
+    if ($detalle->serieRecurso->nro_serie !== $serieEsperada) {
+        return response()->json([
+            'success' => false,
+            'estado' => 'serie_incorrecta',
+            'message' => 'El número de serie del recurso no coincide con el esperado.'
+        ]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'coincide' => true,
+        'id_detalle' => $detalle->id
+    ]);
+}
+
+
+
+
+
+
 
 // ✅ Registrar préstamo por QR (escaneo directo del recurso)
 public function registrarPorQR(Request $request)
@@ -103,7 +231,7 @@ public function registrarPorQR(Request $request)
 
     return response()->json([
         'success'  => true,
-        'message'  => '✅ Préstamo registrado por QR',
+        'message'  => 'Préstamo registrado por QR',
         'prestamo' => $prestamo->id,
         'recurso'  => $serie->recurso->nombre ?? '',
         'serie'    => $serie->nro_serie ?? '',

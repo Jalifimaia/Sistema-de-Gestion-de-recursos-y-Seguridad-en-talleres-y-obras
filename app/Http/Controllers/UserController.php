@@ -87,7 +87,8 @@ public function store(UserRequest $request): RedirectResponse
      */
     public function edit($id): View
     {
-        $usuario = User::with('estado')->findOrFail($id);
+        $usuario = User::with(['estado', 'usuarioRecursos.serieRecurso', 'usuarioRecursos.recurso', 'usuarioRecursos.serie.codigo'])->findOrFail($id);
+
         $roles = Rol::all();
         $estados = EstadoUsuario::all();
 
@@ -97,6 +98,21 @@ public function store(UserRequest $request): RedirectResponse
 
         return view('usuario.edit', compact('usuario', 'roles', 'estados'));
     }
+
+    public function standby($id)
+{
+    $usuario = User::findOrFail($id);
+    $estadoStandBy = EstadoUsuario::where('nombre', 'stand by')->first();
+
+    if (!$estadoStandBy) {
+        return back()->with('error', 'No se encontró el estado "stand by".');
+    }
+
+    $usuario->id_estado = $estadoStandBy->id;
+    $usuario->save();
+
+    return back()->with('success', 'Usuario puesto en estado "stand by".');
+}
 
     /**
      * Update the specified resource in storage.
@@ -189,6 +205,38 @@ public function update(UserRequest $request, $id): RedirectResponse
     /**
      * Cambiar estado a Alta.
      */
+    public function porEstado($estado)
+{
+    // Mapear el valor recibido desde el frontend al nombre exacto en la base
+    $estadoNombre = match($estado) {
+        'alta' => 'Alta',
+        'standby' => 'stand by',
+        default => null,
+    };
+
+    if (! $estadoNombre) {
+        return response()->json([], 404);
+    }
+
+    // Buscar el modelo de estado por nombre exacto
+    $estadoModelo = EstadoUsuario::where('nombre', $estadoNombre)->first();
+
+    if (! $estadoModelo) {
+        return response()->json([], 404);
+    }
+
+    // Filtrar solo trabajadores con ese estado
+    $usuarios = User::where('id_estado', $estadoModelo->id)
+        ->where('id_rol', 3) // Solo trabajadores
+        ->select('id', 'name')
+        ->orderBy('name')
+        ->get();
+
+    return response()->json($usuarios);
+}
+
+
+
     public function darDeAlta($id): RedirectResponse
     {
         $usuario = User::findOrFail($id);

@@ -25,14 +25,14 @@
                     <div class="col-md-6">
                         <label>DNI del trabajador</label>
                         <div class="input-group">
-                            <input type="text" id="dni_usuario" class="form-control" required>
+                            <input type="text" id="dni_usuario" class="form-control" required placeholder="Ingrese aquí el DNI del trabajador involucrado" >
                             <button type="button" id="buscarUsuario" class="btn btn-secondary">Buscar</button>
                         </div>
                         <input type="hidden" name="id_usuario" id="id_usuario">
                     </div>
                     <div class="col-md-6">
                         <label>Nombre completo</label>
-                        <input type="text" id="nombre_usuario" class="form-control" readonly>
+                        <input type="text" id="nombre_usuario" class="form-control" readonly placeholder="Se completará automáticamente al buscar"  >
                     </div>
                 </div>
             </div>
@@ -41,34 +41,103 @@
         <!-- 🧰 DATOS DE LOS RECURSOS -->
         <div id="recursos-container">
             <div class="card mb-3 recurso-block">
-                <div class="card-header bg-success text-white">Datos del Recurso</div>
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <span>Datos del Recurso</span>
+                <button type="button" class="btn btn-sm btn-danger btn-eliminar-recurso" title="Eliminar este recurso">
+                    ✖
+                </button>
+                </div>
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-3">
-                            <label>Categoría</label>
+                            <label class="form-label">Categoría</label>
                             <select name="recursos[0][id_categoria]" class="form-select categoria-select" required>
                                 <option value="">Seleccione</option>
                                 @foreach($categorias as $cat)
-                                    <option value="{{ $cat->id }}">{{ $cat->nombre_categoria }}</option>
+                                    @php
+                                        $selectedCat = old('recursos.0.id_categoria') ?? ($incidente->recursos[0]->subcategoria->categoria->id ?? null ?? null);
+                                    @endphp
+                                    <option value="{{ $cat->id }}" {{ (string)$cat->id === (string)$selectedCat ? 'selected' : '' }}>
+                                        {{ $cat->nombre_categoria }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="col-md-3">
-                            <label>Subcategoría</label>
-                            <select name="recursos[0][id_subcategoria]" class="form-select subcategoria-select" required></select>
+                            <label class="form-label">Subcategoría</label>
+                            <select name="recursos[0][id_subcategoria]" class="form-select subcategoria-select" required>
+                                <option value="">Seleccione</option>
+                                @if(old('recursos.0.id_subcategoria'))
+                                    {{-- Si viene por old, mostrar esa opción --}}
+                                    <option value="{{ old('recursos.0.id_subcategoria') }}" selected>
+                                        {{ collect($subcategorias)->firstWhere('id', old('recursos.0.id_subcategoria'))->nombre ?? 'Seleccionado' }}
+                                    </option>
+                                @elseif(isset($incidente) && $incidente->recursos->count())
+                                    @php $sc = $incidente->recursos[0]->subcategoria ?? null; @endphp
+                                    @if($sc)
+                                        <option value="{{ $sc->id }}" selected>{{ $sc->nombre }}</option>
+                                    @endif
+                                @endif
+                            </select>
                         </div>
+
                         <div class="col-md-3">
-                            <label>Recurso</label>
-                            <select name="recursos[0][id_recurso]" class="form-select recurso-select" required></select>
+                            <label class="form-label">Recurso</label>
+                            <select name="recursos[0][id_recurso]" class="form-select recurso-select" required>
+                                <option value="">Seleccione</option>
+                                @if(old('recursos.0.id_recurso'))
+                                    <option value="{{ old('recursos.0.id_recurso') }}" selected>
+                                        {{ collect($recursos)->firstWhere('id', old('recursos.0.id_recurso'))->nombre ?? 'Seleccionado' }}
+                                    </option>
+                                @elseif(isset($incidente) && $incidente->recursos->count())
+                                    @php $r = $incidente->recursos[0] ?? null; @endphp
+                                    @if($r)
+                                        <option value="{{ $r->id }}" selected>{{ $r->nombre }}</option>
+                                    @endif
+                                @endif
+                            </select>
                         </div>
+
                         <div class="col-md-3">
-                            <label>Serie del recurso</label>
-                            <select name="recursos[0][id_serie_recurso]" class="form-select serie-select" required></select>
+                            <label class="form-label">Serie del recurso</label>
+                            <select name="recursos[0][id_serie_recurso]" class="form-select serie-select" required>
+                                <option value="">Seleccione</option>
+                                @if(old('recursos.0.id_serie_recurso'))
+                                    <option value="{{ old('recursos.0.id_serie_recurso') }}" selected>
+                                        {{ \App\Models\SerieRecurso::find(old('recursos.0.id_serie_recurso'))->nro_serie ?? 'Seleccionado' }}
+                                    </option>
+                                @elseif(isset($incidente) && $incidente->recursos->count())
+                                    @php $serieId = $incidente->recursos[0]->pivot->id_serie_recurso ?? null; @endphp
+                                    @if($serieId)
+                                        <option value="{{ $serieId }}" selected>
+                                            {{ \App\Models\SerieRecurso::find($serieId)->nro_serie ?? 'Seleccionado' }}
+                                        </option>
+                                    @endif
+                                @endif
+                            </select>
                         </div>
+
+                        <div class="col-md-3 mt-3">
+                            <label class="form-label">Estado</label>
+                            <select name="recursos[0][id_estado]" class="form-select estado-select" required>
+                                <option value="">Seleccione</option>
+                                @foreach($estados as $estado)
+                                    @php
+                                        $selectedEstado = old('recursos.0.id_estado') ?? ($incidente->recursos[0]->pivot->id_estado ?? null);
+                                    @endphp
+                                    <option value="{{ $estado->id }}" {{ (string)$estado->id === (string)$selectedEstado ? 'selected' : '' }}>
+                                        {{ $estado->nombre_estado }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
+
 
         <button type="button" id="agregar-recurso" class="btn btn-outline-primary mb-3">+ Agregar otro recurso</button>
 
@@ -78,44 +147,105 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label>Motivo del incidente</label>
-                    <textarea name="descripcion" class="form-control" required>{{ old('descripcion') }}</textarea>
+                    <textarea name="descripcion" class="form-control" required placeholder="Ingrese aquí cuál fue el motivo del incidente" >{{ old('descripcion') }}</textarea>
                 </div>
                 <div class="mb-3">
                     <label>Fecha del incidente</label>
-                    <input type="datetime-local" name="fecha_incidente" class="form-control" value="{{ old('fecha_incidente') }}" required>
-                </div>
+                    <input type="datetime-local"
+                            name="fecha_incidente"
+                            class="form-control @error('fecha_incidente') is-invalid @enderror"
+                            value="{{ old('fecha_incidente') }}"
+                            required
+                            aria-describedby="fechaError"
+                            aria-invalid="{{ $errors->has('fecha_incidente') ? 'true' : 'false' }}">
+
+                    @error('fecha_incidente')
+                        <div id="fechaError" class="invalid-feedback d-block">
+                        {{ $message }}
+                        </div>
+                    @enderror
+                    </div>
+
             </div>
         </div>
 
         <button type="submit" class="btn btn-success w-100">Registrar incidente</button>
     </form>
 
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                {{ session('success') }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
-            </div>
-            </div>
-        </div>
+<!-- Modal de aviso (usuario no encontrado / rol inválido) -->
+<div class="modal fade" id="usuarioAvisoModal" tabindex="-1" aria-labelledby="usuarioAvisoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="usuarioAvisoModalLabel">Atención</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="usuarioAvisoModalBody">
+        <!-- Mensaje dinámico -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
     </div>
+  </div>
+</div>
 
+<!-- Modal de aviso para recursos -->
+<div class="modal fade" id="modalAvisoRecursos" tabindex="-1" aria-labelledby="modalAvisoRecursosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalAvisoRecursosLabel">Atención</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="modalAvisoRecursosBody">
+        <!-- Mensaje dinámico -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Modal de confirmación -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-success">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="successModalLabel">¡Incidente registrado!</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('success') }}
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <a href="{{ route('incidente.create') }}" class="btn btn-outline-success">
+          + Registrar otro
+        </a>
+        <a href="{{ route('incidente.index') }}" class="btn btn-success">
+          Ver incidentes
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+
+    
 </div>
 
 @if(session('success'))
+@push('scripts')
 <script>
-    window.onload = () => {
-        alert("{{ session('success') }}");
-    };
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = new bootstrap.Modal(document.getElementById('successModal'));
+    modal.show();
+  });
 </script>
+@endpush
 @endif
+
 
 <script>
 // ---------- Datos de categorías, subcategorías, recursos y series ----------
@@ -160,6 +290,7 @@ function llenarSeries(recursoId, serieSelect) {
 
 // ---------- Inicializar selects de un bloque ----------
 function initSelects(block) {
+    
     const cat = block.querySelector('.categoria-select');
     const sub = block.querySelector('.subcategoria-select');
     const rec = block.querySelector('.recurso-select');
@@ -180,6 +311,20 @@ function initSelects(block) {
         llenarSeries(rec.value, ser);
     });
 }
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('btn-eliminar-recurso')) {
+    const bloque = e.target.closest('.recurso-block');
+    const total = document.querySelectorAll('.recurso-block').length;
+
+    if (total > 1) {
+      bloque.remove();
+    } else {
+      mostrarModalAvisoRecursos();
+    }
+  }
+});
+
 
 // Inicializar primer bloque
 document.querySelectorAll('.recurso-block').forEach(initSelects);
@@ -206,18 +351,56 @@ document.getElementById('agregar-recurso').addEventListener('click', function() 
 // ---------- Buscar usuario por DNI ----------
 document.getElementById('buscarUsuario').addEventListener('click', function() {
     const dni = document.getElementById('dni_usuario').value.replace(/\./g,'');
-    fetch(`/buscar-usuario/${dni}`)
+    fetch(`/ajax/incidente/buscar-usuario/${dni}`)
         .then(res => res.json())
         .then(data => {
-            if(data.nombre && data.id) {
-                document.getElementById('nombre_usuario').value = data.nombre;
-                document.getElementById('id_usuario').value = data.id;
+            if (data.nombre && data.id) {
+            document.getElementById('nombre_usuario').value = data.nombre;
+            document.getElementById('id_usuario').value = data.id;
             } else {
-                alert(data.error || "Usuario no encontrado");
-                document.getElementById('nombre_usuario').value = '';
-                document.getElementById('id_usuario').value = '';
+            // mostrar modal con mensaje y limpiar campos
+            mostrarModalAvisoUsuario(data.error || 'Usuario no encontrado', 'warning');
+            document.getElementById('nombre_usuario').value = '';
+            document.getElementById('id_usuario').value = '';
             }
+
         });
 });
+// Mostrar modal de aviso con mensaje dinámico
+function mostrarModalAvisoUsuario(mensaje, tipo = 'danger') {
+  try {
+    const modalEl = document.getElementById('usuarioAvisoModal');
+    const body = document.getElementById('usuarioAvisoModalBody');
+    if (!modalEl || !body) {
+      // fallback visible si modal no existe
+      alert(mensaje);
+      return;
+    }
+
+    body.textContent = mensaje;
+
+    // ajustar estilos según tipo (danger, warning, info, success)
+    const header = modalEl.querySelector('.modal-header');
+    header.classList.remove('bg-danger','bg-warning','bg-info','bg-success','text-white');
+    if (tipo === 'warning') header.classList.add('bg-warning','text-dark');
+    else if (tipo === 'info') header.classList.add('bg-info','text-white');
+    else if (tipo === 'success') header.classList.add('bg-success','text-white');
+    else header.classList.add('bg-danger','text-white');
+
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  } catch (e) {
+    console.warn('mostrarModalAvisoUsuario error', e);
+    alert(mensaje);
+  }
+}
+function mostrarModalAvisoRecursos(mensaje = 'Debe haber al menos un recurso cargado.') {
+  const body = document.getElementById('modalAvisoRecursosBody');
+  if (body) body.textContent = mensaje;
+
+  const modal = new bootstrap.Modal(document.getElementById('modalAvisoRecursos'));
+  modal.show();
+}
+
 </script>
 @endsection

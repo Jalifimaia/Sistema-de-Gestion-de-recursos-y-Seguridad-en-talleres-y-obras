@@ -3,82 +3,119 @@
 @section('title', 'Gestión de Usuarios y Roles')
 
 @section('content')
-  <!-- Título -->
-  <div class="mb-4">
-    <h2>Gestión de Usuarios y Roles</h2>
-    <p class="text-muted">Administración de usuarios, permisos y roles del sistema</p>
+<div class="container py-4">  
+<!--para alertas-->
+  @if (session('success'))
+  <div id="alertaEstado" class="alert alert-success alert-dismissible fade show" role="alert">
+  <span id="mensajeAlertaEstado">{{ session('success') }}</span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+  </div>
+  @endif
+
+<!-- 🔶 Encabezado -->
+<header class="row mb-4 align-items-center">
+  <div class="col-md-8">
+    <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+      <img src="{{ asset('images/user.svg') }}" alt="Icono Usuario" style="height: 35px;">
+      Gestión de Usuarios y Roles
+    </h1>
+    <p class="text-muted small">Administración de usuarios, permisos y roles del sistema</p>
   </div>
 
-  <!-- Resumen -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card text-center">
-        <div class="card-body">
-          <h6 class="card-title">Administradores</h6>
-          <h3>{{ $usuarios->where('rol.nombre_rol', 'Administrador')->count() }}</h3>
-          <small class="text-muted">Acceso completo</small>
-        </div>
-      </div>
-    </div>
-
-    @if ($ultimoUsuarioActivo)
-      <div class="col-md-3">
-        <div class="card text-center">
-          <div class="card-body">
-            <h6 class="card-title">Último acceso</h6>
-            <p class="card-text">{{ $ultimoUsuarioActivo->name }}</p>
-            <small class="text-muted">
-              {{ \Carbon\Carbon::parse($ultimoUsuarioActivo->ultimo_acceso)->diffForHumans() }}
-            </small>
-          </div>
-        </div>
-      </div>
-    @endif
+  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
+    <strong id="today" class="valor-fecha text-nowrap"></strong>
   </div>
+</header>
 
+ 
+<div class="row mb-4">
+  <!-- Card: Crear usuario -->
   @auth
     @if (Auth::user()->rol->nombre_rol === 'Administrador')
-      <a href="{{ route('usuarios.create') }}" class="btn btn-success mb-3">
-        + Crear nuevo usuario
-      </a>
+      <div class="col-md-3">
+        <a href="{{ route('usuarios.create') }}" class="card card-resumen card-crear text-center text-decoration-none h-100">
+          <div class="card-body">
+            <h6 class="card-title card-crear d-flex align-items-center justify-content-center gap-2">
+              <img src="{{ asset('images/useradd3.svg') }}" alt="Crear usuario" class="icono-card-titulo">
+              Crear usuario
+            </h6>
+            <small class="text-muted">Alta de nuevo usuario</small>
+          </div>
+        </a>
+      </div>
     @endif
   @endauth
 
-  <!-- Filtros -->
-  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-    <label class="form-label mb-0">Filtrar por:</label>
-
-    <select id="filtroRol" class="form-select w-auto">
-      <option value="todos">Todos los roles</option>
-      @foreach($roles as $rol)
-        <option value="{{ $rol->nombre_rol }}">{{ $rol->nombre_rol }}</option>
-      @endforeach
-    </select>
-
-    <select id="filtroEstado" class="form-select w-auto">
-      <option value="todos">Todos los estados</option>
-      @foreach($estados as $estado)
-        <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
-      @endforeach
-    </select>
-
-    <!-- 🔍 Barra de búsqueda -->
-    <input type="text" id="buscador" class="form-control w-auto" placeholder="Buscar por nombre o email...">
+  <!-- Card: Administradores -->
+  <div class="col-md-3">
+    <div class="card card-resumen text-center h-100">
+      <div class="card-body">
+        <h6 class="card-title d-flex align-items-center justify-content-center gap-2">
+          <img src="{{ asset('images/admin.svg') }}" alt="Administradores" class="icono-card-titulo">
+          Administradores
+        </h6>
+        <h3 class="mb-1">{{ $usuarios->where('rol.nombre_rol', 'Administrador')->count() }}</h3>
+        <small class="text-muted">Acceso completo</small>
+      </div>
+    </div>
   </div>
 
+  <!-- Card: Último acceso -->
+  @if ($ultimoUsuarioActivo)
+    <div class="col-md-3">
+      <div class="card card-resumen text-center h-100">
+        <div class="card-body">
+          <h6 class="card-title d-flex align-items-center justify-content-center gap-2">
+            <img src="{{ asset('images/access.svg') }}" alt="Último acceso" class="icono-card-titulo">
+            Último acceso
+          </h6>
+          <p class="card-text mb-1">{{ $ultimoUsuarioActivo->name }}</p>
+          <small class="text-muted">
+            {{ \Carbon\Carbon::parse($ultimoUsuarioActivo->ultimo_acceso)->diffForHumans() }}
+          </small>
+        </div>
+      </div>
+    </div>
+  @endif
+</div>
+
+<div class="seccion-usuarios">
+<h5 class="card-title fw-bold">Usuarios registrados en el sistema</h5><br>
+
+  <!-- Filtros -->
+  <!-- 🔶 Filtro de usuarios -->
+<div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+  <label class="form-label mb-0 fw-semibold filtrar-por">Filtrar por:</label>
+
+  <select id="filtroRol" class="form-select filtro-destacado w-auto">
+    <option value="todos">Todos los roles</option>
+    @foreach($roles as $rol)
+      <option value="{{ $rol->nombre_rol }}">{{ $rol->nombre_rol }}</option>
+    @endforeach
+  </select>
+
+  <select id="filtroEstado" class="form-select filtro-destacado w-auto">
+    <option value="todos">Todos los estados</option>
+    @foreach($estados as $estado)
+      <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
+    @endforeach
+  </select>
+
+  <input type="text" id="buscador" class="form-control buscador-destacado" placeholder="Buscar por nombre o email..." style="width: 280px; max-width: 100%;">
+</div>
+
+
   <!-- Tabla -->
-  <div class="card shadow-sm">
+
     <div class="card-body">
-      <h5 class="card-title fw-bold">Listado de Usuarios</h5>
-      <p class="text-muted small">Usuarios registrados en el sistema</p>
 
       <div class="table-responsive">
-        <table class="table align-middle mb-0" id="tablaUsuarios">
-          <thead>
+        <table class="table-naranja align-middle mb-0" id="tablaUsuarios">
+          <thead class="table-light">
             <tr>
               <th>Nombre</th>
               <th>Email</th>
-              <th>Rol</th>
+              <!--<th>Rol</th>-->
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -87,31 +124,66 @@
             @foreach ($usuarios as $usuario)
               <tr data-rol="{{ $usuario->rol->nombre_rol ?? '' }}"
                   data-estado="{{ $usuario->estado->nombre ?? '' }}">
-                <td>{{ $usuario->name }}</td>
+                <td class="nombre-completo" data-nombre="{{ $usuario->name }}">
+                  {{ $usuario->name }} [<strong>{{ $usuario->rol->nombre_rol ?? '-' }}</strong>]
+                </td>
                 <td>{{ $usuario->email }}</td>
-                <td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>
-                <td class="estado">{{ $usuario->estado->nombre ?? '-' }}</td>
+                <!--<td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>-->
+                <td class="estado">
+                  @if(($usuario->estado->nombre ?? '') === 'stand by')
+                    <em>stand by</em>
+                  @else
+                    {{ $usuario->estado->nombre ?? '-' }}
+                  @endif
+                </td>
                 <td>
-                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-outline-info">Ver</a>
-                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
+                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-ver">Ver</a>
+                    <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-editar">
+                      <i class="bi bi-pencil"></i>
+                     Editar</a>
 
-                  <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST" class="d-inline form-baja">
-                    @csrf
-                    <button class="btn btn-sm btn-outline-warning"
-                            @if(($usuario->estado->nombre ?? null) === 'Baja')
-                              disabled style="opacity:0.5; cursor:not-allowed;"
-                            @endif>
-                      Dar de baja
-                    </button>
-                  </form>
+                    <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST" class="d-inline form-baja" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol ?? '-' }}">
+                      @csrf
+                      @php $esBaja = ($usuario->estado->nombre ?? null) === 'Baja'; @endphp
+                      <span @if($esBaja) title="Usuario dado de baja" @endif>
+                        <button type="button"
+                                class="btn btn-baja btn-confirmar-baja"
+                                @if($esBaja) disabled style="opacity:0.5; cursor:not-allowed;" @endif>
+                          Dar de baja
+                        </button>
+                      </span>
+                    </form>
                 </td>
               </tr>
-            @endforeach
+          @endforeach
           </tbody>
         </table>
       </div>
     </div>
+  
   </div>
+
+</div>
+
+<!-- Modal de confirmación de baja -->
+<div class="modal fade" id="modalConfirmarBaja" tabindex="-1" aria-labelledby="modalConfirmarBajaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalConfirmarBajaLabel">Confirmar baja</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p id="textoConfirmacion">¿Desea dar de baja a ...?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmarBaja">Sí</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -129,7 +201,8 @@
     filas.forEach(fila => {
       const rolFila = (fila.getAttribute('data-rol') || '').toLowerCase();
       const estadoFila = (fila.getAttribute('data-estado') || '').toLowerCase();
-      const nombre = fila.cells[0].innerText.toLowerCase();
+    const nombre = fila.querySelector('.nombre-completo').dataset.nombre.toLowerCase();
+
       const email = fila.cells[1].innerText.toLowerCase();
 
       const coincideRol = (rol === 'todos' || rolFila === rol);
@@ -169,5 +242,55 @@
       });
     });
   });
+
+  // Modal para confirmación de baja
+  let formSeleccionado = null;
+  document.querySelectorAll('.btn-confirmar-baja').forEach(boton => {
+    boton.addEventListener('click', function () {
+      formSeleccionado = this.closest('form');
+      const nombre = formSeleccionado.getAttribute('data-nombre');
+      const rol = formSeleccionado.getAttribute('data-rol');
+      const texto = document.getElementById('textoConfirmacion');
+      texto.textContent = `¿Desea dar de baja a ${nombre} (${rol})?`;
+      const modal = new bootstrap.Modal(document.getElementById('modalConfirmarBaja'));
+      modal.show();
+    });
+  });
+
+  document.getElementById('btnConfirmarBaja').addEventListener('click', function () {
+    if (formSeleccionado) {
+      formSeleccionado.dispatchEvent(new Event('submit', { cancelable: true }));
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarBaja'));
+      modal.hide();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const alerta = document.getElementById('alertaEstado');
+    if (alerta) {
+      setTimeout(() => {
+        alerta.classList.add('fade');
+        alerta.classList.remove('show');
+        alerta.addEventListener('transitionend', () => {
+          alerta.remove();
+        }, { once: true });
+      }, 5000);
+    }
+
+     const today = new Date();
+    const dia = String(today.getDate()).padStart(2, '0');
+    const mes = String(today.getMonth() + 1).padStart(2, '0');
+    const año = today.getFullYear();
+    const hora = String(today.getHours()).padStart(2, '0');
+    const minutos = String(today.getMinutes()).padStart(2, '0');
+
+    document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
+  });
+
 </script>
 @endpush
+
+@push('styles')
+<link href="{{ asset('css/usuariosIndex.css') }}" rel="stylesheet">
+@endpush
+
