@@ -97,9 +97,12 @@
     </div>
 
     <!-- Botón -->
-    <div class="mt-4 text-end">
-      <button type="submit" class="btn btn-reg">Registrar Checklist</button>
+    <div class="mt-4 text-center">
+      <button type="submit" class="btn btn-reg w-100">
+        Registrar Checklist
+      </button>
     </div>
+
   </form>
 </div>
 

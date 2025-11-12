@@ -1,0 +1,178 @@
+/* Estilo para el botón del acordeón */
+.registro-btn {
+  background-color: #e2e2e2;
+  color: #2e2e2e;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Estilo cuando está expandido */
+.registro-btn:not(.collapsed) {
+  background-color: #e2e2e2;
+  color: #2e2e2e;
+}
+
+/* Estilo del cuerpo del acordeón */
+.registro-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.registro-body em {
+  color: #555;
+  font-style: italic;
+}
+
+.titulo-con-linea {
+  border-bottom: 4px solid #df851e; /* naranja intenso */
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.btn-copiar {
+  background-color: rgb(230, 230, 230);
+  color: #292929;
+  border-radius: 8px;       /* más redondo */
+  border: 1px solid #999;   /* borde gris */
+  padding: 6px 12px;
+  display: inline-flex;     /* asegura alineación ícono + texto */
+  align-items: center;      /* centra verticalmente */
+}
+
+.btn-copiar:hover {
+  background-color: rgb(179, 179, 179);
+  border-color: #666;
+}
+
+.icon-copy {
+  width: 18px;       /* ancho fijo */
+  height: 18px;      /* alto fijo */
+  vertical-align: middle; /* alinea con el texto */
+  display: inline-block;
+}
+
+/* Tabs personalizados */
+/* Tabs personalizados más grandes */
+.custom-tabs .nav-link {
+  color: #555;
+  font-weight: 500;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease-in-out;
+  font-size: 1.05rem;     /* agranda la tipografía */
+  padding: 0.75rem 1.5rem; /* más aire interno */
+}
+
+.custom-tabs .nav-link:hover {
+  color: #b14910;
+  background-color: #fdf2e9;
+}
+
+.custom-tabs .nav-link.active {
+  color: #d35400;
+  border-bottom: 3px solid #b14910;
+  background-color: transparent;
+  font-weight: bold;
+}
+
+/* Tabs estilo barra sólida */
+.custom-tabs {
+  border-bottom: 2px solid #ddd;
+  background-color: #f8f9fa; /* gris claro tipo thead */
+  border-radius: 4px 4px 0 0;
+}
+
+.custom-tabs .nav-link {
+  color: #333;
+  font-weight: 600;
+  font-size: 1.1rem;        /* letras más grandes */
+  padding: 0.75rem 1.5rem;  /* más aire */
+  border: none;
+  border-right: 1px solid #ddd; /* separadores entre tabs */
+}
+
+.custom-tabs .nav-link:last-child {
+  border-right: none;
+}
+
+.custom-tabs .nav-link.active {
+  background-color: #df851e; /* naranja */
+  color: #fff;
+  border-radius: 4px 4px 0 0;
+}
+
+/* Encabezado naranja */
+.table-orange {
+  background-color: #f57c00; /* naranja intenso */
+  color: #fff;
+}
+
+/* Ajustes generales de la tabla */
+.custom-table {
+  font-size: 0.95rem;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 0.75rem 1rem;
+}
+
+/* 1) Fuerza color de fondo y texto del thead */
+#tab-content table thead {
+  background-color: #df851e;
+  color: #fff;
+}
+
+/* 2) Asegura que las celdas del thead hereden el color y fondo */
+#tab-content table thead th,
+#tab-content table thead td {
+  background-color: #df851e; /* fondo naranja en cada celda */
+  color: #fff;
+  border-color: #c47419;     /* borde ligeramente más oscuro para definición */
+}
+
+/* 3) Mantener stripes del tbody sin afectar el thead */
+#tab-content table.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-accent-bg: #f8f9fa;
+}
+
+.btn-volver {
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+}
+
+.titulo-con-linea {
+  border-bottom: 4px solid #f57c00; /* línea naranja */
+  padding-bottom: 0.3rem;
+  margin-bottom: 0; /* ya controlamos con el flex */
+  font-weight: bold;
+  color: #333;
+}
+
+/* Botón volver naranja */
+.btn-volver {
+  background-color: #b14910;   /* naranja */
+  color: #fff;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-volver:hover {
+  background-color: #e36f00;   /* naranja más oscuro al hover */
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Ícono volver */
+.icon-volver {
+  width: 18px;
+  height: 18px;
+}
+
+
+

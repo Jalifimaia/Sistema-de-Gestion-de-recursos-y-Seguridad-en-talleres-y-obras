@@ -93,9 +93,12 @@
 
   <!-- Botones -->
   <div class="text-center mt-4">
-        <input type="hidden" name="todos_asignados" id="todos_asignados" value="0">
-        <button type="submit" id="submitBtn" class="btn btn-guardar w-75 mb-5">Guardar asignación</button>
-    </div>
+    <input type="hidden" name="todos_asignados" id="todos_asignados" value="0">
+    <button type="submit" id="submitBtn" class="btn btn-guardar w-100 mb-5">
+      Guardar asignación
+    </button>
+  </div>
+
 
 </form>
 

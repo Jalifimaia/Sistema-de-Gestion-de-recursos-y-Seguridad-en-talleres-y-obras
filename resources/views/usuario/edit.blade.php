@@ -87,7 +87,7 @@
   </form>
 
   <!-- Acciones de estado -->
-  <div class="d-flex gap-2 mt-4">
+  <div class="d-flex justify-content-center gap-2 mt-4">
     @php $estado = $usuario->estado?->nombre; @endphp
 
     <form method="POST" action="{{ route('usuarios.activarConEPP', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="alta">
