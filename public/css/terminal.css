@@ -716,6 +716,21 @@ input.form-control:focus {
 
 /*MICROFONO*/
 /*Boton del microfono*/
+
+/* Micrófono en modo silenciado (gris + tamaño reducido) */
+.mic-muted {
+  background-color: #ccc !important;
+  color: #3e3e3e !important;
+  box-shadow: none !important;
+  border: 1px solid #1c1c1c !important;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border 0.3s ease
+}
+
+
+
 .mic-float-latido {
   
    pointer-events: none;
@@ -846,6 +861,7 @@ body.modal-open {
   }
 }
 
+#step0,
 #step1,
 #step2,
 #step3,
@@ -863,7 +879,13 @@ body.modal-open {
 #modal-mensaje-kiosco,
 .btn-resumen,
 #modalCerrarSesion,
-#modalConfirmarSerie {
+#modalConfirmarSerie,
+#modalAsistente,
+#boton-flotante-cerrar-sesion,
+#boton-flotante-menu-principal,
+#subcategoria-buttons .btn-outline-dark,
+#recurso-buttons .btn-outline-dark,
+#serie-buttons .btn-outline-dark  {
   animation: subirSuave 0.2s ease-out;
 }
 
@@ -888,4 +910,80 @@ body.modal-open {
 
 .modal.cerrando + .modal-backdrop {
   opacity: 0;
+}
+
+
+
+/* Botón flotante del Asistente */
+.asistente-float {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1040; /* debajo del modal y backdrop */
+  background-color: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+.asistente-float:hover {
+  background-color: #084dc1;
+}
+
+
+
+
+@keyframes expandirSuave {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes contraerSuave {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.subtitulo-wrapper {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.subtitulo-wrapper.visible {
+  max-height: 200px; /* suficiente para 2–3 líneas */
+  opacity: 1;
+}
+
+#asistenteSubtitulo {
+  background-color: rgba(255, 255, 255, 0.7);
+  color: #333;
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+
+#asistenteSubtitulo.oculto {
+  animation: contraerSuave 0.2s ease-out forwards;
 }

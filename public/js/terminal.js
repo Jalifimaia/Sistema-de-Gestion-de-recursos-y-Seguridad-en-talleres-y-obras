@@ -47,22 +47,20 @@ function safeStartRecognitionGlobal() {
   try {
     if (!('webkitSpeechRecognition' in window)) return;
 
-    // 🚫 Si está pausado, no iniciar
     if (window.recognitionGlobalPaused) {
       console.log('⏸️ safeStartRecognitionGlobal: pausado, no se inicia');
       return;
     }
 
     if (recognitionRunning) {
-  try {
-    recognitionGlobal.stop(); // fuerza reinicio si quedó colgado
-    recognitionRunning = false;
-    console.log('safeStartRecognitionGlobal: reinicio forzado por estado inconsistente');
-  } catch (e) {
-    console.warn('safeStartRecognitionGlobal: stop falló en reinicio forzado', e);
-  }
-}
-
+      try {
+        recognitionGlobal.stop(); // fuerza reinicio si quedó colgado
+        recognitionRunning = false;
+        console.log('safeStartRecognitionGlobal: reinicio forzado por estado inconsistente');
+      } catch (e) {
+        console.warn('safeStartRecognitionGlobal: stop falló en reinicio forzado', e);
+      }
+    }
 
     if (!recognitionGlobal) {
       iniciarReconocimientoGlobal();
@@ -3828,7 +3826,7 @@ function actualizarVisibilidadBotonesPorStep(stepId) {
 
   const step = typeof stepId === 'number' ? 'step' + stepId : String(stepId);
 
-  if (step === 'step1' || stepId === '1' || step === 'step12') {
+  if (step === 'step1' || stepId === '1' || step === 'step12' || step === 'step0') {
     // 🔒 Ocultar completamente en login
     btnCerrar.style.display = 'none';
     btnMenu.style.display = 'none';
@@ -4420,6 +4418,210 @@ function reactivarReconocimientoGlobal() {
 
 
 
+/*TTS - TEXTO A VOZ - ASISTENTE DE SAFESTOCK*/
+
+function abrirModalAsistente() {
+  const modalEl = document.getElementById('modalAsistente');
+  if (!modalEl) return;
+
+  // Si ya está visible, no hacer nada
+  if (modalEl.classList.contains('show')) return;
+
+  window.modalKioscoActivo = true;
+
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+  modal.show();
+
+  /*modalEl.addEventListener('hidden.bs.modal', () => {
+    cerrarModalAsistente();
+  }, { once: true });*/
+}
+
+
+function cerrarModalAsistente() {
+  const modalEl = document.getElementById('modalAsistente');
+  if (!modalEl) return;
+
+  window.modalKioscoActivo = false;
+
+  try {
+    bootstrap.Modal.getInstance(modalEl)?.hide();
+  } catch (e) {}
+
+  // Detener TTS si está hablando
+  try {
+    window.speechSynthesis.cancel();
+  } catch (e) {}
+
+  // 🔧 Forzar limpieza de flags si se cerró manualmente
+  window.ttsEnCurso = false;
+  window.textoUltimoTTS = '';
+  window.timestampUltimoTTS = 0;
+
+  // Ocultar subtítulo con animación
+  const wrapper = document.querySelector('.subtitulo-wrapper');
+  const subtituloEl = document.getElementById('asistenteSubtitulo');
+  if (wrapper && subtituloEl) {
+    wrapper.classList.remove('visible');
+    setTimeout(() => {
+      subtituloEl.innerHTML = '';
+    }, 300);
+  }
+
+  // Restaurar micrófono
+  try {
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+  } catch (e) {
+    console.warn('No se pudo reiniciar reconocimiento tras cerrar asistente:', e);
+  }
+
+  document.getElementById('microfono_flotante')?.classList.remove('mic-muted');
+}
+
+
+
+/* ==========================================
+   leerAsistenteTexto(opcion) (versión segura)
+   ========================================== */
+function leerAsistenteTexto(opcion) {
+  let texto = '';
+  switch (opcion) {
+    case 1:
+      texto = 'Podés ingresar al sistema escribiendo tu clave o escaneando tu código QR personal. También podés dictar tu clave por voz diciendo "ingresar clave".';
+      break;
+    case 2:
+      texto = 'Desde el menú principal podés solicitar herramientas, registrar recursos que ya tenés en mano, o ver los recursos que tenés asignados actualmente.';
+      break;
+    case 3:
+      texto = 'Para devolver una herramienta, seleccioná el recurso asignado y escaneá el código QR de la serie correspondiente. El sistema validará la devolución automáticamente.';
+      break;
+    default:
+      texto = '';
+  }
+
+  const modalEl = document.getElementById('modalAsistente');
+  const modalVisible = !!modalEl && modalEl.classList.contains('show');
+  const wrapper = document.querySelector('.subtitulo-wrapper');
+  const subtituloEl = document.getElementById('asistenteSubtitulo');
+  const mic = document.getElementById('microfono_flotante');
+
+  const reproducir = () => {
+    if (!subtituloEl || !wrapper) {
+      console.warn('⚠️ asistenteSubtitulo o wrapper no encontrado en el DOM');
+      return;
+    }
+
+    // Pausar reconocimiento de forma determinista (una vez)
+    try {
+      recognitionGlobalPaused = true;
+      safeStopRecognitionGlobal();
+    } catch (e) {
+      console.warn('safeStopRecognitionGlobal falló antes de TTS:', e);
+    }
+
+    // Preparar subtítulos
+    const palabras = texto.split(' ').filter(Boolean);
+    subtituloEl.innerHTML = palabras.map((p, i) => `<span id="palabra-${i}">${p}</span>`).join(' ');
+    wrapper.classList.add('visible');
+
+    // Micrófono en gris y quitar pulsing si corresponde
+    if (mic) {
+      mic.classList.add('mic-muted');
+      microfono_flotante?.classList.remove('pulsing'); // si existe VAD var
+    }
+
+    // Guardar TTS y flags ANTES de speak para evitar race
+    window.textoUltimoTTS = texto;
+    window.timestampUltimoTTS = Date.now();
+    window.ttsEnCurso = true;
+
+    const utterance = new SpeechSynthesisUtterance(texto);
+    utterance.lang = 'es-ES';
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    let palabraIndex = 0;
+    utterance.onboundary = (event) => {
+      // Algunos navegadores no proveen name === 'word'; chequeamos event.charIndex fallback
+      const isWordBoundary = (event.name && event.name === 'word') || typeof event.charIndex === 'number';
+      if (!isWordBoundary) return;
+      const span = document.getElementById(`palabra-${palabraIndex}`);
+      if (span) {
+        span.style.backgroundColor = '#ffeeba';
+        span.style.borderRadius = '4px';
+      }
+      const prev = document.getElementById(`palabra-${palabraIndex - 1}`);
+      if (prev) prev.style.backgroundColor = '';
+      palabraIndex++;
+    };
+
+    utterance.onend = () => {
+      // Marcar TTS finalizado lo antes posible
+      window.ttsEnCurso = false;
+
+      // Restaurar mic visual
+      if (mic) mic.classList.remove('mic-muted');
+
+      // Ocultar subtítulo con animación
+      wrapper.classList.remove('visible');
+      setTimeout(() => {
+        if (subtituloEl) subtituloEl.innerHTML = '';
+      }, 300);
+
+      // Reactivar reconocimiento de forma controlada SOLO si modal sigue abierto
+      const sigueVisible = !!modalEl && modalEl.classList.contains('show');
+      if (sigueVisible) {
+        recognitionGlobalPaused = false;
+        // Dejamos un pequeño delay para asegurarnos que audio se libere
+        setTimeout(() => {
+          // Solo arrancar si no volvió a activarse TTS
+          if (!window.ttsEnCurso) {
+            try {
+              safeStartRecognitionGlobal();
+            } catch (e) {
+              console.warn('safeStartRecognitionGlobal falló tras TTS:', e);
+            }
+          }
+        }, 300);
+      } else {
+        // Si el modal fue cerrado mientras hablaba, no reactivar reconocimiento aquí
+        console.log('🎤 Reconocimiento no reactivado: modal cerrado durante TTS');
+      }
+    };
+
+    // Cancel posible TTS anterior y hablar (flag ya seteado)
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {
+      console.warn('No se pudo cancelar speechSynthesis previo:', e);
+    }
+    window.speechSynthesis.speak(utterance);
+  };
+
+  if (!modalVisible) {
+    // Mostrar modal y reproducir tras show
+    if (!!modalEl) {
+      window.modalKioscoActivo = true;
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+      modalEl.addEventListener('shown.bs.modal', () => {
+        reproducir();
+      }, { once: true });
+    } else {
+      // Si no existe modal en DOM, solo reproducir (seguro)
+      reproducir();
+    }
+  } else {
+    reproducir();
+  }
+}
+
+
+
+/* COMANDOS DE VOZ */
+
 function procesarComandoVoz(rawTexto) {
   try {
     if (!rawTexto && typeof rawTexto !== 'string') return;
@@ -4427,21 +4629,73 @@ function procesarComandoVoz(rawTexto) {
     const limpio = normalizarTexto(texto).replace(/\b(\w+)\s+\1\b/g, '$1');
     console.log("👉 Reconocido (raw):", rawTexto, "| normalizado:", limpio, "| Step activo:", getStepActivo());
 
+    // Protección temprana contra eco TTS: si TTS activo, ignorar todo
+    if (window.ttsEnCurso) {
+      console.log('🚫 Ignorado: TTS en curso, posible eco');
+      return;
+    }
+
+    // Datos TTS guardados (si existen)
+    const textoTTS = String(window.textoUltimoTTS || '').toLowerCase();
+    const tiempoTTS = Number(window.timestampUltimoTTS || 0);
+    const ahora = Date.now();
+
+    // Normalizar textoUltimoTTS para comparación (si querés usar)
+    const textoTTSNorm = textoTTS ? normalizarTexto(textoTTS) : '';
+
+    // Si existe TTS reciente y el texto reconocido ES IGUAL al TTS normalizado y ocurrió muy reciente, ignorar
+    if (textoTTSNorm && limpio === textoTTSNorm && (ahora - tiempoTTS < 3000)) {
+      console.log('🚫 Ignorado: eco del TTS detectado (texto idéntico y <3s)');
+      return;
+    }
+
+    // === Comandos de voz para el Asistente ===
+    const modalAsistente = document.getElementById('modalAsistente');
+    const modalAsistenteVisible = !!modalAsistente && modalAsistente.classList.contains('show');
+
+    if (modalAsistenteVisible) {
+      if (/\b(como ingreso|como me identifico|como entrar)\b/.test(limpio)) {
+        leerAsistenteTexto(1);
+        return;
+      }
+
+      if (/\b(que puedo hacer|menu principal|opciones disponibles)\b/.test(limpio)) {
+        leerAsistenteTexto(2);
+        return;
+      }
+
+      if (/\b(como devuelvo|como devolver|como devuelve|devolver herramienta|entregar herramienta|devolver recurso|como entregar)\b/.test(limpio)) {
+        leerAsistenteTexto(3);
+        return;
+      }
+    }
+
+    // Comando global para abrir el asistente (solo si no hay ningún modal visible)
+    const algunModalVisible = !!document.querySelector('.modal.show');
+    if (!algunModalVisible && /\b(asistente|ayuda|tengo dudas)\b/.test(limpio)) {
+      abrirModalAsistente();
+      return;
+    }
+
     // Si el kiosco está mostrando un modal kiosco forzado, priorizamos su cierre por voz
     if (window.modalKioscoActivo) {
       if (/\b(cerrar)\b/.test(limpio)) {
-
-        console.log('🎤 Cierre por voz del modal kiosco:', limpio);
-        cerrarModalKiosco();
+        console.log('🎤 Cierre por voz de modal activo:', limpio);
+        const modalAs = document.getElementById('modalAsistente');
+        if (modalAs?.classList.contains('show')) {
+          cerrarModalAsistente();
+        } else {
+          cerrarModalKiosco();
+        }
       } else {
-        console.log('🚫 Comando bloqueado por modal kiosco activo:', limpio);
+        console.log('🚫 Comando bloqueado por modal activo:', limpio);
       }
       return;
     }
 
     // Si hay modal de error QR visible priorizamos su cierre
     const modalErrorQR = document.getElementById('modalErrorQR');
-    const modalErrorVisible = modalErrorQR && modalErrorQR.classList.contains('show');
+    const modalErrorVisible = !!modalErrorQR && modalErrorQR.classList.contains('show');
     if (modalErrorVisible) {
       if (/\b(cerrar|cerrar error|cerrar modal|cerrar qr)\b/.test(limpio)) {
         console.log('🎤 Comando de voz: cerrar modal error QR');
@@ -4452,25 +4706,34 @@ function procesarComandoVoz(rawTexto) {
       return;
     }
 
-
-    
+    // Resto de lógica por pasos / botones globales
     const step = getStepActivo();
 
-    //botones globales de menu principal y cerrar sesion
-    if (step !== 'step1' && step !== 'step12') {
-        if (/\b(cerrar sesión|cerrar sesion)\b/.test(limpio)) {
-          console.log('🔐 Comando de voz detectado: cerrar sesión');
-          mostrarModalCerrarSesion(); // tu función actual para abrir el modal
-          return;
-        }
+    // Botones globales de menú principal y cerrar sesión
+    
+
+    // Comando de voz para avanzar desde la pantalla de bienvenida (step0)
+    if (step === 'step0') {
+      if (/\b(continuar)\b/.test(limpio)) {
+        console.log('🎤 Comando de voz: avanzar desde step0');
+        nextStep(1);
+        return;
+      }
     }
 
-    if (step !== 'step1' && step !== 'step2' && step !== 'step12') {
-        if (/\b(menu principal)\b/.test(limpio)) {
+    if (step !== 'step0' && step !== 'step1' && step !== 'step12') {
+      if (/\b(cerrar sesión|cerrar sesion)\b/.test(limpio)) {
+        console.log('🔐 Comando de voz detectado: cerrar sesión');
+        mostrarModalCerrarSesion();
+        return;
+      }
+    }
+
+    if (step !== 'step0' && step !== 'step1' && step !== 'step2' && step !== 'step12') {
+      if (/\b(menu principal)\b/.test(limpio)) {
         recognitionGlobalPaused = false;
         safeStartRecognitionGlobal();
-        nextStep(2);
-       // getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
+        nextStep(1);
         return;
       }
     }
@@ -4962,3 +5225,50 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 10 * 1000); // cada 10 segundos
 });
 
+
+/* ==========================================
+   Listeners y cleanup seguros (copiá tal cual)
+   ========================================== */
+
+// Listener: si se abre cualquier modal distinto al asistente, cerramos asistente para evitar conflictos
+document.addEventListener('show.bs.modal', (event) => {
+  const modalAsistente = document.getElementById('modalAsistente');
+  if (!modalAsistente) return;
+  // Comprobación en tiempo real: si otro modal se abre y el asistente está visible, cerrarlo
+  const asistVisible = modalAsistente.classList.contains('show');
+  if (event.target && event.target.id !== 'modalAsistente' && asistVisible) {
+    console.log('🧠 Otro modal abierto, cerrando asistente para evitar conflicto');
+    cerrarModalAsistente();
+  }
+});
+
+// Listener seguro para hide del modal (solo si existe)
+(function attachModalHideHandler() {
+  const modalEl = document.getElementById('modalAsistente');
+  if (!modalEl) return;
+  modalEl.addEventListener('hide.bs.modal', () => {
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {}
+    // limpiar subtítulo
+    const wrapper = document.querySelector('.subtitulo-wrapper');
+    const subtituloEl = document.getElementById('asistenteSubtitulo');
+    if (wrapper && subtituloEl) {
+      wrapper.classList.remove('visible');
+      setTimeout(() => { subtituloEl.innerHTML = ''; }, 300);
+    }
+    // Reactivar reconocimiento si procede
+    try {
+      recognitionGlobalPaused = false;
+      safeStartRecognitionGlobal();
+    } catch (e) {}
+  });
+})();
+
+// Cleanup adicional en beforeunload: cancelar TTS y resetear flags críticos
+window.addEventListener('beforeunload', () => {
+  try { window.speechSynthesis.cancel(); } catch (e) {}
+  window.ttsEnCurso = false;
+  window.textoUltimoTTS = '';
+  window.timestampUltimoTTS = 0;
+});

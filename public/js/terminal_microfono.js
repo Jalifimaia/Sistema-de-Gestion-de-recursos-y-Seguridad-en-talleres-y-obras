@@ -15,24 +15,27 @@ async function startVAD() {
 
     let pulsing = false;
 
-    function detectVoice() {
-        analyser.getByteFrequencyData(dataArray);
-        const volume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+   function detectVoice() {
+  analyser.getByteFrequencyData(dataArray);
+  const volume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
 
-        if (volume > umbral_sonido) {
-        if (!pulsing) {
-            microfono_flotante.classList.add('pulsing');
-            pulsing = true;
-        }
-        } else {
-        if (pulsing) {
-            microfono_flotante.classList.remove('pulsing');
-            pulsing = false;
-        }
-        }
+  const micMuted = microfono_flotante.classList.contains('mic-muted');
 
-        requestAnimationFrame(detectVoice);
+  if (!micMuted && volume > umbral_sonido) {
+    if (!pulsing) {
+      microfono_flotante.classList.add('pulsing');
+      pulsing = true;
     }
+  } else {
+    if (pulsing) {
+      microfono_flotante.classList.remove('pulsing');
+      pulsing = false;
+    }
+  }
+
+  requestAnimationFrame(detectVoice);
+}
+
 
     detectVoice();
     } catch (err) {

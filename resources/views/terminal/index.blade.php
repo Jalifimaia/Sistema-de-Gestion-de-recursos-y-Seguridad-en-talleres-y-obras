@@ -18,8 +18,59 @@
       <button type="button" class="btn-close float-end" onclick="document.getElementById('mensaje-kiosco').classList.add('d-none')"></button>
     </div>
 
+  <!-- Paso 0: Pantalla de bienvenida -->
+  <div id="step0" class="step active">
+    <h2 class="mb-4 text-center">
+      Gestione y controle sus herramientas fácilmente con SafeStock
+    </h2>
+
+    <p class="text-center text-muted mb-4" id="textoBienvenida">
+      El sistema permite registrar, solicitar y devolver recursos de forma segura.
+    </p>
+
+    <div class="d-flex flex-column align-items-center gap-3">
+      <button class="btn btn-primary btn-lg d-flex align-items-center gap-2" onclick="nextStep(1)">
+        <span>Continuar</span>
+      </button>
+
+
+
+    </div>
+  </div>
+
+  <!-- Modal del Asistente -->
+  <div class="modal fade" id="modalAsistente" tabindex="-1" aria-labelledby="modalAsistenteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalAsistenteLabel">¿En qué puedo ayudarte?</h5>
+          <button type="button" class="btn-close" onclick="cerrarModalAsistente()" aria-label="Cerrar"></button>
+
+        </div>
+
+        <div class="modal-body d-flex flex-column gap-3">
+          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(1)">¿Cómo ingreso al sistema?</button>
+          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(2)">¿Qué puedo hacer desde el menú principal?</button>
+          <button class="btn btn-outline-dark" onclick="leerAsistenteTexto(3)">¿Cómo devuelvo una herramienta?</button>
+          
+          <!-- Contenedor animado del subtítulo -->
+          <div class="subtitulo-wrapper">
+            <div id="asistenteSubtitulo"></div>
+          </div>
+
+          <button class="btn btn-outline-danger mt-3 btn-cerrar-modal" onclick="cerrarModalAsistente()">Cerrar</button>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
     <!-- Paso 1: Identificar trabajador -->
-    <div id="step1" class="step active">
+    <div id="step1" class="step">
 
       <h2 class="mb-4 text-center titulo-identificar">
         <img src="{{ asset('images/casco.svg') }}" alt="Casco de seguridad" class="icono-casco">
@@ -367,6 +418,10 @@
 
   <span class="mic-label">¡Podés dictar tu DNI!</span>
 
+<!-- Botón flotante del Asistente -->
+<button id="asistente_flotante" class="asistente-float" onclick="abrirModalAsistente()" title="Asistente de SafeStock">
+  Ayuda
+</button>
 
 
 <!-- Microfono flotante  (indicador de microfono activo, debug)-->
