@@ -4477,6 +4477,12 @@ function cerrarModalAsistente() {
   }
 
   document.getElementById('microfono_flotante')?.classList.remove('mic-muted');
+
+
+  setTimeout(() => {
+  document.querySelectorAll('.modal.show').forEach(el => el.classList.remove('show'));
+}, 100);
+
 }
 
 
@@ -4671,11 +4677,17 @@ function procesarComandoVoz(rawTexto) {
     }
 
     // Comando global para abrir el asistente (solo si no hay ningún modal visible)
-    const algunModalVisible = !!document.querySelector('.modal.show');
-    if (!algunModalVisible && /\b(asistente|ayuda|tengo dudas)\b/.test(limpio)) {
+    const modalEl = document.getElementById('modalAsistente');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    const modalVisible = modalEl?.classList.contains('show') && !!modalInstance;
+
+    const algunModalVisible = window.modalKioscoActivo || document.querySelectorAll('.modal.show').length > 0;
+
+if (!algunModalVisible && /\b(ayuda|asistente|tengo dudas)\b/.test(limpio)) {
       abrirModalAsistente();
       return;
     }
+
 
     // Si el kiosco está mostrando un modal kiosco forzado, priorizamos su cierre por voz
     if (window.modalKioscoActivo) {
@@ -4688,6 +4700,8 @@ function procesarComandoVoz(rawTexto) {
           cerrarModalKiosco();
         }
       } else {
+        console.log('🧪 algunModalVisible:', algunModalVisible);
+
         console.log('🚫 Comando bloqueado por modal activo:', limpio);
       }
       return;

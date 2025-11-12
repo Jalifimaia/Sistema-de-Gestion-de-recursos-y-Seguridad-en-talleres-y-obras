@@ -21,11 +21,11 @@
   <!-- Paso 0: Pantalla de bienvenida -->
   <div id="step0" class="step active">
     <h2 class="mb-4 text-center">
-      Gestione y controle sus herramientas fácilmente con SafeStock
+      Te damos la bienvenida a SafeStock
     </h2>
 
     <p class="text-center text-muted mb-4" id="textoBienvenida">
-      El sistema permite registrar, solicitar y devolver recursos de forma segura.
+      Una terminal guiada por voz para gestionar tus herramientas.
     </p>
 
     <div class="d-flex flex-column align-items-center gap-3">
