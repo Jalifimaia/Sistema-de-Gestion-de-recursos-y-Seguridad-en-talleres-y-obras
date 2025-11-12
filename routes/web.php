@@ -35,9 +35,9 @@ use App\Http\Controllers\PrestamoTerminalController;
 Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
-Route::get('/usuarios/{id}', [UserController::class, 'show'])
-     ->where('id', '[0-9]+')
-     ->name('usuarios.show');
+//Route::get('/usuarios/{id}', [UserController::class, 'show'])
+     //->where('id', '[0-9]+')
+     //->name('usuarios.show');
 //Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index']);
 Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index'])->name('controlEPP');
 
@@ -277,7 +277,16 @@ Route::delete('/incidente/{id}', [IncidenteController::class, 'destroy'])->name(
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('usuarios', UserController::class);
+    
+    // Rutas para cargar las pestañas (AJAX / partials)
+    Route::get('usuarios/{id}/checklists', [UsuarioController::class, 'checklists'])->name('usuarios.checklists');
+    Route::get('usuarios/{id}/incidentes', [UsuarioController::class, 'incidentes'])->name('usuarios.incidentes');
+    Route::get('usuarios/{id}/prestamos', [UsuarioController::class, 'prestamos'])->name('usuarios.prestamos');
+
+    Route::resource('usuarios', UsuarioController::class); // <--- ruta de usuarios de UsuarioController
+    //Route::resource('usuarios', UserController::class);    
+
+    
     Route::resource('estado_incidente', EstadoIncidenteController::class);
     Route::resource('prestamos', PrestamoController::class);
     Route::patch('/prestamos/detalle/{id}/baja', [PrestamoController::class, 'darDeBaja'])->name('prestamos.bajaDetalle');

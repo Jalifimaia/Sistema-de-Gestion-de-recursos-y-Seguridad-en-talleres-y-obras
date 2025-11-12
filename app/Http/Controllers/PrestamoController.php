@@ -145,7 +145,7 @@ public function darDeBaja($id)
             'id_usuario_modificacion' => Auth::id(),
         ]);
 
-        SerieRecurso::where('id', $detalle->id_serie)->update(['id_estado' => 4]);
+        SerieRecurso::where('id', $detalle->id_serie)->update(['id_estado' => 1]);
 
         DB::commit();
         return response()->json(['success' => true]);
@@ -361,42 +361,46 @@ public function edit($id): View
 }
 
 
-      public function devolver($id)
-    {
-        DB::beginTransaction();
-        try {
-            $prestamo = Prestamo::findOrFail($id);
-            $detalles = DetallePrestamo::where('id_prestamo', $id)->get();
+    public function devolver($id)
+{
+    DB::beginTransaction();
+    try {
+        $prestamo = Prestamo::findOrFail($id);
+        $detalles = DetallePrestamo::where('id_prestamo', $id)->get();
 
-            foreach ($detalles as $detalle) {
-                $detalle->update([
-                    'id_estado_prestamo' => 3, // Devuelto
-                    'updated_at' => now(),
-                    'id_usuario_modificacion' => Auth::id(),
-                ]);
+        foreach ($detalles as $detalle) {
+            // Marcar el detalle como devuelto
+            $detalle->update([
+                'id_estado_prestamo' => 3, // Devuelto
+                'updated_at' => now(),
+                'id_usuario_modificacion' => Auth::id(),
+            ]);
 
                 SerieRecurso::where('id', $detalle->id_serie)->update(['id_estado' => 1]); // Disponible
 
-                DB::table('stock')->where('id_serie_recurso', $detalle->id_serie)->update([
+            // Actualizar el stock
+            DB::table('stock')->where('id_serie_recurso', $detalle->id_serie)->update([
                     'id_estado_recurso' => 1,
-                    'id_usuario' => null,
-                ]);
-            }
-
-            $todosDevueltos = DetallePrestamo::where('id_prestamo', $id)
-                ->where('id_estado_prestamo', '!=', 3)
-                ->doesntExist();
-
-            if ($todosDevueltos) {
-                $prestamo->update(['estado' => 3]); // Estado préstamo: Devuelto
-            }
-
-            DB::commit();
-            return redirect()->route('prestamos.index')->with('success', 'Préstamo devuelto correctamente.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al devolver préstamo: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'No se pudo devolver el préstamo.']);
+                'id_usuario' => null,
+            ]);
         }
+
+        // Si todos los detalles están devueltos, actualizar el estado del préstamo
+        $todosDevueltos = DetallePrestamo::where('id_prestamo', $id)
+            ->where('id_estado_prestamo', '!=', 3)
+            ->doesntExist();
+
+        if ($todosDevueltos) {
+                $prestamo->update(['estado' => 3]); // Estado préstamo: Devuelto
+        }
+
+        DB::commit();
+        return redirect()->route('prestamos.index')->with('success', 'Préstamo devuelto correctamente.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al devolver préstamo: ' . $e->getMessage());
+        return back()->withErrors(['error' => 'No se pudo devolver el préstamo.']);
     }
+}
+
 }

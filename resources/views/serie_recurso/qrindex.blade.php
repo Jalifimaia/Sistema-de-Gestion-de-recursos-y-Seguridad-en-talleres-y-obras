@@ -11,10 +11,12 @@
     <h3 class="mb-0 fw-bold">Series con código QR</h3><br>
   </div>
 
-  <a href="{{ route('series.qr.lote.pdf') }}" class="btn btn-print d-flex align-items-center mt-2 mt-md-0" target="_blank">
-    <img src="{{ asset('images/print.svg') }}" alt="Imprimir" class="me-2" style="width: 20px; height: 20px;">
-    Imprimir QR en lote
-  </a>
+ <a href="{{ route('series.qr.lote.pdf', ['page' => request('page', 1)]) }}"
+   class="btn btn-print d-flex align-items-center mt-2 mt-md-0" target="_blank">
+  <img src="{{ asset('images/print.svg') }}" alt="Imprimir" class="me-2" style="width: 20px; height: 20px;">
+  Imprimir QR en lote
+</a>
+
 </div>
 
 <!-- 🔍 Buscador por nro_serie con botón -->
