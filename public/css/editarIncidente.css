@@ -119,3 +119,47 @@ ul.text-danger li {
 .card-header {
   font-weight: 600;
 }
+
+/* Botón verde largo */
+.btn-actualizar {
+  background-color: #28a745;   /* verde Bootstrap */
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: none;
+  max-width: 95%;              /* ocupa casi toda la pantalla */
+  display: block;
+  margin: 0 auto;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-actualizar:hover {
+  background-color: #218838;   /* verde más oscuro */
+  color: #fff;
+}
+
+/* Botón gris largo */
+.btn-cancelar {
+  background-color: #6c757d;   /* gris Bootstrap */
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: none;
+  max-width: 95%;
+  display: block;
+  margin: 0 auto;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-cancelar:hover {
+  background-color: #5a6268;   /* gris más oscuro */
+  color: #fff;
+}
+
+.text-warning {
+  color: #f57c00 !important;
+}

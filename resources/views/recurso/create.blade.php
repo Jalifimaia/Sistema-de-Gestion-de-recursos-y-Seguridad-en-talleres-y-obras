@@ -54,7 +54,7 @@
         <!-- Nueva Subcategoría -->
         <div class="input-group mt-2">
           <input type="text" id="nuevaSubcategoria" name="nueva_subcategoria" class="form-control" placeholder="Nueva subcategoría" value="{{ old('nueva_subcategoria') }}">
-          <button type="button" class="btn btn-outline-success" id="agregarSubcategoria">Agregar</button>
+          <button type="button" class="btn btn-agregar-subcategoria" id="agregarSubcategoria">Agregar</button>
         </div>
 
         <!-- Nombre -->
@@ -76,9 +76,11 @@
         </div>
 
         <div class="text-end">
-          <a href="{{ route('inventario.index') }}" class="btn btn-outline-secondary">⬅️ Volver</a>
-          <button type="submit" class="btn btn-primary">Guardar Recurso</button>
+          <button type="submit" class="btn btn-guardar-recurso w-100">
+            Guardar Recurso
+          </button>
         </div>
+
       </form>
 
 

@@ -191,12 +191,18 @@
         </div>
 
         <!-- Botones -->
-        <div class="d-flex justify-content-between">
-          @if(empty($readonly))
-            <button type="submit" class="btn btn-success">Actualizar incidente</button>
-          @endif
-          <a href="{{ route('incidente.index') }}" class="btn btn-secondary">Cancelar</a>
-        </div>
+            <div class="text-center mt-4">
+              @if(empty($readonly))
+                <button type="submit" class="btn btn-actualizar w-100 mb-3">
+                  Actualizar incidente
+                </button>
+              @endif
+
+              <a href="{{ route('incidente.index') }}" class="btn btn-cancelar w-100">
+                Cancelar
+              </a>
+            </div>
+
 
             </form>
         </div>

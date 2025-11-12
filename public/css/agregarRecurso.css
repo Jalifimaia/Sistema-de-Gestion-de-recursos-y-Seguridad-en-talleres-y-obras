@@ -59,3 +59,40 @@ textarea:focus {
   width: 20px;
   flex-shrink: 0;
 }
+
+.btn-guardar-recurso {
+  background-color: #28a745;   /* verde Bootstrap */
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: none;
+  max-width: 95%;              /* ocupa casi toda la pantalla */
+  display: block;
+  margin: 0 auto;              /* centrado */
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-guardar-recurso:hover {
+  background-color: #218838;   /* verde más oscuro al hover */
+  color: #fff;
+}
+
+/* Botón verde para agregar subcategoría */
+.btn-agregar-subcategoria {
+  background-color: #28a745;   /* verde Bootstrap */
+  color: #fff;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  border: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-agregar-subcategoria:hover {
+  background-color: #218838;   /* verde más oscuro */
+  color: #fff;
+}
+
+

@@ -6,18 +6,28 @@
 <div class="container py-4">
 
 <div class="d-flex align-items-center justify-content-between flex-wrap mb-4">
-  <div class="d-flex align-items-center gap-2">
-    <img src="{{ asset('images/qrr.svg') }}" alt="QR" style="width: 28px; height: 28px;">
-    <h3 class="mb-0 fw-bold">Series con código QR</h3><br>
+  <div class="d-flex align-items-center gap-3">
+    <!-- Botón Volver -->
+    <a href="{{ route('inventario.index') }}" class="btn btn-volver d-flex align-items-center">
+      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+      Volver
+    </a>
+
+    <!-- Título con ícono -->
+    <div class="d-flex align-items-center gap-2">
+      <img src="{{ asset('images/qrr.svg') }}" alt="QR" style="width: 28px; height: 28px;">
+      <h3 class="mb-0 fw-bold">Series con código QR</h3>
+    </div>
   </div>
 
- <a href="{{ route('series.qr.lote.pdf', ['page' => request('page', 1)]) }}"
-   class="btn btn-print d-flex align-items-center mt-2 mt-md-0" target="_blank">
-  <img src="{{ asset('images/print.svg') }}" alt="Imprimir" class="me-2" style="width: 20px; height: 20px;">
-  Imprimir QR en lote
-</a>
-
+  <!-- Botón imprimir lote -->
+  <a href="{{ route('series.qr.lote.pdf', ['page' => request('page', 1)]) }}"
+     class="btn btn-print d-flex align-items-center mt-2 mt-md-0" target="_blank">
+    <img src="{{ asset('images/print.svg') }}" alt="Imprimir" class="me-2" style="width: 20px; height: 20px;">
+    Imprimir QR en lote
+  </a>
 </div>
+
 
 <!-- 🔍 Buscador por nro_serie con botón -->
   <div class="input-group mb-3 mt-4">
