@@ -191,12 +191,12 @@ Route::get('/epp/disponibles/{tipo}', [ControlEPPController::class, 'buscarSerie
 |--------------------------------------------------------------------------
 */
 Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
-Route::delete('/recursos/{id}', [RecursoController::class, 'destroy'])->name('recursos.destroy');
+Route::delete('/recursos/{id}/baja', [RecursoController::class, 'destroy'])->name('recursos.baja');
 //Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
 Route::get('/inventario/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::get('/inventario/ajax/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::resource('recursos', RecursoController::class);
-Route::patch('/recursos/{recurso}/baja', [RecursoController::class, 'darDeBaja'])->name('recursos.darDeBaja');
+
 
 //QR de inventario
 Route::get('/series/{id}/qr', [SerieRecursoController::class, 'showQr'])->name('series.qr.show');

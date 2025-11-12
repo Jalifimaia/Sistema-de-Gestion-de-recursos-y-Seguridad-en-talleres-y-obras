@@ -424,43 +424,53 @@ class RecursoController extends Controller
         return redirect()->route('recursos.edit', $recurso->id)->with('success', 'Recurso actualizado correctamente.');
     }
 
-   public function destroy($id)
+public function destroy($id)
 {
     Log::info("Entró a destroy con ID: $id");
 
     $recurso = Recurso::with('serieRecursos.detallePrestamos')->findOrFail($id);
 
-    // Verificar si alguna serie tiene préstamos activos
+    // Caso 2: alguna serie tiene préstamos activos → no se puede dar de baja
     $tienePrestamos = $recurso->serieRecursos->some(function ($serie) {
         return $serie->detallePrestamos()->exists();
     });
 
     if ($tienePrestamos) {
-        return redirect()
-            ->route('inventario.index')
-            ->with('error_modal', 'Este recurso tiene series con préstamos registrados. No se puede eliminar.');
-    }
-
-    // Verificar si tiene series
-    if ($recurso->serieRecursos->isEmpty()) {
-        return redirect()
-            ->route('inventario.index')
-            ->with('error_modal', 'Este recurso no tiene series. No se puede marcar como baja.');
+        return request()->expectsJson()
+            ? response()->json(['error' => 'Este recurso tiene series con préstamos registrados. No se puede dar de baja.'], 422)
+            : redirect()->route('inventario.index')->with('error_modal', 'Este recurso tiene series con préstamos registrados. No se puede dar de baja.');
     }
 
     // Obtener el ID del estado "Baja"
-    $estadoBajaId = Estado::where('nombre_estado', 'Baja')->value('id');
+    $estadoBajaId = Estado::whereRaw('LOWER(nombre_estado) = ?', ['baja'])->value('id');
 
-    // Marcar todas las series como "Baja"
-    $recurso->serieRecursos()->update([
-        'id_estado' => $estadoBajaId,
-        'updated_at' => now('UTC'),
-    ]);
+    // Caso 1: no tiene series → igual se puede dar de baja
+    if ($recurso->serieRecursos->isEmpty()) {
+        $recurso->id_estado  = $estadoBajaId;
+        $recurso->updated_at = now('UTC');
+        $recurso->save();
+    } else {
+        // Caso 3: tiene series pero ninguna comprometida → se marcan todas como baja
+        $recurso->serieRecursos()->update([
+            'id_estado'   => $estadoBajaId,
+            'updated_at'  => now('UTC'),
+        ]);
 
-    return redirect()->route('inventario.index')
-    ->with('success_modal', 'Recurso marcado como dado de baja.');
+        // También marcamos el recurso como baja
+        $recurso->id_estado  = $estadoBajaId;
+        $recurso->updated_at = now('UTC');
+        $recurso->save();
+    }
 
+    // Respuesta según tipo de petición
+    return request()->expectsJson()
+        ? response()->json(['ok' => true, 'message' => 'Recurso marcado como dado de baja'])
+        : redirect()->route('inventario.index')->with('success_modal', 'Recurso marcado como dado de baja.');
 }
+
+
+
+
 
 
 public function create()

@@ -22,20 +22,31 @@
 
   <!-- Estado del Inventario -->
 <section id="estado-inventario" class="mb-4">
-    <div class="card shadow border custom-margin-top card-estado">
-      <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center gap-2">
-      <button class="btn btn-sm btn-light p-1 d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;" type="button" data-bs-toggle="collapse" data-bs-target="#estadoCollapse" aria-expanded="true" aria-controls="estadoCollapse">
-        <img src="{{ asset('images/down.svg') }}" alt="Toggle Inventario" class="down">
-      </button>
+  <div class="card shadow border custom-margin-top card-estado">
+    <!-- Header con botón toggle -->
+    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <!-- Botón toggle collapse -->
+        <button class="btn btn-sm btn-light p-1 d-flex justify-content-center align-items-center"
+                style="width: 32px; height: 32px;"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#estadoCollapse"
+                aria-expanded="false"
+                aria-controls="estadoCollapse">
+          <img src="{{ asset('images/down.svg') }}" alt="Toggle Inventario" class="down">
+        </button>
+
+        <!-- Título y subtítulo -->
         <div class="d-flex align-items-center gap-2">
           <span class="fw-bold">Estado del Inventario</span>
           <span class="text-muted small">- Resumen general de las herramientas y del equipo de protección personal</span>
         </div>
+      </div>
     </div>
-  </div>
 
-    <div class="collapse show" id="estadoCollapse">
+    <!-- Contenedor colapsable -->
+    <div class="collapse" id="estadoCollapse">
       <div class="card-body">
         <div class="row g-3">
           @php
@@ -68,6 +79,10 @@
     </div>
   </div>
 </section>
+
+
+
+
 
   <!-- Filtro y buscador -->
   <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
@@ -111,6 +126,7 @@
         @foreach ($recursos as $recurso)
 
         @php
+          $estadoRecurso = strtolower(optional($recurso->estado)->nombre_estado ?? '');
           $estadosSeries = $recurso->serieRecursos->pluck('estado.nombre_estado')->map(fn($e) => strtolower($e ?? ''))->toArray();
           $todasBaja = count($estadosSeries) > 0 && count(array_unique($estadosSeries)) === 1 && in_array('baja', $estadosSeries);
         @endphp
@@ -121,7 +137,7 @@
           <td class="recurso-categoria">{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
           <td class="recurso-descripcion">{{ $recurso->descripcion }}</td>
           <td class="text-nowrap acciones-cell">
-            @if ($todasBaja)
+            @if ($estadoRecurso === 'baja' || $todasBaja)
               <span class="badge bg-secondary fw-semibold">Dado de baja</span>
             @else
               <div class="d-flex align-items-center gap-2 flex-nowrap">
@@ -153,12 +169,12 @@
                 @endif
 
                 <!-- Dar de baja -->
-                <form method="POST" action="{{ route('recursos.darDeBaja', $recurso->id) }}" class="d-inline dar-baja-form" data-nombre="{{ $recurso->nombre }}" data-id="{{ $recurso->id }}">
-                  @csrf
-                  @method('PATCH')
-                  <button type="button" class="btn btn-sm btn-danger btn-dar-baja btn-accion-compact" title="Dar de baja">
-                    <i class="bi bi-trash"></i>
-                  </button>
+                <form method="POST" action="{{ route('recursos.baja', $recurso->id) }}" class="marcar-baja-form" data-nombre="{{ $recurso->nombre }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn btn-sm btn-danger btn-marcar-baja btn-accion-compact" title="Dar de baja">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </form>
               </div>
             @endif
@@ -253,7 +269,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('js/inventario-actions.js') }}"></script>
 
-<script>
+
+<!--<script>
 document.addEventListener('DOMContentLoaded', function () {
   // Modal global para confirmar "marcar baja" de recurso
   const modalEl = document.getElementById('modalConfirmDelete');
@@ -312,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function () {
     filtroSelect.dispatchEvent(new Event('change'));
   }
 });
-</script>
+</script>-->
 @endpush
 
 @push('styles')

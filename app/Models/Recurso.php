@@ -42,7 +42,7 @@ class Recurso extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['id_subcategoria','id_incidente_detalle', 'id_usuario_creacion', 'id_usuario_modificacion', 'nombre', 'descripcion', 'costo_unitario', 'fecha_creacion', 'fecha_modificacion'];
+    protected $fillable = ['id_subcategoria','id_incidente_detalle', 'id_usuario_creacion', 'id_usuario_modificacion', 'nombre', 'descripcion', 'costo_unitario', 'fecha_creacion', 'fecha_modificacion', 'id_estado',];
 
 
     /**
@@ -117,6 +117,12 @@ class Recurso extends Model
     {
         return $this->hasMany(\App\Models\Incidente::class, 'id', 'id_recurso');
     }
+
+    public function estado(): BelongsTo
+{
+    return $this->belongsTo(\App\Models\Estado::class, 'id_estado');
+}
+
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
