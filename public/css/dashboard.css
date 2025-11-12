@@ -1,0 +1,437 @@
+/* === Encabezado === */
+/*.fecha-destacada {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.etiqueta-fecha {
+  font-weight: 600;
+  color: #f57c00;
+}
+
+.valor-fecha {
+  font-weight: bold;
+}*/
+
+/* === Tarjetas principales === */
+.card-resumen {
+  border-left: 4px solid #f57c00;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.card-resumen .card-body {
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+
+.card-resumen .card-body i {
+  font-size: 2rem;
+  color: #f57c00;
+}
+
+.card-resumen h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-resumen p {
+  margin-bottom: 0;
+}
+
+.card-resumen small {
+  color: #888;
+}
+
+/* === Modales === */
+.modal .border {
+  border-color: #f57c00 !important;
+}
+
+.modal .shadow-sm {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* === Alertas === */
+.alert-prioritaria {
+  border-left: 4px solid #f57c00;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.alert-prioritaria .accordion-button {
+  font-weight: bold;
+  color: #f57c00;
+}
+
+/* === Checklists === */
+.table-checklist td {
+  vertical-align: middle;
+}
+
+.table-checklist .badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+}
+
+/* === Botones === */
+.btn-outline-primary {
+  border-color: #f57c00;
+  color: #f57c00;
+}
+
+.btn-outline-primary:hover {
+  background-color: #f57c00;
+  color: #fff;
+}
+
+/* === Checklists === */
+.table-checklist td {
+  vertical-align: middle;
+}
+
+.check-si {
+  color: green;
+}
+
+.check-no {
+  color: red;
+}
+
+
+.grafico-inventario {
+  height: 300px;
+}
+
+/*fecha*/
+.fecha-destacada {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.etiqueta-fecha {
+  font-weight: 700;
+  color: #d06842; /* naranja branding */
+  margin-right: 0.25rem;
+  font-weight: bold;
+}
+
+.valor-fecha {
+  font-size: 1.25rem;
+  font-weight: 600 bold;
+  color: #2b2b2b;
+}
+
+.fecha-destacada {
+   transform: translateX(-40px);
+   margin-top: -50px !important;
+}
+
+/* Card cuadrada */
+.card-resumen-cuadrada {
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.card-resumen-cuadrada .card-body {
+  padding: 0.5rem;
+}
+
+.card-resumen-cuadrada .icono-card {
+  height: 100px;
+  margin-bottom: 0.5rem;
+}
+
+.card-resumen-cuadrada h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.card-resumen-cuadrada .titulo-card {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+
+.card-resumen-cuadrada .subtitulo-card {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.accordion-button {
+  background-color: #fff;
+  border-left: 4px solid #f57c00;
+}
+
+.encabezado-checklist {
+padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  min-height: auto;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.icono-checklist {
+  height: 25px;
+  width: 25px;
+}
+
+.mover-acordeon-arriba {
+  margin-top: -1rem;
+}
+
+.subir-cards {
+  margin-top: -1.75rem;
+}
+.mensaje-checklist-vacio {
+  color: #272727; /* rojo intenso */
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.icono-checknot {
+  height: 28px;
+  width: 28px;
+}
+
+.accordion-button:focus,
+.accordion-button:active {
+  box-shadow: rgb(58, 58, 58);
+  outline: rgb(135, 145, 0);
+  color: rgb(44, 44, 44);
+}
+
+
+.accordion-button.encabezado-checklist:focus,
+.accordion-button.encabezado-checklist:active {
+  outline: 2px solid #f57c00; /* naranja branding */
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.accordion-button.encabezado-checklist:not(.collapsed) {
+  background-color: transparent;
+}
+
+.encabezado-checklist {
+  outline: 2px solid #79ec6a8c; /* borde naranja permanente */
+  outline-offset: 2px;
+  box-shadow: none;
+  background-color: rgb(49, 177, 81);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+}
+
+/*alerta prioritaria*/
+.icono-alertaP {
+  height: 40px;
+  width: 40px;
+}
+
+@keyframes pulso {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.85; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animar-pulso {
+  animation: pulso 1.5s infinite ease-in-out;
+}
+
+.card-alerta {
+  padding: 0.5rem 1rem;
+  border-left: 4px solid #f57c00;
+  background-color: #fffdf8;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.card-alerta .card-body {
+  padding: 0.75rem 0.75rem;
+}
+
+.card-alerta .card-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-alerta .text-muted {
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.titulo-alerta {
+  font-size: 1.9rem !important;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.subir-alertas {
+  margin-top: -3.5rem !important;
+}
+
+.subir-bienvenida {
+  margin-top: -0.8rem !important;
+  font-size: 1rem;       /* más grande que .small */
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Base para todos los botones de alerta */
+.accordion-button.alerta-naranja,
+.accordion-button.alerta-gris,
+.accordion-button.alerta-rojo {
+  padding: 0.75rem 1rem; /* más alto */
+  font-size: 1rem;
+  min-height: 3rem; /* asegura altura mínima */
+  color: #fff;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+/* Naranja */
+.alerta-naranja {
+  background-color: #babd16;
+}
+
+/* Gris */
+.alerta-gris {
+  background-color: #6c757d;
+}
+
+/* Rojo */
+.alerta-rojo {
+  background-color: #dc3545;
+}
+
+/* Evitar que se pongan blancos al abrir */
+.alerta-naranja:not(.collapsed),
+.alerta-gris:not(.collapsed),
+.alerta-rojo:not(.collapsed) {
+  background-color: inherit;
+  color: #fff;
+}
+
+.accordion-button:not(.collapsed):not(.alerta-naranja):not(.alerta-gris):not(.alerta-rojo) {
+  background-color: transparent;
+}
+
+
+.alerta-naranja:not(.collapsed) {
+  background-color: #babd16;
+}
+
+.alerta-gris:not(.collapsed) {
+  background-color: #6c757d;
+}
+
+.alerta-rojo:not(.collapsed) {
+  background-color: #dc3545;
+}
+
+.texto-descriptivo-alerta {
+  font-size: 1rem;       /* más grande que .small */
+  line-height: 1.4;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.titulo-epp {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #343a40;
+}
+
+.subtitulo-epp {
+  font-size: 0.95rem;
+  color: #6c757d;
+}
+
+.icono-epp {
+  height: 28px;
+  width: 28px;
+}
+/*
+.etiqueta-fecha {
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.valor-fecha {
+  font-weight: 600;
+  font-size: 1rem;
+}*/
+
+
+/* Estado expandido en verde */
+.accordion-button.encabezado-checklist:not(.collapsed) {
+  background-color: #43a047 !important; /* verde */
+  color: #fff !important;               /* texto blanco */
+}
+
+/* Hover y focus cuando está expandido: mantener blanco */
+.accordion-button.encabezado-checklist:not(.collapsed):hover,
+.accordion-button.encabezado-checklist:not(.collapsed):focus {
+  background-color: #388e3c !important; /* verde más oscuro */
+  color: #fff !important;               /* texto blanco */
+  box-shadow: none !important;          /* quitar halo azul de Bootstrap */
+}
+
+/* Hover cuando está cerrado: mantener color original */
+.accordion-button.encabezado-checklist:hover,
+.accordion-button.encabezado-checklist:focus {
+  color: inherit !important; /* no forzar negro */
+}
+
+/* Estado expandido en verde */
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed) {
+  background-color: #43a047 !important;
+  color: #fff !important;
+}
+
+/* Hover y focus cuando está expandido */
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):hover,
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):focus {
+  background-color: #388e3c !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+/* Estado expandido en verde */
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed) {
+  background-color: #43a047 !important; /* verde */
+  color: #fff !important;               /* texto blanco */
+}
+
+/* Hover y focus cuando está expandido */
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):hover,
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):focus,
+.accordion .accordion-item .accordion-button.encabezado-checklist:not(.collapsed):active {
+  background-color: #388e3c !important; /* verde más oscuro */
+  color: #fff !important;               /* texto blanco */
+  box-shadow: none !important;
+}
+
+/* Hover cuando está cerrado: mantener color original */
+.accordion .accordion-item .accordion-button.encabezado-checklist:hover,
+.accordion .accordion-item .accordion-button.encabezado-checklist:focus,
+.accordion .accordion-item .accordion-button.encabezado-checklist:active {
+  color: #ffffff !important; /* el color original, no negro */
+}
+
+
+

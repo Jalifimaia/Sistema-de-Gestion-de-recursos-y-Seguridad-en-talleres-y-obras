@@ -22,6 +22,7 @@
         "puppeteer": "^24.25.0"
     },
     "jest": {
-        "testEnvironment": "jsdom"
+        "testEnvironment": "jsdom",
+        "setupFilesAfterEnv": ["<rootDir>/public/js/test/setupTests.cjs"]
     }
 }

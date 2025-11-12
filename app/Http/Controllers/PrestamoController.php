@@ -14,11 +14,20 @@ use App\Models\SerieRecurso;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+
 class PrestamoController extends Controller
 {
 public function index(): View
 {
-    $prestamos = DB::table('prestamo')
+    $search = request('search');
+    $estado = request('estado');
+    $creador = request('creador');
+    $fechaInicio = request('fecha_inicio');
+    $fechaFin = request('fecha_fin');
+
+    $query = request('search');
+
+    $base = DB::table('prestamo')
         ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
         ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
         ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
@@ -36,9 +45,59 @@ public function index(): View
             'prestamo.fecha_creacion',
             'estado_prestamo.nombre as estado'
         )
-        ->whereIn('prestamo.estado', [1, 2, 3]) // 1 = Cancelado, 2 = Activo, 3 = Devuelto
-        ->orderByDesc('prestamo.id')
-        ->get();
+        ->whereIn('prestamo.estado', [1, 2, 3])
+
+        ->when($estado, function ($q) use ($estado) {
+            $q->where('estado_prestamo.nombre', $estado);
+        })
+        ->when($creador, function ($q) use ($creador) {
+            $q->where('creador.name', $creador);
+        })
+        ->when($fechaInicio, function ($q) use ($fechaInicio) {
+            $q->whereDate('prestamo.fecha_creacion', '>=', $fechaInicio);
+        })
+        ->when($fechaFin, function ($q) use ($fechaFin) {
+            $q->whereDate('prestamo.fecha_creacion', '<=', $fechaFin);
+        })
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('recurso.nombre', 'like', "%{$search}%")
+                    ->orWhere('serie_recurso.nro_serie', 'like', "%{$search}%")
+                    ->orWhere('trabajador.name', 'like', "%{$search}%")
+                    ->orWhere('creador.name', 'like', "%{$search}%");
+            });
+        })
+
+
+        ->when($query, function ($q) use ($query) {
+        $q->where(function ($sub) use ($query) {
+            $sub->where('recurso.nombre', 'like', "%{$query}%")
+                ->orWhere('serie_recurso.nro_serie', 'like', "%{$query}%")
+                ->orWhere('trabajador.name', 'like', "%{$query}%")
+                ->orWhere('creador.name', 'like', "%{$query}%");
+        });
+    })
+
+        ->groupBy(
+            'prestamo.id',
+            'trabajador.name',
+            'creador.name',
+            'recurso.nombre',
+            'serie_recurso.nro_serie',
+            'prestamo.fecha_prestamo',
+            'prestamo.fecha_devolucion',
+            'prestamo.fecha_creacion',
+            'estado_prestamo.nombre'
+        )
+
+
+        ->orderByDesc('prestamo.fecha_creacion');
+
+    $prestamos = DB::table(DB::raw("({$base->toSql()}) as sub"))
+        ->mergeBindings($base)
+        ->paginate(18)
+        ->onEachSide(1)
+        ->withQueryString();
 
     return view('prestamo.index', compact('prestamos'));
 }
@@ -86,7 +145,7 @@ public function darDeBaja($id)
             'id_usuario_modificacion' => Auth::id(),
         ]);
 
-        SerieRecurso::where('id', $detalle->id_serie)->update(['id_estado' => 4]);
+        SerieRecurso::where('id', $detalle->id_serie)->update(['id_estado' => 1]);
 
         DB::commit();
         return response()->json(['success' => true]);
@@ -294,8 +353,7 @@ public function edit($id): View
         }
 
         DB::commit();
-        return redirect()->route('prestamos.index')->with('success', 'Préstamo actualizado correctamente.');
-    } catch (\Exception $e) {
+        return redirect()->route('prestamos.edit', $id)->with('success', 'Préstamo actualizado correctamente.');    } catch (\Exception $e) {
         DB::rollBack();
         Log::error('Error al actualizar préstamo: ' . $e->getMessage());
         return back()->withErrors(['error' => 'No se pudo actualizar el préstamo. ' . $e->getMessage()]);
@@ -303,42 +361,46 @@ public function edit($id): View
 }
 
 
-      public function devolver($id)
-    {
-        DB::beginTransaction();
-        try {
-            $prestamo = Prestamo::findOrFail($id);
-            $detalles = DetallePrestamo::where('id_prestamo', $id)->get();
+    public function devolver($id)
+{
+    DB::beginTransaction();
+    try {
+        $prestamo = Prestamo::findOrFail($id);
+        $detalles = DetallePrestamo::where('id_prestamo', $id)->get();
 
-            foreach ($detalles as $detalle) {
-                $detalle->update([
-                    'id_estado_prestamo' => 3, // Devuelto
-                    'updated_at' => now(),
-                    'id_usuario_modificacion' => Auth::id(),
-                ]);
+        foreach ($detalles as $detalle) {
+            // Marcar el detalle como devuelto
+            $detalle->update([
+                'id_estado_prestamo' => 3, // Devuelto
+                'updated_at' => now(),
+                'id_usuario_modificacion' => Auth::id(),
+            ]);
 
                 SerieRecurso::where('id', $detalle->id_serie)->update(['id_estado' => 1]); // Disponible
 
-                DB::table('stock')->where('id_serie_recurso', $detalle->id_serie)->update([
+            // Actualizar el stock
+            DB::table('stock')->where('id_serie_recurso', $detalle->id_serie)->update([
                     'id_estado_recurso' => 1,
-                    'id_usuario' => null,
-                ]);
-            }
-
-            $todosDevueltos = DetallePrestamo::where('id_prestamo', $id)
-                ->where('id_estado_prestamo', '!=', 3)
-                ->doesntExist();
-
-            if ($todosDevueltos) {
-                $prestamo->update(['estado' => 3]); // Estado préstamo: Devuelto
-            }
-
-            DB::commit();
-            return redirect()->route('prestamos.index')->with('success', 'Préstamo devuelto correctamente.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al devolver préstamo: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'No se pudo devolver el préstamo.']);
+                'id_usuario' => null,
+            ]);
         }
+
+        // Si todos los detalles están devueltos, actualizar el estado del préstamo
+        $todosDevueltos = DetallePrestamo::where('id_prestamo', $id)
+            ->where('id_estado_prestamo', '!=', 3)
+            ->doesntExist();
+
+        if ($todosDevueltos) {
+                $prestamo->update(['estado' => 3]); // Estado préstamo: Devuelto
+        }
+
+        DB::commit();
+        return redirect()->route('prestamos.index')->with('success', 'Préstamo devuelto correctamente.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al devolver préstamo: ' . $e->getMessage());
+        return back()->withErrors(['error' => 'No se pudo devolver el préstamo.']);
     }
+}
+
 }

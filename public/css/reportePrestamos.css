@@ -1,0 +1,118 @@
+input[type="date"].form-control {
+  border: 2px solid #b14910;
+  box-shadow: none;
+}
+
+input[type="date"].form-control:focus {
+  border-color: #b14910;
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
+}
+
+.btn-filtro {
+  background-color: #1976d2;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-filtro:hover {
+  background-color: #943d0e;
+}
+
+.btn-pdf {
+  background-color: #fbc02d;
+  color: #000;
+  font-weight: 500;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-pdf:hover {
+  background-color: #f9a825;
+}
+
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #fff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  transform: translateX(-2px);
+  color: #000;
+}
+
+.icono-volver {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-ver-grafico {
+  border-color: #1f1f1f;
+  outline: none;
+}
+
+.btn-ver-grafico:hover {
+  background-color: #c9c9c9;
+  border-color: #1f1f1f;
+  outline: none;
+}
+
+/* Encabezado de tabla naranja */
+.table thead {
+  background-color: #ff6600 !important;   /* naranja */
+  color: #fff !important;                 /* texto blanco para contraste */
+}
+
+/* Encabezado naranja */
+.table thead tr {
+  background-color: #ff6600 !important;
+}
+.table thead th {
+  color: #fff !important;
+}
+
+/* Striped con tono naranja claro (Bootstrap 5 usa variables) */
+.table-striped > tbody > tr:nth-of-type(odd) {
+  --bs-table-accent-bg: #fff7f0; /* naranja muy suave */
+}
+
+/* Si tenés dark mode o overrides, asegurá el contraste */
+.table td, .table th {
+  border-color: #ddd;
+}
+
+/* Encabezado naranja */
+.table thead {
+  background-color: #ff6600 !important; /* fuerza el fondo naranja */
+}
+
+.table thead th {
+  color: #fff !important; /* texto blanco */
+}
+
+.table {
+  --bs-table-bg: #fff; /* fondo base de la tabla */
+  --bs-table-striped-bg: #fff7f0; /* fondo alternado (striped) */
+  --bs-table-striped-color: #000;
+}
+
+.table thead {
+  --bs-table-bg: #d3401b; /* 👈 esto cambia el fondo del thead */
+  --bs-table-color: #fff; /* texto blanco */
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f0c096 !important; /* naranja muy claro */
+}

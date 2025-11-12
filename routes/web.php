@@ -35,9 +35,9 @@ use App\Http\Controllers\PrestamoTerminalController;
 Route::get('/', fn() => view('welcome'));
 Route::get('/herramientas', fn() => view('herramientas'));
 Route::get('/dashboard', fn() => view('dashboard'));
-Route::get('/usuarios/{id}', [UserController::class, 'show'])
-     ->where('id', '[0-9]+')
-     ->name('usuarios.show');
+//Route::get('/usuarios/{id}', [UserController::class, 'show'])
+     //->where('id', '[0-9]+')
+     //->name('usuarios.show');
 //Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index']);
 Route::get('/controlEPP', [App\Http\Controllers\ControlEPPController::class, 'index'])->name('controlEPP');
 
@@ -60,11 +60,19 @@ Route::get('/reportes', function () {
 |--------------------------------------------------------------------------
 */
 
+/*actualizacion del token para la terminal*/
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+});
 
+
+//URls de la terminal
 Route::prefix('terminal')->group(function () {
     Route::get('/', [KioskoController::class, 'index'])->name('terminal.index');
 
     Route::post('/identificar', [KioskoController::class, 'identificarTrabajador']);
+    Route::post('/identificar-qr', [KioskoController::class, 'identificarPorQR']);
+
     Route::post('/registrar-manual', [KioskoController::class, 'registrarManual']);
     Route::post('/solicitar', [KioskoController::class, 'solicitarRecurso']);
 
@@ -76,6 +84,7 @@ Route::prefix('terminal')->group(function () {
     Route::get('/subcategorias-disponibles/{categoriaId}', [KioskoController::class, 'getSubcategoriasConDisponibles']);
     Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
     Route::get('/recursos-asignados/{usuarioId}', [KioskoController::class, 'recursosAsignados']);
+    
 
     // ✅ Devolución
     Route::post('/validar-qr-devolucion', [PrestamoTerminalController::class, 'validarQRDevolucion']);
@@ -86,6 +95,7 @@ Route::prefix('terminal')->group(function () {
     Route::post('/prestamos/{id_usuario}', [PrestamoTerminalController::class, 'store'])->name('terminal.prestamos.store');
     Route::post('/registrar-por-qr', [PrestamoTerminalController::class, 'registrarPorQR']);
 });
+
 
 /*
 | Rutas de Reportes de Recursos
@@ -180,10 +190,13 @@ Route::get('/epp/disponibles/{tipo}', [ControlEPPController::class, 'buscarSerie
 | Rutas de Inventario
 |--------------------------------------------------------------------------
 */
-Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
+Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
+Route::delete('/recursos/{id}/baja', [RecursoController::class, 'destroy'])->name('recursos.baja');
+//Route::get('/inventario', [RecursoController::class, 'index'])->name('inventario');
 Route::get('/inventario/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::get('/inventario/ajax/subcategorias/{categoriaId}', [SubcategoriaController::class, 'byCategoria']);
 Route::resource('recursos', RecursoController::class);
+
 
 //QR de inventario
 Route::get('/series/{id}/qr', [SerieRecursoController::class, 'showQr'])->name('series.qr.show');
@@ -191,7 +204,7 @@ Route::get('/series/{id}/qr-snippet', [SerieRecursoController::class, 'qrSnippet
 
 
 //QR
-Route::get('/series-qr', [SerieRecursoController::class, 'qrIndex'])->name('series.qr');
+Route::get('/series-qr', [SerieRecursoController::class, 'qrIndex'])->name('series.qr.index');
 Route::get('/series-qr/{id}/pdf', [SerieRecursoController::class, 'exportQrPdf'])->name('series.qr.pdf');
 Route::get('/series-qr-lote', [SerieRecursoController::class, 'qrLote'])->name('series.qr.lote');
 Route::get('/series-qr-lote/pdf', [SerieRecursoController::class, 'exportQrLotePdf'])
@@ -265,7 +278,16 @@ Route::delete('/incidente/{id}', [IncidenteController::class, 'destroy'])->name(
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('usuarios', UserController::class);
+    
+    // Rutas para cargar las pestañas (AJAX / partials)
+    Route::get('usuarios/{id}/checklists', [UsuarioController::class, 'checklists'])->name('usuarios.checklists');
+    Route::get('usuarios/{id}/incidentes', [UsuarioController::class, 'incidentes'])->name('usuarios.incidentes');
+    Route::get('usuarios/{id}/prestamos', [UsuarioController::class, 'prestamos'])->name('usuarios.prestamos');
+
+    Route::resource('usuarios', UsuarioController::class); // <--- ruta de usuarios de UsuarioController
+    //Route::resource('usuarios', UserController::class);    
+
+    
     Route::resource('estado_incidente', EstadoIncidenteController::class);
     Route::resource('prestamos', PrestamoController::class);
     Route::patch('/prestamos/detalle/{id}/baja', [PrestamoController::class, 'darDeBaja'])->name('prestamos.bajaDetalle');
@@ -277,7 +299,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario');
+Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
+
 Route::get('/inventario/exportar', [InventarioController::class, 'exportarCSV'])->name('inventario.exportar');
 
 

@@ -118,10 +118,10 @@ function validarDuplicados(mostrarAlertas = false) {
   });
 
   if (mostrarAlertas) {
-    if (hayDuplicados) alert('⚠️ Hay combinaciones repetidas.');
-    if (hayCantidadCero) alert('⚠️ Hay cantidades en cero.');
-    if (hayCamposFaltantes) alert('⚠️ Faltan campos obligatorios.');
-    if (hayTipoTalleInconsistente) alert('⚠️ Todas las filas deben usar el mismo tipo de talle.');
+    if (hayDuplicados) alert('⚠️ Hay combinaciones repetidas.'); //no sale el alert
+    if (hayCantidadCero) alert('⚠️ Hay cantidades en cero.'); //no sale el alert
+    if (hayCamposFaltantes) alert('⚠️ Faltan campos obligatorios.'); //no sale el alert
+    if (hayTipoTalleInconsistente) alert('⚠️ Todas las filas deben usar el mismo tipo de talle.'); //no sale el alert
 
     if (hayTipoTalleIncorrecto) {
       const modalEl = document.getElementById('modalErrorTipoTalle');
@@ -165,6 +165,23 @@ function validarCombinaciones() {
   btnGuardar.disabled = !hayFilaValida || hayFilaInvalida;
 }
 
+// 👉 Actualiza el estado de los botones de borrar: si solo hay 1 fila, la primera queda deshabilitada; si hay >1, todas habilitadas
+function updateDeleteButtons() {
+  const filas = document.querySelectorAll('#combinacionesBody tr');
+  if (filas.length === 0) return;
+  if (filas.length === 1) {
+    const btn = filas[0].querySelector('.btn-delete');
+    if (btn) btn.disabled = true;
+    return;
+  }
+  filas.forEach(fila => {
+    const btn = fila.querySelector('.btn-delete');
+    if (btn) btn.disabled = false;
+  });
+}
+
+
+
 // 👉 Agregar fila
 window.agregarFila = function () {
   const tbody = document.getElementById('combinacionesBody');
@@ -203,7 +220,7 @@ window.agregarFila = function () {
     </td>
     <td><input type="number" class="form-control cantidad-input" min="0" value="0"></td>
     <td><input type="text" class="form-control codigo-preview" disabled></td>
-    <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove(); generarPreviewCodigoPorFila(); validarDuplicados()">✕</button></td>
+    <td><button type="button" class="btn btn-sm btn-danger btn-delete" onclick="this.closest('tr').remove(); generarPreviewCodigoPorFila(); validarDuplicados(); updateDeleteButtons();">✕</button></td>
   `;
 
   row.innerHTML = cols;
@@ -217,11 +234,13 @@ window.agregarFila = function () {
   generarPreviewCodigoPorFila();
   validarDuplicados(false);
   validarCombinaciones();
+  updateDeleteButtons();
 };
 
 // 👉 Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   agregarFila();
+  updateDeleteButtons();
 
   const tbody = document.getElementById('combinacionesBody');
   if (tbody) {
@@ -246,75 +265,191 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // valida y muestra el error debajo del input usando invalid-feedback (Bootstrap)
+window.validarFechaAdquisicionInline = function() {
+  const input = document.getElementById('fecha_adquisicion');
+  const errDiv = document.getElementById('fecha_adquisicion_error');
+  if (!input || !errDiv) return true;
+
+  // limpiar estado previo
+  errDiv.textContent = '';
+  errDiv.style.display = 'none';
+  input.classList.remove('is-invalid');
+
+  const valor = input.value;
+  if (!valor) return true;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const fecha = new Date(valor); fecha.setHours(0,0,0,0);
+
+  if (fecha > today) {
+    const msg = 'La fecha de adquisición no puede ser posterior al día de hoy.';
+    errDiv.textContent = msg;
+    errDiv.style.display = 'block';
+    input.classList.add('is-invalid');
+    return false;
+  }
+
+  return true;
+};
+
+// mostrar error de servidor para la fecha (usa el mismo div)
+function showFechaServerError(msg) {
+  const input = document.getElementById('fecha_adquisicion');
+  const errDiv = document.getElementById('fecha_adquisicion_error');
+  if (!input || !errDiv) return;
+  errDiv.textContent = msg || 'Fecha inválida.';
+  errDiv.style.display = 'block';
+  input.classList.add('is-invalid');
+}
+
+// limpiar mensaje de fecha
+function clearFechaError() {
+  const input = document.getElementById('fecha_adquisicion');
+  const errDiv = document.getElementById('fecha_adquisicion_error');
+  if (!input || !errDiv) return;
+  errDiv.textContent = '';
+  errDiv.style.display = 'none';
+  input.classList.remove('is-invalid');
+}
+
+// listeners: limpiar y revalidar al cambiar
+const fechaInput = document.getElementById('fecha_adquisicion');
+if (fechaInput) {
+  fechaInput.addEventListener('input', () => clearFechaError());
+  fechaInput.addEventListener('change', () => validarFechaAdquisicionInline());
+}
+
+function clearFormError() {
+  const prev = document.getElementById('form_series_error');
+  if (prev) prev.remove();
+}
+function showFormError(msg) {
+  clearFormError();
+  const formEl = document.getElementById('formSeries');
+  if (!formEl) return;
+  const div = document.createElement('div');
+  div.id = 'form_series_error';
+  div.className = 'alert alert-danger mt-2';
+  div.textContent = msg || 'Ocurrió un error al guardar.';
+  formEl.prepend(div);
+}
+function showFechaServerError(msg) {
+  const input = document.getElementById('fecha_adquisicion');
+  const errDiv = document.getElementById('fecha_adquisicion_error');
+  if (!input || !errDiv) return;
+  errDiv.textContent = msg || 'Fecha inválida.';
+  errDiv.style.display = 'block';
+  input.classList.add('is-invalid');
+}
+function clearFechaError() {
+  const input = document.getElementById('fecha_adquisicion');
+  const errDiv = document.getElementById('fecha_adquisicion_error');
+  if (!input || !errDiv) return;
+  errDiv.textContent = '';
+  errDiv.style.display = 'none';
+  input.classList.remove('is-invalid');
+}
+
+
   const form = document.getElementById('formSeries');
+
   if (form) {
     form.addEventListener('submit', function (e) {
-  e.preventDefault();
+      e.preventDefault();
 
-  // Si la validación falla (y ya mostramos modal/alerts), no enviamos la petición
-  const ok = validarDuplicados(true);
-  if (!ok) return;
+      // validar fecha de adquisición antes de continuar
+      if (!window.validarFechaAdquisicionInline()) {
+        document.getElementById('fecha_adquisicion')?.focus();
+        return;
+      }
 
-  const filas = document.querySelectorAll('#combinacionesBody tr');
-  const combinaciones = [];
+      // validar duplicados sin mostrar alertos; si falla mostramos mensaje inline y abortamos
+      const ok = validarDuplicados(false);
+      if (!ok) {
+        showFormError('Corrigí las combinaciones marcadas en rojo antes de continuar.');
+        return;
+      }
 
-  filas.forEach(fila => {
-    const tipoTalle = requiereTalle ? (fila.querySelector('.tipo-talle')?.value || '') : null;
-    const talle = requiereTalle ? (fila.querySelector('.talle-select')?.value || '') : null;
-    const color = fila.querySelector('.color-select')?.value || '';
-    const cantidad = fila.querySelector('.cantidad-input')?.value || '';
+      const filas = document.querySelectorAll('#combinacionesBody tr');
+      const combinaciones = [];
 
-    if (color && cantidad > 0) {
-      combinaciones.push({ tipo_talle: tipoTalle, talle, color_nombre: color, cantidad });
-    }
-  });
+      filas.forEach(fila => {
+        const tipoTalle = requiereTalle ? (fila.querySelector('.tipo-talle')?.value || '') : null;
+        const talle = requiereTalle ? (fila.querySelector('.talle-select')?.value || '') : null;
+        const color = fila.querySelector('.color-select')?.value || '';
+        const cantidad = fila.querySelector('.cantidad-input')?.value || '';
 
-  if (combinaciones.length === 0) {
-    alert('⚠️ No hay combinaciones válidas para guardar.');
-    return;
+        if (color && cantidad > 0) {
+          combinaciones.push({ tipo_talle: tipoTalle, talle, color_nombre: color, cantidad });
+        }
+      });
+
+      if (combinaciones.length === 0) {
+        showFormError('⚠️ No hay combinaciones válidas para guardar.');
+        return;
+      }
+
+
+      const payload = {
+        id_recurso: document.querySelector('[name="id_recurso"]').value,
+        combinaciones: JSON.stringify(combinaciones),
+        version: document.getElementById('version').value,
+        anio: document.getElementById('anio').value,
+        lote: document.getElementById('lote').value,
+        fecha_adquisicion: document.getElementById('fecha_adquisicion').value,
+        fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
+        id_estado: document.querySelector('[name="id_estado"]').value,
+      };
+
+      clearFormError(); // limpia errores previos
+      fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: JSON.stringify(payload),
+      })
+      .then(async res => {
+        const data = await res.json();
+        console.log("📦 Respuesta del servidor:", data);
+
+        if (!res.ok) {
+          // 422 o cualquier error: priorizamos mensajes de validación del backend
+          // si backend devuelve estructura errors.fecha_adquisicion o message con 'fecha', lo mostramos debajo del input
+          if (data && data.errors && data.errors.fecha_adquisicion) {
+            showFechaServerError(Array.isArray(data.errors.fecha_adquisicion) ? data.errors.fecha_adquisicion.join(' ') : String(data.errors.fecha_adquisicion));
+            return;
+          }
+          const serverMsg = data && data.message ? String(data.message) : null;
+          if (serverMsg && /fecha/i.test(serverMsg)) {
+            showFechaServerError(serverMsg.includes('posterior') ? 'La fecha de adquisición no puede ser mayor a la fecha actual.' : serverMsg);
+            return;
+          }
+
+          // otros errores de validación del backend o estado 422
+          showFormError(serverMsg || 'Error al guardar las series. Revisá los campos marcados.');
+          return;
+        }
+
+        // éxito: limpiamos errores y mostramos modal
+        clearFormError();
+        clearFechaError();
+        const modalEl = document.getElementById('modalSeriesAgregadas');
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          new bootstrap.Modal(modalEl).show();
+        }
+      })
+      .catch(err => {
+        console.error("❌ Error en la petición:", err);
+        // mostrar mensaje genérico inline (sin alert)
+        showFormError('Error de red o del servidor. Revisá la consola para más detalles.');
+      });
+    });
   }
-
-  const payload = {
-    id_recurso: document.querySelector('[name="id_recurso"]').value,
-    combinaciones: JSON.stringify(combinaciones),
-    version: document.getElementById('version').value,
-    anio: document.getElementById('anio').value,
-    lote: document.getElementById('lote').value,
-    fecha_adquisicion: document.getElementById('fecha_adquisicion').value,
-    fecha_vencimiento: document.getElementById('fecha_vencimiento').value,
-    id_estado: document.querySelector('[name="id_estado"]').value,
-  };
-
-  fetch(form.action, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-    },
-    body: JSON.stringify(payload),
-  })
-  .then(async res => {
-    const data = await res.json();
-    console.log("📦 Respuesta del servidor:", data);
-
-    if (!res.ok) {
-      console.error("⚠️ Error del servidor:", data);
-      throw new Error(data.message || 'Error al guardar las series.');
-    }
-
-    const modalEl = document.getElementById('modalSeriesAgregadas');
-    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-      new bootstrap.Modal(modalEl).show();
-    }
-  })
-  .catch(err => {
-    console.error("❌ Error en la petición:", err);
-    alert('❌ Error al guardar. Revisá la consola para más detalles.');
-  });
 });
 
-  }
-});
 
 console.log('✅ serieRecurso.js cargado');

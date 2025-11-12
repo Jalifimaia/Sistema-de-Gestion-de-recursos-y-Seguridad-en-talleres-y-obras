@@ -17,29 +17,51 @@
 
     @if($fecha_inicio || $fecha_fin)
         <h4>Rango seleccionado:
-            @if($fecha_inicio) desde <strong>{{ $fecha_inicio }}</strong> @endif
-            @if($fecha_fin) hasta <strong>{{ $fecha_fin }}</strong> @endif
+            @if($fecha_inicio) desde <strong>{{ \Carbon\Carbon::parse($fecha_inicio)->format('d/m/Y') }}</strong> @endif
+            @if($fecha_fin) hasta <strong>{{ \Carbon\Carbon::parse($fecha_fin)->format('d/m/Y') }}</strong> @endif
         </h4>
     @endif
 
     <div class="resumen">
-        <strong>Total en reparación:</strong> {{ $total }}
+        <strong>Total en reparación:</strong> {{ $total ?? $recursos->count() }}
     </div>
 
     <table>
         <thead>
             <tr>
+                <th>Categoría</th>
+                <th>Subcategoría</th>
                 <th>Recurso</th>
                 <th>Número de serie</th>
                 <th>Fecha adquisición</th>
+                <th>Fecha marcado en reparación</th>
             </tr>
         </thead>
         <tbody>
             @foreach($recursos as $r)
             <tr>
-                <td>{{ $r->nombre }}</td>
+                <td>{{ $r->categoria ?? '-' }}</td>
+                <td>{{ $r->subcategoria ?? '-' }}</td>
+                <td>{{ $r->recurso ?? $r->nombre ?? '-' }}</td>
                 <td>{{ $r->nro_serie }}</td>
-                <td>{{ $r->fecha_adquisicion }}</td>
+                <td>
+                    @if(!empty($r->fecha_adquisicion))
+                        {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $r->fecha_adquisicion, 'UTC')
+                            ->setTimezone(config('app.timezone'))
+                            ->format('d/m/Y') }}
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
+                    @if(!empty($r->estado_actualizado_en))
+                        {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $r->estado_actualizado_en, 'UTC')
+                            ->setTimezone(config('app.timezone'))
+                            ->format('d/m/Y ') }}
+                    @else
+                        -
+                    @endif
+                </td>
             </tr>
             @endforeach
         </tbody>

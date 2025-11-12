@@ -14,7 +14,11 @@ class InventarioController extends Controller
 
     public function index()
     {
-        $recursos = Recurso::with(['serieRecursos.codigo', 'subcategoria.categoria'])->get();
+        $recursos = Recurso::with([
+            'serieRecursos.codigo',
+            'serieRecursos.estado',   // <<— agregado: trae el estado de cada serie
+            'subcategoria.categoria'
+        ])->get();
 
         $herramientasTotales = DB::table('serie_recurso')
             ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
@@ -98,7 +102,8 @@ class InventarioController extends Controller
 
     public function exportarCSV()
     {
-        $recursos = Recurso::with('subcategoria.categoria', 'serieRecursos')->get();
+        $recursos = Recurso::with('subcategoria.categoria', 'serieRecursos.estado')->get();
+
 
         $headers = [
             'Content-Type' => 'text/csv',
@@ -133,7 +138,7 @@ class InventarioController extends Controller
                     $recurso->descripcion,
                     $recurso->subcategoria->categoria->nombre_categoria ?? 'Sin categoría',
                     $recurso->subcategoria->nombre ?? 'Sin subcategoría',
-                    $series ?: 'Sin series',
+                    $series ?: '',
                     $estados ?: 'Sin estado',
                     $fechas ?: 'Sin fechas'
                 ]);

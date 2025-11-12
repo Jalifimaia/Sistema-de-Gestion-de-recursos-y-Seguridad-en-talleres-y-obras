@@ -1,0 +1,172 @@
+/* 🔷 Encabezado principal */
+.titulo-checklist {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2e2e2e;
+  margin-bottom: 0.25rem;
+}
+
+/* 🔷 Botón volver */
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  transform: translateX(-2px);
+  color: #000;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+/* 🔷 Cards de acción */
+.card-action {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid #f57c00;
+  border-radius: 8px;
+}
+
+.card-action:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 🔷 Íconos en títulos de cards */
+.icono-action-inline {
+  height: 28px;
+  width: 28px;
+  animation: pulse 1.5s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* 🔷 Botones de acción por tipo */
+.btn-action {
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 100%;
+  color: #fff;
+}
+
+.btn-verde {
+  background-color: #388e3c;
+}
+.btn-verde:hover {
+  background-color: #2e7d32;
+  transform: scale(1.03);
+}
+
+.btn-azul {
+  background-color: #1976d2;
+}
+.btn-azul:hover {
+  background-color: #1565c0;
+  transform: scale(1.03);
+}
+
+.btn-rojo {
+  background-color: #d32f2f;
+}
+.btn-rojo:hover {
+  background-color: #c62828;
+  transform: scale(1.03);
+}
+
+.btn-naranja {
+  background-color: #f57c00;
+}
+.btn-naranja:hover {
+  background-color: #e66a00;
+  transform: scale(1.03);
+}
+
+/* 🔷 Tabla checklist */
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+}
+
+#buscadorTrabajador {
+  border: 2px solid #914600;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+}
+
+#buscadorTrabajador:focus {
+  border-color: #d28219;
+  box-shadow: 0 0 0 3px rgba(221, 99, 0, 0.2);
+}
+
+/* 🔷 Encabezado más compacto */
+header {
+  margin-bottom: 2rem !important; /* antes estaba en mb-5 (~3rem) */
+  padding-bottom: 1rem;
+}
+
+/* 🔷 Espaciado más ajustado entre buscador y tabla */
+#buscadorTrabajador {
+  margin-top: -2.9rem;
+  margin-bottom: 1rem;
+  background-color: #fff2e6;
+}
+
+/* 🔷 Card de tabla más cerca del buscador */
+.card.shadow-sm.mb-4 {
+  margin-top: -0.5rem;
+  border-color: #d28219;
+}
+
+#tablaChecklistDiario thead {
+  background-color: #d29119; /* Azul institucional */
+  color: #fff;
+}
+
+#tablaChecklistDiario thead th {
+  font-weight: 600;
+  padding: 0.75rem;
+  border-bottom: 2px solid #572e00;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.tabla-epp thead th {
+  background-color: #a58809 !important;
+  color: #fff !important;
+}
+
+.icono-titulo {
+  height: 32px;
+  width: 32px;
+  animation: pulse 1.5s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}

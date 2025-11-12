@@ -1,0 +1,98 @@
+.form-control,
+.form-select,
+textarea {
+  border: 2px solid #b14910 !important;
+  box-shadow: none;
+}
+
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+  border-color: #b14910 !important;
+  outline: none;
+  box-shadow: 0 0 0 0.25rem rgba(177, 73, 16, 0.4);
+}
+
+.btn-verrde {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+}
+
+.btn-verrde:hover {
+  background-color: #1b5e20;
+}
+
+.btn-verde {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+}
+
+.btn-verde:hover {
+  background-color: #1b5e20;
+}
+
+.form-label {
+  font-weight: 600;
+}
+
+/* 🔷 Botón volver */
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #fff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  transform: translateX(-2px);
+  color: #000;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.btn-guardar-recurso {
+  background-color: #28a745;   /* verde Bootstrap */
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: none;
+  max-width: 95%;              /* ocupa casi toda la pantalla */
+  display: block;
+  margin: 0 auto;              /* centrado */
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-guardar-recurso:hover {
+  background-color: #218838;   /* verde más oscuro al hover */
+  color: #fff;
+}
+
+/* Botón verde para agregar subcategoría */
+.btn-agregar-subcategoria {
+  background-color: #28a745;   /* verde Bootstrap */
+  color: #fff;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  border: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-agregar-subcategoria:hover {
+  background-color: #218838;   /* verde más oscuro */
+  color: #fff;
+}
+
+

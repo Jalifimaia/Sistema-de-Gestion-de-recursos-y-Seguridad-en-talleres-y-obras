@@ -1,0 +1,34 @@
+table.table thead th {
+  background-color: #b14910 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #fff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  transform: translateX(-2px);
+  color: #000;
+}
+
+.icono-volver {
+  width: 20px;
+  height: 20px;
+}
+
+table.table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+table.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}

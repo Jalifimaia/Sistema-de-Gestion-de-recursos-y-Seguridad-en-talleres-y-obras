@@ -1,0 +1,101 @@
+.pagination .page-link {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.25rem;
+  color: #d35400;
+  border-color: #d35400;
+}
+
+.pagination .page-link:hover {
+  background-color: #fbeee0;
+  color: #e67e22;
+  border-color: #e67e22;
+}
+
+.pagination .active .page-link {
+  background-color: #e67e22;
+  border-color: #e67e22;
+  color: #fff;
+}
+
+/* Oculta el resumen de paginación */
+p.small.text-muted {
+  display: none;
+}
+
+.card {
+  border: 2px solid #b14910;
+  border-radius: 8px;
+}
+
+.btn-pdf {
+  background-color: #c9a91e;
+  color: #000;
+  border: none;
+}
+
+.btn-pdf:hover {
+  background-color: #fbc02d;
+}
+
+.btn-print {
+  background-color: #212121;
+  color: #fff;
+  border: none;
+  font-weight: 500;
+}
+
+.btn-print:hover {
+  background-color: #424242;
+  color: #fff;
+}
+
+#busquedaSerie {
+  border: 2px solid #b14910;
+  box-shadow: none;
+}
+
+#busquedaSerie:focus {
+  border-color: #b14910;
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
+}
+
+#btnBuscarSerie {
+  background-color: #b14910;
+  border-color: #9b3f0d;
+  color: #fff;
+  font-weight: 500;
+}
+
+#btnBuscarSerie:hover {
+  background-color: #ef6c00;
+  border-color: #ef6c00;
+}
+
+.btn-volver {
+  background-color: #d3401b;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  line-height: 1.2;
+  max-width: fit-content;
+  height: auto;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #c62828;
+}
+.icono-volver {
+  width: 18px;
+  height: 18px;
+}
+

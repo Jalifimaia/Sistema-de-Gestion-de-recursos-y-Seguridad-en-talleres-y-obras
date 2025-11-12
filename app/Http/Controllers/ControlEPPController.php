@@ -227,8 +227,9 @@ class ControlEPPController extends Controller
     return view('checklistEPP', compact('trabajadores', 'preseleccionado'));
 }
 
-    public function store(Request $request)
+public function store(Request $request)
 {
+    
     $request->validate([
         'trabajador_id' => 'required|exists:usuario,id',
         'observaciones' => 'nullable|string',
@@ -242,9 +243,35 @@ class ControlEPPController extends Controller
     ]);
 
     $request->merge([
-    'observaciones' => $request->observaciones ?: 'Sin observaciones',
+        'observaciones' => $request->observaciones ?: 'Sin observaciones',
     ]);
 
+    // 🔎 Validar que los EPP marcados como usados estén asignados
+    $eppsMarcados = collect([
+        'casco' => $request->boolean('casco'),
+        'guantes' => $request->boolean('guantes'),
+        'lentes' => $request->boolean('anteojos'),
+        'botas' => $request->boolean('botas'),
+        'chaleco' => $request->boolean('chaleco'),
+        'arnes' => $request->boolean('arnes'),
+    ]);
+
+    $tiposMarcados = $eppsMarcados->filter()->keys()->map(fn($epp) => strtolower(trim($epp)))->toArray();
+
+    $tiposAsignados = UsuarioRecurso::where('id_usuario', $request->trabajador_id)
+        ->pluck('tipo_epp')
+        ->filter()
+        ->map(fn($t) => strtolower(trim($t)))
+        ->unique()
+        ->toArray();
+
+    $faltantes = array_diff($tiposMarcados, $tiposAsignados);
+
+    if (count($faltantes) > 0) {
+        return back()->withErrors([
+            'epp_asignacion' => 'No se puede registrar el checklist: hay EPP marcados como usados pero no asignados.'
+        ])->withInput();
+    }
 
     // 🔎 Buscar si ya existe un checklist del mismo trabajador hoy
     $checklist = Checklist::where('trabajador_id', $request->trabajador_id)
@@ -290,14 +317,16 @@ class ControlEPPController extends Controller
 }
 
 
+
     public function createAsignacionEPP()
 {
     $usuarios = Usuario::where('id_rol', 3)
-        ->whereHas('estado', function ($q) {
-            $q->where('nombre', 'stand by');
-        })
-        ->whereDoesntHave('usuarioRecursos') // 🔒 Excluir los que ya tienen EPP
-        ->get();
+    ->whereHas('estado', function ($q) {
+        $q->where('nombre', 'stand by');
+    })
+    ->with('usuarioRecursos') // traer relación para usarla en la vista/JS si hace falta
+    ->get();
+
 
     $tiposEpp = ['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'];
     $seriesDisponibles = [];
@@ -369,16 +398,53 @@ public function activarConEPP($id)
 
 public function storeAsignacionEPP(Request $request)
 {
-    $request->validate([
-        'usuario_id' => 'required|exists:usuario,id',
-        'casco' => 'required|integer|exists:serie_recurso,id',
-        'guantes' => 'required|integer|exists:serie_recurso,id',
-        'lentes' => 'required|integer|exists:serie_recurso,id',
-        'botas' => 'required|integer|exists:serie_recurso,id',
-        'chaleco' => 'required|integer|exists:serie_recurso,id',
-        'arnes' => 'required|integer|exists:serie_recurso,id',
-        'fecha_asignacion' => 'required|date',
-    ]);
+    $messages = [
+    'usuario_id.required' => 'Seleccioná un trabajador.',
+    'usuario_id.exists' => 'El trabajador seleccionado no existe.',
+    'casco.required' => 'Seleccioná un casco.',
+    'casco.integer' => 'Valor inválido para casco.',
+    'casco.exists' => 'La serie de casco seleccionada no existe.',
+    'guantes.required' => 'Seleccioná guantes.',
+    'guantes.integer' => 'Valor inválido para guantes.',
+    'guantes.exists' => 'La serie de guantes seleccionada no existe.',
+    'lentes.required' => 'Seleccioná anteojos.',
+    'lentes.integer' => 'Valor inválido para anteojos.',
+    'lentes.exists' => 'La serie de anteojos seleccionada no existe.',
+    'botas.required' => 'Seleccioná botas.',
+    'botas.integer' => 'Valor inválido para botas.',
+    'botas.exists' => 'La serie de botas seleccionada no existe.',
+    'chaleco.required' => 'Seleccioná chaleco.',
+    'chaleco.integer' => 'Valor inválido para chaleco.',
+    'chaleco.exists' => 'La serie de chaleco seleccionada no existe.',
+    'arnes.required' => 'Seleccioná arnés.',
+    'arnes.integer' => 'Valor inválido para arnés.',
+    'arnes.exists' => 'La serie de arnés seleccionada no existe.',
+    'fecha_asignacion.required' => 'Seleccioná la fecha de asignación.',
+    'fecha_asignacion.date' => 'La fecha de asignación no es válida.',
+];
+
+$attributes = [
+    'usuario_id' => 'trabajador',
+    'casco' => 'casco',
+    'guantes' => 'guantes',
+    'lentes' => 'anteojos',
+    'botas' => 'botas',
+    'chaleco' => 'chaleco',
+    'arnes' => 'arnés',
+    'fecha_asignacion' => 'fecha de asignación',
+];
+
+$request->validate([
+    'usuario_id' => 'required|exists:usuario,id',
+    'casco' => 'required|integer|exists:serie_recurso,id',
+    'guantes' => 'required|integer|exists:serie_recurso,id',
+    'lentes' => 'required|integer|exists:serie_recurso,id',
+    'botas' => 'required|integer|exists:serie_recurso,id',
+    'chaleco' => 'required|integer|exists:serie_recurso,id',
+    'arnes' => 'required|integer|exists:serie_recurso,id',
+    'fecha_asignacion' => 'required|date',
+], $messages, $attributes);
+
 
     $usuario = Usuario::with('estado', 'usuarioRecursos')->findOrFail($request->usuario_id);
 
@@ -456,7 +522,6 @@ public function storeAsignacionEPP(Request $request)
 }
 
 
-
 public function buscarSeriesEPP(Request $request)
 {
     $tipo = $request->input('tipo');
@@ -508,123 +573,99 @@ public function buscarSeriesEPP(Request $request)
     }));
 }
 
-
-
-/*
-    public function buscarSeriesEPP(Request $request)
-{
-    $tipo = $request->input('tipo');
-    $query = $request->input('q');
-
-    $baseQuery = SerieRecurso::whereHas('recurso.subcategoria', function ($q) use ($tipo) {
-        $q->where('nombre', $tipo);
-    })
-    ->whereHas('estado', function ($q) {
-        $q->where('nombre_estado', 'Disponible'); // 🔹 Solo estado "Disponible"
-    })
-    ->whereDoesntHave('usuarioRecurso') // 🔹 No asignadas
-    ->with(['recurso', 'estado']); // 🔹 Carga relaciones necesarias
-
-    if (!empty($query)) {
-        $baseQuery->whereRaw('LOWER(TRIM(nro_serie)) LIKE ?', ['%' . strtolower(trim($query)) . '%']);
-    }
-
-    $series = $baseQuery->limit(20)->get();
-
-    return response()->json($series->map(function ($serie) {
-        return [
-            'id' => $serie->id,
-            'nro_serie' => $serie->nro_serie,
-            'recurso' => $serie->recurso->nombre,
-            'vencimiento' => Carbon::parse($serie->fecha_vencimiento)->format('d/m/Y'),
-        ];
-    }));
-}
-*/
 public function faltantes()
 {
-    // Subcategorías de EPP
+    // Subcategorías EPP por nombre normalizado
     $subcategoriasEpp = Subcategoria::whereHas('categoria', function ($q) {
         $q->where('nombre_categoria', 'EPP');
-    })->get()->keyBy('nombre');
-   
-    // Mapeo de campos del checklist → nombre de subcategoría
+    })->get()->keyBy(fn($s) => mb_strtolower(trim($s->nombre)));
+
+    // Mapeo por ID de subcategoría (más robusto)
     $mapaEpp = [
-    'anteojos' => 'lentes',
-    'botas' => 'botas',
-    'chaleco' => 'Chaleco Test',
-    'guantes' => 'guantes',
-    'arnes' => 'Arnes',
-    'casco' => 'Casco',
-];
+        'anteojos' => $subcategoriasEpp['lentes']->id ?? null,
+        'botas'    => $subcategoriasEpp['botas']->id ?? null,
+        'chaleco'  => $subcategoriasEpp['chaleco']->id ?? null,
+        'guantes'  => $subcategoriasEpp['guantes']->id ?? null,
+        'arnes'    => $subcategoriasEpp['arnes']->id ?? null,
+        'casco'    => $subcategoriasEpp['casco']->id ?? null,
+    ];
 
-    // Todos los trabajadores
-    $trabajadores = Usuario::whereHas('rol', function ($q) {
-        $q->where('nombre_rol', 'Trabajador');
-    })->get();
+    // Trabajadores activos o en standby
+    $estadosConsiderados = [1, 3];
+    $trabajadores = Usuario::whereIn('id_estado', $estadosConsiderados)
+        ->whereHas('rol', fn($q) => $q->where('nombre_rol', 'Trabajador'))
+        ->get(['id', 'name']);
 
-    // Checklist del día actual
-    $checklists = Checklist::select('trabajador_id', 'anteojos', 'botas', 'chaleco', 'guantes', 'arnes', 'es_en_altura')
-        ->whereDate('fecha', \Carbon\Carbon::today())
+    if ($trabajadores->isEmpty()) {
+        return view('epp.faltantes', ['faltantes' => [], 'usuarios' => []]);
+    }
+
+    $usuarioIds = $trabajadores->pluck('id')->all();
+
+    // Checklist más reciente por trabajador
+    $checklists = Checklist::whereIn('trabajador_id', $usuarioIds)
+        ->orderByDesc('fecha')
         ->get()
-        ->keyBy('trabajador_id');
+        ->groupBy('trabajador_id')
+        ->map(fn($group) => $group->first());
 
-    // Recursos asignados por trabajador
-    $asignados = UsuarioRecurso::with('recurso.subcategoria')->get()->groupBy('id_usuario');
+    // Asignaciones sin filtros extra
+    $asignados = UsuarioRecurso::with('recurso.subcategoria')
+        ->whereIn('id_usuario', $usuarioIds)
+        ->get()
+        ->groupBy('id_usuario');
 
     $faltantes = [];
 
     foreach ($trabajadores as $usuario) {
         $usuarioId = $usuario->id;
-        $check = $checklists[$usuarioId] ?? null;
-        $tiene = $asignados[$usuarioId] ?? collect();
-        $faltante = [];
+        $check = $checklists->get($usuarioId) ?? null;
+        if (!$check) continue;
 
-        // Solo evaluamos si tiene checklist hoy
-        if (!$check) {
-            continue;
-        }
-
-        // Determinar qué EPP necesita
         $necesita = array_keys($mapaEpp);
-
         if (!$check->es_en_altura) {
             $necesita = array_filter($necesita, fn($tipo) => $tipo !== 'arnes');
         }
 
-        // Evaluar faltantes
+        $tieneAsignaciones = $asignados->get($usuarioId) ?? collect();
+        $tieneIdsSubcat = $tieneAsignaciones
+            ->filter(fn($ur) => $ur->recurso && $ur->recurso->subcategoria)
+            ->map(fn($ur) => (int)$ur->recurso->subcategoria->id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $faltante = [];
+
         foreach ($necesita as $campo) {
-            $nombreSubcat = $mapaEpp[$campo];
-            if ($subcategoriasEpp->has($nombreSubcat)) {
-                $subcatId = $subcategoriasEpp[$nombreSubcat]->id;
+            $subcatId = $mapaEpp[$campo] ?? null;
+            if (!$subcatId) {
+                $faltante[] = "(Falta configurar subcategoría para: {$campo})";
+                continue;
+            }
 
-                $tieneEseEpp = $tiene->contains(function ($ur) use ($subcatId) {
-                    return $ur->recurso && $ur->recurso->id_subcategoria === $subcatId;
-                });
-
-                if (!$tieneEseEpp) {
-                    $faltante[] = $nombreSubcat;
-                }
+            if (!in_array($subcatId, $tieneIdsSubcat, true)) {
+                $nombreSubcat = $subcategoriasEpp->firstWhere('id', $subcatId)?->nombre ?? 'Desconocido';
+                $faltante[] = $nombreSubcat;
             }
         }
 
-        // Extra: si trabaja en altura y no marcó arnés
-        if ($check->es_en_altura && !$check->arnes) {
-            $faltante[] = 'Arnés (obligatorio en altura)';
+        if ($check->es_en_altura && empty($check->arnes)) {
+            $faltante[] = 'Arnés (no marcado en checklist)';
         }
 
-        if (count($faltante)) {
+        if (!empty($faltante)) {
             $faltantes[$usuarioId] = $faltante;
         }
     }
 
-    // Obtener nombres de los trabajadores
-    $usuarios = Usuario::whereIn('id', array_keys($faltantes))->pluck('name', 'id');
-
-    //dd($faltantes);
+    $usuarios = Usuario::whereIn('id', array_keys($faltantes))->pluck('name', 'id')->toArray();
 
     return view('epp.faltantes', compact('faltantes', 'usuarios'));
 }
+
+
+
 
 
 

@@ -6,9 +6,19 @@
 
 @section('content')
 <div class="container py-4">
-    <h3 class="mb-4">
-        Agregar Series para: {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
-    </h3>
+    <div class="d-flex align-items-center justify-content-start mb-4 gap-3 flex-wrap">
+        <a href="{{ route('inventario.index') }}" class="btn btn-volver d-flex align-items-center">
+          <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+          Volver
+        </a>
+
+        <div class="d-flex align-items-center">
+          <img src="{{ asset('images/herradd.svg') }}" alt="Herramienta" style="width: 40px; height: 40px;" class="me-2">
+          <h4 class="fw-bold mb-0">
+            Agregar Series para: {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
+          </h4>
+        </div>
+      </div>
 
     @if ($errors->any())
       <div class="alert alert-danger">
@@ -72,11 +82,13 @@
         </div>
 
         <div class="mb-3">
-        <label for="fecha_adquisicion" class="form-label">Fecha de Adquisición</label>
-        <div class="input-group" onclick="this.querySelector('input').showPicker()">
+          <label for="fecha_adquisicion" class="form-label">Fecha de Adquisición</label>
+          <div class="input-group" onclick="this.querySelector('input').showPicker()">
             <input type="date" name="fecha_adquisicion" id="fecha_adquisicion" class="form-control" required>
+          </div>
+          <div id="fecha_adquisicion_error" class="invalid-feedback" style="display:none;"></div>
         </div>
-        </div>
+
 
 
         <div class="mb-3">
@@ -93,7 +105,7 @@
         <div class="mb-4">
             <h5>Series por {{ $requiereTalle ? 'Talle y Color' : 'Color' }}</h5>
             <table class="table table-bordered text-center">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         @if($requiereTalle)
                             <th>Tipo de Talle</th>
@@ -109,13 +121,13 @@
                     <!-- Filas dinámicas -->
                 </tbody>
             </table>
-            <button type="button" class="btn btn-outline-primary" onclick="agregarFila()">+ Agregar combinación</button>
+            <div class="d-flex justify-content-start gap-3 mt-3 flex-wrap">
+              <button type="button" class="btn btn-combinacion" onclick="agregarFila()">+ Agregar combinación</button>
+
+              <button type="submit" class="btn btn-guardar" id="btnGuardar" disabled>Guardar Series</button>
+            </div>
+
         </div>
-
-        
-
-        <button type="submit" class="btn btn-success" id="btnGuardar" disabled>Guardar Series</button>
-        <a href="{{ route('inventario') }}" class="btn btn-secondary ms-2">Volver</a>
     </form>
     
 </div>
@@ -132,7 +144,7 @@
         Las series fueron agregadas correctamente.
       </div>
       <div class="modal-footer">
-        <a href="{{ route('inventario') }}" class="btn btn-outline-success">Volver al inventario</a>
+        <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
         <a href="{{ url()->current() }}" class="btn btn-success">Agregar más series</a>
       </div>
     </div>
@@ -165,7 +177,7 @@
     window.nombreRecurso = @json($recurso->nombre);
     window.descripcionRecurso = @json($recurso->descripcion);
     window.requiereTalle = @json($requiereTalle);
-    window.tallesPorTipo = @json($talles); // 👈 ahora viene de la BD
+    window.tallesPorTipo = @json($talles); 
 </script>
 <script src="{{ asset('js/serieRecurso.js') }}"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -241,5 +253,8 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
-
 @endpush
+@push('styles')
+  <link href="{{ asset('css/agregarSerie.css') }}" rel="stylesheet">
+@endpush
+

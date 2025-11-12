@@ -5,23 +5,48 @@
 @section('content')
 <div class="container py-4">
 
+  <!-- Encabezado -->
   <header class="row mb-4">
     <div class="col-md-8">
-      <h1 class="h4 fw-bold mb-1">Gestión de Inventario</h1>
-      <p class="text-muted small">Control de herramientas y equipos de protección personal</p>
+      <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+        <img src="{{ asset('images/inventario.svg') }}" alt="Icono Inventario" style="height: 35px;">
+        Gestión de Inventario
+      </h1>
+      <p class="text-muted">Control de herramientas y equipos de protección personal</p>
     </div>
-    <div class="col-md-4 text-md-end text-muted small">
-      Fecha: <strong id="today" class="text-nowrap"></strong>
+
+    <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
+      <strong id="today" class="valor-fecha text-nowrap">{{ now()->format('d/m/Y H:i') }}</strong>
     </div>
   </header>
 
   <!-- Estado del Inventario -->
-  <section id="estado-inventario" class="mb-4">
-    <div class="card shadow border mt-4">
-      <div class="card-header bg-white border-bottom">
-        <h5 class="fw-bold mb-0">📊 Estado del Inventario</h5>
-        <p class="text-muted small mb-0">Resumen general de herramientas y EPP</p>
+<section id="estado-inventario" class="mb-4">
+  <div class="card shadow border custom-margin-top card-estado">
+    <!-- Header con botón toggle -->
+    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <!-- Botón toggle collapse -->
+        <button class="btn btn-sm btn-light p-1 d-flex justify-content-center align-items-center"
+                style="width: 32px; height: 32px;"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#estadoCollapse"
+                aria-expanded="false"
+                aria-controls="estadoCollapse">
+          <img src="{{ asset('images/down.svg') }}" alt="Toggle Inventario" class="down">
+        </button>
+
+        <!-- Título y subtítulo -->
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold">Estado del Inventario</span>
+          <span class="text-muted small">- Resumen general de las herramientas y del equipo de protección personal</span>
+        </div>
       </div>
+    </div>
+
+    <!-- Contenedor colapsable -->
+    <div class="collapse" id="estadoCollapse">
       <div class="card-body">
         <div class="row g-3">
           @php
@@ -45,184 +70,269 @@
 
           <!-- Botón exportar -->
           <div class="col-6 col-md-4 col-lg-2 d-flex align-items-center justify-content-center">
-            <a href="{{ route('inventario.exportar') }}" class="btn btn-orange btn-sm w-100">
+            <a href="{{ route('inventario.exportar') }}" class="btn btn-csv btn-sm w-100 btn-csv">
               <i class="bi bi-download me-1"></i> Exportar CSV
             </a>
           </div>
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- Botones superiores -->
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <a href="{{ route('recursos.create') }}" class="btn btn-orange">Agregar recurso</a>
-    <a href="{{ url('/series-qr') }}" class="btn btn-outline-secondary">📑 Ver todos los códigos QR</a>
   </div>
+</section>
 
-  <!-- Filtro -->
+
+
+
+
+  <!-- Filtro y buscador -->
   <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
     <label class="form-label mb-0">Filtrar por:</label>
-    <select id="filtroInventario" class="form-select w-auto">
+    <select id="filtroInventario" class="form-select w-auto filtro-destacado">
       <option value="todos">Todos</option>
       <option value="herramienta">Herramientas</option>
       <option value="epp">EPP</option>
-      <option value="reparacion">En reparación</option>
     </select>
+
+    <input type="text" id="buscador" class="form-control w-auto ms-3 buscador-destacado" placeholder="Buscar por nombre...">
   </div>
 
-  <!-- Tabla -->
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <h5 class="card-title fw-bold">Listado de Recursos</h5>
-      <p class="text-muted small">Elementos registrados en el sistema</p>
+  <!-- Botones: Agregar + QR -->
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <a href="{{ route('recursos.create') }}" class="btn btn-orange d-flex align-items-center gap-2">
+      <img src="{{ asset('images/mas.svg') }}" alt="Icono agregar" style="height: 35px;">
+      <span class="texto-boton-grande">Agregar recurso</span>
+    </a>
 
-      <div class="table-responsive">
-        <table class="table-naranja align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>Nombre</th>
-              <th>Serie</th>
-              <th>Estado</th>
-              <th>Categoría</th>
-              <th>Descripción</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($recursos as $recurso)
-            <tr>
-              <td>{{ $recurso->nombre }}</td>
-              <td>
-                @if ($recurso->serieRecursos->count())
-                  <div class="d-flex align-items-center gap-2">
-                    <select class="form-select form-select-sm w-auto"
-                            onchange="mostrarEstado(this)"
-                            data-id="{{ $recurso->id }}">
-                      <option value="">Seleccionar serie</option>
-                      @foreach ($recurso->serieRecursos as $serie)
-                        @php
-                          $estadoNombre = $serie->estado->nombre_estado ?? 'Sin estado';
-                          $esEPP = strtolower(optional($recurso->categoria)->nombre_categoria ?? '') === 'epp';
-                        @endphp
-                        <option 
-                          value="{{ $serie->id }}"
-                          data-estado="{{ $estadoNombre }}"
-                          data-talle="{{ $esEPP ? $serie->talle : '' }}"
-                        >
-                          {{ $serie->codigo->codigo_base ?? 'SIN-CODIGO' }}-{{ str_pad($serie->correlativo, 2, '0', STR_PAD_LEFT) }}{{ $esEPP && $serie->talle ? ' T:' . $serie->talle : '' }}
-                        </option>
-                      @endforeach
-                    </select>
-                  </div>
-                @else
-                  <span class="text-muted">Sin series</span>
-                @endif
-              </td>
-              <td>
-                <!-- Estado dinámico -->
-                <div id="estado-{{ $recurso->id }}"
-                     class="badge estado-vencimiento px-2 py-1 border rounded small fw-semibold"
-                     style="min-width: 160px; display: none;"></div>
-              </td>
-    
-              <td>{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
-              <td>{{ $recurso->descripcion }}</td>
-              <td class="text-nowrap">
-                <a href="{{ route('recursos.edit', $recurso->id) }}" class="btn btn-sm btn-orange">
+    <a href="{{ url('/series-qr') }}" class="btn btn-outline-orange d-flex align-items-center gap-2">
+      <img src="{{ asset('images/qr2.svg') }}" alt="QR icono" style="height: 35px;">
+      <span class="texto-boton-grande btn-qr">Códigos QR</span>
+    </a>
+  </div>
+
+<!-- Tabla -->
+<div class="card-body">
+  <div class="table-responsive" style="overflow-x: auto; min-width: 100%;">
+    <table class="table-naranja align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Nombre</th>
+          <th>Subcategoría</th>
+          <th>Categoría</th>
+          <th>Descripción</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach ($recursos as $recurso)
+
+        @php
+          $estadoRecurso = strtolower(optional($recurso->estado)->nombre_estado ?? '');
+          $estadosSeries = $recurso->serieRecursos->pluck('estado.nombre_estado')->map(fn($e) => strtolower($e ?? ''))->toArray();
+          $todasBaja = count($estadosSeries) > 0 && count(array_unique($estadosSeries)) === 1 && in_array('baja', $estadosSeries);
+        @endphp
+
+        <tr data-recurso-id="{{ $recurso->id }}">
+          <td class="recurso-nombre">{{ $recurso->nombre }}</td>
+          <td class="recurso-subcategoria">{{ optional($recurso->subcategoria)->nombre ?? 'Sin subcategoría' }}</td>
+          <td class="recurso-categoria">{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
+          <td class="recurso-descripcion">{{ $recurso->descripcion }}</td>
+          <td class="text-nowrap acciones-cell">
+            @if ($estadoRecurso === 'baja' || $todasBaja)
+              <span class="badge bg-secondary fw-semibold">Dado de baja</span>
+            @else
+              <div class="d-flex align-items-center gap-2 flex-nowrap">
+                <!-- Editar -->
+                <a href="{{ route('recursos.edit', $recurso->id) }}" class="btn btn-sm btn-editar btn-accion-compact" title="Editar">
                   <i class="bi bi-pencil"></i>
                 </a>
 
-                <form action="{{ route('recursos.destroy', $recurso->id) }}" method="POST" class="d-inline eliminar-recurso-form" data-nombre="{{ $recurso->nombre }}" data-id="{{ $recurso->id }}">
-                  @csrf
-                  @method('DELETE')
-                  <button type="button" class="btn btn-sm btn-danger btn-eliminar" data-id="{{ $recurso->id }}">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </form>
-
-                <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-secondary">
-                  <i class="bi bi-plus-circle"> Agregar serie</i>
+                <!-- Agregar serie -->
+                <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-agregar-serie btn-accion-compact" title="Agregar serie">
+                  <i class="bi bi-plus-circle"></i>
                 </a>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
-      </div>
 
-    </div>
+                <!-- Ver series -->
+                @if ($recurso->serieRecursos->count())
+                  <button type="button"
+                          class="btn btn-sm btn-ver-series btn-accion-compact"
+                          data-nombre="{{ $recurso->nombre }}"
+                          data-series="{{ $recurso->serieRecursos->toJson() }}"
+                          data-bs-toggle="modal"
+                          data-bs-target="#modalSeries"
+                          title="Ver series">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                @else
+                  <button type="button" class="btn btn-sm btn-outline-secondary btn-accion-compact" disabled title="Sin series">
+                    <i class="bi bi-eye-slash"></i>
+                  </button>
+                @endif
+
+                <!-- Dar de baja -->
+                <form method="POST" action="{{ route('recursos.baja', $recurso->id) }}" class="marcar-baja-form" data-nombre="{{ $recurso->nombre }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn btn-sm btn-danger btn-marcar-baja btn-accion-compact" title="Dar de baja">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+              </div>
+            @endif
+          </td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
   </div>
 </div>
-@endsection
 
-@section('scripts')
-  <script src="{{ asset('js/inventario.js') }}?v={{ time() }}"></script>
-  <script src="{{ asset('js/filtroBusqueda.js') }}?v={{ time() }}"></script>
 
-<!-- Modal Confirmar Eliminación (global) -->
-<div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div id="infoPaginacion" class="text-muted small"></div>
+        <ul id="paginacion" class="pagination mb-0"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirmación baja (global para recurso) -->
+  <div class="modal fade" id="modalConfirmBajaRecurso" tabindex="-1" aria-labelledby="modalConfirmBajaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="modalConfirmBajaLabel">Confirmar baja del recurso</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p id="modalConfirmBajaText" class="mb-0">¿Seguro que querés marcar como baja este recurso?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="modalBajaCancel" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="modalBajaConfirm" class="btn btn-danger">Sí, marcar baja</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal Ver Series -->
+<div class="modal fade" id="modalSeries" tabindex="-1" aria-labelledby="modalSeriesLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="modalConfirmDeleteLabel">Confirmar eliminación</h5>
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalSeriesLabel">Series del recurso</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <p id="modalConfirmDeleteText" class="mb-0">¿Seguro que quieres eliminar este recurso?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" id="modalConfirmDeleteBtn" class="btn btn-danger">Sí, eliminar</button>
+        <div class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+          <label for="buscadorSerie" class="form-label mb-0">Buscar serie:</label>
+          <input type="text" id="buscadorSerie" class="form-control w-auto" placeholder="Ej: T123">
+          <label for="filtroEstado" class="form-label mb-0 ms-2">Filtrar por estado:</label>
+          <select id="filtroEstado" class="form-select w-auto">
+            <option value="todos">Todos</option>
+            <option value="Disponible">Disponible</option>
+            <option value="Baja">Baja</option>
+            <option value="Prestado">Prestado</option>
+            <option value="Devuelto">Devuelto</option>
+            <option value="Dañado">Dañado</option>
+            <option value="En reparación">En reparación</option>
+          </select>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table-naranja align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Serie</th>
+                <th>Estado</th>
+                <th>Color</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaSeriesBody"></tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div id="infoPaginacionSeries" class="text-muted small"></div>
+          <ul id="paginacionSeries" class="pagination mb-0"></ul>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
 
 @endsection
 
 @push('scripts')
-<script>
+<script src="{{ asset('js/filtroBusqueda.js') }}"></script>
+<script src="{{ asset('js/cargarSeriesRecurso.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/inventario-actions.js') }}"></script>
+
+
+<!--<script>
 document.addEventListener('DOMContentLoaded', function () {
-  // Variables del modal
+  // Modal global para confirmar "marcar baja" de recurso
   const modalEl = document.getElementById('modalConfirmDelete');
   const modalText = document.getElementById('modalConfirmDeleteText');
   const modalConfirmBtn = document.getElementById('modalConfirmDeleteBtn');
-  const bsModal = new bootstrap.Modal(modalEl);
-
-  // Form objetivo a enviar al confirmar
+  let bsModal;
+  if (modalEl) bsModal = new bootstrap.Modal(modalEl);
   let targetForm = null;
 
-  // Handler: abrir modal al click de cualquier .btn-eliminar
-  document.querySelectorAll('.btn-eliminar').forEach(btn => {
-    btn.addEventListener('click', function (e) {
+  // Botón que dispara "marcar baja" (no borra)
+  document.querySelectorAll('.btn-marcar-baja').forEach(btn => {
+    btn.addEventListener('click', function () {
       const id = this.dataset.id;
-      // buscar el form asociado (ascendiendo en DOM)
-      const form = this.closest('.eliminar-recurso-form');
-      if (!form) return console.warn('Formulario de eliminación no encontrado para id', id);
+      const form = this.closest('.marcar-baja-form');
+      if (!form) return console.warn('Formulario para marcar baja no encontrado', id);
 
       const nombre = form.dataset.nombre || `ID ${id}`;
-      // personalizar texto del modal
-      modalText.textContent = `¿Seguro que quieres eliminar este recurso "${nombre}"?`;
-      targetForm = form;
-      bsModal.show();
+      if (modalText && bsModal) {
+        modalText.textContent = `¿Seguro que querés marcar como baja el recurso "${nombre}"?`;
+        targetForm = form;
+        bsModal.show();
+      } else {
+        // fallback: submit directo
+        form.submit();
+      }
     });
   });
 
-  // Confirmar eliminación: enviar form guardado
-  modalConfirmBtn.addEventListener('click', function () {
-    if (!targetForm) return;
-    // opcional: deshabilitar botón para evitar doble submit
-    modalConfirmBtn.disabled = true;
-    targetForm.submit();
+  if (modalConfirmBtn) {
+    modalConfirmBtn.addEventListener('click', function () {
+      if (!targetForm) return;
+      modalConfirmBtn.disabled = true;
+      // submit: backend debe cambiar estado a "baja"
+      targetForm.submit();
+    });
+  }
+
+  if (modalEl) {
+    modalEl.addEventListener('hidden.bs.modal', function () {
+      targetForm = null;
+      if (modalConfirmBtn) modalConfirmBtn.disabled = false;
+      if (modalText) modalText.textContent = '¿Seguro que quieres eliminar este recurso?';
+    });
+  }
+
+  // Rehabilitar botones visuales (por si hay overlays)
+  document.querySelectorAll('a.btn, button').forEach(btn => {
+    btn.style.pointerEvents = 'auto';
+    btn.style.position = 'relative';
+    btn.style.zIndex = '10';
   });
 
-  // Reiniciar estado del modal al cerrarlo
-  modalEl.addEventListener('hidden.bs.modal', function () {
-    targetForm = null;
-    modalConfirmBtn.disabled = false;
-    modalText.textContent = '¿Seguro que quieres eliminar este recurso?';
-  });
+  // Inicial trigger para que filtroBusqueda.js aplique estado inicial
+  const filtroSelect = document.getElementById('filtroInventario');
+  if (filtroSelect) {
+    filtroSelect.dispatchEvent(new Event('change'));
+  }
 });
-</script>
+</script>-->
+@endpush
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/inventario.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 @endpush

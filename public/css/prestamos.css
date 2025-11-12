@@ -1,0 +1,139 @@
+/* 🔶 Encabezado de tarjeta */
+.card-header {
+  background-color: #d06842 !important;
+  color: #fff !important;
+  text-align: left;
+  padding: 12px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* 🔶 Título dentro del header */
+.card-header h4 {
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+/* 🔶 Botón de nuevo préstamo */
+.btn-nuevo-prestamo {
+  background-color: #27862b;
+  color: #fff;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+}
+
+.btn-nuevo-prestamo:hover {
+  background-color: #d06842;
+}
+
+/* 🔶 Botón de búsqueda */
+.input-group .btn {
+  background-color: #d06842;
+  color: #fff;
+  border: none;
+}
+
+.input-group .btn:hover {
+  background-color: #d06842;
+}
+
+/* 🔶 Botón editar dentro de tarjeta */
+.card .btn-editar {
+  background-color: #d06842;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+}
+
+.card .btn-editar:hover {
+  background-color: #ef6c00;
+}
+
+/* 🔶 Badge de estado */
+.badge.bg-danger,
+.badge.bg-success,
+.badge.bg-warning,
+.badge.bg-secondary {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* 🔶 Botón nuevo préstamo */
+.btn-nuevo-prestamo {
+  background-color: #27862b;
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+}
+
+.btn-nuevo-prestamo:hover {
+  background-color: #37a73d;
+}
+
+/* 🔶 Botón buscar */
+.btn-naranja {
+  background-color: #d06842;
+  color: #fff;
+  border: none;
+}
+
+.btn-naranja:hover {
+  background-color: #d06842;
+}
+
+/* 🔶 Outline naranja para filtros y búsqueda */
+.filtro-naranja,
+.filtro-naranja:focus,
+.form-select:focus,
+input[type="date"]:focus {
+  border-color: #d06842;
+  box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
+}
+
+/* Aplicar clase a todos los filtros */
+#filtro-estado,
+#filtro-creador,
+#fecha-inicio,
+#fecha-fin {
+  border-color: #d06842;
+}
+
+/* 🔶 Paginación naranja */
+.pagination {
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.page-link {
+  color: #3b3b3b;
+  border: 1px solid #d06842;
+  font-weight: 500;
+}
+
+.page-link:hover {
+  background-color: #d06842;
+  color: #fff;
+  border-color: #d06842;
+}
+
+.page-item.active .page-link {
+  background-color: #d06842;
+  border-color: #af5636;
+  color: #fff;
+}
+
+
+p.small.text-muted {
+  display: none;
+}
