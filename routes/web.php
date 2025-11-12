@@ -284,7 +284,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('usuarios/{id}/incidentes', [UsuarioController::class, 'incidentes'])->name('usuarios.incidentes');
     Route::get('usuarios/{id}/prestamos', [UsuarioController::class, 'prestamos'])->name('usuarios.prestamos');
 
-    Route::resource('usuarios', UsuarioController::class); // <--- ruta de usuarios de UsuarioController
+    Route::resource('usuarios', UserController::class); // <--- ruta de usuarios de UsuarioController
     //Route::resource('usuarios', UserController::class);    
 
     
