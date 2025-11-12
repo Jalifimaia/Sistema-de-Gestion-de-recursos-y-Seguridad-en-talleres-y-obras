@@ -46,7 +46,7 @@
       <div class="dropdown w-100">
         <button class="btn btn-sm text-white d-flex align-items-center justify-content-between w-100 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           <div class="d-flex align-items-center">
-            <img src="https://i.pravatar.cc/150?u=demo"
+            <img src="https://cdn-icons-png.flaticon.com/512/12225/12225881.png"
                 alt="Foto de perfil"
                 class="rounded-circle border shadow-sm me-2"
                 style="width: 40px; height: 40px; object-fit: cover;">
