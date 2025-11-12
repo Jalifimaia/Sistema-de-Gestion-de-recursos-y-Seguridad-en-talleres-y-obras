@@ -4284,8 +4284,15 @@ function activarModoDictadoClave() {
   const claveInput = document.getElementById('clave');
   if (!claveInput) return;
 
+  // ✅ Forzar focus con reintento
   if (!document.activeElement.isSameNode(claveInput)) {
     claveInput.focus();
+    setTimeout(() => {
+      if (!document.activeElement.isSameNode(claveInput)) {
+        console.warn('⚠️ Focus no aplicado correctamente, reintentando');
+        claveInput.focus();
+      }
+    }, 100);
   }
 
   claveInput.classList.add('dictado-activo');
