@@ -3347,9 +3347,10 @@ function handleStep10Pagina(numero, intentos = 0) {
     return;
   }
 
-  const contenedorId = eppActivo ? 'recursos-asignados-epp' : 'recursos-asignados-herramientas';
+const contenedorId = eppActivo ? 'recursos-asignados-epp' : 'recursos-asignados-herramientas';
 const paginadorId = eppActivo ? 'paginadorEPP-step' : 'paginadorHerramientas-step';
-renderRecursosAsignados(recursos, numero, contenedorId, paginadorId);
+const esEpp = !!eppActivo;
+renderRecursosAsignados(recursos, numero, contenedorId, paginadorId, esEpp);
 
 }
 
