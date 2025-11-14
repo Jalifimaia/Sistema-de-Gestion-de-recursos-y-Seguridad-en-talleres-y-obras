@@ -309,4 +309,31 @@ public function devolverRecurso($id)
     ]);
 }
 
+public function eppAsignados($usuarioId)
+{
+    $epps = DB::table('usuario_recurso')
+        ->join('recurso', 'usuario_recurso.id_recurso', '=', 'recurso.id')
+        ->leftJoin('serie_recurso', 'usuario_recurso.id_serie_recurso', '=', 'serie_recurso.id')
+        ->where('usuario_recurso.id_usuario', $usuarioId)
+        ->select(
+            'usuario_recurso.id as detalle_id',
+            'recurso.nombre as recurso',
+            'serie_recurso.nro_serie as serie',
+            'usuario_recurso.tipo_epp',
+            'usuario_recurso.fecha_asignacion'
+        )
+        ->get()
+        ->map(function($r) {
+            return [
+                'detalle_id'     => $r->detalle_id,
+                'recurso'        => $r->recurso ?? $r->tipo_epp,
+                'serie'          => $r->serie ?? '-',
+                'fecha_asignacion' => $r->fecha_asignacion ? \Carbon\Carbon::parse($r->fecha_asignacion)->format('Y-m-d') : '-',
+            ];
+        });
+
+    return response()->json($epps);
+}
+
+
 }
