@@ -680,7 +680,7 @@ function identificarTrabajador() {
 function simularEscaneo() {
   //alert("Simulación de escaneo QR");
   console.log('🧪 simularEscaneo: simulación activada, avanzando a step5');
-  window.nextStep(5);
+  //window.nextStep(5);
 }
 
 function cargarCategorias() {
@@ -1947,6 +1947,17 @@ function detenerEscaneoQRregistroRecursos(next = null) {
   const btnCancelar = document.getElementById('btn-cancelar-qr');
   const textoCamara = document.getElementById('texto-camara-activa');
 
+  const avanzar = () => {
+    if (next) {
+      if (next === 5) {
+        // ⚡ En lugar de ir al step5, forzar categoría Herramienta y saltar a step6
+        seleccionarCategoria(2); // reemplazá 2 por el ID real de la categoría Herramienta
+      } else {
+        window.nextStep(next);
+      }
+    }
+  };
+
   if (scanner && isScanning) {
     console.log('📴 detenerEscaneoQRregistroRecursos: deteniendo escaneo activo');
     scanner.stop().catch(() => {}).then(() => {
@@ -1955,7 +1966,7 @@ function detenerEscaneoQRregistroRecursos(next = null) {
       if (btnEscanear) btnEscanear.classList.remove('d-none');
       if (textoCamara) textoCamara.classList.add('d-none');
       isScanning = false;
-      if (next) window.nextStep(next); // 👈 avanzar al paso cuando termina
+      avanzar();
       console.log('➡️ detenerEscaneoQRregistroRecursos: avanzando a step', next);
     });
   } else {
@@ -1964,7 +1975,7 @@ function detenerEscaneoQRregistroRecursos(next = null) {
     if (btnEscanear) btnEscanear.classList.remove('d-none');
     if (textoCamara) textoCamara.classList.add('d-none');
     isScanning = false;
-    if (next) window.nextStep(next);
+    avanzar();
   }
 }
 
@@ -2870,7 +2881,7 @@ if (_serieButtons) {
 
 
 // 👇 nuevo: target de retorno para step5
-let step5ReturnTarget = 2; // default: menú principal
+let step6ReturnTarget = 2; // default: menú principal
 
 function setModoEscaneo(modo) {
   const titulo = document.getElementById('titulo-step3');
@@ -2881,15 +2892,18 @@ function setModoEscaneo(modo) {
       Tengo la herramienta en mano
     `;
     detenerEscaneoQRregistroRecursos();
-    step5ReturnTarget = 3;
+    step6ReturnTarget = 3; // ⚡ si llegamos desde step3
+    // ❌ NO llamar a seleccionarCategoria acá
   } else {
     console.log('🔄 setModoEscaneo: modo escaneo QR activado');
     titulo.textContent = '📷 Escanear Recurso';
     activarEscaneoQRregistroRecursos();
-    // escaneo QR no cambia el target de step5
+    // escaneo QR no cambia el target de step6
   }
-  window.nextStep(3);
+  window.nextStep(3); // mostrar step3
 }
+
+
 
 function cargarMenuPrincipal() {
   const contenedor = document.getElementById('menu-principal-buttons');
@@ -2924,8 +2938,8 @@ function cargarMenuPrincipal() {
             return;
           }
 
-          step5ReturnTarget = 2;
-          window.nextStep(5);
+          step6ReturnTarget = 2; // ⚡ si llegamos desde step2
+          seleccionarCategoria(2); // ID real de Herramienta
         } catch (err) {
           manejarErrorFetch(err, 'Solicitud de herramienta');
         }
@@ -2962,7 +2976,7 @@ function cargarMenuPrincipal() {
 
 // 👇 nuevo: función para botón Volver en step5
 function volverDesdeStep5() {
-  window.nextStep(step5ReturnTarget);
+  window.nextStep(step6ReturnTarget);
 }
 
 let ultimoTabElegido = 'epp';
@@ -4996,8 +5010,9 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
 
       if (matchOpcion(textoSimple, 2, "solicitar herramienta", "quiero solicitar", "pedir herramienta")) {
         //window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
-        step5ReturnTarget = 2;
-        window.nextStep(5);
+        step6ReturnTarget = 2;
+        seleccionarCategoria(2); //ID de Herramienta
+        //window.nextStep(5);
         return;
       }
 
@@ -5043,8 +5058,9 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
       }
 
       if (matchOpcion(limpio, 2, "manual", "solicitar manualmente")) {
-        step5ReturnTarget = 3;
-        detenerEscaneoQRregistroRecursos(5);
+        step6ReturnTarget = 3;
+        detenerEscaneoQRregistroRecursos(6);
+        seleccionarCategoria(2); // ID de Herramienta
         return;
       }
 
@@ -5062,8 +5078,8 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
     // Delegamos a bloques ya implementados en tu código original
     if (step === 'step5') {
       if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) {
-        //window.mostrarMensajeKiosco(step5ReturnTarget === 3 ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"' : '🎤 Comando reconocido: Volver al menú principal', 'success');
-        window.nextStep(step5ReturnTarget);
+        //window.mostrarMensajeKiosco(step6ReturnTarget === 3 ? '🎤 Comando reconocido: Volver a "Tengo la herramienta en mano"' : '🎤 Comando reconocido: Volver al menú principal', 'success');
+        window.nextStep(step6ReturnTarget);
         return;
       }
       const botonesCat = document.querySelectorAll('#categoria-buttons button');
@@ -5076,23 +5092,35 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
     }
 
     if (step === 'step6') {
-      const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
-      if (matchPaginaSub && Array.isArray(window.subcategoriasActuales)) {
-        const token = matchPaginaSub[1];
-        const numero = numeroDesdeToken(token);
-        if (!isNaN(numero) && numero >= 1) {
-          const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / cantidadRecursosPorPagina));
-          if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
-          renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
-          return;
-        }
-      }
-      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) { /*window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a categorías', 'success');*/ window.nextStep(5); return; }
-      const botonesSub = document.querySelectorAll('#subcategoria-buttons button');
-      for (let i = 0; i < botonesSub.length; i++) { const btn = botonesSub[i]; if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) { btn.click(); return; } }
-      console.log("⚠️ Step6: Procesada entrada (si hubo coincidencias)");
+  const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (matchPaginaSub && Array.isArray(window.subcategoriasActuales)) {
+    const token = matchPaginaSub[1];
+    const numero = numeroDesdeToken(token);
+    if (!isNaN(numero) && numero >= 1) {
+      const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / cantidadRecursosPorPagina));
+      if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
+      renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
       return;
     }
+  }
+  
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "opcion volver")) { 
+    window.nextStep(step6ReturnTarget); // ⚡ dinámico: vuelve a step2 o step3 según origen
+    return; 
+  }
+
+  const botonesSub = document.querySelectorAll('#subcategoria-buttons button');
+  for (let i = 0; i < botonesSub.length; i++) {
+    const btn = botonesSub[i];
+    if (matchOpcion(limpio, i + 1) || matchTextoBoton(limpio, btn)) {
+      btn.click();
+      return;
+    }
+  }
+  console.log("⚠️ Step6: Procesada entrada (si hubo coincidencias)");
+  return;
+}
+
 
     if (step === 'step7') {
       const matchPaginaRec = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);

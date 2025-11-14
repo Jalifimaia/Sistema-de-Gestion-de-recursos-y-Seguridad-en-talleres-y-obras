@@ -162,7 +162,7 @@
       </div>
 
       <div class="text-center">
-        <button id="herramienta-en-mano-solicitar" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(5)">
+        <button id="herramienta-en-mano-solicitar" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(); seleccionarCategoria(2);">
           <span class="badge-opcion">Opción 2</span>
           <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
             <img src="{{ asset('images/hand2.svg') }}" alt="Mano" class="icono-opcion">
@@ -199,21 +199,21 @@
 
 
 
-    <!-- Paso 5: Categoría -->
+    <!-- Paso 5: Categoría 
     <div id="step5" class="step">
       <h2 class="mb-4 text-center">Seleccionar Categoría</h2>
       <div id="categoria-buttons"></div>
       <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="volverDesdeStep5()">
-        <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
+        <img src="{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
         <span>Volver</span>
       </button>  
-    </div>
+    </div>-->
 
     <!-- Paso 6: Subcategoría -->
     <div id="step6" class="step">
       <h2 class="mb-4 text-center">Seleccionar Subcategoría</h2>
       <div id="subcategoria-buttons"></div>
-      <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="nextStep(5)">
+      <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="nextStep(step6ReturnTarget)">
         <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
         <span>Volver</span>
       </button>
