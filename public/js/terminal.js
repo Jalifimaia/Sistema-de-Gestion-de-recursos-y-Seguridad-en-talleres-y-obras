@@ -4816,7 +4816,7 @@ if (!algunModalVisible && /\b(ayuda|asistente|tengo dudas)\b/.test(limpio)) {
       if (/\b(menu principal)\b/.test(limpio)) {
         recognitionGlobalPaused = false;
         safeStartRecognitionGlobal();
-        nextStep(1);
+        nextStep(2);
         return;
       }
     }
