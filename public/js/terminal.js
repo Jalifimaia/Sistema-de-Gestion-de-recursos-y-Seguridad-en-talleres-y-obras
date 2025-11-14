@@ -3148,6 +3148,7 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
     btn.dataset.detalleId = r.detalle_id;
     btn.dataset.serie = r.serie || '';
     btn.dataset.recurso = r.recurso || '';
+    btn.dataset.subcategoria = r.subcategoria || '';
     btn.dataset.opcionIndex = index + 1;
 
     if (!esEpp) {
@@ -3156,11 +3157,14 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
       btn.disabled = true; // no clickeable
     }
 
+    // Texto combinado: "Subcategoria - Recurso"
+    const textoRecurso = (r.subcategoria ? r.subcategoria + ' - ' : '') + (r.recurso || '-');
+
     btn.innerHTML = `
       <div class="d-flex flex-row justify-content-between align-items-center w-100">
         ${!esEpp ? `<span class="badge-opcion">Opción ${index + 1}</span>` : ''}
         <div class="d-flex flex-column text-start" style="flex: 1; min-width: 0;">
-          <span>${r.recurso || '-'}</span>
+          <span>${textoRecurso}</span>
           <span class="text-muted">${r.serie || '-'}</span>
         </div>
         <div class="d-flex flex-column text-end" style="flex-shrink: 0;">

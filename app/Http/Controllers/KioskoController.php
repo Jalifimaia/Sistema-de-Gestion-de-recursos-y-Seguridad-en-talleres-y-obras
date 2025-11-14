@@ -135,8 +135,9 @@ public function identificarPorQR(Request $request)
                         'subcategoria'     => $d->serieRecurso->recurso->subcategoria->nombre ?? '-',
                         'recurso'          => $d->serieRecurso->recurso->nombre ?? '-',
                         'serie'            => $d->serieRecurso->nro_serie ?? '-',
-                        'fecha_prestamo'   => $d->prestamo->fecha_prestamo ? \Carbon\Carbon::parse($d->prestamo->fecha_prestamo)->format('Y-m-d') : '-',
-                        'fecha_devolucion' => $d->prestamo->fecha_devolucion ? \Carbon\Carbon::parse($d->prestamo->fecha_devolucion)->format('Y-m-d') : '-',
+                        'fecha_prestamo'   => $d->prestamo->fecha_prestamo ? \Carbon\Carbon::parse($d->prestamo->fecha_prestamo)->format('d/m/Y') : '-',
+                        'fecha_devolucion' => $d->prestamo->fecha_devolucion ? \Carbon\Carbon::parse($d->prestamo->fecha_devolucion)->format('d/m/Y') : '-',
+
                     ];
                 });
 
@@ -313,11 +314,13 @@ public function eppAsignados($usuarioId)
 {
     $epps = DB::table('usuario_recurso')
         ->join('recurso', 'usuario_recurso.id_recurso', '=', 'recurso.id')
+        ->leftJoin('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
         ->leftJoin('serie_recurso', 'usuario_recurso.id_serie_recurso', '=', 'serie_recurso.id')
         ->where('usuario_recurso.id_usuario', $usuarioId)
         ->select(
             'usuario_recurso.id as detalle_id',
             'recurso.nombre as recurso',
+            'subcategoria.nombre as subcategoria',
             'serie_recurso.nro_serie as serie',
             'usuario_recurso.tipo_epp',
             'usuario_recurso.fecha_asignacion'
@@ -325,10 +328,12 @@ public function eppAsignados($usuarioId)
         ->get()
         ->map(function($r) {
             return [
-                'detalle_id'     => $r->detalle_id,
-                'recurso'        => $r->recurso ?? $r->tipo_epp,
-                'serie'          => $r->serie ?? '-',
-                'fecha_asignacion' => $r->fecha_asignacion ? \Carbon\Carbon::parse($r->fecha_asignacion)->format('Y-m-d') : '-',
+                'detalle_id'       => $r->detalle_id,
+                'recurso'          => $r->recurso ?? $r->tipo_epp,
+                'subcategoria'     => $r->subcategoria ?? '',
+                'serie'            => $r->serie ?? '-',
+                'fecha_asignacion' => $r->fecha_asignacion ? \Carbon\Carbon::parse($r->fecha_asignacion)->format('d/m/Y') : '-',
+
             ];
         });
 
