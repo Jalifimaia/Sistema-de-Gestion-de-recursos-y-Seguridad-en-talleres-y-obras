@@ -4798,7 +4798,7 @@ function procesarComandoVoz(rawTexto) {
 
     const algunModalVisible = window.modalKioscoActivo || document.querySelectorAll('.modal.show').length > 0;
 
-if (!algunModalVisible && /\b(ayuda|asistente|tengo dudas)\b/.test(limpio)) {
+if (!algunModalVisible && /\b(ayuda)\b/.test(limpio)) {
       abrirModalAsistente();
       return;
     }
@@ -4859,7 +4859,7 @@ if (!algunModalVisible && /\b(ayuda|asistente|tengo dudas)\b/.test(limpio)) {
     }
 
     if (step !== 'step0' && step !== 'step1' && step !== 'step2' && step !== 'step12') {
-      if (/\b(menu principal)\b/.test(limpio)) {
+      if (/\b(menu principal|principal|menu)\b/.test(limpio)) {
         recognitionGlobalPaused = false;
         safeStartRecognitionGlobal();
         nextStep(2);
@@ -5064,7 +5064,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
         return;
       }
 
-      if (matchOpcion(limpio, 3, "volver", "atrás", "regresar")) {
+      if (matchOpcion(limpio, 3, "volver")) {
         detenerEscaneoQRregistroRecursos(2);
         return;
       }
@@ -5149,7 +5149,7 @@ if (step === 'step7') {
   }
 
   // --- Volver a step6 ---
-  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver")) {
     window.nextStep(6);
     return;
   }
@@ -5197,7 +5197,7 @@ if (step === 'step8') {
   }
 
   // === Volver a step7 ===
-  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver")) {
     window.nextStep(7);
     return;
   }
@@ -5324,7 +5324,7 @@ if (matchPaginaAny) {
     // Comando global: cerrar modalRecursos antiguo compat (si sigue existiendo)
     const modalRec = document.getElementById('modalRecursos');
     if (modalRec && modalRec.classList.contains('show')) {
-      if (matchOpcion(limpio, 0, "volver", "cerrar", "cerrar recursos")) {
+      if (matchOpcion(limpio, 0, "volver")) {
         console.log("✅ Comando global: Cerrar modal de recursos asignados");
         try { bootstrap.Modal.getInstance(modalRec)?.hide(); } catch (e) {}
         //window.mostrarMensajeKiosco('🎤 Comando reconocido: Cerrar recursos asignados', 'success');
