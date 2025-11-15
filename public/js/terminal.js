@@ -3153,6 +3153,13 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
 
   const porPagina = cantidadRecursosPorPagina;
   const totalPaginas = Math.ceil(recursos.length / porPagina);
+
+  // ⚡ Si no hay recursos, mostrar mensaje y salir
+  if (!Array.isArray(recursos) || recursos.length === 0) {
+    contenedor.innerHTML = `<div class="text-center text-muted">No tiene ${esEpp ? 'EPP' : 'herramientas'} asignadas</div>`;
+    return;
+  }
+
   const inicio = (pagina - 1) * porPagina;
   const visibles = recursos.slice(inicio, inicio + porPagina);
 
@@ -3168,7 +3175,7 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
     if (!esEpp) {
       btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id);
     } else {
-      btn.disabled = true; // no clickeable
+      btn.disabled = true;
     }
 
     const textoRecurso = (r.subcategoria ? r.subcategoria + ' - ' : '') + (r.recurso || '-');
@@ -3190,7 +3197,7 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
     contenedor.appendChild(btn);
   });
 
-  // ⚡ Solo mostrar botones de paginación si hay más de una página
+  // ⚡ Solo mostrar paginador si hay más de una página
   if (totalPaginas > 1) {
     for (let i = 1; i <= totalPaginas; i++) {
       const pagBtn = document.createElement('button');
