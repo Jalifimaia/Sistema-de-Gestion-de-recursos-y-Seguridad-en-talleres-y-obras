@@ -3209,79 +3209,6 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
   try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
 
-
-/*
-function renderTablaRecursosStep(tablaId, recursos = [], pagina = 1, paginadorId) {
-  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderTablaRecursosStep: safeStop failed', e); }
-
-  const tabla = document.getElementById(tablaId);
-  const paginador = document.getElementById(paginadorId);
-  if (!tabla || !paginador) {
-    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
-    return;
-  }
-
-  const porPagina = cantidadRecursosPorPagina;
-  const totalPaginas = Math.max(1, Math.ceil((recursos || []).length / porPagina));
-  const inicio = (pagina - 1) * porPagina;
-  const visibles = (recursos || []).slice(inicio, inicio + porPagina);
-
-  tabla.innerHTML = '';
-  if (visibles.length === 0) {
-    tabla.innerHTML = `<tr><td colspan="${porPagina}" class="text-center">No tiene recursos asignados</td></tr>`;
-    paginador.innerHTML = '';
-    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
-    return;
-  }
-
-  visibles.forEach((r, index) => {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-sm btn-primary';
-    btn.dataset.detalleId = r.detalle_id;
-    btn.dataset.serie = r.serie || '';
-    btn.dataset.recurso = r.recurso || '';
-    btn.dataset.opcionIndex = index + 1;
-    btn.innerHTML = `Opción ${index + 1}`;
-    btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id);
-
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${r.subcategoria || '-'} / ${r.recurso || '-'}</td>
-      <td>${r.serie || '-'}</td>
-      <td>${r.fecha_prestamo || '-'}</td>
-      <td>${r.fecha_devolucion || '-'}</td>
-      <td></td>
-    `;
-    row.children[4].appendChild(btn);
-    tabla.appendChild(row);
-  });
-
-  // paginador
-  paginador.innerHTML = '';
-  for (let i = 1; i <= totalPaginas; i++) {
-    const b = document.createElement('button');
-    b.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
-    b.textContent = `Página ${i}`;
-    b.onclick = () => {
-      try { safeStopRecognitionGlobal(); } catch (e) {}
-      ultimaPaginaElegida = i;
-      setTimeout(() => renderTablaRecursosStep(tablaId, recursos, i, paginadorId), 60);
-    };
-    paginador.appendChild(b);
-  }
-
-  if (tablaId === 'tablaEPP-step') window.paginaEPPActual = pagina;
-  if (tablaId === 'tablaHerramientas-step') window.paginaHerramientasActual = pagina;
-
-  // ✅ Emitir evento para sincronización con reconocimiento por voz
-  document.dispatchEvent(new CustomEvent('tablaRecursosRenderizada', {
-    detail: { tablaId, pagina }
-  }));
-
-  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
-}
-*/
-
 function confirmarDevolucionPorVozStep10(index) {
   console.log(`🎤 confirmarDevolucionPorVozStep10: opción ${index}`);
 
@@ -4868,54 +4795,55 @@ if (!algunModalVisible && /\b(ayuda)\b/.test(limpio)) {
     }
 
     // Si estamos en step10 (pantalla de recursos asignados) manejamos comandos allí
-    if (step === 'step10') {
+if (step === 'step10') {
 
-      if (esComandoVolver(limpio) || /\b(v|b)ol(v|b)er\b/.test(limpio)) {
-      recognitionGlobalPaused = false;
-      safeStartRecognitionGlobal();
-      nextStep(2);
-    //  getRenderer('mostrarMensajeKiosco')('Volviendo al menú principal', 'info');
-      return;
+  // --- Volver al menú principal ---
+  if (esComandoVolver(limpio) || /\b(v|b)ol(v|b)er\b/.test(limpio)) {
+    recognitionGlobalPaused = false;
+    safeStartRecognitionGlobal();
+    nextStep(2);
+    return;
+  }
+
+  // --- Cambio de tab por voz ---
+  const tabPorStep = matchTabCambio(limpio);
+  if (tabPorStep === 'epp') {
+    document.getElementById('tab-epp-step')?.click();
+    return;
+  }
+  if (tabPorStep === 'herramientas') {
+    document.getElementById('tab-herramientas-step')?.click();
+    return;
+  }
+
+  // --- Devolución por voz: "opcion N" ---
+  const mOp = limpio.match(/^opcion\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (mOp) {
+    const index = numeroDesdeToken(mOp[1]);
+    if (!isNaN(index) && index >= 1) {
+      confirmarDevolucionPorVozStep10(index);
+    } else {
+      getRenderer('mostrarModalKioscoSinVoz')('Opción no reconocida', 'warning');
     }
+    return;
+  }
 
-
-      // cambio de tab por voz
-      const tabPorStep = matchTabCambio(limpio);
-      if (tabPorStep === 'epp') {
-        document.getElementById('tab-epp-step')?.click();
-        //getRenderer('mostrarMensajeKiosco')('✅ Mostrando EPP', 'success');
-        return;
-      }
-      if (tabPorStep === 'herramientas') {
-        document.getElementById('tab-herramientas-step')?.click();
-       // getRenderer('mostrarMensajeKiosco')('✅ Mostrando Herramientas', 'success');
-        return;
-      }
-
-      // Devolución por voz: "opcion N"
-      const mOp = limpio.match(/opcion\s*(\d{1,2})/i);
-      if (mOp) {
-        const index = parseInt(mOp[1], 10);
-        if (!isNaN(index)) {
-          confirmarDevolucionPorVozStep10(index);
-        } else {
-          getRenderer('mostrarModalKioscoSinVoz')('Opción no reconocida', 'warning');
-        }
-        return;
-      }
-
-      // Paginación "pagina N"
-      const mp = limpio.match(/^pagina\s*(\d{1,2})$/i);
-      if (mp) {
-        const numero = parseInt(mp[1], 10);
-        if (!isNaN(numero)) handleStep10Pagina(numero);
-        else getRenderer('mostrarModalKioscoSinVoz')('Número de página no reconocido', 'warning');
-        return;
-      }
-
-      console.log('⚠️ step10: comando no reconocido', limpio);
-      return;
+  // --- Paginación: "pagina N" ---
+  const mp = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (mp) {
+    const numero = numeroDesdeToken(mp[1]);
+    if (!isNaN(numero) && numero >= 1) {
+      handleStep10Pagina(numero);
+    } else {
+      getRenderer('mostrarModalKioscoSinVoz')('Número de página no reconocido', 'warning');
     }
+    return;
+  }
+
+  console.log('⚠️ step10: comando no reconocido', limpio);
+  return;
+}
+
 
 
 
