@@ -3511,11 +3511,22 @@ function matchTextoBoton(limpio, btn) {
 
 
 // Conversión palabras -> número (siempre disponible antes de usarlo)
+// Mapa de palabras → números
 const MAPA_NUMEROS = {
-  uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5,
-  seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10,
-  once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
-  dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20
+  'uno': 1,
+  'una': 1,
+  'primero': 1,
+  'dos': 2,
+  'segundo': 2,
+  'tres': 3,
+  'tercero': 3,
+  'cuatro': 4,
+  'cinco': 5,
+  'seis': 6,
+  'siete': 7,
+  'ocho': 8,
+  'nueve': 9,
+  'diez': 10
 };
 
 // helper ya definido previamente (si no está, pegalo antes de procesar comandos)
@@ -5038,7 +5049,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
     }
 
 
- // === Step6: Subcategorías ===
+// === Step6: Subcategorías ===
 if (step === 'step6') {
   // --- Paginación ---
   const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
@@ -5047,7 +5058,10 @@ if (step === 'step6') {
     const numero = numeroDesdeToken(token);
     if (!isNaN(numero) && numero >= 1) {
       const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / cantidadRecursosPorPagina));
-      if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
+      if (numero > totalPaginas) {
+        window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning');
+        return;
+      }
       console.log("📄 Step6: cambiando a página", numero);
       renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
       return;
@@ -5060,7 +5074,7 @@ if (step === 'step6') {
     return;
   }
 
-  // --- Selección de subcategoría: solo aceptar "opcion N" ---
+  // --- Selección de subcategoría ---
   const matchOpcionSub = limpio.match(/^opcion\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
   if (matchOpcionSub) {
     const numero = numeroDesdeToken(matchOpcionSub[1]);
@@ -5100,7 +5114,7 @@ if (step === 'step7') {
     return;
   }
 
-  // --- Selección de recurso: solo aceptar "opcion N" ---
+  // --- Selección de recurso ---
   const matchOpcionRec = limpio.match(/^opcion\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
   if (matchOpcionRec) {
     const numero = numeroDesdeToken(matchOpcionRec[1]);
@@ -5114,10 +5128,12 @@ if (step === 'step7') {
   console.log("⚠️ Step7: Procesada entrada (si hubo coincidencias)");
   return;
 }
-   
 
+
+// === Lógica de Step8 (selección de serie) ===
+// === Step8: Selección de serie ===
 if (step === 'step8') {
-  // === Paginación de series ===
+  // --- Paginación ---
   const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
   if (matchPaginaSer && Array.isArray(window.seriesActuales)) {
     const token = matchPaginaSer[1];
@@ -5128,12 +5144,24 @@ if (step === 'step8') {
         window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning');
         return;
       }
+      console.log("📄 Step8: cambiando a página", numero);
       renderSeriesPaginadas(window.seriesActuales, numero);
       return;
     }
   }
 
-  // === Cerrar modal de mensajes ===
+  // --- Selección de serie ---
+  const matchOpcionSerie = limpio.match(/^opcion\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (matchOpcionSerie) {
+    const numero = numeroDesdeToken(matchOpcionSerie[1]);
+    const botonesSeries = document.querySelectorAll('#serie-buttons button');
+    if (!isNaN(numero) && numero >= 1 && numero <= botonesSeries.length) {
+      botonesSeries[numero - 1].click();
+      return;
+    }
+  }
+
+  // --- Cerrar modal de mensajes ---
   if (/\b(cerrar)\b/.test(limpio)) {
     const modalEl = document.getElementById('modal-mensaje-kiosco');
     if (modalEl && modalEl.classList.contains('show')) {
@@ -5142,26 +5170,16 @@ if (step === 'step8') {
     }
   }
 
-  // === Volver a step7 ===
+  // --- Volver a step7 ---
   if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver")) {
     window.nextStep(7);
     return;
   }
 
-  // === Selección de serie: solo aceptar "opcion N" ===
-  const matchOpcionSerie = limpio.match(/^opcion\s*(\d{1,2})$/i);
-  if (matchOpcionSerie) {
-    const numero = parseInt(matchOpcionSerie[1], 10);
-    const botonesSeries = document.querySelectorAll('#serie-buttons button');
-    if (numero >= 1 && numero <= botonesSeries.length) {
-      botonesSeries[numero - 1].click();
-      return;
-    }
-  }
-
   console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
   return;
 }
+
 
 
 
