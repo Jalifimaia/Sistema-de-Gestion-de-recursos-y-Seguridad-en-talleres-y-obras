@@ -3181,8 +3181,8 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
       btn.disabled = true; // no clickeable en EPP
     }
 
-    // Texto combinado: Recurso - Subcategoria
-    const textoRecurso = (r.recurso || '-') + (r.subcategoria ? ' - ' + r.subcategoria : '');
+    // Texto combinado: Subcategoria - Recurso (orden invertido)
+    const textoRecurso = (r.subcategoria ? r.subcategoria : '-') + (r.recurso ? ' - ' + r.recurso : '');
 
     btn.innerHTML = `
       <div class="d-flex flex-row justify-content-between align-items-center w-100">
