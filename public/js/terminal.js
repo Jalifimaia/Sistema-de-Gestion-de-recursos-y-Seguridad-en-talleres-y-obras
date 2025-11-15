@@ -3253,8 +3253,10 @@ function confirmarDevolucionPorVozStep10(index) {
     return;
   }
 
-  const detalleId = btn.dataset.detalleId;
-  const serie = btn.dataset.serie || '';
+  const detalleId    = btn.dataset.detalleId;
+  const serie        = btn.dataset.serie || '';
+  const recurso      = btn.dataset.recurso || '';
+  const subcategoria = btn.dataset.subcategoria || '';
 
   if (!detalleId) {
     console.warn(`❌ El botón opción ${index} no tiene detalleId`);
@@ -3262,11 +3264,13 @@ function confirmarDevolucionPorVozStep10(index) {
     return;
   }
 
-  console.log(`➡️ confirmarDevolucionPorVozStep10: botón encontrado, detalleId=${detalleId}, serie=${serie}`);
+  console.log(`➡️ confirmarDevolucionPorVozStep10: botón encontrado, detalleId=${detalleId}, serie=${serie}, recurso=${recurso}, subcategoria=${subcategoria}`);
 
   window._modalConfirmedByVoice = true;
   try { safeStopRecognitionGlobal(); } catch (e) {}
-  mostrarStepDevolucionQR(serie, detalleId);
+
+  // ✅ Pasamos todos los datos al step9
+  mostrarStepDevolucionQR(serie, detalleId, recurso, subcategoria);
 }
 
 
