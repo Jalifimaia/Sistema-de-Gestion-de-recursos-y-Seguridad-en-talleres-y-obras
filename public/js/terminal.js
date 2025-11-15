@@ -3171,7 +3171,6 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
       btn.disabled = true; // no clickeable
     }
 
-    // Texto combinado: "Subcategoria - Recurso"
     const textoRecurso = (r.subcategoria ? r.subcategoria + ' - ' : '') + (r.recurso || '-');
 
     btn.innerHTML = `
@@ -3191,16 +3190,19 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
     contenedor.appendChild(btn);
   });
 
-  for (let i = 1; i <= totalPaginas; i++) {
-    const pagBtn = document.createElement('button');
-    pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
-    pagBtn.textContent = `Página ${i}`;
-    pagBtn.onclick = () => {
-      try { safeStopRecognitionGlobal(); } catch (e) {}
-      ultimaPaginaElegida = i;
-      setTimeout(() => renderRecursosAsignados(recursos, i, contenedorId, paginadorId, esEpp), 60);
-    };
-    paginador.appendChild(pagBtn);
+  // ⚡ Solo mostrar botones de paginación si hay más de una página
+  if (totalPaginas > 1) {
+    for (let i = 1; i <= totalPaginas; i++) {
+      const pagBtn = document.createElement('button');
+      pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+      pagBtn.textContent = `Página ${i}`;
+      pagBtn.onclick = () => {
+        try { safeStopRecognitionGlobal(); } catch (e) {}
+        ultimaPaginaElegida = i;
+        setTimeout(() => renderRecursosAsignados(recursos, i, contenedorId, paginadorId, esEpp), 60);
+      };
+      paginador.appendChild(pagBtn);
+    }
   }
 
   if (contenedorId === 'recursos-asignados-epp') window.paginaEPPActual = pagina;
