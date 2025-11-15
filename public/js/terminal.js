@@ -1275,7 +1275,8 @@ let serieEsperada = '';
 let detalleIdActual = null;
 window._modalErrorQR = null;
 
-function mostrarStepDevolucionQR(serie, detalleId) {
+
+function mostrarStepDevolucionQR(serie, detalleId, recurso, subcategoria) {
   safeStopRecognitionGlobal();
 
   serieEsperada = serie;
@@ -1283,14 +1284,14 @@ function mostrarStepDevolucionQR(serie, detalleId) {
   window.modoActual = 'devolucion';
 
   const serieEl = document.getElementById('serieEsperadaQR');
+  const recursoEl = document.getElementById('recursoEsperadoQR');
+  const subcatEl = document.getElementById('subcategoriaEsperadaQR');
   const feedbackEl = document.getElementById('qrFeedback');
-  //const btnConfirmar = document.getElementById('btnConfirmarDevolucion');
 
   if (serieEl) serieEl.textContent = serie || '';
+  if (recursoEl) recursoEl.textContent = recurso || '';
+  if (subcatEl) subcatEl.textContent = subcategoria || '';
   if (feedbackEl) feedbackEl.textContent = '';
-  /*if (btnConfirmar) {
-    try { btnConfirmar.disabled = true; } catch (e) {}
-  }*/
 
   nextStep(9);
 
@@ -1315,6 +1316,7 @@ function mostrarStepDevolucionQR(serie, detalleId) {
   setTimeout(intentarActivarCamara, 250);
   activarReconocimientoDevolucionQR();
 }
+
 
 
 
@@ -3173,12 +3175,14 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
     btn.dataset.opcionIndex = index + 1;
 
     if (!esEpp) {
-      btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id);
+      // ⚡ Pasamos recurso + subcategoria + serie al step9
+      btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id, r.recurso, r.subcategoria);
     } else {
-      btn.disabled = true;
+      btn.disabled = true; // no clickeable en EPP
     }
 
-    const textoRecurso = (r.subcategoria ? r.subcategoria + ' - ' : '') + (r.recurso || '-');
+    // Texto combinado: Recurso - Subcategoria
+    const textoRecurso = (r.recurso || '-') + (r.subcategoria ? ' - ' + r.subcategoria : '');
 
     btn.innerHTML = `
       <div class="d-flex flex-row justify-content-between align-items-center w-100">
@@ -3217,6 +3221,7 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
 
   try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
+
 
 function confirmarDevolucionPorVozStep10(index) {
   console.log(`🎤 confirmarDevolucionPorVozStep10: opción ${index}`);
