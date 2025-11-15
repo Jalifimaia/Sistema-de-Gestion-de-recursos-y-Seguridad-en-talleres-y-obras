@@ -2631,11 +2631,11 @@ async function registrarSerie(serieId, boton = null) {
     const data = await res.json();
 
     if (data.success) {
-      const mensaje = `✅ Recurso asignado correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
+      const mensaje = `Recurso asignado correctamente${data.recurso ? ': ' + data.recurso : ''}${data.serie ? ' - Serie ' + data.serie : ''}.`;
       mostrarModalKioscoSinVoz(mensaje, 'success');
 
       if (boton instanceof HTMLElement) {
-        boton.innerHTML = `<span class="flex-grow-1 text-start">✅ Recurso asignado</span>`;
+        boton.innerHTML = `<span class="flex-grow-1 text-start">Recurso asignado</span>`;
         boton.disabled = true;
         boton.classList.remove('btn-outline-success');
         boton.classList.add('btn-success');
