@@ -5141,33 +5141,54 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
       return;
     }
 
-    if (step === 'step8') {
-      const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
-      if (matchPaginaSer && Array.isArray(window.seriesActuales)) {
-        const token = matchPaginaSer[1];
-        const numero = numeroDesdeToken(token);
-        if (!isNaN(numero) && numero >= 1) {
-          const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / cantidadRecursosPorPagina));
-          if (numero > totalPaginas) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
-          renderSeriesPaginadas(window.seriesActuales, numero);
-          return;
-        }
-      }
-
-    if (/\b(cerrar)\b/.test(limpio)) {
-      const modalEl = document.getElementById('modal-mensaje-kiosco');
-      if (modalEl && modalEl.classList.contains('show')) {
-        cerrarModalKiosco();
+if (step === 'step8') {
+  // === Paginación de series ===
+  const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
+  if (matchPaginaSer && Array.isArray(window.seriesActuales)) {
+    const token = matchPaginaSer[1];
+    const numero = numeroDesdeToken(token);
+    if (!isNaN(numero) && numero >= 1) {
+      const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / cantidadRecursosPorPagina));
+      if (numero > totalPaginas) {
+        window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning');
         return;
       }
-    }
-
-      if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) { /*window.mostrarMensajeKiosco('🎤 Comando reconocido: Volver a recursos', 'success');*/ window.nextStep(7); return; }
-      const botonesSeries = document.querySelectorAll('#serie-buttons button');
-      botonesSeries.forEach((btn, index) => { try { if (matchOpcion(limpio, index + 1) || matchTextoBoton(limpio, btn)) { btn.click(); } } catch (e) { console.warn('Error al procesar botón serie', e); } });
-      console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
+      renderSeriesPaginadas(window.seriesActuales, numero);
       return;
     }
+  }
+
+  // === Cerrar modal de mensajes ===
+  if (/\b(cerrar)\b/.test(limpio)) {
+    const modalEl = document.getElementById('modal-mensaje-kiosco');
+    if (modalEl && modalEl.classList.contains('show')) {
+      cerrarModalKiosco();
+      return;
+    }
+  }
+
+  // === Volver a step7 ===
+  if (esComandoVolver(limpio) || matchOpcion(limpio, 0, "volver", "atrás", "regresar")) {
+    window.nextStep(7);
+    return;
+  }
+
+  // === Selección de serie: solo aceptar "opcion N" ===
+  const matchOpcionSerie = limpio.match(/^opcion\s*(\d{1,2})$/i);
+  if (matchOpcionSerie) {
+    const numero = parseInt(matchOpcionSerie[1], 10);
+    const botonesSeries = document.querySelectorAll('#serie-buttons button');
+    if (numero >= 1 && numero <= botonesSeries.length) {
+      botonesSeries[numero - 1].click();
+      return;
+    }
+  }
+
+  console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
+  return;
+}
+
+
 
     // === Step9: Devolución por QR ===
     if (step === 'step9') {
@@ -5235,35 +5256,40 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
     }
 
     // === Paginación y navegación globales (fallback) ===
-    const matchPaginaAny = limpio.match(/^pagina\s*(número\s*)?(\d{1,2}|[a-záéíóúñ]+)$/i);
+const matchPaginaAny = limpio.match(/^pagina\s*(?:número\s*)?(\d{1,2}|[a-záéíóúñ]+)$/i);
 
-    if (matchPaginaAny) {
-      const token = matchPaginaAny[1];
-      const numero = numeroDesdeToken(token);
-      if (isNaN(numero) || numero < 1) { window.mostrarModalKioscoSinVoz('Número de página no reconocido', 'warning'); return; }
+if (matchPaginaAny) {
+  const token = matchPaginaAny[1]; // ahora sí es el número/palabra
+  const numero = numeroDesdeToken(token);
+  if (isNaN(numero) || numero < 1) {
+    window.mostrarModalKioscoSinVoz('Número de página no reconocido', 'warning');
+    return;
+  }
 
-      if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
-        const total = Math.max(1, Math.ceil(window.subcategoriasActuales.length / cantidadRecursosPorPagina));
-        if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
-        renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
-        return;
-      }
-      if (step === 'step7' && Array.isArray(window.recursosActuales)) {
-        const total = Math.max(1, Math.ceil(window.recursosActuales.length / cantidadRecursosPorPagina));
-        if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
-        renderRecursosPaginados(window.recursosActuales, numero);
-        return;
-      }
-      if (step === 'step8' && Array.isArray(window.seriesActuales)) {
-        const total = Math.max(1, Math.ceil(window.seriesActuales.length / cantidadRecursosPorPagina));
-        if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
-        renderSeriesPaginadas(window.seriesActuales, numero);
-        return;
-      }
+  if (step === 'step6' && Array.isArray(window.subcategoriasActuales)) {
+    const total = Math.max(1, Math.ceil(window.subcategoriasActuales.length / cantidadRecursosPorPagina));
+    if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
+    renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
+    return;
+  }
+  if (step === 'step7' && Array.isArray(window.recursosActuales)) {
+    const total = Math.max(1, Math.ceil(window.recursosActuales.length / cantidadRecursosPorPagina));
+    if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
+    renderRecursosPaginados(window.recursosActuales, numero);
+    return;
+  }
 
-      console.log('⚠️ matchPaginaAny: comando página detectado pero no aplicable en step', step);
-      return;
-    }
+  /*if (step === 'step8' && Array.isArray(window.seriesActuales)) {
+    const total = Math.max(1, Math.ceil(window.seriesActuales.length / cantidadRecursosPorPagina));
+    if (numero > total) { window.mostrarModalKioscoSinVoz('Número de página inválido', 'warning'); return; }
+    renderSeriesPaginadas(window.seriesActuales, numero);
+    return;
+  }*/
+
+  console.log('⚠️ matchPaginaAny: comando página detectado pero no aplicable en step', step);
+  return;
+}
+
 
     // Comando global: cerrar modalRecursos antiguo compat (si sigue existiendo)
     const modalRec = document.getElementById('modalRecursos');
