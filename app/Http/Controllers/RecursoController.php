@@ -49,7 +49,7 @@ class RecursoController extends Controller
         }
 
         if ($fecha_fin) {
-            $query->where('prestamo.fecha_prestamo', '<=', $fecha_fin);
+            $query->where('prestamo.fecha_prestamo', '<=', Carbon::parse($fecha_fin)->endOfDay());
         }
 
         $recursos = $query
@@ -127,8 +127,9 @@ class RecursoController extends Controller
         if ($fecha_inicio) {
             $query->whereDate('ir.updated_at', '>=', $fecha_inicio);
         }
+        
         if ($fecha_fin) {
-            $query->whereDate('ir.updated_at', '<=', $fecha_fin);
+            $query->where('prestamo.fecha_prestamo', '<=', Carbon::parse($fecha_fin)->endOfDay());
         }
 
         $recursos = $query->orderByDesc('ir.updated_at')->get();
@@ -227,7 +228,7 @@ class RecursoController extends Controller
     }
 
     if ($fecha_fin) {
-        $query->where('serie_recurso.fecha_adquisicion', '<=', $fecha_fin);
+     $query->where('serie_recurso.fecha_adquisicion', '<=', Carbon::parse($fecha_fin)->endOfDay());
     }
 
     $herramientas = $query->orderByDesc('serie_recurso.fecha_adquisicion')->get();
@@ -284,11 +285,11 @@ class RecursoController extends Controller
 
 
     public function incidentesPorTipo(Request $request)
-    {
-        $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
+{
+    $fecha_inicio = $request->input('fecha_inicio');
+    $fecha_fin = $request->input('fecha_fin');
 
-        $query = DB::table('incidente_recurso')
+    $query = DB::table('incidente_recurso')
         ->join('recurso', 'incidente_recurso.id_recurso', '=', 'recurso.id')
         ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
         ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
@@ -299,29 +300,35 @@ class RecursoController extends Controller
             DB::raw('MAX(incidente.fecha_incidente) as ultima_fecha')
         );
 
-        if ($fecha_inicio) {
-            $query->where('incidente.fecha_incidente', '>=', $fecha_inicio);
-        }
-
-        if ($fecha_fin) {
-            $fecha_fin_incluida = Carbon::parse($fecha_fin)->endOfDay(); // 2025-10-28 23:59:59
-            $query->where('incidente.fecha_incidente', '<=', $fecha_fin_incluida);
-        }
-
-        $incidentes = $query
-            ->groupBy('categoria.nombre_categoria')
-            ->orderByDesc('cantidad_incidentes')
-            ->get();
-
-        $filtrados = $incidentes->filter(function ($item) {
-            return in_array($item->nombre_categoria, ['Herramienta', 'EPP']);
-        });
-        $labels = $filtrados->pluck('nombre_categoria');
-        $valores = $filtrados->pluck('cantidad_incidentes');
-
-
-        return view('reportes.incidentesPorTipoRecurso', compact('incidentes', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
+    if ($fecha_inicio) {
+        $query->where('incidente.fecha_incidente', '>=', Carbon::parse($fecha_inicio)->startOfDay());
     }
+
+    if ($fecha_fin) {
+        $query->where('incidente.fecha_incidente', '<=', Carbon::parse($fecha_fin)->endOfDay());
+    }
+
+    $incidentes = $query
+        ->groupBy('categoria.nombre_categoria')
+        ->orderByDesc('cantidad_incidentes')
+        ->get();
+
+    // 🔧 Filtrar solo categorías relevantes para el gráfico
+    $filtrados = $incidentes->filter(function ($item) {
+        return in_array($item->nombre_categoria, ['Herramienta', 'EPP']);
+    });
+
+    $labels = $filtrados->pluck('nombre_categoria');
+    $valores = $filtrados->pluck('cantidad_incidentes');
+
+    return view('reportes.incidentesPorTipoRecurso', compact(
+        'incidentes',
+        'fecha_inicio',
+        'fecha_fin',
+        'labels',
+        'valores'
+    ));
+}
 
     public function incidentesPorTipoPDF(Request $request)
     {
