@@ -6,13 +6,13 @@
 <div class="container py-4">
 
     <!-- 🔶 Encabezado -->
-    <header class="row mb-4 align-items-center">
+    <header class="row mb-2 align-items-center">
       <div class="col-md-8">
         <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2 text-orange">
           <img src="{{ asset('images/list1.svg') }}" alt="Ícono lista" style="height: 35px;">
           Incidentes registrados
         </h1>
-        <p class="text-muted small">Listado de incidentes registrados en el sistema</p>
+        <p class="text-muted small mb-2">Listado de incidentes registrados en el sistema</p>
       </div>
 
       <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-3">
@@ -20,6 +20,24 @@
       </div>
     </header>
 
+    <!-- 🔎 Buscador y filtro -->
+    <div class="row mb-3 align-items-center g-2">
+      <div class="col-md-8">
+        <input type="text"
+              id="buscadorIncidentes"
+              class="form-control"
+              placeholder="Buscar por trabajador o motivo...">
+      </div>
+
+      <div class="col-md-4">
+        <select id="filtroEstadoIncidente" class="form-select">
+          <option value="">Todos los estados</option>
+          @foreach($estados as $id => $nombre)
+            <option value="{{ $nombre }}">{{ $nombre }}</option>
+          @endforeach
+        </select>
+      </div>
+    </div>
 
     <div class="mb-3 text-start">
       <a href="{{ route('incidente.create') }}" class="btn btn-registrar-incidente">
@@ -62,6 +80,7 @@
                                 : '-' }}
                             </td>
                             <td>
+                              <div class="grupo-acciones">
                               <button class="btn btn-detalles" data-bs-toggle="modal" data-bs-target="#modalIncidente{{ $incidente->id }}">
                                 <img src="{{ asset('images/detalles.svg') }}" alt="Detalles" width="16" height="16" class="me-1">
                                 Ver detalles
@@ -76,15 +95,23 @@
                                   <i class="bi bi-pencil me-1"></i> Editar
                                 </a>
                               @endif
-                        </td>
+                                </div>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <div id="infoPaginacionIncidentes" class="text-muted small"></div>
+                  <ul id="paginacionIncidentes" class="pagination mb-0"></ul>
+                </div>
+                
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Modales de detalle -->
 @foreach($incidentes as $incidente)
@@ -208,6 +235,7 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', function () {
+      /* 🔔 Alerta de éxito que se oculta a los 5 segundos */
       const alerta = document.getElementById('alertaEstado');
       if (alerta) {
           setTimeout(() => {
@@ -219,16 +247,119 @@
           }, 5000);
       }
 
+      /* 📅 Fecha actual en el encabezado */
       const today = new Date();
-    const dia = String(today.getDate()).padStart(2, '0');
-    const mes = String(today.getMonth() + 1).padStart(2, '0');
-    const año = today.getFullYear();
-    const hora = String(today.getHours()).padStart(2, '0');
-    const minutos = String(today.getMinutes()).padStart(2, '0');
-    document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
+      const dia = String(today.getDate()).padStart(2, '0');
+      const mes = String(today.getMonth() + 1).padStart(2, '0');
+      const año = today.getFullYear();
+      const hora = String(today.getHours()).padStart(2, '0');
+      const minutos = String(today.getMinutes()).padStart(2, '0');
+      const fechaEl = document.getElementById('today');
+      if (fechaEl) {
+        fechaEl.textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
+      }
+
+      /* 🔎 Buscador y filtro de incidentes */
+      const buscador = document.getElementById('buscadorIncidentes');
+      const filtro = document.getElementById('filtroEstadoIncidente');
+      const filas = Array.from(document.querySelectorAll('table tbody tr'));
+      const paginacion = document.getElementById('paginacionIncidentes');
+      const info = document.getElementById('infoPaginacionIncidentes');
+
+      const filasPorPagina = 10;
+      let paginaActual = 1;
+
+      function aplicarFiltrosYPaginar() {
+        const texto = buscador ? buscador.value.toLowerCase() : '';
+        const estado = filtro ? filtro.value : '';
+
+        const visibles = filas.filter(fila => {
+          const trabajador = fila.cells[0]?.textContent.toLowerCase() || '';
+          const motivo = fila.cells[1]?.textContent.toLowerCase() || '';
+          const estadoActual = fila.cells[2]?.textContent.trim() || '';
+
+          const coincideTexto = trabajador.includes(texto) || motivo.includes(texto);
+          const coincideEstado = !estado || estadoActual === estado;
+
+          return coincideTexto && coincideEstado;
+        });
+
+        const totalPaginas = Math.ceil(visibles.length / filasPorPagina);
+        paginaActual = Math.min(Math.max(1, paginaActual), totalPaginas || 1);
+
+        // Ocultar todas
+        filas.forEach(fila => {
+          fila.style.display = 'none';
+          fila.style.backgroundColor = '';
+        });
+
+        // Mostrar visibles de la página actual
+        const inicio = (paginaActual - 1) * filasPorPagina;
+        const fin = paginaActual * filasPorPagina;
+        visibles.slice(inicio, fin).forEach((fila, idx) => {
+          fila.style.display = '';
+          fila.style.backgroundColor = (idx % 2 === 0) ? '#ffffff' : '#ffeddf';
+        });
+
+        // Info
+        if (info) {
+          const desde = visibles.length ? inicio + 1 : 0;
+          const hasta = visibles.length ? Math.min(fin, visibles.length) : 0;
+          info.textContent = `Mostrando ${desde} a ${hasta} de ${visibles.length} incidentes`;
+        }
+
+        renderizarBotones(totalPaginas);
+      }
+
+      function renderizarBotones(total) {
+        if (!paginacion) return;
+        paginacion.innerHTML = '';
+
+        const crearItem = (label, page, disabled = false, active = false) => {
+          const li = document.createElement('li');
+          li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+          const a = document.createElement('a');
+          a.className = 'page-link';
+          a.textContent = label;
+          a.href = '#';
+          a.addEventListener('click', e => {
+            e.preventDefault();
+            if (!disabled && paginaActual !== page) {
+              paginaActual = Math.max(1, Math.min(page, total || 1));
+              aplicarFiltrosYPaginar();
+            }
+          });
+          li.appendChild(a);
+          return li;
+        };
+
+        // Prev
+        paginacion.appendChild(crearItem('«', paginaActual - 1, paginaActual === 1));
+
+        for (let i = 1; i <= (total || 1); i++) {
+          paginacion.appendChild(crearItem(i, i, false, i === paginaActual));
+        }
+
+        // Next
+        paginacion.appendChild(crearItem('»', paginaActual + 1, paginaActual === total || total === 0));
+      }
+
+      // Eventos
+      if (buscador) buscador.addEventListener('input', () => {
+        paginaActual = 1;
+        aplicarFiltrosYPaginar();
+      });
+      if (filtro) filtro.addEventListener('change', () => {
+        paginaActual = 1;
+        aplicarFiltrosYPaginar();
+      });
+
+      // Iniciar
+      aplicarFiltrosYPaginar();
   });
   </script>
 @endpush
+
 
 @push('styles')
 <link href="{{ asset('css/incidentes.css') }}" rel="stylesheet">

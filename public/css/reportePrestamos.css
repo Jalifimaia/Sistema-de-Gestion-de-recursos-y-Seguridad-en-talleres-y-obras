@@ -116,3 +116,60 @@ input[type="date"].form-control:focus {
 .table-striped tbody tr:nth-of-type(odd) {
   background-color: #f0c096 !important; /* naranja muy claro */
 }
+
+.pagination .page-link {
+  color: #b95b0e;
+  border: 1px solid #b95b0e;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+  color: #fff;
+  background-color: #b95b0e;
+  border-color: #b95b0e;
+}
+
+.pagination .page-item.active .page-link {
+  color: #fff;
+  background-color: #b95b0e;
+  border-color: #b95b0e;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #ccc;
+  border-color: #ddd;
+  background-color: #f8f9fa;
+}
+
+/*AAA*/
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding-left: 0;
+}
+
+.page-item {
+  margin: 0 2px;
+}
+
+.page-link {
+  color: #d06842;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #ffd1be;
+}
+
+.page-item.active .page-link {
+  background-color: #d06842;
+  color: white;
+  border-color: #d06842;
+}
