@@ -6,7 +6,7 @@
 <div class="container py-4">
 
   <!-- Encabezado -->
-  <header class="row mb-4">
+  <header class="row mb-4 protect-toggle">
     <div class="col-md-8">
       <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
         <img src="{{ asset('images/inventario.svg') }}" alt="Icono Inventario" style="height: 35px;">
