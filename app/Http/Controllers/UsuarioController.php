@@ -13,29 +13,30 @@ use Illuminate\Http\Request;
 class UsuarioController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Usuario::with(['rol', 'estado']);
+{
+    $query = Usuario::with(['rol', 'estado']);
 
-        // Si no hay filtros aplicados, mostrar todos
-        if ($request->filled('rol')) {
-            $query->whereHas('rol', fn($q) => $q->where('nombre_rol', $request->rol));
-        }
-
-        if ($request->filled('estado')) {
-            $query->whereHas('estado', fn($q) => $q->where('nombre', $request->estado));
-        }
-
-        $usuarios = $query->get();
-
-        $ultimoUsuarioActivo = Usuario::whereNotNull('ultimo_acceso')
-            ->orderByDesc('ultimo_acceso')
-            ->first();
-
-        $roles = Rol::all();
-        $estados = EstadoUsuario::all();
-
-        return view('usuario.index', compact('usuarios', 'ultimoUsuarioActivo', 'roles', 'estados'));
+    if ($request->filled('rol')) {
+        $query->whereHas('rol', fn($q) => $q->where('nombre_rol', $request->rol));
     }
+
+    if ($request->filled('estado')) {
+        $query->whereHas('estado', fn($q) => $q->where('nombre', $request->estado));
+    }
+
+    // 🔴 Trae todos los usuarios
+    $usuarios = $query->get();
+
+    $ultimoUsuarioActivo = Usuario::whereNotNull('ultimo_acceso')
+        ->orderByDesc('ultimo_acceso')
+        ->first();
+
+    $roles = Rol::all();
+    $estados = EstadoUsuario::all();
+
+    return view('usuario.index', compact('usuarios', 'ultimoUsuarioActivo', 'roles', 'estados'));
+}
+
 
 
 

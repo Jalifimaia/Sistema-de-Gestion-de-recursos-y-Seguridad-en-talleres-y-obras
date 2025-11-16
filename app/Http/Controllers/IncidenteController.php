@@ -68,8 +68,8 @@ class IncidenteController extends Controller
             'estadoIncidente'
         ])->get();
 
-        $estados = Estado::all()->keyBy('id')->map(fn($e) => $e->nombre_estado)->toArray();
-
+        $estados = EstadoIncidente::all()->pluck('nombre_estado', 'id')->toArray();
+        
         return view('incidente.index', compact('incidentes', 'estados'));
     }
 

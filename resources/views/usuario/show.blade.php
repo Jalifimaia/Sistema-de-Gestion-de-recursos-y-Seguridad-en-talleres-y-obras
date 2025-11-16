@@ -89,17 +89,17 @@
 <ul class="nav nav-tabs custom-tabs justify-content-center mb-4" id="myTab" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link active tab-loader" data-url="{{ route('usuarios.checklists', $usuario->id) }}" type="button">
-      Checklist <span class="badge bg-secondary">{{ $usuario->checklists_count ?? 0 }}</span>
+      Checklist 
     </button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link tab-loader" data-url="{{ route('usuarios.incidentes', $usuario->id) }}" type="button">
-      Incidentes <span class="badge bg-secondary">{{ $usuario->incidentes_count ?? 0 }}</span>
+      Incidentes 
     </button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link tab-loader" data-url="{{ route('usuarios.prestamos', $usuario->id) }}" type="button">
-      Préstamos <span class="badge bg-secondary">{{ $usuario->prestamos_count ?? 0 }}</span>
+      Préstamos 
     </button>
   </li>
 </ul>

@@ -80,10 +80,6 @@
   </div>
 </section>
 
-
-
-
-
   <!-- Filtro y buscador -->
   <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
     <label class="form-label mb-0">Filtrar por:</label>

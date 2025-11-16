@@ -75,6 +75,10 @@
                 @endforeach
             </tbody>
         </table>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div id="infoPaginacionPrestamos" class="text-muted small"></div>
+          <ul id="paginacionPrestamos" class="pagination mb-0"></ul>
+        </div>
     </div>
 
 <!-- Modal de gráficos -->
@@ -111,98 +115,171 @@
     @endif
 </div>
 
+
+@push('scripts')
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    const prestamos = @json($prestamos);
+document.addEventListener('DOMContentLoaded', function () {
+  /* 🔶 Paginación de préstamos */
+  const tabla = document.querySelector('table.table tbody');
+  if (tabla) {
+    const filas = Array.from(tabla.querySelectorAll('tr'));
+    const paginacion = document.getElementById('paginacionPrestamos');
+    const info = document.getElementById('infoPaginacionPrestamos');
 
-    const fechas = prestamos.map(p => p.fecha_prestamo.split(' ')[0]);
-    const estados = prestamos.map(p => p.estado);
+    const filasPorPagina = 10;
+    let paginaActual = 1;
 
-    const fechaCount = fechas.reduce((acc, f) => {
-        acc[f] = (acc[f] || 0) + 1;
-        return acc;
-    }, {});
+    function aplicarPaginacion() {
+      const totalPaginas = Math.ceil(filas.length / filasPorPagina);
+      paginaActual = Math.min(Math.max(1, paginaActual), totalPaginas || 1);
 
-    const estadoCount = estados.reduce((acc, e) => {
-        acc[e] = (acc[e] || 0) + 1;
-        return acc;
-    }, {});
+      filas.forEach(fila => {
+        fila.style.display = 'none';
+        fila.style.backgroundColor = '';
+      });
 
+      const inicio = (paginaActual - 1) * filasPorPagina;
+      const fin = paginaActual * filasPorPagina;
+      filas.slice(inicio, fin).forEach((fila, idx) => {
+        fila.style.display = '';
+        fila.style.backgroundColor = (idx % 2 === 0) ? '#ffffff' : '#ffeddf';
+      });
 
-    new Chart(document.getElementById('graficoBarrasModal'), {
-  type: 'bar',
-  data: {
-    labels: Object.keys(fechaCount),
-    datasets: [{
-      label: 'Préstamos por día',
-      data: Object.values(fechaCount),
-      backgroundColor: 'rgba(255, 140, 0, 0.7)',
-      borderColor: 'rgba(255, 140, 0, 1)',
-      borderWidth: 1
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      title: {
-        display: true,
-        text: 'Préstamos por día',
-        color: '#ff6600',
-        font: { size: 16 }
+      if (info) {
+        const desde = filas.length ? inicio + 1 : 0;
+        const hasta = filas.length ? Math.min(fin, filas.length) : 0;
+        info.textContent = `Mostrando ${desde} a ${hasta} de ${filas.length} préstamos`;
       }
+
+      renderizarBotones(totalPaginas);
+    }
+
+    function renderizarBotones(total) {
+      if (!paginacion) return;
+      paginacion.innerHTML = '';
+
+      const crearItem = (label, page, disabled = false, active = false) => {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.textContent = label;
+        a.href = '#';
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          if (!disabled && paginaActual !== page) {
+            paginaActual = Math.max(1, Math.min(page, total || 1));
+            aplicarPaginacion();
+          }
+        });
+        li.appendChild(a);
+        return li;
+      };
+
+      paginacion.appendChild(crearItem('«', paginaActual - 1, paginaActual === 1));
+      for (let i = 1; i <= (total || 1); i++) {
+        paginacion.appendChild(crearItem(i, i, false, i === paginaActual));
+      }
+      paginacion.appendChild(crearItem('»', paginaActual + 1, paginaActual === total || total === 0));
+    }
+
+    aplicarPaginacion();
+  }
+
+  /* 🔶 Gráficos con Chart.js */
+  const prestamos = @json($prestamos);
+  const fechas = prestamos.map(p => p.fecha_prestamo.split(' ')[0]);
+  const estados = prestamos.map(p => p.estado);
+
+  const fechaCount = fechas.reduce((acc, f) => {
+      acc[f] = (acc[f] || 0) + 1;
+      return acc;
+  }, {});
+
+  const estadoCount = estados.reduce((acc, e) => {
+      acc[e] = (acc[e] || 0) + 1;
+      return acc;
+  }, {});
+
+  new Chart(document.getElementById('graficoBarrasModal'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(fechaCount),
+      datasets: [{
+        label: 'Préstamos por día',
+        data: Object.values(fechaCount),
+        backgroundColor: 'rgba(255, 140, 0, 0.7)',
+        borderColor: 'rgba(255, 140, 0, 1)',
+        borderWidth: 1
+      }]
     },
-    scales: {
-      x: {
-        ticks: { color: '#ff6600', font: { size: 12 } },
-        grid: { display: false }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Préstamos por día',
+          color: '#ff6600',
+          font: { size: 16 }
+        }
       },
-      y: {
-        beginAtZero: true,
-        ticks: { color: '#333', font: { size: 12 } },
-        grid: { color: '#eee' }
+      scales: {
+        x: {
+          ticks: { color: '#ff6600', font: { size: 12 } },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#333', font: { size: 12 } },
+          grid: { color: '#eee' }
+        }
       }
     }
-  }
-});
+  });
 
-new Chart(document.getElementById('graficoTortaModal'), {
-  type: 'pie',
-  data: {
-    labels: Object.keys(estadoCount),
-    datasets: [{
-      label: 'Distribución por estado',
-      data: Object.values(estadoCount),
-      backgroundColor: ['#ff6600', '#ffc107', '#0d6efd', '#6c757d', '#198754'],
-      borderColor: '#fff',
-      borderWidth: 2
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: 'Distribución por estado',
-        color: '#ff6600',
-        font: { size: 16 }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-            const value = context.raw;
-            const percentage = ((value / total) * 100).toFixed(1);
-            return `${context.label}: ${value} (${percentage}%)`;
+  new Chart(document.getElementById('graficoTortaModal'), {
+    type: 'pie',
+    data: {
+      labels: Object.keys(estadoCount),
+      datasets: [{
+        label: 'Distribución por estado',
+        data: Object.values(estadoCount),
+        backgroundColor: ['#ff6600', '#ffc107', '#0d6efd', '#6c757d', '#198754'],
+        borderColor: '#fff',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Distribución por estado',
+          color: '#ff6600',
+          font: { size: 16 }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const value = context.raw;
+              const percentage = ((value / total) * 100).toFixed(1);
+              return `${context.label}: ${value} (${percentage}%)`;
+            }
           }
         }
       }
     }
-  }
+  });
 });
-
 </script>
+@endpush
+
 @endsection
 
 @push('styles')
