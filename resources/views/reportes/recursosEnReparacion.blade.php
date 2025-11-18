@@ -86,6 +86,10 @@
                     @endforeach
                 </tbody>
             </table>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <div id="infoPaginacionReparacion" class="text-muted small"></div>
+              <ul id="paginacionReparacion" class="pagination mb-0"></ul>
+            </div>
         </div>
         @else
         <div class="alert alert-info">No se encontraron recursos en reparación en el rango seleccionado.</div>
@@ -112,6 +116,49 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+  // 🔹 Paginación de la tabla
+  const filas = Array.from(document.querySelectorAll('table tbody tr'));
+  const info = document.getElementById('infoPaginacionReparacion');
+  const paginacion = document.getElementById('paginacionReparacion');
+  const filasPorPagina = 10;
+  let paginaActual = 1;
+
+  function mostrarPagina(pagina) {
+    paginaActual = pagina;
+    const total = filas.length;
+    const totalPaginas = Math.ceil(total / filasPorPagina);
+
+    filas.forEach(f => f.style.display = 'none');
+
+    const inicio = (pagina - 1) * filasPorPagina;
+    const fin = Math.min(inicio + filasPorPagina, total);
+    for (let i = inicio; i < fin; i++) {
+      filas[i].style.display = 'table-row';
+    }
+
+    info.textContent = `Mostrando ${total === 0 ? 0 : inicio + 1}-${fin} de ${total} recursos`;
+
+    paginacion.innerHTML = '';
+    for (let i = 1; i <= totalPaginas; i++) {
+      const li = document.createElement('li');
+      li.className = 'page-item' + (i === paginaActual ? ' active' : '');
+      const a = document.createElement('a');
+      a.className = 'page-link';
+      a.href = '#';
+      a.textContent = i;
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        mostrarPagina(i);
+      });
+      li.appendChild(a);
+      paginacion.appendChild(li);
+    }
+  }
+
+  mostrarPagina(1);
+
+  // 🔹 Gráfico con Chart.js
   const labels = {!! json_encode($labels) !!};
   const valores = {!! json_encode($valores) !!};
 
@@ -162,7 +209,9 @@
       }
     }
   });
+});
 </script>
+
 @endsection
 @push('styles')
 <link href="{{ asset('css/recursosEnReparacion.css') }}" rel="stylesheet">
