@@ -492,3 +492,269 @@ h1, .titulo-principal {
   justify-content: center;
 }
 
+/*AAAAAAAAA*/
+
+/* Forzar toggle visible cuando sidebar está cerrado y garantizar por z-index */
+.toggle-btn {
+  position: fixed !important;
+  top: 16px !important;
+  left: 20px !important;
+  z-index: 99999 !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  transition: left 0.28s ease, opacity 0.2s ease !important;
+}
+
+/* Cuando el sidebar está abierto desplazamos el toggle fuera de vista */
+#sidebar.active ~ .toggle-btn,
+#sidebar.active + .toggle-btn {
+  left: -100px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Backup: si la relación de hermanos falla, usamos selector general basado en estado body */
+body[data-sidebar="open"] .toggle-btn {
+  left: -100px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+body[data-sidebar="closed"] .toggle-btn {
+  left: 20px !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/*SIDEBAR*/
+/* === Scroll y estilo del sidebar === */
+#sidebar {
+  position: fixed;             /* Queda fijo en pantalla */
+  left: 0;
+  top: 0;
+  height: 100vh;               /* Ocupa toda la altura visible */
+  width: 240px;                /* Ajustá según tu diseño */
+  background-color: #222;      /* Fondo oscuro (puede cambiar) */
+  color: white;
+  overflow-y: auto;            /* 🔹 Habilita el scroll vertical */
+  overflow-x: hidden;          /* Evita scroll horizontal */
+  padding: 20px;
+  scrollbar-width: thin;       /* Scroll más fino (Firefox) */
+  scrollbar-color: #f57c00 #333; /* Colores del scroll (Firefox) */
+}
+
+/* 🔸 Scroll personalizado (para Chrome, Edge, etc.) */
+#sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+  background-color: #f57c00;
+  border-radius: 10px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+  background-color: #333;
+}
+
+/*AAAAAAAAAAAAA*/
+
+/* Sidebar cerrado */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -240px; /* oculto fuera de pantalla */
+  width: 240px;
+  height: 100vh;
+  background-color: #212529;
+  transition: left 0.3s ease;
+  z-index: 1050;
+}
+
+/* Sidebar abierto */
+#sidebar.active {
+  left: 0;
+}
+
+/* Botón ☰ fijo arriba a la izquierda */
+.toggle-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-size: 1.2rem;
+  transition: left 0.3s ease;
+}
+
+/* Ocultar el botón ☰ cuando el sidebar está abierto */
+#sidebar.active ~ .toggle-btn {
+  left: -100px;
+}
+
+/* Contenido principal */
+#main {
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+}
+
+#main.shifted {
+  margin-left: 240px;
+}
+
+/*AAAA2*/
+/* base sidebar */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -240px;          /* cerrado por defecto */
+  width: 240px;
+  height: 100vh;
+  transition: left 0.28s ease;
+  z-index: 1050;
+}
+
+/* abierto */
+#sidebar.active {
+  left: 0;
+}
+
+/* main se corre cuando sidebar abierto */
+#main {
+  margin-left: 0;
+  transition: margin-left 0.28s ease;
+}
+#main.shifted {
+  margin-left: 240px;
+}
+
+/* botón cuadradito (siempre en el mismo nivel DOM que el nav#sidebar) */
+.toggle-btn {
+  position: fixed !important;
+  top: 16px !important;
+  left: 20px !important;
+  z-index: 99999 !important;
+  pointer-events: auto !important;
+  transition: left 0.28s ease, opacity 0.2s ease;
+  opacity: 1;
+}
+
+/* cuando el sidebar está abierto, movemos el toggle fuera de vista */
+#sidebar.active ~ .toggle-btn {
+  left: -100px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* cuando el sidebar no está activo (cerrado), forzamos que el toggle quede visible */
+#sidebar:not(.active) ~ .toggle-btn {
+  left: 20px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== Toggle exactamente cuadrado y consistente ===== */
+.toggle-square {
+  width: 44px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+  background-color: #212529 !important;
+  color: #e9e9e9 !important;
+  border: none !important;
+  cursor: pointer !important;
+  overflow: visible !important;
+}
+
+/* icono dentro centrado */
+.toggle-square i {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  line-height: 1;
+  font-size: 20px !important;
+}
+
+/* mantener posicionamiento autoritativo del toggle (no tocar) */
+.toggle-btn {
+  position: fixed !important;
+  top: 16px !important;
+  left: 20px !important;
+  z-index: 99999 !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  transition: left .28s ease, opacity .2s ease !important;
+}
+
+/* cuando el sidebar está abierto lo sacamos de la vista (dos selectores por compat) */
+#sidebar.active ~ .toggle-btn,
+body[data-sidebar="open"] .toggle-btn {
+  left: -100px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* estado cerrado -> toggle visible */
+body[data-sidebar="closed"] .toggle-btn,
+#sidebar:not(.active) ~ .toggle-btn {
+  left: 20px !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* transición suave ya aplicada, pero por si acaso */
+.toggle-btn, .toggle-square {
+  transition: top .16s ease, left .16s ease !important;
+  will-change: top, left;
+}
+
+/* si algún contenedor tiene overflow hidden que pueda recortar al toggle, evitarlo en el body */
+body {
+  overflow-x: hidden;
+}
+
+/*AAAAA*/
+
+/* Cuando el sidebar está cerrado, empujar títulos a la derecha */
+body[data-sidebar="closed"] .protect-toggle {
+  padding-left: 10px; /* 56px ancho del toggle + ~16px de separación */
+  box-sizing: border-box;
+  transition: padding-left 0.2s ease;
+}
+
+/* Cuando el sidebar está abierto, restaurar */
+body[data-sidebar="open"] .protect-toggle {
+  padding-left: 0;
+}
+
+
+body[data-sidebar="closed"] header {
+  padding-left: 10px; /* 56px ancho del toggle + ~16px de separación */
+  box-sizing: border-box;
+  transition: padding-left 0.2s ease;
+}
+
+/* Cuando el sidebar está abierto, restaurar */
+body[data-sidebar="open"] header {
+  padding-left: 0;
+}
+
+body[data-sidebar="closed"] .container {
+  padding-left: 70px; /* 56px ancho del toggle + ~16px de separación */
+  box-sizing: border-box;
+  transition: padding-left 0.2s ease;
+}
+
+/* Cuando el sidebar está abierto, restaurar */
+body[data-sidebar="open"] .container {
+  padding-left: 20px;
+}
+
+
+
