@@ -75,8 +75,8 @@
   </nav>
 
   <!-- Botón de apertura -->
-  <button id="toggleSidebar" class="btn btn-secondary toggle-btn">
-    <i class="bi bi-list"></i>
+  <button id="toggleSidebar" class="btn btn-secondary toggle-btn toggle-square" aria-label="Abrir menú">
+    <i class="bi bi-list" aria-hidden="true"></i>
   </button>
 
   <!-- Contenido principal -->
@@ -96,47 +96,131 @@
 
   <!-- Sidebar logic -->
   <script>
+  (function () {
     const toggleBtn = document.getElementById('toggleSidebar');
     const closeBtn = document.getElementById('closeSidebar');
     const sidebar = document.getElementById('sidebar');
     const main = document.getElementById('main');
 
     function abrirSidebar() {
-      sidebar.classList.add('active');
-      main.classList.add('shifted');
-      toggleBtn.classList.add('hidden');
-      localStorage.setItem('sidebarAbierto', 'true');
-    }
+  if (!sidebar || !main) return;
+  sidebar.classList.add('active');
+  main.classList.add('shifted');
+  document.body.setAttribute('data-sidebar', 'open'); // <- línea nueva
+  localStorage.setItem('sidebarAbierto', 'true');
+}
 
-    function cerrarSidebar() {
-      sidebar.classList.remove('active');
-      main.classList.remove('shifted');
-      toggleBtn.classList.remove('hidden');
-      localStorage.setItem('sidebarAbierto', 'false');
-    }
+function cerrarSidebar() {
+  if (!sidebar || !main) return;
+  sidebar.classList.remove('active');
+  main.classList.remove('shifted');
+  document.body.setAttribute('data-sidebar', 'closed'); // <- línea nueva
+  localStorage.setItem('sidebarAbierto', 'false');
+}
 
-    window.addEventListener('DOMContentLoaded', () => {
-      sidebar.classList.add('no-transition', 'invisible');
 
-      const estado = localStorage.getItem('sidebarAbierto');
-      if (estado === 'true') {
-        sidebar.classList.add('active');
-        main.classList.add('shifted');
-        toggleBtn.classList.add('hidden');
-      } else {
-        sidebar.classList.remove('active');
-        main.classList.remove('shifted');
-        toggleBtn.classList.remove('hidden');
+    // Delegación global por si el nodo se reemplaza o hay overlays
+    document.addEventListener('click', function (e) {
+      const tToggle = e.target.closest && e.target.closest('#toggleSidebar');
+      const tClose = e.target.closest && e.target.closest('#closeSidebar');
+      if (tToggle) {
+        e.preventDefault();
+        abrirSidebar();
+      } else if (tClose) {
+        e.preventDefault();
+        cerrarSidebar();
       }
-
-      setTimeout(() => {
-        sidebar.classList.remove('no-transition', 'invisible');
-      }, 50);
     });
 
-    toggleBtn.addEventListener('click', abrirSidebar);
-    closeBtn.addEventListener('click', cerrarSidebar);
-  </script>
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        // Aplicar estado guardado
+        const estado = localStorage.getItem('sidebarAbierto');
+        if (estado === 'true') {
+          abrirSidebar();
+        } else {
+          cerrarSidebar();
+        }
+
+        // Quitar posibles clases iniciales "invisible/no-transition" si las pones
+        sidebar?.classList.remove('no-transition', 'invisible');
+      } catch (err) {
+        console.error('Sidebar init error', err);
+      }
+    });
+
+    // Exponer funciones para pruebas manuales en consola (opcional)
+    window.abrirSidebar = abrirSidebar;
+    window.cerrarSidebar = cerrarSidebar;
+  })();
+</script>
+
+
+<script>
+/*(function () {
+  const TOGGLE_SELECTOR = '#toggleSidebar';
+  const PROTECT_SELECTOR = '[data-protect-toggle], .protect-toggle';
+  const TOGGLE_SIZE = 56; // ancho/alto del toggle en px (ajustá a tu .toggle-square)
+  const GAP = 12; // separación en px entre toggle y header
+
+  function isVisible(el) { return el && el.offsetParent !== null; }
+
+  function rectsOverlap(a, b) {
+    return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+  }
+
+  function adjustProtectedHeaders() {
+    const toggle = document.querySelector(TOGGLE_SELECTOR);
+    if (!toggle) return;
+    const toggleRect = toggle.getBoundingClientRect();
+
+    document.querySelectorAll(PROTECT_SELECTOR).forEach(header => {
+      if (!isVisible(header)) {
+        header.classList.remove('protect-toggle--shifted');
+        return;
+      }
+      const hRect = header.getBoundingClientRect();
+
+      // consideramos solapamiento solo en la zona superior (títulos)
+      const overlapping = rectsOverlap(toggleRect, hRect);
+      if (overlapping) {
+        // aplicar clase que empuja contenido a la derecha
+        header.classList.add('protect-toggle--shifted');
+      } else {
+        header.classList.remove('protect-toggle--shifted');
+      }
+    });
+  }
+
+  // throttle simple con RAF
+  let raf = null;
+  function scheduleAdjust() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => { adjustProtectedHeaders(); raf = null; });
+  }
+
+  // re-evaluar en eventos habituales y cuando el sidebar cambia
+  window.addEventListener('load', scheduleAdjust);
+  window.addEventListener('resize', scheduleAdjust);
+  window.addEventListener('orientationchange', scheduleAdjust);
+  window.addEventListener('scroll', scheduleAdjust);
+
+  // observar mutaciones en el body por Livewire/Alpine
+  const mo = new MutationObserver(scheduleAdjust);
+  mo.observe(document.body, { subtree: true, childList: true, attributes: true });
+
+  // también re-evaluar cuando cambie el estado del sidebar (data-sidebar)
+  const bodyObs = new MutationObserver(mutations => {
+    for (const m of mutations) {
+      if (m.attributeName === 'data-sidebar') { scheduleAdjust(); break; }
+    }
+  });
+  bodyObs.observe(document.body, { attributes: true });
+
+  // ejecución inicial
+  scheduleAdjust();
+})();*/
+</script>
 
   <!-- Livewire y scripts inyectados -->
   @livewireScripts

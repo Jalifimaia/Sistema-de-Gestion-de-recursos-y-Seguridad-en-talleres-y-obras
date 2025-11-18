@@ -9,7 +9,7 @@
 
 @section('content')
 <div class="container py-4">
-    <header class="d-flex justify-content-between align-items-center mb-4">
+    <header class="d-flex justify-content-between align-items-center mb-4 protect-toggle">
       <div>
         <p class="text-muted mb-1 subir-bienvenida">
           Bienvenido, {{ auth()->user()->name }} <em>[{{ auth()->user()->rol->nombre_rol }}]</em>

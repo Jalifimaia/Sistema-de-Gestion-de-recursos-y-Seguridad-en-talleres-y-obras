@@ -21,37 +21,3 @@
     @endauth
   </div>
 </div>
-.sidebar {
-  position: fixed;            /* Fijo en pantalla */
-  top: 0;
-  left: 0;
-  width: 250px;
-  height: 100vh;              /* Ocupa todo el alto */
-  background-color: #212529;
-  color: white;
-  padding: 20px;
-  overflow-y: auto !important;  /* Scroll vertical garantizado */
-  overflow-x: hidden;
-  z-index: 1050;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Estilo de scrollbar */
-.sidebar::-webkit-scrollbar {
-  width: 8px;
-}
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: #f57c00;
-  border-radius: 10px;
-}
-.sidebar::-webkit-scrollbar-track {
-  background-color: #333;
-}
-
-/* Aseguramos que el bloque de usuario quede abajo */
-.sidebar .border-top.pt-3.mt-auto {
-  margin-top: auto !important;
-}
-
-<style>
