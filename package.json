@@ -18,11 +18,14 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "bootstrap-icons": "^1.13.1",
         "node-fetch": "^2.7.0",
         "puppeteer": "^24.25.0"
     },
     "jest": {
         "testEnvironment": "jsdom",
-        "setupFilesAfterEnv": ["<rootDir>/public/js/test/setupTests.cjs"]
+        "setupFilesAfterEnv": [
+            "<rootDir>/public/js/test/setupTests.cjs"
+        ]
     }
 }

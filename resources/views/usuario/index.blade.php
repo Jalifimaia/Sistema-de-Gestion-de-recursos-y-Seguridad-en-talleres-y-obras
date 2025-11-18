@@ -103,54 +103,67 @@
     <div class="card-body">
 
       <div class="table-responsive">
-        <table class="table-naranja align-middle mb-0" id="tablaUsuarios">
-          <thead class="table-light">
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <!--<th>Rol</th>-->
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($usuarios as $usuario)
-              <tr data-rol="{{ $usuario->rol->nombre_rol ?? '' }}"
-                  data-estado="{{ $usuario->estado->nombre ?? '' }}">
-                <td class="nombre-completo" data-nombre="{{ $usuario->name }}">
-                  {{ $usuario->name }} [<strong>{{ $usuario->rol->nombre_rol ?? '-' }}</strong>]
-                </td>
-                <td>{{ $usuario->email }}</td>
-                <!--<td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>-->
-                <td class="estado text-center">
-                  <div id="estado-usuario-{{ $usuario->id }}"
-                      class="badge estado-usuario px-3 py-2 rounded"
-                      data-estado="{{ $usuario->estado->nombre ?? '-' }}">
-                  </div>
-                </td>
-                <td class="acciones">
+      <table class="table-naranja align-middle mb-0" id="tablaUsuarios">
+        <thead class="table-light">
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <!--<th>Rol</th>-->
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach ($usuarios as $usuario)
+            <tr data-rol="{{ $usuario->rol->nombre_rol ?? '' }}"
+                data-estado="{{ $usuario->estado->nombre ?? '' }}">
+              <td class="nombre-completo" data-nombre="{{ $usuario->name }}">
+                {{ $usuario->name }} [<strong>{{ $usuario->rol->nombre_rol ?? '-' }}</strong>]
+              </td>
+              <td>{{ $usuario->email }}</td>
+              <!--<td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>-->
+              <td class="estado text-center">
+                <div id="estado-usuario-{{ $usuario->id }}"
+                    class="badge estado-usuario px-3 py-2 rounded"
+                    data-estado="{{ $usuario->estado->nombre ?? '-' }}">
+                </div>
+              </td>
+              <td class="acciones">
+                <div class="acciones-grupo">
                   <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-ver">Ver</a>
-                    <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-editar">
-                      <i class="bi bi-pencil"></i>
-                     Editar</a>
+                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-editar">
+                    <i class="bi bi-pencil"></i> Editar
+                  </a>
 
-                    <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST" class="d-inline form-baja" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol ?? '-' }}">
-                      @csrf
-                      @php $esBaja = ($usuario->estado->nombre ?? null) === 'Baja'; @endphp
-                      <span @if($esBaja) title="Usuario dado de baja" @endif>
-                        <button type="button"
-                                class="btn btn-baja btn-confirmar-baja"
-                                @if($esBaja) disabled style="opacity:0.5; cursor:not-allowed;" @endif>
-                          Dar de baja
-                        </button>
-                      </span>
-                    </form>
-                </td>
-              </tr>
+                  <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST"
+                        class="d-inline form-baja"
+                        data-nombre="{{ $usuario->name }}"
+                        data-rol="{{ $usuario->rol->nombre_rol ?? '-' }}">
+                    @csrf
+                    @php $esBaja = ($usuario->estado->nombre ?? null) === 'Baja'; @endphp
+                    <span @if($esBaja) title="Usuario dado de baja" @endif>
+                      <button type="button"
+                              class="btn btn-baja btn-confirmar-baja"
+                              @if($esBaja) disabled style="opacity:0.5; cursor:not-allowed;" @endif>
+                        Dar de baja
+                      </button>
+                    </span>
+                  </form>
+                </div>
+              </td>
+            </tr>
           @endforeach
-          </tbody>
-        </table>
-      </div>
+        </tbody>
+      </table>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+              <div id="infoPaginacionUsuarios" class="text-muted small"></div>
+              <ul id="paginacionUsuarios" class="pagination mb-0"></ul>
+          </div>
+
+
+        </div>
+
     </div>
   
   </div>
@@ -180,36 +193,111 @@
 
 @push('scripts')
 <script>
-  const filtroRol = document.getElementById('filtroRol');
-  const filtroEstado = document.getElementById('filtroEstado');
-  const buscador = document.getElementById('buscador');
-  const filas = document.querySelectorAll('#tablaUsuarios tbody tr');
+document.addEventListener('DOMContentLoaded', function () {
+  const filas = Array.from(document.querySelectorAll('#tablaUsuarios tbody tr'));
+  const info = document.getElementById('infoPaginacionUsuarios');
+  const paginacion = document.getElementById('paginacionUsuarios');
+  const filasPorPagina = 10;
 
-  function filtrar() {
-    const rol = filtroRol.value.toLowerCase();
-    const estado = filtroEstado.value.toLowerCase();
-    const texto = buscador.value.toLowerCase();
+  let paginaActual = 1;
+  let visibles = filas;
 
-    filas.forEach(fila => {
-      const rolFila = (fila.getAttribute('data-rol') || '').toLowerCase();
-      const estadoFila = (fila.getAttribute('data-estado') || '').toLowerCase();
-    const nombre = fila.querySelector('.nombre-completo').dataset.nombre.toLowerCase();
+  // Helpers seguros
+  const norm = v => (v || '').trim().toLowerCase();
+  const esTodos = v => {
+    const n = norm(v);
+    return n === '' || n === 'todos' || n.startsWith('todos ');
+  };
 
-      const email = fila.cells[1].innerText.toLowerCase();
+  function recalcularVisibles() {
+    const rolSel = typeof filtroRol !== 'undefined' ? filtroRol.value : '';
+    const estadoSel = typeof filtroEstado !== 'undefined' ? filtroEstado.value : '';
+    const textoSel = typeof buscador !== 'undefined' ? buscador.value : '';
 
-      const coincideRol = (rol === 'todos' || rolFila === rol);
-      const coincideEstado = (estado === 'todos' || estadoFila === estado);
-      const coincideTexto = (texto === '' || nombre.includes(texto) || email.includes(texto));
+    const rol = norm(rolSel);
+    const estado = norm(estadoSel);
+    const texto = norm(textoSel);
 
-      fila.style.display = (coincideRol && coincideEstado && coincideTexto) ? '' : 'none';
+    visibles = filas.filter(fila => {
+      const rolFila = norm(fila.getAttribute('data-rol'));
+      const estadoFila = norm(fila.getAttribute('data-estado'));
+      const nombre = norm(fila.querySelector('.nombre-completo')?.dataset?.nombre);
+      const email = norm(fila.cells[1]?.innerText);
+
+      const okRol = esTodos(rolSel) || rolFila === rol;
+      const okEstado = esTodos(estadoSel) || estadoFila === estado;
+      const okTexto = texto === '' || nombre.includes(texto) || email.includes(texto);
+
+      return okRol && okEstado && okTexto;
     });
+
+    // Diagnóstico
+    console.log('visibles:', visibles.length);
   }
 
-  filtroRol.addEventListener('change', filtrar);
-  filtroEstado.addEventListener('change', filtrar);
-  buscador.addEventListener('input', filtrar);
+  function mostrarPagina(pagina) {
+    paginaActual = pagina;
 
-  // Interceptar formularios de baja para evitar redirect
+    const totalRegistros = visibles.length;
+    const totalPaginas = Math.max(1, Math.ceil(totalRegistros / filasPorPagina));
+    paginaActual = Math.min(Math.max(1, paginaActual), totalPaginas);
+
+    // Ocultar todas
+    filas.forEach(fila => fila.style.display = 'none');
+
+    // Mostrar rango actual
+    const inicio = (paginaActual - 1) * filasPorPagina;
+    const fin = Math.min(inicio + filasPorPagina, totalRegistros);
+
+    for (let i = inicio; i < fin; i++) {
+      const fila = visibles[i];
+      if (fila) fila.style.display = 'table-row';
+    }
+
+    // Info
+    if (info) {
+      const desde = totalRegistros ? inicio + 1 : 0;
+      const hasta = totalRegistros ? fin : 0;
+      info.textContent = `Mostrando ${desde}-${hasta} de ${totalRegistros} usuarios`;
+    }
+
+    // Botones
+    if (paginacion) {
+      paginacion.innerHTML = '';
+      for (let i = 1; i <= totalPaginas; i++) {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (i === paginaActual ? ' active' : '');
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.href = '#';
+        a.textContent = i;
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          mostrarPagina(i); // no tocamos filtros aquí
+        });
+        li.appendChild(a);
+        paginacion.appendChild(li);
+      }
+    }
+
+    // Diagnóstico
+    console.log('paginaActual:', paginaActual, 'rango:', inicio, fin);
+  }
+
+  function aplicarFiltros() {
+    recalcularVisibles();
+    mostrarPagina(1); // siempre volver a página 1 tras cambiar filtros
+  }
+
+  // Inicializar
+  aplicarFiltros();
+
+  // Eventos de filtros (si existen)
+  if (typeof filtroRol !== 'undefined') filtroRol.addEventListener('change', aplicarFiltros);
+  if (typeof filtroEstado !== 'undefined') filtroEstado.addEventListener('change', aplicarFiltros);
+  if (typeof buscador !== 'undefined') buscador.addEventListener('input', aplicarFiltros);
+
+  // 🔶 Interceptar formularios de baja (opcionalmente reaplicar filtros)
   document.querySelectorAll('.form-baja').forEach(form => {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -219,116 +307,70 @@
 
       fetch(this.action, {
         method: 'POST',
-        headers: {
-          'X-CSRF-TOKEN': this.querySelector('[name=_token]').value
-        }
+        headers: { 'X-CSRF-TOKEN': this.querySelector('[name=_token]').value }
       }).then(res => {
         if (res.ok) {
-          // Actualizar solo la fila
           estadoCell.innerText = 'Baja';
           fila.setAttribute('data-estado', 'Baja');
           boton.disabled = true;
           boton.style.opacity = '0.5';
           boton.style.cursor = 'not-allowed';
+          aplicarFiltros(); // refleja cambio si hay filtro por estado
         }
       });
     });
   });
 
-  // Modal para confirmación de baja
-  let formSeleccionado = null;
-  document.querySelectorAll('.btn-confirmar-baja').forEach(boton => {
-    boton.addEventListener('click', function () {
-      formSeleccionado = this.closest('form');
-      const nombre = formSeleccionado.getAttribute('data-nombre');
-      const rol = formSeleccionado.getAttribute('data-rol');
-      const texto = document.getElementById('textoConfirmacion');
-      texto.textContent = `¿Desea dar de baja a ${nombre} (${rol})?`;
-      const modal = new bootstrap.Modal(document.getElementById('modalConfirmarBaja'));
-      modal.show();
-    });
-  });
+  // 🔶 Estado visual y fecha
+  const alerta = document.getElementById('alertaEstado');
+  if (alerta) {
+    setTimeout(() => {
+      alerta.classList.add('fade');
+      alerta.classList.remove('show');
+      alerta.addEventListener('transitionend', () => alerta.remove(), { once: true });
+    }, 5000);
+  }
 
-  document.getElementById('btnConfirmarBaja').addEventListener('click', function () {
-    if (formSeleccionado) {
-      formSeleccionado.dispatchEvent(new Event('submit', { cancelable: true }));
-      const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarBaja'));
-      modal.hide();
-    }
-  });
+  const today = new Date();
+  const dia = String(today.getDate()).padStart(2, '0');
+  const mes = String(today.getMonth() + 1).padStart(2, '0');
+  const año = today.getFullYear();
+  const horas = String(today.getHours()).padStart(2, '0');
+  const minutos = String(today.getMinutes()).padStart(2, '0');
+  const segundos = String(today.getSeconds()).padStart(2, '0');
+  document.getElementById("today").textContent = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const alerta = document.getElementById('alertaEstado');
-    if (alerta) {
-      setTimeout(() => {
-        alerta.classList.add('fade');
-        alerta.classList.remove('show');
-        alerta.addEventListener('transitionend', () => {
-          alerta.remove();
-        }, { once: true });
-      }, 5000);
-    }
+  function capitalizar(texto) {
+    return texto.split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+  }
 
-    const today = new Date();
-
-    const dia = String(today.getDate()).padStart(2, '0');
-    const mes = String(today.getMonth() + 1).padStart(2, '0');
-    const año = today.getFullYear();
-
-    const horas = String(today.getHours()).padStart(2, '0');
-    const minutos = String(today.getMinutes()).padStart(2, '0');
-    const segundos = String(today.getSeconds()).padStart(2, '0');
-
-    const fechaFormateada = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
-    document.getElementById("today").textContent = fechaFormateada;
-
-    function capitalizar(texto) {
-      return texto
-        .split(' ')
-        .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
-        .join(' ');
-    }
-
-    document.querySelectorAll('[id^="estado-usuario-"]').forEach(div => {
+  document.querySelectorAll('[id^="estado-usuario-"]').forEach(div => {
     const estado = (div.dataset.estado || '').toLowerCase();
-
     if (estado) {
-      div.textContent = capitalizar(estado); 
+      div.textContent = capitalizar(estado);
       div.style.display = 'inline-block';
     } else {
       div.style.display = 'none';
     }
-
-    // Resetear clases base
     div.className = 'badge px-2 py-1 rounded';
-
-    switch (estado.toLowerCase()) {
-      case 'alta':
-        div.classList.add('bg-success', 'text-white'); // verde relleno
-        div.style.fontSize = '1rem'; // más grande
-        break;
-      case 'baja':
-        div.classList.add('bg-danger', 'text-white'); // rojo relleno
-        div.style.fontSize = '1rem';
-        break;
-      case 'stand by':
-        div.classList.add('bg-secondary', 'text-white'); // gris relleno
-        div.style.fontSize = '1rem';
-        div.style.fontStyle = 'italic'; // itálica
-        break;
-      default:
-        div.classList.add('bg-light', 'text-dark');
-        div.style.fontSize = '1rem';
-        break;
+    switch (estado) {
+      case 'alta': div.classList.add('bg-success','text-white'); break;
+      case 'baja': div.classList.add('bg-danger','text-white'); break;
+      case 'stand by': div.classList.add('bg-secondary','text-white'); div.style.fontStyle='italic'; break;
+      default: div.classList.add('bg-light','text-dark'); break;
     }
-    
+    div.style.fontSize = '1rem';
   });
-  });
-
+});
 </script>
+
+
+
 @endpush
 
+
+
 @push('styles')
-<link href="{{ asset('css/usuariosIndex.css') }}" rel="stylesheet">
+<link href="{{ asset('css/usuariosIndex.css') }}?v={{ time() }}" rel="stylesheet">
 @endpush
 

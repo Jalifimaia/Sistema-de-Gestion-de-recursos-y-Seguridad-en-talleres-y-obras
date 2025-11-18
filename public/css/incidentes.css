@@ -73,3 +73,96 @@
   background-color: #ef6c00;
 }
 
+#buscadorIncidentes::placeholder {
+  color: #999;
+}
+
+#filtroEstadoIncidente {
+  min-width: 180px;
+}
+
+/* Outline visible en buscador y select */
+#buscadorIncidentes,
+#filtroEstadoIncidente {
+  border: 1px solid #b95b0e;   /* naranja */
+  outline: none;
+  box-shadow: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+#buscadorIncidentes:focus,
+#filtroEstadoIncidente:focus {
+  border-color: #b95b0e;
+  box-shadow: 0 0 0 2px rgba(255, 127, 0, 0.3); /* glow naranja */
+}
+
+/* Reducir espacio debajo del header */
+header.row.mb-4 {
+  margin-bottom: 1rem !important; /* antes eran 1.5rem o más */
+}
+
+/* Reducir espacio entre filtros/botón y la tabla */
+.container .mb-3 {
+  margin-bottom: 0.75rem !important;
+}
+
+/* Estilo general de los links de paginación */
+.pagination .page-link {
+  color: #b95b0e;              /* texto naranja */
+  border: 1px solid #b95b0e;   /* borde naranja */
+  background-color: #fff;      /* fondo blanco */
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.pagination .page-link:hover {
+  color: #fff;
+  background-color: #b95b0e;   /* fondo naranja al pasar */
+  border-color: #b95b0e;
+}
+
+/* Estado activo */
+.pagination .page-item.active .page-link {
+  color: #fff;
+  background-color: #b95b0e;   /* fondo naranja */
+  border-color: #b95b0e;
+}
+
+/* Estado deshabilitado */
+.pagination .page-item.disabled .page-link {
+  color: #ccc;
+  border-color: #ddd;
+  background-color: #f8f9fa;
+}
+
+/*AA*/
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding-left: 0;
+}
+
+.page-item {
+  margin: 0 2px;
+}
+
+.page-link {
+  color: #d06842;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #ffd1be;
+}
+
+.page-item.active .page-link {
+  background-color: #d06842;
+  color: white;
+  border-color: #d06842;
+}
