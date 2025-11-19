@@ -162,7 +162,7 @@
       </div>
 
       <div class="text-center">
-        <button id="herramienta-en-mano-solicitar" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(5)">
+        <button id="herramienta-en-mano-solicitar" class="btn btn-outline-dark btn-lg d-flex herramienta-en-mano align-items-center justify-content-start m-2 w-100" onclick="detenerEscaneoQRregistroRecursos(); seleccionarCategoria(2);">
           <span class="badge-opcion">Opción 2</span>
           <span class="ms-2 flex-grow-1 text-start d-flex align-items-center gap-2">
             <img src="{{ asset('images/hand2.svg') }}" alt="Mano" class="icono-opcion">
@@ -199,21 +199,21 @@
 
 
 
-    <!-- Paso 5: Categoría -->
+    <!-- Paso 5: Categoría 
     <div id="step5" class="step">
       <h2 class="mb-4 text-center">Seleccionar Categoría</h2>
       <div id="categoria-buttons"></div>
       <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="volverDesdeStep5()">
-        <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
+        <img src="{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
         <span>Volver</span>
       </button>  
-    </div>
+    </div>-->
 
     <!-- Paso 6: Subcategoría -->
     <div id="step6" class="step">
       <h2 class="mb-4 text-center">Seleccionar Subcategoría</h2>
       <div id="subcategoria-buttons"></div>
-      <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="nextStep(5)">
+      <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="nextStep(step6ReturnTarget)">
         <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
         <span>Volver</span>
       </button>
@@ -249,35 +249,40 @@
 
     </div>
 
-  <!-- Paso 9: Devolución con escaneo QR -->
-    <div id="step9" class="step d-none">
-      <h3 class="mb-3 text-center">Devolución de recurso</h3>
-      <p class="text-center">Muestre el QR del recurso con serie <strong id="serieEsperadaQR"></strong></p>
+<!-- Paso 9: Devolución con escaneo QR -->
+<div id="step9" class="step d-none">
+  <h3 class="mb-3 text-center">Devolución de recurso</h3>
+  <p class="text-center">
+    Muestre el QR del recurso:<br>
+    <strong id="subcategoriaEsperadaQR"></strong> - 
+    <strong id="recursoEsperadoQR"></strong> <br>
+    Serie: <strong id="serieEsperadaQR"></strong>
+  </p>
 
-      <!-- Contenedor del escáner QR -->
-      <div class="d-flex justify-content-center">
-        <div id="qr-reader-devolucion" style="width: 300px; height: 225px; margin: auto;"></div>
+  <!-- Contenedor del escáner QR -->
+  <div class="d-flex justify-content-center">
+    <div id="qr-reader-devolucion" style="width: 300px; height: 225px; margin: auto;"></div>
+  </div>
 
-      </div>
+  <!-- Indicador de cámara activa -->
+  <div id="texto-camara-activa-devolucion" class="text-muted text-center mt-2 d-none">Cámara activa</div>
 
-      <!-- Indicador de cámara activa -->
-      <div id="texto-camara-activa-devolucion" class="text-muted text-center mt-2 d-none">Cámara activa</div>
+  <!-- Botón para cancelar escaneo -->
+  <div class="text-center mt-2">
+    <button id="btn-cancelar-qr" class="btn btn-outline-primary d-none" onclick="cancelarEscaneoQRregistroRecursos()">Cancelar escaneo</button>
+  </div>
 
-      <!-- Botón para cancelar escaneo -->
-      <div class="text-center mt-2">
-        <button id="btn-cancelar-qr" class="btn btn-outline-primary d-none" onclick="cancelarEscaneoQRregistroRecursos()">Cancelar escaneo</button>
-      </div>
+  <!-- Feedback del QR -->
+  <div id="qrFeedback" class="mt-3 text-center fw-bold text-danger"></div>
 
-      <!-- Feedback del QR -->
-      <div id="qrFeedback" class="mt-3 text-center fw-bold text-danger"></div>
+  <!-- Botones de acción -->
+  <div class="text-center mt-4">
+    <button class="btn btn-outline-danger btn-lg texto-cancelar mt-2" onclick="volverARecursosAsignadosDesdeDevolucionQR()">
+      <span>Cancelar escaneo</span>
+    </button>
+  </div>
+</div>
 
-      <!-- Botones de acción -->
-      <div class="text-center mt-4">
-        <button class="btn btn-outline-danger btn-lg texto-cancelar mt-2" onclick="volverARecursosAsignadosDesdeDevolucionQR()">
-          <span>Cancelar escaneo</span>
-        </button>
-      </div>
-    </div>
 
 <!-- Paso 10: Recursos asignados -->
 <div id="step10" class="step d-none">

@@ -85,6 +85,9 @@ Route::prefix('terminal')->group(function () {
     Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
     Route::get('/recursos-asignados/{usuarioId}', [KioskoController::class, 'recursosAsignados']);
     
+    // ✅ EPP asignados (permanentes)
+    Route::get('/epp-asignados/{usuarioId}', [KioskoController::class, 'eppAsignados']);
+
 
     // ✅ Devolución
     Route::post('/validar-qr-devolucion', [PrestamoTerminalController::class, 'validarQRDevolucion']);
