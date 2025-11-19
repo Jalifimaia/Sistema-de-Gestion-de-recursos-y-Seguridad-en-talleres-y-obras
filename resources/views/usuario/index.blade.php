@@ -142,11 +142,12 @@
                     @csrf
                     @php $esBaja = ($usuario->estado->nombre ?? null) === 'Baja'; @endphp
                     <span @if($esBaja) title="Usuario dado de baja" @endif>
-                      <button type="button"
-                              class="btn btn-baja btn-confirmar-baja"
-                              @if($esBaja) disabled style="opacity:0.5; cursor:not-allowed;" @endif>
-                        Dar de baja
-                      </button>
+<button type="button"
+        class="btn btn-baja btn-confirmar-baja"
+        @if($esBaja) disabled style="opacity:0.5; cursor:not-allowed;" @endif>
+  Dar de baja
+</button>
+
                     </span>
                   </form>
                 </div>
@@ -231,7 +232,6 @@ document.addEventListener('DOMContentLoaded', function () {
       return okRol && okEstado && okTexto;
     });
 
-    // Diagnóstico
     console.log('visibles:', visibles.length);
   }
 
@@ -242,10 +242,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const totalPaginas = Math.max(1, Math.ceil(totalRegistros / filasPorPagina));
     paginaActual = Math.min(Math.max(1, paginaActual), totalPaginas);
 
-    // Ocultar todas
     filas.forEach(fila => fila.style.display = 'none');
 
-    // Mostrar rango actual
     const inicio = (paginaActual - 1) * filasPorPagina;
     const fin = Math.min(inicio + filasPorPagina, totalRegistros);
 
@@ -254,14 +252,12 @@ document.addEventListener('DOMContentLoaded', function () {
       if (fila) fila.style.display = 'table-row';
     }
 
-    // Info
     if (info) {
       const desde = totalRegistros ? inicio + 1 : 0;
       const hasta = totalRegistros ? fin : 0;
       info.textContent = `Mostrando ${desde}-${hasta} de ${totalRegistros} usuarios`;
     }
 
-    // Botones
     if (paginacion) {
       paginacion.innerHTML = '';
       for (let i = 1; i <= totalPaginas; i++) {
@@ -273,51 +269,62 @@ document.addEventListener('DOMContentLoaded', function () {
         a.textContent = i;
         a.addEventListener('click', e => {
           e.preventDefault();
-          mostrarPagina(i); // no tocamos filtros aquí
+          mostrarPagina(i);
         });
         li.appendChild(a);
         paginacion.appendChild(li);
       }
     }
 
-    // Diagnóstico
     console.log('paginaActual:', paginaActual, 'rango:', inicio, fin);
   }
 
   function aplicarFiltros() {
     recalcularVisibles();
-    mostrarPagina(1); // siempre volver a página 1 tras cambiar filtros
+    mostrarPagina(1);
   }
 
-  // Inicializar
   aplicarFiltros();
 
-  // Eventos de filtros (si existen)
   if (typeof filtroRol !== 'undefined') filtroRol.addEventListener('change', aplicarFiltros);
   if (typeof filtroEstado !== 'undefined') filtroEstado.addEventListener('change', aplicarFiltros);
   if (typeof buscador !== 'undefined') buscador.addEventListener('input', aplicarFiltros);
 
-  // 🔶 Interceptar formularios de baja (opcionalmente reaplicar filtros)
-  document.querySelectorAll('.form-baja').forEach(form => {
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const boton = this.querySelector('button');
-      const fila = this.closest('tr');
-      const estadoCell = fila.querySelector('.estado');
+  // 🔶 Modal de confirmación de baja
+  const modal = new bootstrap.Modal(document.getElementById('modalConfirmarBaja'));
+  const textoConfirmacion = document.getElementById('textoConfirmacion');
+  let formSeleccionado = null;
 
-      fetch(this.action, {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': this.querySelector('[name=_token]').value }
-      }).then(res => {
-        if (res.ok) {
-          estadoCell.innerText = 'Baja';
-          fila.setAttribute('data-estado', 'Baja');
-          boton.disabled = true;
-          boton.style.opacity = '0.5';
-          boton.style.cursor = 'not-allowed';
-          aplicarFiltros(); // refleja cambio si hay filtro por estado
-        }
-      });
+  document.querySelectorAll('.btn-confirmar-baja').forEach(boton => {
+    boton.addEventListener('click', function() {
+      formSeleccionado = this.closest('form');
+      const nombre = formSeleccionado.dataset.nombre;
+      const rol = formSeleccionado.dataset.rol;
+      textoConfirmacion.textContent = `¿Desea dar de baja a ${nombre} [${rol}]?`;
+      modal.show();
+    });
+  });
+
+  document.getElementById('btnConfirmarBaja').addEventListener('click', function() {
+    if (!formSeleccionado) return;
+
+    const boton = formSeleccionado.querySelector('button');
+    const fila = formSeleccionado.closest('tr');
+    const estadoCell = fila.querySelector('.estado');
+
+    fetch(formSeleccionado.action, {
+      method: 'POST',
+      headers: { 'X-CSRF-TOKEN': formSeleccionado.querySelector('[name=_token]').value }
+    }).then(res => {
+      if (res.ok) {
+        estadoCell.innerText = 'Baja';
+        fila.setAttribute('data-estado', 'Baja');
+        boton.disabled = true;
+        boton.style.opacity = '0.5';
+        boton.style.cursor = 'not-allowed';
+        aplicarFiltros();
+      }
+      modal.hide();
     });
   });
 
@@ -363,10 +370,8 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
-
-
-
 @endpush
+
 
 
 
