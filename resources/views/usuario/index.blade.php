@@ -305,28 +305,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  document.getElementById('btnConfirmarBaja').addEventListener('click', function() {
-    if (!formSeleccionado) return;
+document.getElementById('btnConfirmarBaja').addEventListener('click', function() {
+  if (!formSeleccionado) return;
 
-    const boton = formSeleccionado.querySelector('button');
-    const fila = formSeleccionado.closest('tr');
-    const estadoCell = fila.querySelector('.estado');
+  const boton = formSeleccionado.querySelector('button');
+  const fila = formSeleccionado.closest('tr');
+  const estadoCell = fila.querySelector('.estado');
+  const estadoDiv = estadoCell.querySelector('[id^="estado-usuario-"]'); // el badge interno
 
-    fetch(formSeleccionado.action, {
-      method: 'POST',
-      headers: { 'X-CSRF-TOKEN': formSeleccionado.querySelector('[name=_token]').value }
-    }).then(res => {
-      if (res.ok) {
-        estadoCell.innerText = 'Baja';
-        fila.setAttribute('data-estado', 'Baja');
-        boton.disabled = true;
-        boton.style.opacity = '0.5';
-        boton.style.cursor = 'not-allowed';
-        aplicarFiltros();
+  fetch(formSeleccionado.action, {
+    method: 'POST',
+    headers: { 'X-CSRF-TOKEN': formSeleccionado.querySelector('[name=_token]').value }
+  }).then(res => {
+    if (res.ok) {
+      // Actualizar badge en vez de la celda
+      if (estadoDiv) {
+        estadoDiv.textContent = 'Baja';
+        estadoDiv.className = 'badge px-2 py-1 rounded bg-danger text-white';
+        estadoDiv.style.fontSize = '1rem';
+        estadoDiv.style.fontStyle = 'normal'; // resetear italica
       }
-      modal.hide();
-    });
+
+      fila.setAttribute('data-estado', 'Baja');
+      boton.disabled = true;
+      boton.style.opacity = '0.5';
+      boton.style.cursor = 'not-allowed';
+      aplicarFiltros();
+    }
+    modal.hide();
   });
+});
+
 
   // 🔶 Estado visual y fecha
   const alerta = document.getElementById('alertaEstado');
