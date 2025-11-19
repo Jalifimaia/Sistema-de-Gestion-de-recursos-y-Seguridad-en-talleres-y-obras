@@ -23,7 +23,7 @@
   </div>
 
   <!-- Formulario -->
-  <form id="formEditarUsuario" method="POST" action="{{ route('usuarios.update', $usuario->id) }}">
+  <form id="formEditarUsuario" method="POST" action="{{ route('usuarios.update', $usuario->id) }} novalidate">
     @csrf
     @method('PUT')
 
@@ -175,6 +175,24 @@
   </div>
 </div>
 
+<!-- Modal de éxito -->
+<div class="modal fade" id="modalExitoUsuario" tabindex="-1" aria-labelledby="modalExitoUsuarioLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalExitoUsuarioLabel">Éxito</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Usuario editado correctamente.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -260,55 +278,101 @@ document.addEventListener('DOMContentLoaded', function () {
   // 💾 Modal de confirmación para guardar cambios
   (function setupGuardarModal() {
     const btnAbrirModalGuardar = document.getElementById('btnAbrirModalGuardar');
-    const btnConfirmarGuardar = document.getElementById('btnConfirmarGuardar');
     const formEditarUsuario = document.getElementById('formEditarUsuario');
 
-    if (!btnAbrirModalGuardar || !btnConfirmarGuardar || !formEditarUsuario) return;
+    if (!btnAbrirModalGuardar || !formEditarUsuario) return;
 
     btnAbrirModalGuardar.addEventListener('click', function () {
       const modalGuardar = new bootstrap.Modal(document.getElementById('modalConfirmarGuardar'));
       modalGuardar.show();
     });
+  })();
 
-    btnConfirmarGuardar.addEventListener('click', function () {
-      formEditarUsuario.submit();
+  // 🚨 Validación personalizada de campos requeridos
+  (function setupValidacionCampos() {
+    const formEditarUsuario = document.getElementById('formEditarUsuario');
+    const btnConfirmarGuardar = document.getElementById('btnConfirmarGuardar');
+
+    if (!formEditarUsuario || !btnConfirmarGuardar) return;
+
+    // Interceptar el submit del formulario
+    formEditarUsuario.addEventListener('submit', function (e) {
+      if (!formEditarUsuario.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const modalMsgEl = document.getElementById('modalMensajeSistema');
+        if (modalMsgEl) {
+          const header = document.getElementById('modalMensajeHeader');
+          header.classList.remove('bg-success');
+          header.classList.add('bg-danger', 'text-white');
+          document.getElementById('modalMensajeSistemaLabel').textContent = 'Error';
+          document.getElementById('modalMensajeContenido').textContent =
+            'Por favor, completá todos los campos obligatorios antes de guardar.';
+          new bootstrap.Modal(modalMsgEl).show();
+        }
+      }
     });
+
+    // Confirmar guardar → validar antes de enviar
+    btnConfirmarGuardar.addEventListener('click', function () {
+  if (formEditarUsuario.checkValidity()) {
+    formEditarUsuario.requestSubmit(); // dispara el submit sin validación nativa
+  } else {
+    // 🔴 Cerrar el modal de confirmación de guardar si está abierto
+    const modalConfirmarGuardarEl = document.getElementById('modalConfirmarGuardar');
+    const modalConfirmarGuardar = bootstrap.Modal.getInstance(modalConfirmarGuardarEl);
+    if (modalConfirmarGuardar) {
+      modalConfirmarGuardar.hide();
+    }
+
+    // Mostrar el modal de error
+    const modalMsgEl = document.getElementById('modalMensajeSistema');
+    if (modalMsgEl) {
+      const header = document.getElementById('modalMensajeHeader');
+      header.classList.remove('bg-success');
+      header.classList.add('bg-danger', 'text-white');
+      document.getElementById('modalMensajeSistemaLabel').textContent = 'Error';
+      document.getElementById('modalMensajeContenido').textContent =
+        'Tenés campos sin completar. Revisalos antes de continuar.';
+      new bootstrap.Modal(modalMsgEl).show();
+    }
+  }
+});
+
   })();
 
   // ✅ Modal automático para mensajes del sistema
-  (function autocloseSystemModal() {
-    @if(session('success'))
-      (function () {
-        const modalEl = document.getElementById('modalMensajeSistema');
-        if (!modalEl) return;
-        const header = document.getElementById('modalMensajeHeader');
-        header?.classList.remove('bg-danger');
-        header?.classList.add('bg-success', 'text-white');
-        document.getElementById('modalMensajeSistemaLabel').textContent = 'Éxito';
-        document.getElementById('modalMensajeContenido').textContent = @json(session('success'));
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-        setTimeout(() => modal.hide(), 4000);
-      })();
-    @endif
+(function autocloseSystemModal() {
+  @if(session('success'))
+    (function () {
+      const modalEl = document.getElementById('modalExitoUsuario');
+      if (!modalEl) return;
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+      setTimeout(() => modal.hide(), 4000);
+    })();
+  @endif
 
-    @if($errors->any())
-      (function () {
-        const modalEl = document.getElementById('modalMensajeSistema');
-        if (!modalEl) return;
-        const header = document.getElementById('modalMensajeHeader');
-        header?.classList.remove('bg-success');
-        header?.classList.add('bg-danger', 'text-white');
-        document.getElementById('modalMensajeSistemaLabel').textContent = 'Error';
-        const errores = @json($errors->all());
-        document.getElementById('modalMensajeContenido').textContent = errores.join('\n');
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-      })();
-    @endif
-  })();
+  @if($errors->any())
+    (function () {
+      const modalEl = document.getElementById('modalMensajeSistema');
+      if (!modalEl) return;
+      const header = document.getElementById('modalMensajeHeader');
+      header?.classList.remove('bg-success');
+      header?.classList.add('bg-danger', 'text-white');
+      document.getElementById('modalMensajeSistemaLabel').textContent = 'Error';
+      const errores = @json($errors->all());
+      document.getElementById('modalMensajeContenido').textContent = errores.join('\n');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    })();
+  @endif
+})();
+
 });
 </script>
+
 @endpush
 
 @push('styles')
