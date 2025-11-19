@@ -48,7 +48,7 @@
         @else
           <div class="table-responsive">
             <table class="table table-bordered text-center table-checklist">
-              <thead class="table-light">
+              <thead>
                 <tr>
                   <th>Trabajador</th>
                   <th>Anteojos</th>
@@ -88,7 +88,7 @@
           </div>
 
           <div class="mt-3 text-end">
-            <a href="{{ route('controlEPP') }}" class="btn btn-sm btn-outline-primary">
+            <a href="{{ route('controlEPP') }}" class="btn btn-sm btn-ver-todo">
               Ver todos los checklist
             </a>
           </div>

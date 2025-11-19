@@ -27,7 +27,7 @@
       @endif
 
 
-      <form id="recursoForm" method="POST" action="{{ route('recursos.store') }}">
+      <form id="recursoForm" method="POST" action="{{ route('recursos.store') }}" novalidate>
         @csrf
 
         <!-- Categoría -->
@@ -52,7 +52,7 @@
         </div>
 
         <!-- Nueva Subcategoría -->
-        <div class="input-group mt-2">
+        <div class="input-group mt-2 mb-3">
           <input type="text" id="nuevaSubcategoria" name="nueva_subcategoria" class="form-control" placeholder="Nueva subcategoría" value="{{ old('nueva_subcategoria') }}">
           <button type="button" class="btn btn-agregar-subcategoria" id="agregarSubcategoria">Agregar</button>
         </div>
@@ -86,6 +86,25 @@
 
 
 </div>
+
+<!-- Modal faltan campos -->
+<div class="modal fade" id="modalErrorCampos" tabindex="-1" aria-labelledby="modalErrorCamposLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalErrorCamposLabel">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Faltan campos por completar. Por favor, revisá el formulario.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div class="modal fade" id="modalRecursoCreado" tabindex="-1" aria-labelledby="modalRecursoCreadoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">

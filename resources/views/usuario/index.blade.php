@@ -190,6 +190,25 @@
   </div>
 </div>
 
+<!-- Modal de éxito en baja -->
+<div class="modal fade" id="modalExitoBaja" tabindex="-1" aria-labelledby="modalExitoBajaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalExitoBajaLabel">Éxito</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="modalExitoBajaContenido">
+        <!-- Texto dinámico -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 @endsection
 
 @push('scripts')
@@ -306,27 +325,43 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.getElementById('btnConfirmarBaja').addEventListener('click', function() {
-    if (!formSeleccionado) return;
+  if (!formSeleccionado) return;
 
-    const boton = formSeleccionado.querySelector('button');
-    const fila = formSeleccionado.closest('tr');
-    const estadoCell = fila.querySelector('.estado');
+  const boton = formSeleccionado.querySelector('button');
+  const fila = formSeleccionado.closest('tr');
+  const estadoCell = fila.querySelector('.estado');
+  const nombre = formSeleccionado.dataset.nombre;
+  const rol = formSeleccionado.dataset.rol;
 
-    fetch(formSeleccionado.action, {
-      method: 'POST',
-      headers: { 'X-CSRF-TOKEN': formSeleccionado.querySelector('[name=_token]').value }
-    }).then(res => {
-      if (res.ok) {
-        estadoCell.innerText = 'Baja';
-        fila.setAttribute('data-estado', 'Baja');
-        boton.disabled = true;
-        boton.style.opacity = '0.5';
-        boton.style.cursor = 'not-allowed';
-        aplicarFiltros();
+  fetch(formSeleccionado.action, {
+    method: 'POST',
+    headers: { 'X-CSRF-TOKEN': formSeleccionado.querySelector('[name=_token]').value }
+  }).then(res => {
+    if (res.ok) {
+      // Actualizar estado visual
+      estadoCell.innerText = 'Baja';
+      fila.setAttribute('data-estado', 'Baja');
+      boton.disabled = true;
+      boton.style.opacity = '0.5';
+      boton.style.cursor = 'not-allowed';
+      aplicarFiltros();
+
+      // ✅ Mostrar modal de éxito
+      const modalExitoEl = document.getElementById('modalExitoBaja');
+      const contenido = document.getElementById('modalExitoBajaContenido');
+      if (modalExitoEl && contenido) {
+      contenido.innerHTML = `Usuario <strong>${nombre}</strong> [<em>${rol}</em>] dado de baja correctamente.`;
+        const modalExito = new bootstrap.Modal(modalExitoEl);
+        modalExito.show();
+        setTimeout(() => modalExito.hide(), 4000); // opcional: cerrar solo
       }
-      modal.hide();
-    });
+    }
+
+    // Cerrar modal de confirmación
+    modal.hide();
   });
+});
+
 
   // 🔶 Estado visual y fecha
   const alerta = document.getElementById('alertaEstado');

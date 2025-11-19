@@ -131,12 +131,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!firstInvalid) firstInvalid = descripcion;
   }
 
-  if (firstInvalid) {
-    firstInvalid.focus();
-    return; // No enviar si hay errores
-  }
+      if (firstInvalid) {
+      firstInvalid.focus();
 
-  // 🔹 Enviar formulario por fetch
+      const modalErrorEl = document.getElementById('modalErrorCampos');
+      if (modalErrorEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        new bootstrap.Modal(modalErrorEl).show();
+      }
+
+      return; // No enviar si hay errores
+    }
+
+
   const payload = {
     id_subcategoria: subcategoriaSelect.value,
     nombre: document.getElementById('nombre').value,

@@ -433,5 +433,18 @@ padding-top: 0.25rem;
   color: #ffffff !important; /* el color original, no negro */
 }
 
+.table-checklist thead {
+  background-color: #b14910 !important;
+  color: #fff !important;
+}
 
+.table.table-checklist thead tr th {
+  background-color: #cc662f !important;
+  color: #fff !important;
+}
+
+.btn-ver-todo {
+  background-color: #3e8d09;
+  color: #fff;
+}
 
