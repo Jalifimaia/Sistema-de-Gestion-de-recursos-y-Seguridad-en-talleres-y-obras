@@ -349,33 +349,30 @@ public function activarConEPP($id)
 {
     $usuario = Usuario::with('usuarioRecursos', 'estado')->findOrFail($id);
 
-    // Solo trabajadores (ajustá id_rol si corresponde)
-    if ($usuario->id_rol !== 3) {
-        return back()->withErrors(['rol' => 'Solo se pueden activar trabajadores con EPP.']);
-    }
-
     // Solo permitir activar si está en stand by o ya en Alta
     $estadoActual = optional($usuario->estado)->nombre;
     if (! in_array($estadoActual, ['stand by', 'Alta'])) {
         return back()->withErrors(['estado' => "No se puede dar de alta desde el estado '{$estadoActual}'. Primero pase a stand by."]);
     }
 
-    // Normalizar y recolectar tipos asignados
-    $tiposAsignados = $usuario->usuarioRecursos
-        ->pluck('tipo_epp')
-        ->filter()
-        ->map(fn($t) => strtolower(trim($t)))
-        ->unique()
-        ->values()
-        ->toArray();
+    // Validar EPP solo si es trabajador
+    if ($usuario->id_rol === 3) {
+        $tiposAsignados = $usuario->usuarioRecursos
+            ->pluck('tipo_epp')
+            ->filter()
+            ->map(fn($t) => strtolower(trim($t)))
+            ->unique()
+            ->values()
+            ->toArray();
 
-    $tiposObligatorios = ['casco','guantes','lentes','botas','chaleco','arnes'];
-    $faltantes = array_diff($tiposObligatorios, $tiposAsignados);
+        $tiposObligatorios = ['casco','guantes','lentes','botas','chaleco','arnes'];
+        $faltantes = array_diff($tiposObligatorios, $tiposAsignados);
 
-    if (count($faltantes) > 0) {
-        return back()->withErrors([
-            'faltantes' => 'No se puede dar de alta. Faltan: ' . implode(', ', $faltantes)
-        ])->withInput();
+        if (count($faltantes) > 0) {
+            return back()->withErrors([
+                'faltantes' => 'No se puede dar de alta. Faltan: ' . implode(', ', $faltantes)
+            ])->withInput();
+        }
     }
 
     $estadoAlta = EstadoUsuario::where('nombre', 'Alta')->first();
@@ -389,7 +386,7 @@ public function activarConEPP($id)
 
     \Log::info("Usuario {$usuario->id} activado a Alta por usuario " . auth()->id());
 
-    return redirect()->route('usuarios.edit', $usuario->id)->with('success', 'Trabajador dado de alta correctamente.');
+    return redirect()->route('usuarios.edit', $usuario->id)->with('success', 'Usuario dado de alta correctamente.');
 }
 
 
