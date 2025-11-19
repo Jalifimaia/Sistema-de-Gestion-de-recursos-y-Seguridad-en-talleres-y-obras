@@ -145,8 +145,9 @@ public function update(UserRequest $request, $id): RedirectResponse
         $usuario->update($data);
 
         return redirect()
-            ->route('usuarios.index')
-            ->with('success', 'Usuario actualizado correctamente');
+    ->route('usuarios.edit', $usuario->id)
+    ->with('success', 'Usuario actualizado correctamente');
+
 
     } catch (\Exception $e) {
         \Log::error('Error al actualizar usuario: ' . $e->getMessage());
