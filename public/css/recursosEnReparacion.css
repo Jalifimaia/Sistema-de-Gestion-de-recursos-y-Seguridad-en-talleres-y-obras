@@ -128,3 +128,28 @@ table.table thead th {
   border-color: #d06842;
 }
 
+.btn-ver-grafico {
+  border-color: #1f1f1f;
+  outline: none;
+}
+
+.btn-ver-grafico:hover {
+  background-color: #c9c9c9;
+  border-color: #1f1f1f;
+  outline: none;
+}
+
+.btn-filtro {
+  background-color: #b14910;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-filtro:hover {
+  background-color: #943d0e;
+}
+

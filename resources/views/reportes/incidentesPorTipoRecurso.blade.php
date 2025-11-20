@@ -17,34 +17,52 @@
             </h4>
         </div>
 
-        <div class="ms-auto">
-            <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalGrafico">
-                Ver gráfico
-                <img src="{{ asset('images/grafico.svg') }}" alt="Gráfico" class="ms-2 icono-volver">
-            </button>
+        <div class="ms-auto d-flex gap-2">
+          <button type="button"
+                  class="btn btn-ver-grafico btn-sm d-flex align-items-center text-nowrap"
+                  style="min-width: 130px;"
+                  data-bs-toggle="modal" data-bs-target="#modalGrafico">
+            <img src="{{ asset('images/grafico.svg') }}" alt="Gráfico" class="me-2" style="width: 16px; height: 16px;">
+            Ver gráfico
+          </button>
+
+          <a href="{{ url('/reportes/incidentes-por-tipo/pdf') }}?fecha_inicio={{ request('fecha_inicio') }}&fecha_fin={{ request('fecha_fin') }}"
+            class="btn btn-pdf btn-sm d-flex align-items-center text-nowrap"
+            style="min-width: 150px;">
+            <img src="{{ asset('images/pdf2.svg') }}" alt="PDF" class="me-2" style="width: 16px; height: 16px;">
+            Exportar a PDF
+          </a>
         </div>
+
 
     </div>
 
     <form method="GET" action="{{ route('reportes.incidentesPorTipo') }}" class="row g-3 align-items-end mb-4">
-        <div class="col-md-3">
-            <label for="fecha_inicio" class="form-label">Desde</label>
+        <!-- Fechas -->
+        <div class="col-md-2">
+            <label for="fecha_inicio" class="form-label fw-bold">Desde</label>
             <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ request('fecha_inicio') }}">
         </div>
-        <div class="col-md-3">
-            <label for="fecha_fin" class="form-label">Hasta</label>
+
+        <div class="col-md-2">
+            <label for="fecha_fin" class="form-label fw-bold">Hasta</label>
             <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ request('fecha_fin') }}">
         </div>
-        <div class="col-md-6 d-flex gap-3">
-            <button type="submit" class="btn btn-filtro d-flex align-items-center justify-content-center flex-grow-1">
-            <img src="{{ asset('images/filter.svg') }}" alt="Filtrar" class="me-2 icono-volver">
-            Aplicar filtros
-            </button>
 
-            <a href="{{ url('/reportes/incidentes-por-tipo/pdf') }}?fecha_inicio={{ request('fecha_inicio') }}&fecha_fin={{ request('fecha_fin') }}"
-            class="btn btn-pdf d-flex align-items-center justify-content-center flex-grow-1">
-            <img src="{{ asset('images/pdf2.svg') }}" alt="PDF" class="me-2 icono-volver">
-            Exportar a PDF
+        <!-- Botón aplicar -->
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-filtro btn-sm w-100 d-flex align-items-center justify-content-center text-nowrap">
+                <img src="{{ asset('images/filter.svg') }}" alt="Filtrar" class="me-2" style="width: 16px; height: 16px;">
+                Aplicar filtros
+            </button>
+        </div>
+
+        <!-- Botón limpiar cuadrado -->
+        <div class="col-auto">
+            <a href="{{ route('reportes.incidentesPorTipo') }}" 
+               class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center"
+               style="width: 40px; height: 40px; padding: 0;">
+                <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 20px; height: 20px;">
             </a>
         </div>
     </form>

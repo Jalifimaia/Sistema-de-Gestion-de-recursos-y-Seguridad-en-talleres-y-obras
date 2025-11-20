@@ -22,49 +22,86 @@
     </div>
   </div>
 
-  <!-- Errores -->
-  @if ($errors->any())
-    <div class="alert alert-danger">
-      <ul class="mb-0">
-        @foreach ($errors->all() as $error)
-          <li>{{ $error }}</li>
-        @endforeach
-      </ul>
-    </div>
-  @endif
-
   <!-- Formulario -->
-  <form method="POST" action="{{ route('usuarios.store') }}">
+  <form id="crearUsuarioForm" method="POST" action="{{ route('usuarios.store') }}" novalidate>
     @csrf
 
     <div class="mb-3">
       <label for="name" class="form-label">Nombre</label>
-      <input type="text" name="name" class="form-control" value="{{ old('name') }}" required placeholder="Ingrese su nombre">
+      <input type="text" name="name" id="name" class="form-control"
+       value="{{ old('name') }}"
+       placeholder="Ingrese su nombre"
+       maxlength="255">
+       <div class="invalid-feedback d-block" id="error-name"></div>
     </div>
 
     <div class="mb-3">
       <label for="dni" class="form-label">DNI</label>
-      <input type="text" name="dni" class="form-control" value="{{ old('dni') }}" required placeholder="Ingrese su DNI">
+      <input type="number"
+            name="dni"
+            id="dni"
+            class="form-control"
+            value="{{ old('dni') }}"
+            placeholder="Ingrese su DNI"
+            min="1"
+            oninput="if(this.value.length>15) this.value=this.value.slice(0,15)">
+            <div class="invalid-feedback d-block" id="error-dni"></div>
     </div>
 
     <div class="mb-3">
       <label for="email" class="form-label">Email</label>
-      <input type="email" name="email" class="form-control" value="{{ old('email') }}" required placeholder="Ingrese su dirección de mail">
+      <input type="email" name="email" id="email" class="form-control"
+       value="{{ old('email') }}"
+       placeholder="Ingrese su dirección de mail"
+       maxlength="255">
+       <div class="invalid-feedback d-block" id="error-email"></div>
     </div>
 
+    <!-- Contraseña -->
     <div class="mb-3">
       <label for="password" class="form-label">Contraseña</label>
-      <input type="password" name="password" id="password" class="form-control" placeholder="Ingrese una contraseña">
+      <div class="input-group">
+        <input type="password"
+              name="password"
+              id="password"
+              class="form-control"
+              placeholder="Ingrese una contraseña"
+              maxlength="255">
+        <button type="button" class="btn btn-ojoa" id="togglePassword">
+          <img src="{{ asset('images/ojocerrado.svg') }}"
+              alt="Mostrar/Ocultar"
+              id="iconPassword"
+              style="width:20px; height:20px;">
+        </button>
+        <div class="invalid-feedback d-block" id="error-password"></div>
+      </div>
     </div>
 
+    <!-- Confirmar contraseña -->
     <div class="mb-3">
       <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
-      <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="Confirme su contraseña">
+      <div class="input-group">
+        <input type="password"
+              name="password_confirmation"
+              id="password_confirmation"
+              class="form-control"
+              placeholder="Confirme su contraseña"
+              maxlength="255">
+        <button type="button" class="btn btn-ojoa" id="togglePasswordConfirm">
+          <img src="{{ asset('images/ojocerrado.svg') }}"
+              alt="Mostrar/Ocultar"
+              id="iconPasswordConfirm"
+              style="width:20px; height:20px;">
+        </button>
+        <div class="invalid-feedback d-block" id="error-password-confirm"></div>
+      </div>
     </div>
+
+
 
     <div class="mb-3">
       <label for="id_rol" class="form-label">Rol</label>
-      <select name="id_rol" class="form-select" required>
+      <select name="id_rol" class="form-select">
         @foreach ($roles as $rol)
           <option value="{{ $rol->id }}">{{ $rol->nombre_rol }}</option>
         @endforeach
@@ -79,6 +116,25 @@
     </div>
   </form>
 </div>
+
+<!-- Modal de error -->
+<div class="modal fade" id="modalErrorCampos" tabindex="-1" aria-labelledby="modalErrorCamposLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalErrorCamposLabel">Error</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Hay campos obligatorios sin completar o con formato inválido.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- Modal de éxito -->
 <div class="modal fade" id="usuarioCreadoModal" tabindex="-1" aria-labelledby="usuarioCreadoLabel" aria-hidden="true">
@@ -111,12 +167,88 @@
 
 @push('scripts')
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    @if(session('usuario_creado'))
-      const modal = new bootstrap.Modal(document.getElementById('usuarioCreadoModal'));
-      modal.show();
-    @endif
+document.addEventListener('DOMContentLoaded', () => {
+  function toggleVisibility(inputId, buttonId, iconId) {
+    const input = document.getElementById(inputId);
+    const button = document.getElementById(buttonId);
+    const icon = document.getElementById(iconId);
+
+    if (!input || !button || !icon) return;
+
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.src = "{{ asset('images/ojoabierto.svg') }}"; 
+      } else {
+        input.type = 'password';
+        icon.src = "{{ asset('images/ojocerrado.svg') }}"; 
+      }
+    });
+  }
+
+  toggleVisibility('password', 'togglePassword', 'iconPassword');
+  toggleVisibility('password_confirmation', 'togglePasswordConfirm', 'iconPasswordConfirm');
+
+  const form = document.getElementById('crearUsuarioForm');
+
+  const modalErrorEl = document.getElementById('modalErrorCampos');
+
+  form.addEventListener('submit', function(e) {
+    let hasErrors = false;
+
+    // Resetear mensajes previos
+    document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+
+    // Nombre
+    const name = form.querySelector('[name="name"]');
+    if (!name.value.trim()) {
+      document.getElementById('error-name').textContent = 'El nombre es obligatorio';
+      hasErrors = true;
+    }
+
+    // DNI
+    const dni = form.querySelector('[name="dni"]');
+    if (!dni.value.trim()) {
+      document.getElementById('error-dni').textContent = 'El DNI es obligatorio';
+      hasErrors = true;
+    } else if (!/^\d+$/.test(dni.value)) {
+      document.getElementById('error-dni').textContent = 'El DNI debe contener solo números';
+      hasErrors = true;
+    }
+
+    // Email
+    const email = form.querySelector('[name="email"]');
+    if (!email.value.trim()) {
+      document.getElementById('error-email').textContent = 'El email es obligatorio';
+      hasErrors = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+      document.getElementById('error-email').textContent = 'El formato de email es inválido';
+      hasErrors = true;
+    }
+
+    // Contraseña
+    const password = form.querySelector('[name="password"]');
+    const confirm = form.querySelector('[name="password_confirmation"]');
+    if (!password.value.trim()) {
+      document.getElementById('error-password').textContent = 'La contraseña es obligatoria';
+      hasErrors = true;
+    } else if (password.value !== confirm.value) {
+      document.getElementById('error-password-confirm').textContent = 'Las contraseñas no coinciden';
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      e.preventDefault(); // Cancela el envío si hay errores
+    }
   });
+
+  @if(session('usuario_creado'))
+    const modal = new bootstrap.Modal(document.getElementById('usuarioCreadoModal'));
+    modal.show();
+  @endif
+});
 </script>
+
 @endpush
 

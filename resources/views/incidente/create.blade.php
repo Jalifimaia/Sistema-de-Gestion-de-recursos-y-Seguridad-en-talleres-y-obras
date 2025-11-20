@@ -154,7 +154,10 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label>Motivo del incidente</label>
-                    <textarea name="descripcion" class="form-control" required placeholder="Ingrese aquí cuál fue el motivo del incidente" >{{ old('descripcion') }}</textarea>
+                    <textarea name="descripcion" class="form-control"
+                      required
+                      maxlength="255"
+                      placeholder="Ingrese aquí cuál fue el motivo del incidente (máx. 255 caracteres).">{{ old('descripcion') }}</textarea>
                 </div>
                 <div class="mb-3">
                     <label>Fecha del incidente</label>
@@ -255,7 +258,6 @@
 
 
 <script>
-// ---------- Datos de categorías, subcategorías, recursos y series ----------
 const categorias = @json($categorias);
 
 // ---------- Funciones para llenar selects ----------

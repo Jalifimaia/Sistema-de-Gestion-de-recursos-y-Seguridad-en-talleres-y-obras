@@ -62,14 +62,26 @@
         <!-- Nombre -->
         <div class="col-md-6">
             <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre del recurso" value="{{ old('nombre', $recurso->nombre) }}" required>
+            <input type="text" id="nombre" name="nombre"
+              class="form-control"
+              maxlength="60"
+              value="{{ old('nombre', $recurso->nombre) }}" required>
         </div>
 
         <!-- Descripción -->
         <div class="col-12">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Descripción..." rows="3">{{ old('descripcion', $recurso->descripcion) }}</textarea>
+          <label for="descripcion" class="form-label">Descripción</label>
+          <textarea id="descripcion"
+                    name="descripcion"
+                    class="form-control @error('descripcion') is-invalid @enderror"
+                    placeholder="Descripción..."
+                    rows="3"
+                    maxlength="250">{{ old('descripcion', $recurso->descripcion) }}</textarea>
+          @error('descripcion')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
         </div>
+
 
         <!-- Costo unitario -->
         <div class="col-md-6">

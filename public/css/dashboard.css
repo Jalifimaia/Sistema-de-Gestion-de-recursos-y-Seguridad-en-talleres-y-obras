@@ -448,3 +448,26 @@ padding-top: 0.25rem;
   color: #fff;
 }
 
+/* Cambiar color de los links de paginación */
+.pagination .page-link {
+  color: #b14910; /* rojo Bootstrap (danger) */
+}
+
+/* Cambiar color de fondo y texto cuando está activo */
+.pagination .page-item.active .page-link {
+  background-color: #b14910; /* rojo */
+  border-color: #b14910;
+  color: #fff; /* texto blanco */
+}
+
+/* Cambiar color al pasar el mouse */
+.pagination .page-link:hover {
+  color: #b14910; /* rojo más oscuro */
+}
+
+.bg-modall {
+  background-color: #b14910 ;
+  color: #fff;
+}
+
+

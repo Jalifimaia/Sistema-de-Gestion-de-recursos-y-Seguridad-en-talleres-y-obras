@@ -180,17 +180,34 @@ public function createConRecurso($id)
 {
     $query = request('search');
 
-    $series = SerieRecurso::with('recurso')
+    $series = SerieRecurso::with(['recurso.subcategoria', 'recurso.categoria'])
         ->when($query, function ($q) use ($query) {
-            $q->where('nro_serie', 'like', $query . '%'); // ← busca por las iniciales del nro_serie
+            $q->where(function ($sub) use ($query) {
+                // 🔍 nro_serie: coincidencias en cualquier parte
+                $sub->where('nro_serie', 'like', "%{$query}%")
+                    // 🔍 nombre del recurso
+                    ->orWhereHas('recurso', function ($qr) use ($query) {
+                        $qr->where('nombre', 'like', "%{$query}%")
+                           // 🔍 subcategoría
+                           ->orWhereHas('subcategoria', function ($qs) use ($query) {
+                               $qs->where('nombre', 'like', "%{$query}%");
+                           })
+                           // 🔍 categoría
+                           ->orWhereHas('categoria', function ($qc) use ($query) {
+                               $qc->where('nombre_categoria', 'like', "%{$query}%");
+                           });
+                    });
+            });
         })
         ->orderByDesc('id')
-        ->paginate(18)
+        ->paginate(18) // 🔄 Laravel calcula cuántas páginas según resultados filtrados
         ->onEachSide(1)
-        ->withQueryString(); // ← mantiene el ?search en los links de paginación
+        ->withQueryString(); // mantiene ?search en los links de paginación
 
     return view('serie_recurso.qrindex', compact('series'));
 }
+
+
 
 
 

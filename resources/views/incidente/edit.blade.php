@@ -150,14 +150,15 @@
             <div class="mb-3">
               <label for="descripcion" class="form-label">Motivo del incidente</label>
               @if(!empty($readonly))
-                <input type="text" name="descripcion" id="descripcion" class="form-control" 
-                      value="{{ $incidente->descripcion }}" readonly>
+                <textarea name="descripcion" id="descripcion" class="form-control" readonly>{{ $incidente->descripcion }}</textarea>
                 <input type="hidden" name="descripcion" value="{{ $incidente->descripcion }}">
               @else
-                <input type="text" name="descripcion" id="descripcion" class="form-control" 
-                      value="{{ old('descripcion', $incidente->descripcion) }}" required>
+                <textarea name="descripcion" id="descripcion" class="form-control"
+                          required maxlength="255"
+                          placeholder="Ingrese aquí cuál fue el motivo del incidente (máx. 255 caracteres).">{{ old('descripcion', $incidente->descripcion) }}</textarea>
               @endif
             </div>
+
 
             <!-- Fecha del incidente -->
             <div class="mb-3">

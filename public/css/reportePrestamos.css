@@ -10,7 +10,7 @@ input[type="date"].form-control:focus {
 }
 
 .btn-filtro {
-  background-color: #1976d2;
+  background-color: #b14910;
   color: #fff;
   font-weight: 500;
   border: none;
@@ -173,3 +173,15 @@ input[type="date"].form-control:focus {
   color: white;
   border-color: #d06842;
 }
+
+.btn-limpiar {
+  background-color: #6c757d; /* gris Bootstrap */
+  color: white;
+  border: none;
+}
+
+.btn-limpiar:hover {
+  background-color: #5a6268;
+}
+
+

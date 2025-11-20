@@ -64,10 +64,11 @@ public function store(UserRequest $request): RedirectResponse
 
     User::create($data);
 
-    return Redirect::back()->with('usuario_creado', true);
-
-
+    // 🔹 Redirige siempre a la pantalla de creación con la sesión
+    return redirect()->route('usuarios.create')
+                     ->with('usuario_creado', true);
 }
+
 
 
 

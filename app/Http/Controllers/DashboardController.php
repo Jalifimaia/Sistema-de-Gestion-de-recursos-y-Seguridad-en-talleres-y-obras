@@ -16,26 +16,23 @@ class DashboardController extends Controller
 
 public function index()
 {
-    $usuariosActivos = Usuario::where('id_estado', 1)->count();
     $usuarios = Usuario::where('id_estado', 1)->get();
 
+    $usuariosActivos = Usuario::where('id_estado', 1)->count();
 
-    /*$usuariosEnLinea = DB::table('users')
-    ->where('last_activity', '>=', now()->subMinutes(10))
-    ->count();*/
+    $usuariosActivosLista = Usuario::where('id_estado', 1)
+        ->paginate(6, ['*'], 'usuarios_activos_page');
+
+    $herramientasEnUso = SerieRecurso::where('id_estado', 3)->count();
+
+    $herramientasEnUsoLista = SerieRecurso::with('recurso.subcategoria.categoria')
+        ->whereHas('recurso.subcategoria.categoria', function ($query) {
+            $query->where('nombre_categoria', 'Herramienta');
+        })
+        ->where('id_estado', 3)
+        ->paginate(6, ['*'], 'herramientas_uso_page');
 
 
-    // Herramientas en uso (estado_prestamo = Activo)
-    $herramientasEnUso = DB::table('serie_recurso')
-    ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
-    ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
-    ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
-    ->where('serie_recurso.id_estado', 3) // Prestado
-    ->where('categoria.nombre_categoria', 'Herramienta')
-    ->count();
-
-
-    // Herramientas totales (todas las series de recursos que son herramientas)
     $herramientasTotales = DB::table('serie_recurso')
         ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
         ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
@@ -43,25 +40,22 @@ public function index()
         ->where('categoria.nombre_categoria', 'Herramienta')
         ->count();
 
-    // Herramientas disponibles
     $herramientasDisponibles = DB::table('serie_recurso')
         ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
         ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
         ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
         ->where('categoria.nombre_categoria', 'Herramienta')
-        ->where('serie_recurso.id_estado', 1) // Disponible
+        ->where('serie_recurso.id_estado', 1)
         ->count();
 
-    // EPP en stock
     $eppStock = DB::table('serie_recurso')
         ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
         ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
         ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
         ->where('categoria.nombre_categoria', 'EPP')
-        ->where('serie_recurso.id_estado', 1) // Disponible
+        ->where('serie_recurso.id_estado', 1)
         ->count();
 
-    // EPP totales
     $eppTotales = DB::table('serie_recurso')
         ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
         ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
@@ -69,36 +63,20 @@ public function index()
         ->where('categoria.nombre_categoria', 'EPP')
         ->count();
 
-    // Elementos en reparación
     $elementosReparacion = DB::table('serie_recurso')
-        ->where('id_estado', 6) // En Reparación
+        ->where('id_estado', 6)
         ->count();
 
-    $stockBajo = DB::table('serie_recurso')
-    ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
-    ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
-    ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
-    ->select('recurso.nombre', DB::raw('COUNT(*) as cantidad'))
-    ->where('categoria.nombre_categoria', 'EPP')
-    ->where('serie_recurso.id_estado', 1) // Disponible
-    ->groupBy('recurso.nombre')
-    ->having('cantidad', '<', 5)
-    ->get();
-
-        
-
-    // Total de trabajadores
     $totalTrabajadores = DB::table('usuario')
         ->where('id_rol', 3)
         ->count();
 
-    // Cantidad de EPP devueltos por trabajadores
     $eppEntregados = DB::table('serie_recurso')
         ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
         ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
         ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
         ->where('categoria.nombre_categoria', 'EPP')
-        ->where('serie_recurso.id_estado', 4) // Devuelto
+        ->where('serie_recurso.id_estado', 4)
         ->count();
 
     $eppEntregadosLista = DB::table('detalle_prestamo')
@@ -109,28 +87,33 @@ public function index()
         ->join('prestamo', 'detalle_prestamo.id_prestamo', '=', 'prestamo.id')
         ->join('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
         ->where('categoria.nombre_categoria', 'EPP')
-        ->where('detalle_prestamo.id_estado_prestamo', 2) // Activo
+        ->where('detalle_prestamo.id_estado_prestamo', 2)
         ->select(
             'usuario.name as trabajador',
             'recurso.nombre as elemento',
             'prestamo.fecha_prestamo as fecha_entrega'
         )
-
         ->get();
 
-    $alertasVencidos = SerieRecurso::with('recurso')
+    $alertasVencidas = SerieRecurso::with('recurso')
         ->whereNotNull('fecha_vencimiento')
         ->where('fecha_vencimiento', '<', now())
-        ->get();
+        ->paginate(6, ['*'], 'vencidos_page');
 
-
-
-     // Porcentaje entregado
-    $porcentajeEntregado = $totalTrabajadores > 0
-        ? round(($eppEntregados / $totalTrabajadores) * 100)
-        : 0;
-
-
+    $stockBajo = DB::table('serie_recurso')
+    ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
+    ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id') 
+    ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
+    ->select(
+        'recurso.nombre as recurso',
+        'subcategoria.nombre as subcategoria',   
+        DB::raw('COUNT(*) as cantidad')
+    )
+    ->where('categoria.nombre_categoria', 'EPP')
+    ->where('serie_recurso.id_estado', 1)
+    ->groupBy('recurso.nombre', 'subcategoria.nombre') 
+    ->having('cantidad', '<', 5)
+    ->paginate(6, ['*'], 'stock_page');
 
 
     $herramientasNoDevueltas = DB::table('detalle_prestamo')
@@ -140,32 +123,40 @@ public function index()
     ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
     ->join('prestamo', 'detalle_prestamo.id_prestamo', '=', 'prestamo.id')
     ->join('usuario', 'prestamo.id_usuario', '=', 'usuario.id')
-    ->where('detalle_prestamo.id_estado_prestamo', 2) // Activo
+    ->where('detalle_prestamo.id_estado_prestamo', 2)
     ->where('categoria.nombre_categoria', 'Herramienta')
-    ->select('recurso.nombre as recurso', 'serie_recurso.nro_serie', 'usuario.name as trabajador')
-    ->get();
+    ->select(
+        'recurso.nombre as recurso',
+        'subcategoria.nombre as subcategoria',  
+        'serie_recurso.nro_serie',
+        'usuario.name as trabajador'
+    )
+    ->paginate(6, ['*'], 'herramientas_page');
+
+
+    $alertasActivas = $alertasVencidas->total()
+                    + $stockBajo->total()
+                    + $herramientasNoDevueltas->total();
 
     $herramientasUsadas = SerieRecurso::with('recurso.subcategoria')
         ->whereHas('recurso.subcategoria.categoria', function ($query) {
             $query->where('nombre_categoria', 'Herramienta');
         })
-        ->where('id_estado', 3) // En uso
+        ->where('id_estado', 3)
         ->get();
 
-
-
     $eppVencidos = DB::table('serie_recurso')
-    ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
-    ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
-    ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
-    ->where('categoria.nombre_categoria', 'EPP')
-    ->whereNotNull('serie_recurso.fecha_vencimiento')
-    ->where('serie_recurso.fecha_vencimiento', '<', now())
-    ->count();
+        ->join('recurso', 'serie_recurso.id_recurso', '=', 'recurso.id')
+        ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
+        ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
+        ->where('categoria.nombre_categoria', 'EPP')
+        ->whereNotNull('serie_recurso.fecha_vencimiento')
+        ->where('serie_recurso.fecha_vencimiento', '<', now())
+        ->count();
 
     $elementosDañados = DB::table('serie_recurso')
-    ->where('id_estado', 5)
-    ->count();
+        ->where('id_estado', 5)
+        ->count();
 
     $estadoRecursos = DB::table('serie_recurso')
         ->select('id_estado', DB::raw('count(*) as total'))
@@ -188,77 +179,37 @@ public function index()
         ->take(5)
         ->get();
 
+    $porcentajeEntregado = $totalTrabajadores > 0
+        ? round(($eppEntregados / $totalTrabajadores) * 100)
+        : 0;
 
-
-
-
-    $alertasActivas = count($alertasVencidos) + count($stockBajo) + count($herramientasNoDevueltas);
-
-
-
-    
-
-    $alertasLista = collect();
-
-        // Vencidos
-        foreach ($alertasVencidos as $item) {
-            $alertasLista->push((object)[
-                'tipo' => 'Vencido',
-                'descripcion' => $item->recurso->nombre . ' (Serie: ' . $item->nro_serie . ') vencido el ' . \Carbon\Carbon::parse($item->fecha_vencimiento)->format('d/m/Y')
-            ]);
-        }
-
-        // Stock bajo
-        foreach ($stockBajo as $item) {
-            $alertasLista->push((object)[
-                'tipo' => 'Stock bajo',
-                'descripcion' => $item->nombre . ' - Quedan ' . $item->cantidad . ' unidades'
-            ]);
-        }
-
-        // Sin devolución
-        foreach ($herramientasNoDevueltas as $item) {
-            $alertasLista->push((object)[
-                'tipo' => 'Sin devolución',
-                'descripcion' => $item->recurso . ' (Serie: ' . $item->nro_serie . ') - ' . $item->trabajador
-            ]);
-        }
-
-
-   
     return view('dashboard', compact(
-    'usuariosActivos',
-    'herramientasEnUso',
-    'herramientasTotales',
-    'herramientasDisponibles',
-    'alertasVencidos',
-    'eppEntregados',
-    'totalTrabajadores',
-    'porcentajeEntregado',
-    'stockBajo',
-    'herramientasNoDevueltas',
-    'alertasActivas',
-    'usuarios',
-    'eppStock',
-    'eppTotales',
-    'elementosDañados',
-    'eppVencidos',
-    'usuarios',
-    'herramientasUsadas',
-    'eppEntregadosLista',
-    'alertasLista',
-    'alertasVencidos',
-    'stockBajo',
-    'herramientasNoDevueltas',
-    'estadoLabels',
-    'labels',
-    'valores',
-    'checklistsHoy',
-    'elementosReparacion'
-));
-
-
-
-
+        'usuariosActivos',
+        'usuariosActivosLista',
+        'usuarios',
+        'herramientasEnUso',
+        'herramientasEnUsoLista',
+        'herramientasTotales',
+        'herramientasDisponibles',
+        'eppStock',
+        'eppTotales',
+        'elementosReparacion',
+        'totalTrabajadores',
+        'eppEntregados',
+        'eppEntregadosLista',
+        'porcentajeEntregado',
+        'herramientasUsadas',
+        'eppVencidos',
+        'elementosDañados',
+        'estadoLabels',
+        'labels',
+        'valores',
+        'checklistsHoy',
+        'alertasVencidas',
+        'stockBajo',
+        'herramientasNoDevueltas',
+        'alertasActivas'
+    ));
 }
+
 }

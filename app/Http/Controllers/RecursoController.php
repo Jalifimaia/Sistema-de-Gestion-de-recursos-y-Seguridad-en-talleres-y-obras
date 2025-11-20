@@ -424,12 +424,22 @@ class RecursoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(RecursoRequest $request, Recurso $recurso): RedirectResponse
-    {
-        $recurso->update($request->validated());
+    public function update(RecursoRequest $request, $id)
+{
+    $validated = $request->validated();
 
-        return redirect()->route('recursos.edit', $recurso->id)->with('success', 'Recurso actualizado correctamente.');
-    }
+    $recurso = Recurso::findOrFail($id);
+    $recurso->update([
+        'nombre' => $validated['nombre'],
+        'descripcion' => $validated['descripcion'] ?? null,
+        'costo_unitario' => $validated['costo_unitario'],
+        'id_usuario_modificacion' => auth()->id(),
+    ]);
+
+    return redirect()->route('recursos.edit', $recurso->id)
+        ->with('success', 'Recurso actualizado correctamente.');
+}
+
 
 public function destroy($id)
 {

@@ -20,13 +20,20 @@
       </div>
     </header>
 
-    <!-- 🔎 Buscador y filtro -->
+    <!-- 🔘 Botón registrar -->
+    <div class="mb-3 text-start">
+      <a href="{{ route('incidente.create') }}" class="btn btn-registrar-incidente">
+        + Registrar nuevo incidente
+      </a>
+    </div>
+
+    <!-- 🔎 Buscador y filtro (ahora debajo del botón) -->
     <div class="row mb-3 align-items-center g-2">
       <div class="col-md-8">
         <input type="text"
               id="buscadorIncidentes"
               class="form-control"
-              placeholder="Buscar por trabajador o motivo...">
+              placeholder="Buscar por trabajador, motivo, estado o resolución...">
       </div>
 
       <div class="col-md-4">
@@ -38,13 +45,6 @@
         </select>
       </div>
     </div>
-
-    <div class="mb-3 text-start">
-      <a href="{{ route('incidente.create') }}" class="btn btn-registrar-incidente">
-        + Registrar nuevo incidente
-      </a>
-    </div>
-
 
     @if(session('success'))
         <div id="alertaEstado" class="alert alert-success alert-dismissible fade show" role="alert">
@@ -230,12 +230,10 @@
 @endsection
 
 @push('scripts')
-  {{-- Cargar archivo externo que formatea la fecha en zona Buenos Aires --}}
   <script src="{{ asset('js/formatoFecha.js') }}" defer></script>
 
   <script>
   document.addEventListener('DOMContentLoaded', function () {
-      /* 🔔 Alerta de éxito que se oculta a los 5 segundos */
       const alerta = document.getElementById('alertaEstado');
       if (alerta) {
           setTimeout(() => {
@@ -271,15 +269,23 @@
 
       function aplicarFiltrosYPaginar() {
         const texto = buscador ? buscador.value.toLowerCase() : '';
-        const estado = filtro ? filtro.value : '';
+        const estadoFiltro = filtro ? filtro.value.toLowerCase() : '';
 
         const visibles = filas.filter(fila => {
-          const trabajador = fila.cells[0]?.textContent.toLowerCase() || '';
-          const motivo = fila.cells[1]?.textContent.toLowerCase() || '';
-          const estadoActual = fila.cells[2]?.textContent.trim() || '';
+          const trabajador   = fila.cells[0]?.textContent.toLowerCase() || '';
+          const motivo       = fila.cells[1]?.textContent.toLowerCase() || '';
+          const estadoActual = fila.cells[2]?.textContent.toLowerCase() || '';
+          const resolucion   = fila.cells[3]?.textContent.toLowerCase() || '';
 
-          const coincideTexto = trabajador.includes(texto) || motivo.includes(texto);
-          const coincideEstado = !estado || estadoActual === estado;
+          // 🔎 Buscar coincidencia en cualquiera de los campos
+          const coincideTexto =
+            trabajador.includes(texto) ||
+            motivo.includes(texto) ||
+            estadoActual.includes(texto) ||
+            resolucion.includes(texto);
+
+          // 📌 Filtro por estado (select)
+          const coincideEstado = !estadoFiltro || estadoActual === estadoFiltro;
 
           return coincideTexto && coincideEstado;
         });
@@ -359,6 +365,7 @@
   });
   </script>
 @endpush
+
 
 
 @push('styles')

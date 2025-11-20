@@ -20,9 +20,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const nombre = fila.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
         const categoria = fila.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
         const subcategoria = fila.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+        const descripcion = fila.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || ''; // 🔑 nueva columna
         const categoriaCombinada = `${categoria} ${subcategoria}`;
-        return (filtro === 'todos' || categoriaCombinada.includes(filtro)) && nombre.includes(texto);
+
+        // Buscar en cualquiera de los campos
+        const coincideTexto =
+          nombre.includes(texto) ||
+          categoria.includes(texto) ||
+          subcategoria.includes(texto) ||
+          descripcion.includes(texto);
+
+        return (filtro === 'todos' || categoriaCombinada.includes(filtro)) && coincideTexto;
       });
+
 
       const totalPaginas = Math.ceil(visibles.length / filasPorPagina);
       paginaActual = Math.min(Math.max(1, paginaActual), totalPaginas || 1);

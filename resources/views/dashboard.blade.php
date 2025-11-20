@@ -106,7 +106,9 @@
             <div class="col-md-4">
               <div class="card card-resumen card-resumen-cuadrada">
                 <div class="card-body">
-                  <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" data-bs-toggle="modal" data-bs-target="#modalUsuarios">
+                  <!-- Trabajadores Activos -->
+                  <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
+                  data-bs-toggle="modal" data-bs-target="#modalUsuariosActivos">
                     <img src="{{ asset('images/workers.svg') }}" alt="Trabajadores Activos" class="icono-card">
                     <h2 class="fw-bold mb-1">{{ $usuariosActivos }}</h2>
                     <p class="mb-0 titulo-card">Trabajadores Activos</p>
@@ -121,7 +123,8 @@
       <div class="col-md-4">
         <div class="card card-resumen card-resumen-cuadrada">
           <div class="card-body">
-            <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" data-bs-toggle="modal" data-bs-target="#modalHerramientas">
+            <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
+            data-bs-toggle="modal" data-bs-target="#modalHerramientasUso">
               <img src="{{ asset('images/herra.svg') }}" alt="Herramientas en Uso" class="icono-card">
               <h2 class="fw-bold mb-1">{{ $herramientasEnUso }}</h2>
               <p class="mb-0 titulo-card">Herramientas en Uso</p>
@@ -149,174 +152,226 @@
 </div>
 
   <!-- Modales -->
-  <!-- Modal: Trabajadores Activos -->
-<div class="modal fade" id="modalUsuarios" tabindex="-1" aria-labelledby="modalUsuariosLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalUsuariosLabel">Trabajadores Activos</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row g-3">
-          @foreach($usuarios as $usuario)
-            <div class="col-md-6">
-              <div class="border rounded p-3 bg-light shadow-sm h-100">
-                <h6 class="fw-bold mb-1">{{ $usuario->nombre }}</h6>
-                <p class="mb-1 text-muted small">Email: <span class="fw-semibold">{{ $usuario->email }}</span></p>
-                <p class="mb-0 text-muted small">Rol: <span class="fw-semibold">{{ $usuario->rol->nombre_rol ?? 'Sin rol' }}</span></p>
-              </div>
-            </div>
-          @endforeach
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Herramientas -->
-<div class="modal fade" id="modalHerramientas" tabindex="-1" aria-labelledby="modalHerramientasLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalHerramientasLabel">Herramientas en Uso</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row g-3">
-          @foreach($herramientasUsadas as $herramienta)
-            <div class="col-md-6">
-              <div class="border rounded p-3 bg-light shadow-sm h-100">
-                <h6 class="fw-bold mb-1">{{ $herramienta->recurso->nombre }}</h6>
-                <p class="mb-1 text-muted small">Subcategoría: <span class="fw-semibold">{{ $herramienta->recurso->subcategoria->nombre }}</span></p>
-                <p class="mb-0 text-muted small">Serie: <span class="fw-semibold">{{ $herramienta->nro_serie }}</span></p>
-              </div>
-            </div>
-          @endforeach
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Modal: Alertas Activas -->
 <div class="modal fade" id="modalAlertas" tabindex="-1" aria-labelledby="modalAlertasLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
+      
+      <div class="modal-header bg-modall text-white justify-content-center">
         <h5 class="modal-title" id="modalAlertasLabel">Alertas Activas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body">
-        <div class="row g-3">
-          @foreach($alertasLista as $alerta)
-            @php
-              $tipo = strtolower($alerta->tipo);
-              $color = match(true) {
-                str_contains($tipo, 'vencido') => 'danger',
-                str_contains($tipo, 'stock') => 'warning',
-                str_contains($tipo, 'devolución') => 'info',
-                default => 'secondary'
-              };
-            @endphp
-            <div class="col-md-6">
-              <div class="alert alert-{{ $color }} shadow-sm mb-0 h-100">
-                <strong>{{ $alerta->tipo }}</strong><br>
-                <small>{{ $alerta->descripcion }}</small>
-              </div>
-            </div>
-          @endforeach
-        </div>
+      
+      <div class="modal-body text-center">
+        <button class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#modalVencidos">
+          Vencidos
+        </button>
+        <button class="btn btn-warning mb-2" data-bs-toggle="modal" data-bs-target="#modalStock">
+          Stock bajo
+        </button>
+        <button class="btn btn-info mb-2" data-bs-toggle="modal" data-bs-target="#modalDevoluciones">
+          Sin devolución
+        </button>
       </div>
+      
     </div>
   </div>
 </div>
+
+<!-- Modal: Alertas Vencidas -->
+<div class="modal fade" id="modalVencidos" tabindex="-1" aria-labelledby="modalVencidosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalVencidosLabel">Alertas Vencidas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="row g-3">
+          @forelse($alertasVencidas as $alerta)
+            <div class="col-md-6">
+              <div class="alert alert-danger shadow-sm h-100">
+                <strong>{{ $alerta->recurso->subcategoria->nombre }} - {{ $alerta->recurso->nombre }}</strong><br>
+                <small>
+                  Serie: {{ $alerta->nro_serie }} vencido el 
+                  {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}
+                </small>
+              </div>
+            </div>
+          @empty
+            <div class="text-center text-muted">No hay alertas vencidas.</div>
+          @endforelse
+        </div>
+        
+        <!-- Paginación -->
+        <div class="mt-3">
+          {{ $alertasVencidas->links() }}
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Stock bajo -->
+<div class="modal fade" id="modalStock" tabindex="-1" aria-labelledby="modalStockLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalStockLabel">Alertas de Stock bajo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="row g-3">
+          @forelse($stockBajo as $item)
+            <div class="col-md-6">
+              <div class="alert alert-warning shadow-sm h-100">
+                <strong>{{ $item->subcategoria }} - {{ $item->recurso }}</strong><br>
+                <small>Quedan {{ $item->cantidad }} unidades</small>
+              </div>
+            </div>
+          @empty
+            <div class="text-center text-muted">No hay alertas de stock bajo.</div>
+          @endforelse
+        </div>
+        
+        <!-- Paginación -->
+        <div class="mt-3">
+          {{ $stockBajo->links() }}
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Sin devolución -->
+<div class="modal fade" id="modalDevoluciones" tabindex="-1" aria-labelledby="modalDevolucionesLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalDevolucionesLabel">Alertas de Herramientas sin devolución</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="row g-3">
+          @forelse($herramientasNoDevueltas as $item)
+            <div class="col-md-6">
+              <div class="alert alert-info shadow-sm h-100">
+                <strong>{{ $item->subcategoria }} - {{ $item->recurso }}</strong>
+                <small>Serie: {{ $item->nro_serie }} - {{ $item->trabajador }}</small>
+              </div>
+            </div>
+          @empty
+            <div class="text-center text-muted">No hay herramientas sin devolución.</div>
+          @endforelse
+        </div>
+        
+        <!-- Paginación -->
+        <div class="mt-3">
+          {{ $herramientasNoDevueltas->links() }}
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+<!-- Modal: Herramientas en uso -->
+<div class="modal fade" id="modalHerramientasUso" tabindex="-1" aria-labelledby="modalHerramientasUsoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header bg-modall text-white justify-content-center">
+        <h5 class="modal-title" id="modalHerramientasUsoLabel">Herramientas en uso</h5>
+        <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="row g-3">
+          @forelse($herramientasEnUsoLista as $herramienta)
+            <div class="col-md-6">
+              <div class="alert alert-info shadow-sm h-100">
+                <strong>{{ $herramienta->recurso->subcategoria->nombre }} - {{ $herramienta->recurso->nombre }}</strong><br>
+                <small>Serie: {{ $herramienta->nro_serie }}</small>
+              </div>
+            </div>
+          @empty
+            <div class="text-center text-muted">No hay herramientas en uso.</div>
+          @endforelse
+        </div>
+
+        <!-- Paginación -->
+        <div class="mt-3">
+          {{ $herramientasEnUsoLista->appends(['modal' => 'herramientasUso'])->links() }}
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Trabajadores activos -->
+<div class="modal fade" id="modalUsuariosActivos" tabindex="-1" aria-labelledby="modalUsuariosActivosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- Encabezado gris con texto centrado -->
+      <div class="modal-header bg-modall text-white justify-content-center position-relative">
+        <h5 class="modal-title" id="modalUsuariosActivosLabel">Trabajadores activos</h5>
+        <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row g-3">
+          @forelse($usuariosActivosLista as $usuario)
+            <div class="col-md-6">
+              <div class="alert alert-success shadow-sm h-100">
+                <strong>{{ $usuario->name }}</strong><br>
+                <small>Email: {{ $usuario->email }}</small><br>
+                <small>Rol: {{ $usuario->rol->nombre_rol ?? 'Sin rol' }}</small>
+              </div>
+            </div>
+          @empty
+            <div class="text-center text-muted">No hay trabajadores activos.</div>
+          @endforelse
+        </div>
+
+        <!-- Paginación -->
+        <div class="mt-3">
+          {{ $usuariosActivosLista->appends(['modal' => 'usuariosActivos'])->links() }}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 
 
   <!-- Alertas y gráfico -->
   <div class="row g-4 mt-2 subir-alertas">
-  <!-- Alertas Prioritarias -->
-  <div class="col-md-6">
-    <div class="card card-resumen h-100 card-alerta">
-      <div class="card-body">
-        <h5 class="card-title fw-bold mb-2 d-flex align-items-center titulo-alerta">
-          <img src="{{ asset('images/alertaP.svg') }}" alt="Alerta Prioritaria" class="icono-alertaP me-2 animar-pulso">
-          <span>Alertas Prioritarias</span>
-        </h5>
-        <p class="text-muted small mb-3">Situaciones que requieren atención inmediata</p>
-
-        <div class="accordion" id="alertasPrioritarias">
-          <!-- Stock Bajo -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingStock">
-              <button class="accordion-button collapsed alerta-naranja" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStock" aria-expanded="false" aria-controls="collapseStock">
-                Stock bajo ({{ $stockBajo->count() }})
-              </button>
-            </h2>
-            <div id="collapseStock" class="accordion-collapse collapse" aria-labelledby="headingStock" data-bs-parent="#alertasPrioritarias">
-              <div class="accordion-body">
-                @foreach($stockBajo as $stock)
-                  <div class="alert alert-warning mb-3">
-                    <strong>{{ $stock->nombre }}</strong><br>
-                    <small>Quedan {{ $stock->cantidad }} unidades disponibles</small>
-                  </div>
-                @endforeach
-              </div>
-            </div>
-          </div>
-
-          <!-- Vencidos -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingVencidos">
-              <button class="accordion-button collapsed alerta-gris" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVencidos" aria-expanded="false" aria-controls="collapseVencidos">
-                Recursos vencidos ({{ $alertasVencidos->count() }})
-              </button>
-            </h2>
-            <div id="collapseVencidos" class="accordion-collapse collapse" aria-labelledby="headingVencidos" data-bs-parent="#alertasPrioritarias">
-              <div class="accordion-body">
-                @foreach($alertasVencidos as $alerta)
-                  <div class="alert alert-danger mb-3">
-                    <strong>{{ $alerta->recurso->nombre }}</strong> (Serie: {{ $alerta->nro_serie }})<br>
-                    <small>Venció el {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}</small>
-                  </div>
-                @endforeach
-              </div>
-            </div>
-          </div>
-
-          <!-- Sin devolución -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingDevolucion">
-              <button class="accordion-button collapsed alerta-rojo" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDevolucion" aria-expanded="false" aria-controls="collapseDevolucion">
-                Sin devolución ({{ $herramientasNoDevueltas->count() }})
-              </button>
-            </h2>
-            <div id="collapseDevolucion" class="accordion-collapse collapse" aria-labelledby="headingDevolucion" data-bs-parent="#alertasPrioritarias">
-              <div class="accordion-body">
-                @foreach($herramientasNoDevueltas as $item)
-                  <div class="alert alert-info mb-3">
-                    <strong>{{ $item->recurso }}</strong><br>
-                    <small>Serie {{ $item->nro_serie }} - {{ $item->trabajador }}</small>
-                  </div>
-                @endforeach
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Gráfico de estado general del inventario -->
-  <div class="col-md-6">
-    <div class="card card-resumen h-100 card-alerta">
+  <div class="row mt-4">
+  <div class="col-12">
+    <div class="card card-resumen h-100 card-alerta w-100">
       <div class="card-body">
         <h5 class="card-title fw-bold mb-2 titulo-alerta">Estado General del Inventario</h5>
-        <canvas id="graficoInventario" class="grafico-inventario"></canvas>
+        <canvas id="graficoInventario" class="grafico-inventario w-100" style="max-height:250px;"></canvas>
       </div>
     </div>
   </div>
 </div>
+
+
+
 
 @endsection
 
@@ -367,6 +422,34 @@
         }
       });
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Si la URL trae el parámetro de paginación de vencidos
+    if (urlParams.has('vencidos_page')) {
+        new bootstrap.Modal(document.getElementById('modalVencidos')).show();
+    }
+
+    // Si la URL trae el parámetro de paginación de stock bajo
+    if (urlParams.has('stock_page')) {
+        new bootstrap.Modal(document.getElementById('modalStock')).show();
+    }
+
+    // Si la URL trae el parámetro de paginación de herramientas sin devolución
+    if (urlParams.has('herramientas_page')) {
+        new bootstrap.Modal(document.getElementById('modalDevoluciones')).show();
+    }
+
+    // Si la URL trae el parámetro de paginación de trabajadores activos
+    if (urlParams.has('usuarios_activos_page')) {
+        new bootstrap.Modal(document.getElementById('modalUsuariosActivos')).show();
+    }
+
+    // Si la URL trae el parámetro de paginación de herramientas en uso
+    if (urlParams.has('herramientas_uso_page')) {
+        new bootstrap.Modal(document.getElementById('modalHerramientasUso')).show();
+    }
+
   });
 </script>
 @endpush

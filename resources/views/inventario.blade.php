@@ -80,30 +80,36 @@
   </div>
 </section>
 
-  <!-- Filtro y buscador -->
-  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-    <label class="form-label mb-0">Filtrar por:</label>
-    <select id="filtroInventario" class="form-select w-auto filtro-destacado">
-      <option value="todos">Todos</option>
-      <option value="herramienta">Herramientas</option>
-      <option value="epp">EPP</option>
-    </select>
-
-    <input type="text" id="buscador" class="form-control w-auto ms-3 buscador-destacado" placeholder="Buscar por nombre...">
-  </div>
-
   <!-- Botones: Agregar + QR -->
-  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-    <a href="{{ route('recursos.create') }}" class="btn btn-orange d-flex align-items-center gap-2">
-      <img src="{{ asset('images/mas.svg') }}" alt="Icono agregar" style="height: 35px;">
-      <span class="texto-boton-grande">Agregar recurso</span>
-    </a>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <a href="{{ route('recursos.create') }}" class="btn btn-orange d-flex align-items-center gap-2">
+    <img src="{{ asset('images/mas.svg') }}" alt="Icono agregar" style="height: 35px;">
+    <span class="texto-boton-grande">Agregar recurso</span>
+  </a>
 
-    <a href="{{ url('/series-qr') }}" class="btn btn-outline-orange d-flex align-items-center gap-2">
-      <img src="{{ asset('images/qr2.svg') }}" alt="QR icono" style="height: 35px;">
-      <span class="texto-boton-grande btn-qr">Códigos QR</span>
-    </a>
-  </div>
+  <a href="{{ url('/series-qr') }}" class="btn btn-outline-orange d-flex align-items-center gap-2">
+    <img src="{{ asset('images/qr2.svg') }}" alt="QR icono" style="height: 35px;">
+    <span class="texto-boton-grande btn-qr">Códigos QR</span>
+  </a>
+</div>
+
+<!-- Filtro y buscador -->
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+  <!-- Buscar -->
+  <input type="text" id="buscador"
+         class="form-control buscador-destacado"
+         style="height: 46px; flex: 1;"
+         placeholder="Buscar por nombre, categoria, subcategoria o descripción...">
+
+  <!-- Filtro -->
+  <select id="filtroInventario"
+          class="form-select filtro-destacado"
+          style="height: 46px; width: auto;">
+    <option value="todos">Todos</option>
+    <option value="herramienta">Herramientas</option>
+    <option value="epp">EPP</option>
+  </select>
+</div>
 
 <!-- Tabla -->
 <div class="card-body">
@@ -112,8 +118,8 @@
       <thead class="table-light">
         <tr>
           <th>Nombre</th>
-          <th>Subcategoría</th>
           <th>Categoría</th>
+          <th>Subcategoría</th>
           <th>Descripción</th>
           <th>Acciones</th>
         </tr>
@@ -129,8 +135,8 @@
 
         <tr data-recurso-id="{{ $recurso->id }}">
           <td class="recurso-nombre">{{ $recurso->nombre }}</td>
-          <td class="recurso-subcategoria">{{ optional($recurso->subcategoria)->nombre ?? 'Sin subcategoría' }}</td>
           <td class="recurso-categoria">{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
+          <td class="recurso-subcategoria">{{ optional($recurso->subcategoria)->nombre ?? 'Sin subcategoría' }}</td>
           <td class="recurso-descripcion">{{ $recurso->descripcion }}</td>
           <td class="text-nowrap acciones-cell">
             @if ($estadoRecurso === 'baja' || $todasBaja)

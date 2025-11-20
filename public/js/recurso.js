@@ -132,15 +132,27 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
       if (firstInvalid) {
-      firstInvalid.focus();
+  firstInvalid.focus();
 
-      const modalErrorEl = document.getElementById('modalErrorCampos');
-      if (modalErrorEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        new bootstrap.Modal(modalErrorEl).show();
-      }
+  // Recolectar mensajes de error actuales
+  const errors = Array.from(form.querySelectorAll('.text-danger.small.mt-1'))
+                      .map(el => el.textContent);
 
-      return; // No enviar si hay errores
+  // Mostrar modal solo si el error corresponde a campos obligatorios vacíos
+  if (errors.includes('Este campo es obligatorio.') &&
+      (firstInvalid.id === 'nombre' ||
+       firstInvalid.id === 'categoria' ||
+       firstInvalid.id === 'id_subcategoria' ||
+       firstInvalid.id === 'costo_unitario')) {
+    const modalErrorEl = document.getElementById('modalErrorCampos');
+    if (modalErrorEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      new bootstrap.Modal(modalErrorEl).show();
     }
+  }
+
+  return; // No enviar si hay errores
+}
+
 
 
   const payload = {

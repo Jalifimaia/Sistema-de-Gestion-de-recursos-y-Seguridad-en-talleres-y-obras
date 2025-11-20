@@ -77,8 +77,14 @@
         </div>
 
         <div class="mb-3">
-            <label for="lote" class="form-label">Lote</label>
-            <input type="number" name="lote" id="lote" class="form-control" placeholder="Ingrese el N° de lote" min="1" required>
+          <label for="lote" class="form-label">Lote</label>
+          <input type="number"
+                name="lote"
+                id="lote"
+                class="form-control"
+                placeholder="Ingrese el N° de lote"
+                min="1"
+                required>
         </div>
 
         <div class="mb-3">
@@ -184,6 +190,13 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  
+  const loteInput = document.getElementById('lote');
+  loteInput.addEventListener('input', () => {
+    if (loteInput.value.length > 5) {
+      loteInput.value = loteInput.value.slice(0, 5); // 🔹 corta a 5 dígitos
+    }
+  });
   const form = document.getElementById('formSeries');
 
   // 🔹 Validación al presionar Enter

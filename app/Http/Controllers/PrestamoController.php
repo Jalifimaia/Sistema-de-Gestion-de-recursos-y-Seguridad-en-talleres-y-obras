@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Prestamo;
 use App\Models\DetallePrestamo;
+use App\Models\Usuario;
 use App\Models\SerieRecurso;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,6 +25,11 @@ public function index(): View
     $creador = request('creador');
     $fechaInicio = request('fecha_inicio');
     $fechaFin = request('fecha_fin');
+
+    $usuarios = Usuario::whereIn('id_rol', [1, 2])
+    ->pluck('name');
+
+
 
     $query = request('search');
 
@@ -99,7 +105,7 @@ public function index(): View
         ->onEachSide(1)
         ->withQueryString();
 
-    return view('prestamo.index', compact('prestamos'));
+    return view('prestamo.index', compact('prestamos', 'usuarios'));
 }
 
 

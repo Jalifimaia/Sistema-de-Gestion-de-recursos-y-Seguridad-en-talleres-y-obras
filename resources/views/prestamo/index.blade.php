@@ -22,10 +22,56 @@
 
       {{-- Filtros --}}
       <form method="GET" action="{{ route('prestamos.index') }}">
-      <div class="row mb-3 align-items-end">
-        <div class="col-md-2">
-          <label for="filtro-estado" class="form-label">Estado</label>
-          <select id="filtro-estado" name="estado" class="form-select filtro-naranja">
+        <div class="row g-3 align-items-end mb-3">
+          <!-- Fechas -->
+          <div class="col-md-2">
+            <label for="fecha-inicio" class="form-label fw-bold">Desde</label>
+            <input type="date" id="fecha-inicio" name="fecha_inicio" class="form-control filtro-naranja" value="{{ request('fecha_inicio') }}">
+          </div>
+
+          <div class="col-md-2">
+            <label for="fecha-fin" class="form-label fw-bold">Hasta</label>
+            <input type="date" id="fecha-fin" name="fecha_fin" class="form-control filtro-naranja" value="{{ request('fecha_fin') }}">
+          </div>
+
+          <!-- Botón aplicar filtros -->
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-naranja btn-sm w-100 d-flex align-items-center justify-content-center text-nowrap">
+              <img src="{{ asset('images/filter.svg') }}" alt="Buscar" class="me-2" style="width: 16px; height: 16px;">
+              Aplicar filtros
+            </button>
+          </div>
+
+          <!-- Botón limpiar -->
+          <div class="col-auto">
+            <a href="{{ route('prestamos.index') }}" 
+              class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center"
+              style="width: 42px; height: 42px; padding: 0;">
+              <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 22px; height: 22px;">
+            </a>
+          </div>
+        </div>
+
+        <div class="row g-3 align-items-end">
+        <!-- Buscar texto -->
+        <div class="col-md-6">
+          <label for="search" class="form-label fw-bold">Buscar</label>
+          <div class="input-group" style="height: 46px;">
+            <input type="text" name="search" id="busqueda"
+                  class="form-control filtro-naranja"
+                  style="height: 100%;"
+                  value="{{ request('search') }}"
+                  placeholder="Buscar por recurso, serie, trabajador o creador">
+            <button class="btn btn-naranja" type="submit">
+              <img src="{{ asset('images/lupa.svg') }}" alt="Buscar" style="width: 16px; height: 16px;">
+            </button>
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div class="col-md-3">
+          <label for="filtro-estado" class="form-label fw-bold">Estado</label>
+          <select name="estado" onchange="this.form.submit()" class="form-select filtro-naranja" style="height: 46px;">
             <option value="">Todos</option>
             <option value="Cancelado" {{ request('estado') == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
             <option value="Activo" {{ request('estado') == 'Activo' ? 'selected' : '' }}>Activo</option>
@@ -34,49 +80,21 @@
           </select>
         </div>
 
-        <div class="col-md-2">
-          <label for="filtro-creador" class="form-label">Creado por</label>
-          <select id="filtro-creador" name="creador" class="form-select filtro-naranja">
+        <!-- Creado por -->
+        <div class="col-md-3">
+          <label for="filtro-creador" class="form-label fw-bold">Creado por</label>
+          <select name="creador" onchange="this.form.submit()" class="form-select filtro-naranja" style="height: 46px;">
             <option value="">Todos</option>
-            @foreach($prestamos->pluck('creado_por')->unique() as $nombre)
-              <option value="{{ $nombre }}" {{ request('creador') == $nombre ? 'selected' : '' }}>{{ $nombre }}</option>
+            @foreach($usuarios as $nombre)
+              <option value="{{ $nombre }}" {{ request('creador') == $nombre ? 'selected' : '' }}>
+                {{ $nombre }}
+              </option>
             @endforeach
           </select>
         </div>
-
-        <div class="col-md-2">
-          <label for="fecha-inicio" class="form-label">Desde</label>
-          <input type="date" id="fecha-inicio" name="fecha_inicio" class="form-control filtro-naranja" value="{{ request('fecha_inicio') }}">
-        </div>
-
-        <div class="col-md-3 d-flex align-items-end">
-          <div class="w-100 me-2">
-            <label for="fecha-fin" class="form-label">Hasta</label>
-            <input type="date" id="fecha-fin" name="fecha_fin" class="form-control filtro-naranja" value="{{ request('fecha_fin') }}">
-          </div>
-          <button type="submit" class="btn btn-naranja d-flex align-items-center justify-content-center"
-                style="width: 40px; height: 40px;">
-          <img src="{{ asset('images/lupa.svg') }}" alt="Buscar" style="width:18px; height:18px;">
-        </button>
-        </div> <br>
-
-        <div class="col-md-6">
-          <label for="search" class="form-label">Buscar</label>
-          <div class="input-group">
-            <input type="text" name="search" id="busqueda" value="{{ request('search') }}"
-                  class="form-control filtro-naranja"
-                  placeholder="🔍 Buscar por recurso, serie, trabajador o creador">
-            <button class="btn btn-naranja" type="submit">
-              <img src="{{ asset('images/lupa.svg') }}" alt="Buscar" style="width:18px; height:18px;">
-            </button>
-          </div>
-</div>
-
       </div>
 
-</form>
-
-
+      </form><br>
 
       {{-- Tarjetas de préstamos --}}
       <div id="contenedorPrestamos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">

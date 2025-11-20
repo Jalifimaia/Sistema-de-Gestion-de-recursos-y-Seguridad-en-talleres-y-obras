@@ -31,10 +31,7 @@
 
 <!-- 🔍 Buscador por nro_serie con botón -->
   <div class="input-group mb-3 mt-4">
-    <input type="text" id="busquedaSerie" class="form-control" placeholder="🔍 Buscar por iniciales del número de serie...">
-    <button id="btnBuscarSerie" class="btn btn-buscar" aria-label="Buscar">
-      <img src="{{ asset('images/lupa.svg') }}" alt="Buscar" style="width: 20px; height: 20px;">
-    </button>
+    <input type="text" id="busquedaSerie" class="form-control" placeholder="Buscar por categoría, subcategoría, nombre del recurso o iniciales del número de serie...">
   </div>
 
   @if($series->isEmpty())
@@ -48,7 +45,9 @@
               <div>
                 <h5 class="card-title">{{ $serie->nro_serie }}</h5>
                 <p class="card-text">
-                  <strong>Recurso:</strong> {{ $serie->recurso->nombre ?? 'Sin nombre' }}<br>
+                  <strong>Recurso:</strong> 
+                  {{ $serie->recurso->nombre ?? 'Sin nombre' }}
+                  [{{ $serie->recurso->subcategoria->nombre ?? 'Sin subcategoría' }}]
                 </p>
 
                 @if($serie->codigo_qr)
@@ -88,55 +87,40 @@
 
 @push('scripts')
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('✅ Script cargado');
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('busquedaSerie');
+  if (!input) return;
 
-    // 📋 Copiar código QR
-    document.querySelectorAll('.copiar-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const codigo = btn.getAttribute('data-codigo');
-        console.log('📋 Copiando:', codigo);
+  // Pre-cargar valor desde la URL
+  const params = new URLSearchParams(window.location.search);
+  input.value = params.get('search') || '';
 
-        navigator.clipboard.writeText(codigo).then(() => {
-          const original = btn.innerHTML;
-          btn.innerHTML = '✅ Copiado';
-          setTimeout(() => {
-            btn.innerHTML = original;
-          }, 1500);
-        }).catch(err => {
-          console.error('❌ Error al copiar:', err);
-          alert('No se pudo copiar el código.');
-        });
-      });
-    });
-
-    // 🔍 Buscar solo al presionar Enter o botón
-    const input = document.getElementById('busquedaSerie');
-    const boton = document.getElementById('btnBuscarSerie');
-    
-    input.value = new URLSearchParams(window.location.search).get('search') || '';
-
-    const buscar = () => {
-    const valor = input.value.trim();
-    const baseUrl = window.location.pathname;
-
-    if (valor) {
-      window.location.href = `${baseUrl}?search=${encodeURIComponent(valor)}`;
-    } else {
-      window.location.href = baseUrl; // 🔄 sin filtro, muestra todo
-    }
+  let timer;
+  const debounce = (fn, delay = 400) => {
+    clearTimeout(timer);
+    timer = setTimeout(fn, delay);
   };
 
+  input.addEventListener('input', () => {
+    debounce(() => {
+      const valor = input.value.trim();
+      const url = new URL(window.location.href);
+      const usp = url.searchParams;
 
-    input.addEventListener('keypress', e => {
-      if (e.key === 'Enter') buscar();
-    });
+      if (valor) {
+        usp.set('search', valor);
+        usp.delete('page'); // reiniciar a página 1
+      } else {
+        usp.delete('search');
+        usp.delete('page');
+      }
 
-    boton.addEventListener('click', buscar);
+      window.location.search = usp.toString();
+    }, 400);
   });
-
-
-
+});
 </script>
 @endpush
+
+
 

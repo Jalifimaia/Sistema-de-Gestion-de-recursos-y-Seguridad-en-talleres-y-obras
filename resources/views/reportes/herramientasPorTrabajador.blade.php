@@ -15,35 +15,48 @@
                 </h4>
             </div>
 
-            <button type="button" class="btn btn-outline-secondary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalGrafico">
+            <div class="ms-auto d-flex gap-2">
+            <button type="button" class="btn btn-ver-grafico d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalGrafico">
+                <img src="{{ asset('images/grafico.svg') }}" alt="Gráfico" class="me-2" style="width: 18px; height: 18px;">
                 Ver gráfico
-                <img src="{{ asset('images/grafico.svg') }}" alt="Gráfico" class="ms-2" style="width: 18px; height: 18px;">
-            </button>
-        </div>
-
-
-    <form method="GET" action="{{ route('reportes.herramientasPorTrabajador') }}" class="row g-3 align-items-end mb-4">
-        <div class="col-md-3">
-            <label for="fecha_inicio" class="form-label">Desde</label>
-            <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ request('fecha_inicio') }}">
-        </div>
-        <div class="col-md-3">
-            <label for="fecha_fin" class="form-label">Hasta</label>
-            <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ request('fecha_fin') }}">
-        </div>
-        <div class="col-md-6 d-flex gap-3">
-            <button type="submit" class="btn btn-filtro d-flex align-items-center justify-content-center flex-grow-1">
-                <img src="{{ asset('images/filter.svg') }}" alt="Filtrar" class="me-2" style="width: 18px; height: 18px;">
-                Aplicar filtros
             </button>
 
             <a href="{{ url('/reportes/herramientas-por-trabajador/pdf') }}?fecha_inicio={{ request('fecha_inicio') }}&fecha_fin={{ request('fecha_fin') }}"
-                class="btn btn-pdf d-flex align-items-center justify-content-center flex-grow-1">
+               class="btn btn-pdf d-flex align-items-center">
                 <img src="{{ asset('images/pdf2.svg') }}" alt="PDF" class="me-2" style="width: 18px; height: 18px;">
                 Exportar a PDF
             </a>
         </div>
+    </div>
 
+    <form method="GET" action="{{ route('reportes.herramientasPorTrabajador') }}" class="row g-3 align-items-end mb-4">
+        <!-- Fechas -->
+        <div class="col-md-2">
+            <label for="fecha_inicio" class="form-label fw-bold">Desde</label>
+            <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ request('fecha_inicio') }}">
+        </div>
+
+        <div class="col-md-2">
+            <label for="fecha_fin" class="form-label fw-bold">Hasta</label>
+            <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ request('fecha_fin') }}">
+        </div>
+
+        <!-- Botón aplicar -->
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-filtro btn-sm w-100 d-flex align-items-center justify-content-center text-nowrap">
+                <img src="{{ asset('images/filter.svg') }}" alt="Filtrar" class="me-2" style="width: 16px; height: 16px;">
+                Aplicar filtros
+            </button>
+        </div>
+
+        <!-- Botón limpiar cuadrado -->
+        <div class="col-auto">
+            <a href="{{ route('reportes.herramientasPorTrabajador') }}" 
+               class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center"
+               style="width: 40px; height: 40px; padding: 0;">
+                <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 20px; height: 20px;">
+            </a>
+        </div>
     </form>
 
     @if($herramientas->count())

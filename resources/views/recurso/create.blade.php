@@ -52,28 +52,68 @@
         </div>
 
         <!-- Nueva Subcategoría -->
-        <div class="input-group mt-2 mb-3">
-          <input type="text" id="nuevaSubcategoria" name="nueva_subcategoria" class="form-control" placeholder="Nueva subcategoría" value="{{ old('nueva_subcategoria') }}">
-          <button type="button" class="btn btn-agregar-subcategoria" id="agregarSubcategoria">Agregar</button>
+        <div class="mt-2 mb-3">
+          <label for="nuevaSubcategoria" class="form-label">
+            ¿No encontrás la subcategoría? Agregá una nueva
+          </label>
+          <div class="input-group">
+            <input type="text"
+                  id="nuevaSubcategoria"
+                  name="nueva_subcategoria"
+                  class="form-control"
+                  placeholder="Nueva subcategoría"
+                  value="{{ old('nueva_subcategoria') }}">
+            <button type="button"
+                    class="btn btn-agregar-subcategoria"
+                    id="agregarSubcategoria">
+              Agregar
+            </button>
+          </div>
         </div>
 
         <!-- Nombre -->
         <div class="mb-3">
           <label for="nombre" class="form-label">Nombre</label>
-          <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre del recurso" value="{{ old('nombre') }}" required>
+          <input type="text"
+                id="nombre"
+                name="nombre"
+                class="form-control @error('nombre') is-invalid @enderror"
+                maxlength="60"
+                required>
+          @error('nombre')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
         </div>
 
         <!-- Descripción -->
         <div class="mb-3">
           <label for="descripcion" class="form-label">Descripción</label>
-          <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Breve descripción (máx. 4 palabras)" rows="3" required>{{ old('descripcion') }}</textarea>
+          <textarea id="descripcion"
+                    name="descripcion"
+                    class="form-control @error('descripcion') is-invalid @enderror"
+                    rows="3"
+                    maxlength="250"></textarea>
+          @error('descripcion')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
         </div>
 
         <!-- Costo unitario -->
         <div class="mb-3">
           <label for="costo_unitario" class="form-label">Costo Unitario</label>
-          <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" placeholder="Costo unitario" step="0.01" min="0" value="{{ old('costo_unitario') }}" required>
+          <input type="number"
+                id="costo_unitario"
+                name="costo_unitario"
+                class="form-control @error('costo_unitario') is-invalid @enderror"
+                step="0.01"
+                min="0"
+                max="99999999.99"
+                required>
+          @error('costo_unitario')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
         </div>
+
 
         <div class="text-end">
           <button type="submit" class="btn btn-guardar-recurso w-100">
