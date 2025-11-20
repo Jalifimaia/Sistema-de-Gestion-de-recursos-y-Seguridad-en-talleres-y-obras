@@ -155,6 +155,10 @@ Route::get('/checklist-epp/tabla', [ControlEPPController::class, 'verSoloCheckli
 Route::get('/checklist-epp', [ControlEPPController::class, 'create'])->name('checklist.epp');
 Route::post('/checklist-epp', [ControlEPPController::class, 'store'])->name('checklist.epp.store');
 
+
+
+Route::get('/checklist/validar-hoy/{id}', [ControlEPPController::class, 'validarHoy']);
+
 //Color
 Route::post('/colores/crear', [ColorController::class, 'storeAjax'])->name('colores.storeAjax');
 
@@ -325,6 +329,8 @@ Route::get('serie_recurso/create-con-recurso/{id}', [SerieRecursoController::cla
     ->name('serie_recurso.createConRecurso');
 Route::post('serie_recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])
     ->name('serie_recurso.storeMultiple');
+
+
 
 
 /*

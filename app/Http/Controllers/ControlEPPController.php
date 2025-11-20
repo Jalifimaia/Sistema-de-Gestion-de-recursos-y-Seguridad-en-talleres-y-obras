@@ -390,8 +390,15 @@ public function activarConEPP($id)
 }
 
 
+public function validarHoy($id)
+{
+    $existe = Checklist::where('trabajador_id', $id)
+                ->whereDate('created_at', now()->toDateString())
+                ->exists();
 
 
+    return response()->json(['existe' => $existe]);
+}
 
 public function storeAsignacionEPP(Request $request)
 {

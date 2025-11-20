@@ -159,3 +159,7 @@ textarea.form-control:focus {
   color: #fff;
 }
 
+#aviso-checklist {
+  padding-bottom: 15px;
+  padding-top: 5px;
+}

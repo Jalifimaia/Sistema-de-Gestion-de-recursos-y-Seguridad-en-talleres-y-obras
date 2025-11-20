@@ -57,6 +57,9 @@
       @enderror
     </div>
 
+    <div id="aviso-checklist" class="text-danger mt-2 d-none"></div>
+
+
     <!-- EPP asignado -->
     <div id="epp-asignado" class="alert alert-info d-none">
       <strong>EPP asignado:</strong>
@@ -231,25 +234,39 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  select.addEventListener('change', function () {
-    const userId = this.value;
-    if (!userId) return;
+select.addEventListener('change', function () {
+  const userId = this.value;
+  if (!userId) return;
 
-    fetch(`/epp/asignados/${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        eppList.innerHTML = '';
-        if (data.length === 0) {
-          eppList.innerHTML = '<li>No tiene EPP asignado</li>';
-        } else {
-          data.forEach(epp => {
-            eppList.innerHTML += `<li>${epp.tipo}: ${epp.serie}</li>`;
-          });
-        }
-        eppBox.classList.remove('d-none');
-        validarChecklistContraAsignado(data);
+  const eppPromise = fetch(`/epp/asignados/${userId}`).then(res => res.json());
+  const checklistPromise = fetch(`/checklist/validar-hoy/${userId}`).then(res => res.json());
+
+  Promise.all([eppPromise, checklistPromise]).then(([eppData, checklistData]) => {
+    // Mostrar EPP asignado
+    eppList.innerHTML = '';
+    if (eppData.length === 0) {
+      eppList.innerHTML = '<li>No tiene EPP asignado</li>';
+    } else {
+      eppData.forEach(epp => {
+        eppList.innerHTML += `<li>${epp.tipo}: ${epp.serie}</li>`;
       });
+    }
+    eppBox.classList.remove('d-none');
+    validarChecklistContraAsignado(eppData);
+
+    // Mostrar aviso checklist
+    const aviso = document.getElementById('aviso-checklist');
+    if (checklistData.existe) {
+      aviso.textContent = `Al trabajador ya se le realizó el checklist hoy.`;
+      aviso.classList.remove('d-none');
+    } else {
+      aviso.textContent = '';
+      aviso.classList.add('d-none');
+    }
   });
+});
+
+
 
   if (select.value) {
     select.dispatchEvent(new Event('change'));
