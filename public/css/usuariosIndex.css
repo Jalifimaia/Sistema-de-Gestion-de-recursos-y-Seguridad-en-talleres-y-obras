@@ -531,3 +531,13 @@ td.acciones .d-flex {
 
 
 
+/* 🔶 Botón buscar */
+.btn-naranja {
+  background-color: #d06842;
+  color: #fff;
+  border: none;
+}
+
+.btn-naranja:hover {
+  background-color: #d06842;
+}

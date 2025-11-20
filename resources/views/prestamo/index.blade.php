@@ -14,8 +14,8 @@
     <div class="card-body bg-white">
 
       <div class="mb-3 text-start">
-        <a href="{{ route('prestamos.create') }}" class="btn btn-nuevo-prestamo">
-          <i class="bi bi-plus-circle"></i> Nuevo Préstamo
+        <a href="{{ route('prestamos.create') }}" class="btn btn-naranja">
+           Nuevo Préstamo
         </a>
       </div>
 

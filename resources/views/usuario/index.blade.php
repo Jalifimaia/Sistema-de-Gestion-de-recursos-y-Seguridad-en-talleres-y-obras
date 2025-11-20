@@ -27,7 +27,7 @@
 @auth
   @if (Auth::user()->rol->nombre_rol === 'Administrador')
     <div class="mb-3 text-start">
-      <a href="{{ route('usuarios.create') }}" class="btn btn-registrar-incidente">
+      <a href="{{ route('usuarios.create') }}" class="btn btn-naranja">
         Crear usuario
       </a>
     </div>

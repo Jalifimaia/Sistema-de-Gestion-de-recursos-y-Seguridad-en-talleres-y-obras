@@ -166,3 +166,14 @@ header.row.mb-4 {
   color: white;
   border-color: #d06842;
 }
+
+/* 🔶 Botón buscar */
+.btn-naranja {
+  background-color: #d06842;
+  color: #fff;
+  border: none;
+}
+
+.btn-naranja:hover {
+  background-color: #d06842;
+}

@@ -40,8 +40,8 @@
     </div>
 
     <div class="mb-3 text-start">
-      <a href="{{ route('incidente.create') }}" class="btn btn-registrar-incidente">
-        + Registrar nuevo incidente
+      <a href="{{ route('incidente.create') }}" class="btn btn-naranja">
+        Registrar nuevo incidente
       </a>
     </div>
 
