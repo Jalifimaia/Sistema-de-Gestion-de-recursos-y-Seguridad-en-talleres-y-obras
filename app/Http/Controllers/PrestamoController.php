@@ -183,8 +183,9 @@ public function store(PrestamoRequest $request)
     DB::beginTransaction();
     try {
         $workerId = $validated['id_trabajador'];
-        $fechaPrestamo = Carbon::today();
-        $fechaDevolucion = Carbon::tomorrow();
+        $fechaPrestamo   = Carbon::now('America/Argentina/Buenos_Aires');
+        $fechaDevolucion = Carbon::now('America/Argentina/Buenos_Aires')->addDay();
+
 
         $idPrestamo = DB::table('prestamo')->insertGetId([
             'id_usuario'              => $workerId,
