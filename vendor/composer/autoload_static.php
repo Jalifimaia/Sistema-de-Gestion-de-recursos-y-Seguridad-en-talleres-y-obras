@@ -643,6 +643,7 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
         'App\\Http\\Controllers\\SerieRecursoController' => __DIR__ . '/../..' . '/app/Http/Controllers/SerieRecursoController.php',
         'App\\Http\\Controllers\\SubcategoriaController' => __DIR__ . '/../..' . '/app/Http/Controllers/SubcategoriaController.php',
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
+        'App\\Http\\Controllers\\UsuarioController' => __DIR__ . '/../..' . '/app/Http/Controllers/UsuarioController.php',
         'App\\Http\\Requests\\CategoriaRequest' => __DIR__ . '/../..' . '/app/Http/Requests/CategoriaRequest.php',
         'App\\Http\\Requests\\DetallePrestamoRequest' => __DIR__ . '/../..' . '/app/Http/Requests/DetallePrestamoRequest.php',
         'App\\Http\\Requests\\EstadoIncidenteRequest' => __DIR__ . '/../..' . '/app/Http/Requests/EstadoIncidenteRequest.php',
