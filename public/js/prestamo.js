@@ -97,95 +97,81 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Handler Agregar (mínimas validaciones)
-  if (agregarBtn && contenedorSeries && serieSelect && recursoSelect) {
-    agregarBtn.addEventListener('click', (e) => {
-      e.preventDefault();
+// Handler Agregar (modificado para un solo recurso)
+// Handler Agregar (modificado para un solo recurso y submit inmediato)
+if (agregarBtn && contenedorSeries && serieSelect && recursoSelect) {
+  agregarBtn.addEventListener('click', (e) => {
+    e.preventDefault();
 
-      // forzamos sync por si
-      syncTrabajadorHidden();
-      actualizarEstadoAgregar();
+    // sincronizar trabajador
+    syncTrabajadorHidden();
+    actualizarEstadoAgregar();
 
-      const trabajadorId = (trabajadorHidden && trabajadorHidden.value) || (trabajadorSelect && trabajadorSelect.value) || null;
-      if (!trabajadorId) {
-        alert('Seleccioná primero un trabajador antes de agregar recursos.');
-        return;
-      }
+    const form = document.querySelector('form[method="POST"][action*="prestamos"]');
+    const trabajadorId = (trabajadorHidden && trabajadorHidden.value) || (trabajadorSelect && trabajadorSelect.value) || null;
 
-      const serieId = serieSelect.value;
-      const serieText = serieSelect.options[serieSelect.selectedIndex]?.text || '';
-      const recursoText = recursoSelect.options[recursoSelect.selectedIndex]?.text || '';
+    if (!form) {
+      alert('No se encontró el formulario de préstamo.');
+      return;
+    }
 
-      if (!serieId || serieSelect.selectedIndex === 0) {
-        const modalInvalida = document.getElementById('modalSerieInvalida');
-        if (modalInvalida && typeof bootstrap !== 'undefined') {
-          limpiarBackdropsYBody();
-          const modal = new bootstrap.Modal(modalInvalida);
-          modal.show();
-          modalInvalida.addEventListener('hidden.bs.modal', () => {
-            try { modal.dispose(); } catch (e) {}
-            limpiarBackdropsYBody();
-          }, { once: true });
-        }
-        return;
-      }
+    if (!trabajadorId) {
+      alert('Seleccioná primero un trabajador antes de agregar recursos.');
+      return;
+    }
 
-      // evitar duplicados (inputs hidden series[])
-      if (contenedorSeries.querySelector(`input[name="series[]"][value="${serieId}"]`)) {
-        alert('Esta serie ya fue agregada.');
-        return;
-      }
+    const serieId = serieSelect.value;
+    const serieText = serieSelect.options[serieSelect.selectedIndex]?.text || '';
+    const recursoText = recursoSelect.options[recursoSelect.selectedIndex]?.text || '';
 
-      // crear tarjeta DOM con hidden input (mismo name que espera el backend)
-      const tarjeta = document.createElement('div');
-      tarjeta.className = 'col-md-4';
-      tarjeta.innerHTML = `
-        <div class="card border-success shadow-sm">
-          <div class="card-body p-2">
-            <h6 class="card-title mb-1">${recursoText}</h6>
-            <p class="card-text text-muted mb-2">Serie: <strong>${serieText}</strong></p>
-            <input type="hidden" name="series[]" value="${serieId}">
-            <button type="button" class="btn btn-sm btn-outline-danger eliminar w-100 mt-2">Quitar</button>
-          </div>
-        </div>
-      `;
-      contenedorSeries.appendChild(tarjeta);
-
-      // ocultar option en el select de series para evitar re-uso
-      const optionToHide = serieSelect.querySelector(`option[value="${serieId}"]`);
-      if (optionToHide) optionToHide.style.display = 'none';
-
-      // bloquear cambio de trabajador
-      if (trabajadorSelect) trabajadorSelect.disabled = true;
-      if (trabajadorHidden) trabajadorHidden.value = trabajadorSelect ? trabajadorSelect.value || trabajadorHidden.value : trabajadorHidden.value;
-      if (cambiarTrabajadorBtn) cambiarTrabajadorBtn.style.display = 'inline-block';
-
-      actualizarEstadoAgregar();
-
-      // handler remover tarjeta
-      tarjeta.querySelector('.eliminar').addEventListener('click', () => {
-        if (optionToHide) optionToHide.style.display = 'block';
-        tarjeta.remove();
-        if (!haySeriesAgregadas()) {
-          if (trabajadorSelect) trabajadorSelect.disabled = false;
-          if (cambiarTrabajadorBtn) cambiarTrabajadorBtn.style.display = 'none';
-          if (trabajadorHidden) trabajadorHidden.value = trabajadorSelect ? trabajadorSelect.value || '' : '';
-        }
-        actualizarEstadoAgregar();
-      });
-
-      // mostrar modal de confirmación opcional
-      const modalEl = document.getElementById('modalRecursoAgregado');
-      if (modalEl && typeof bootstrap !== 'undefined') {
+    if (!serieId || serieSelect.selectedIndex === 0) {
+      const modalInvalida = document.getElementById('modalSerieInvalida');
+      if (modalInvalida && typeof bootstrap !== 'undefined') {
         limpiarBackdropsYBody();
-        const modal = new bootstrap.Modal(modalEl);
+        const modal = new bootstrap.Modal(modalInvalida);
         modal.show();
-        modalEl.addEventListener('hidden.bs.modal', () => { try { modal.dispose(); } catch(e){}; limpiarBackdropsYBody(); }, { once: true });
+        modalInvalida.addEventListener('hidden.bs.modal', () => {
+          try { modal.dispose(); } catch (e) {}
+          limpiarBackdropsYBody();
+        }, { once: true });
       }
+      return;
+    }
 
-      // reset serie select
-      serieSelect.selectedIndex = 0;
-    });
-  }
+    // permitir solo un recurso
+    if (contenedorSeries.querySelector('input[name="series[]"]')) {
+      alert('Solo se puede agregar un recurso por préstamo.');
+      return;
+    }
+
+    // crear tarjeta + hidden
+    const tarjeta = document.createElement('div');
+    tarjeta.className = 'col-md-12';
+    tarjeta.innerHTML = `
+      <div class="card border-success shadow-sm">
+        <div class="card-body p-2">
+          <h6 class="card-title mb-1">${recursoText}</h6>
+          <p class="card-text text-muted mb-2">Serie: <strong>${serieText}</strong></p>
+          <input type="hidden" name="series[]" value="${serieId}">
+        </div>
+      </div>
+    `;
+    contenedorSeries.appendChild(tarjeta);
+
+    // bloquear cambio de trabajador
+    if (trabajadorSelect) trabajadorSelect.disabled = true;
+    if (cambiarTrabajadorBtn) cambiarTrabajadorBtn.style.display = 'none';
+
+    // deshabilitar botones para evitar doble envío
+    agregarBtn.disabled = true;
+    const guardarBtn = document.querySelector('button[type="submit"].btn-guardar');
+    if (guardarBtn) guardarBtn.disabled = true;
+
+    // enviar el formulario para que se ejecute store()
+    form.submit();
+  });
+}
+
 
   // Botón Cambiar trabajador (si existe)
   if (cambiarTrabajadorBtn) {
