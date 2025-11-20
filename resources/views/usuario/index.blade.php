@@ -24,21 +24,16 @@
  
 <div class="row mb-4 subir-cards-usuarios">
   <!-- Card: Crear usuario -->
-  @auth
-    @if (Auth::user()->rol->nombre_rol === 'Administrador')
-      <div class="col-md-3">
-        <a href="{{ route('usuarios.create') }}" class="card card-resumen card-crear text-center text-decoration-none h-100">
-          <div class="card-body">
-            <h6 class="card-title card-crear d-flex align-items-center justify-content-center gap-2">
-              <img src="{{ asset('images/useraddd.svg') }}" alt="Crear usuario" class="icono-card-titulo">
-              Crear usuario
-            </h6>
-            <small class="text-muted">Alta de nuevo usuario</small>
-          </div>
-        </a>
-      </div>
-    @endif
-  @endauth
+@auth
+  @if (Auth::user()->rol->nombre_rol === 'Administrador')
+    <div class="mb-3 text-start">
+      <a href="{{ route('usuarios.create') }}" class="btn btn-registrar-incidente">
+        Crear usuario
+      </a>
+    </div>
+  @endif
+@endauth
+
 
   <!-- Card: Administradores -->
   <div class="col-md-3">
