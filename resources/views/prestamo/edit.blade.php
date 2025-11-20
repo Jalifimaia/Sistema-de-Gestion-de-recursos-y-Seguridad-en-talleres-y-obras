@@ -61,16 +61,18 @@
         <input type="hidden" name="estado" value="{{ $prestamo->estado }}">
 
         {{-- Selects para agregar recursos (categoría, subcategoria, recurso, serie) --}}
-        <div class="row mb-3">
+        <!--<div class="row mb-3">
+
           <div class="col-md-4">
             <label for="categoria" class="form-label">Categoría</label>
             <select id="categoria" class="form-select">
               <option selected disabled>Seleccione una categoría</option>
-              @foreach($categorias as $cat)
-                <option value="{{ $cat->id }}">{{ $cat->nombre_categoria }}</option>
-              @endforeach
-            </select>
+              foreach($categorias as $cat)
+                <option value="{ $cat->id }}">{ $cat->nombre_categoria }}</option>
+              endforeach
+            </select> 
           </div>
+
           <div class="col-md-4">
             <label for="subcategoria" class="form-label">Subcategoría</label>
             <select id="subcategoria" class="form-select">
@@ -95,7 +97,7 @@
           <div class="col-md-2 text-end">
             <button type="button" class="btn btn-success w-100 mt-4" id="agregar">Agregar</button>
           </div>
-        </div>
+        </div>-->
 
         <hr>
         <h5 class="mb-3">Recursos prestados</h5>
@@ -142,8 +144,8 @@
             <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
             Volver
           </a>
-          <button type="submit" class="btn btn-guardar">Actualizar Préstamo</button>
-        </div>
+         <!-- <button type="submit" class="btn btn-guardar">Actualizar Préstamo</button>
+       --> </div> 
       </form>
     </div>
   </div>
