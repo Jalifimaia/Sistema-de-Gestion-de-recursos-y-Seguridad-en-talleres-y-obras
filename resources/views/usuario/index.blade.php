@@ -16,9 +16,9 @@
     <p class="text-muted small">Administración de usuarios, permisos y roles del sistema</p>
   </div>
 
-  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-3">
+ <!-- <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-3">
         <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
-      </div>
+      </div>-->
 </header>
 
  

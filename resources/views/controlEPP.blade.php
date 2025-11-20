@@ -21,11 +21,11 @@
     </p>
   </div>
 
-  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-4">
+ <!-- <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-4">
     <div class="mt-4">
     <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
     </div>
-  </div>
+  </div>-->
 </header>
 
 

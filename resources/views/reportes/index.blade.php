@@ -15,9 +15,9 @@
     <p class="text-muted">Visualización de movimientos, asignaciones e incidentes registrados en el sistema</p>
   </div>
 
-  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
+ <!-- <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
     <strong id="today" class="valor-fecha text-nowrap"></strong>
-  </div>
+  </div>-->
 </header>
 
 
