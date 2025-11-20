@@ -88,9 +88,10 @@
           </div>
 
           <div class="mt-3 text-end">
-            <a href="{{ route('controlEPP') }}" class="btn btn-sm btn-outline-primary">
-              Ver todos los checklist
-            </a>
+        <a href="{{ route('checklist.epp.tabla') }}" class="btn btn-sm btn-outline-primary">
+    Ver todos los checklist
+</a>
+
           </div>
         @endif
       </div>
