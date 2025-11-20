@@ -197,6 +197,22 @@ window.addEventListener('load', function () {
         });
         contAcc.appendChild(btnEditarSerie);
 
+// Botón ver QR
+const btnQr = document.createElement('a');
+btnQr.href = `/series/${serieId}/qr`; // ruta showQr
+btnQr.target = '_blank';
+btnQr.className = 'btn btn-sm btn-success btn-accion';
+btnQr.innerHTML = '<i class="bi bi-qr-code"></i><span class="ms-1">QR</span>';
+contAcc.appendChild(btnQr);
+
+// Botón descargar QR en PDF (usar la ruta que sí funciona)
+const btnQrPdf = document.createElement('a');
+btnQrPdf.href = `/series-qr/${serieId}/pdf`;
+btnQrPdf.target = '_blank';
+btnQrPdf.className = 'btn btn-sm btn-warning btn-accion';
+btnQrPdf.innerHTML = '<i class="bi bi-file-earmark-pdf"></i><span class="ms-1">PDF</span>';
+contAcc.appendChild(btnQrPdf);
+
         tdAcciones.appendChild(contAcc);
 
         fila.appendChild(tdSerie);

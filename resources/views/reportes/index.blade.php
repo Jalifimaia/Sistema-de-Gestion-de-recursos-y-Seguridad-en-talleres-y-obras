@@ -15,9 +15,9 @@
     <p class="text-muted">Visualización de movimientos, asignaciones e incidentes registrados en el sistema</p>
   </div>
 
-  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
+ <!-- <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
     <strong id="today" class="valor-fecha text-nowrap"></strong>
-  </div>
+  </div>-->
 </header>
 
 
@@ -32,7 +32,7 @@
       <div class="card-body d-flex flex-column">
         <h5 class="card-title fw-bold text-center mt-2">Préstamos registrados</h5>
         <p class="card-text text-center">Visualizá los movimientos registrados en el sistema.</p>
-        <a href="{{ route('reportes.prestamos') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+        <a href="{{ route('reportes.prestamos') }}" class="btn btn-naranja btn-sm mt-auto w-100">Ver reporte</a>
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@
       <div class="card-body d-flex flex-column">
         <h5 class="card-title fw-bold text-center mt-2">Recursos más prestados</h5>
         <p class="card-text text-center">Ranking de recursos por cantidad de préstamos registrados en el sistema.</p>
-        <a href="{{ route('reportes.masPrestados') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+        <a href="{{ route('reportes.masPrestados') }}" class="btn btn-naranja btn-sm mt-auto w-100">Ver reporte</a>
       </div>
     </div>
   </div>
@@ -60,7 +60,7 @@
       <div class="card-body d-flex flex-column">
         <h5 class="card-title fw-bold text-center mt-2">Recursos en reparación</h5>
         <p class="card-text text-center">Listado de recursos que están actualmente en estado de reparación.</p>
-        <a href="{{ route('reportes.enReparacion') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+        <a href="{{ route('reportes.enReparacion') }}" class="btn btn-naranja btn-sm mt-auto w-100">Ver reporte</a>
       </div>
     </div>
   </div>
@@ -74,7 +74,7 @@
       <div class="card-body d-flex flex-column">
         <h5 class="card-title fw-bold text-center mt-2">Herramientas por trabajador</h5>
         <p class="card-text text-center">Asignaciones de herramientas por usuario para trazabilidad y control.</p>
-        <a href="{{ route('reportes.herramientasPorTrabajador') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+        <a href="{{ route('reportes.herramientasPorTrabajador') }}" class="btn btn-naranja btn-sm mt-auto w-100">Ver reporte</a>
       </div>
     </div>
   </div>
@@ -88,7 +88,7 @@
       <div class="card-body d-flex flex-column">
         <h5 class="card-title fw-bold text-center mt-2">Incidentes por tipo de recurso</h5>
         <p class="card-text text-center">Análisis de incidentes agrupados por categoría de recurso.</p>
-        <a href="{{ route('reportes.incidentesPorTipo') }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Ver reporte</a>
+        <a href="{{ route('reportes.incidentesPorTipo') }}" class="btn btn-naranja btn-sm mt-auto w-100">Ver reporte</a>
       </div>
     </div>
   </div>

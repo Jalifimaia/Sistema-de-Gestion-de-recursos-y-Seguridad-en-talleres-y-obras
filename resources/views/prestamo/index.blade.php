@@ -14,8 +14,8 @@
     <div class="card-body bg-white">
 
       <div class="mb-3 text-start">
-        <a href="{{ route('prestamos.create') }}" class="btn btn-nuevo-prestamo">
-          <i class="bi bi-plus-circle"></i> Nuevo Préstamo
+        <a href="{{ route('prestamos.create') }}" class="btn btn-naranja">
+           Nuevo Préstamo
         </a>
       </div>
 
@@ -112,16 +112,18 @@
      data-estado="{{ strtolower($p->estado) }}"
      data-creador="{{ strtolower($p->creado_por) }}"
      data-texto="{{ strtolower($p->recurso . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
-     data-fecha="{{ $p->fecha_creacion }}">
+    data-fecha="{{ $p->fecha_prestamo }}"
+>
   <div class="card border-secondary shadow-sm h-100 p-1">
     <div class="card-body p-2">
       <h6 class="card-title mb-1 fs-6">{{ $p->recurso }}</h6>
       <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
       <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
       <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
-      <p class="card-text mb-1 small">
-        Fecha: {{ \Carbon\Carbon::parse($p->fecha_creacion)->format('d/m/Y H:i') }}
-      </p>
+<p class="card-text mb-1 small">
+  Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
+</p>
+
       <p class="card-text mb-0 small">
         Estado: <span class="badge bg-{{ $color }}">{{ $p->estado }}</span>
       </p>

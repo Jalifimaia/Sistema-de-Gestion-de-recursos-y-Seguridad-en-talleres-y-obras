@@ -150,3 +150,14 @@ td.text-nowrap > .d-flex {
 
 /* Mantener separación y prevenir quiebre en móviles */
 .d-flex.gap-2 { gap: 6px; }
+
+/* 🔶 Botón buscar */
+.btn-naranja {
+  background-color: #d06842;
+  color: #fff;
+  border: none;
+}
+
+.btn-naranja:hover {
+  background-color: #d06842;
+}

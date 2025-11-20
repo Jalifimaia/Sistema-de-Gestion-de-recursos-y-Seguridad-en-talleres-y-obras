@@ -15,10 +15,14 @@
     <!-- Columna izquierda: datos -->
     <div class="col-md-8">
       <div class="d-flex align-items-center gap-3 mb-4">
-        <a href="{{ route('usuarios.index') }}" class="btn btn-volver d-flex align-items-center">
-          <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icon-volver me-2">
-          Volver
-        </a>
+<a href="{{ request('from') === 'sinChecklist' 
+              ? route('controlEPP.sinChecklist') 
+              : route('usuarios.index') }}" 
+   class="btn btn-volver d-flex align-items-center">
+  <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icon-volver me-2">
+  Volver
+</a>
+
         <h1 class="titulo-con-linea mb-0">{{ $usuario->name }}</h1>
       </div>
 

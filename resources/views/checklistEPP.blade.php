@@ -7,10 +7,15 @@
   <!-- 🔶 Encabezado -->
 <header class="mb-5 py-3 px-4">
   <div class="d-flex justify-content-between align-items-center flex-wrap">
-    <a href="{{ route('controlEPP') }}" class="btn btn-volver d-flex align-items-center">
-      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
-      Volver
-    </a>
+
+<a href="{{ request('from') === 'sinChecklist' 
+              ? route('controlEPP.sinChecklist') 
+              : route('controlEPP') }}" 
+   class="btn btn-volver d-flex align-items-center">
+  <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+  Volver
+</a>
+
     <div class="text-center w-100 mt-3 d-flex justify-content-center align-items-center gap-2">
       <img src="{{ asset('images/check.svg') }}" alt="Checklist" class="icono-titulo">
       <h1 class="titulo-checklist mb-0">Registro de Checklist Diario</h1>
@@ -51,6 +56,9 @@
         <div class="invalid-feedback">{{ $message }}</div>
       @enderror
     </div>
+
+    <div id="aviso-checklist" class="text-danger mt-2 d-none"></div>
+
 
     <!-- EPP asignado -->
     <div id="epp-asignado" class="alert alert-info d-none">
@@ -226,25 +234,39 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  select.addEventListener('change', function () {
-    const userId = this.value;
-    if (!userId) return;
+select.addEventListener('change', function () {
+  const userId = this.value;
+  if (!userId) return;
 
-    fetch(`/epp/asignados/${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        eppList.innerHTML = '';
-        if (data.length === 0) {
-          eppList.innerHTML = '<li>No tiene EPP asignado</li>';
-        } else {
-          data.forEach(epp => {
-            eppList.innerHTML += `<li>${epp.tipo}: ${epp.serie}</li>`;
-          });
-        }
-        eppBox.classList.remove('d-none');
-        validarChecklistContraAsignado(data);
+  const eppPromise = fetch(`/epp/asignados/${userId}`).then(res => res.json());
+  const checklistPromise = fetch(`/checklist/validar-hoy/${userId}`).then(res => res.json());
+
+  Promise.all([eppPromise, checklistPromise]).then(([eppData, checklistData]) => {
+    // Mostrar EPP asignado
+    eppList.innerHTML = '';
+    if (eppData.length === 0) {
+      eppList.innerHTML = '<li>No tiene EPP asignado</li>';
+    } else {
+      eppData.forEach(epp => {
+        eppList.innerHTML += `<li>${epp.tipo}: ${epp.serie}</li>`;
       });
+    }
+    eppBox.classList.remove('d-none');
+    validarChecklistContraAsignado(eppData);
+
+    // Mostrar aviso checklist
+    const aviso = document.getElementById('aviso-checklist');
+    if (checklistData.existe) {
+      aviso.textContent = `Al trabajador ya se le realizó el checklist hoy.`;
+      aviso.classList.remove('d-none');
+    } else {
+      aviso.textContent = '';
+      aviso.classList.add('d-none');
+    }
   });
+});
+
+
 
   if (select.value) {
     select.dispatchEvent(new Event('change'));

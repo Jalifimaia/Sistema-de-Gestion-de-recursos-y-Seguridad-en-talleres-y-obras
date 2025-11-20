@@ -24,9 +24,9 @@
           Estado general de las herramientas y de la seguridad de los trabajadores.
         </p>
       </div>
-    <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
+    <!--  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
       <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
-    </div>
+    </div>-->
   </header>
 
   <!-- Checklists del Día (desplegable) -->
@@ -88,9 +88,10 @@
           </div>
 
           <div class="mt-3 text-end">
-            <a href="{{ route('controlEPP') }}" class="btn btn-sm btn-ver-todo">
-              Ver todos los checklist
-            </a>
+        <a href="{{ route('checklist.epp.tabla') }}" class="btn btn-sm btn-ver-todo">
+    Ver todos los checklist
+</a>
+
           </div>
         @endif
       </div>

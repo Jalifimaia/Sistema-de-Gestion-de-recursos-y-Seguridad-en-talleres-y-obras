@@ -93,10 +93,9 @@
           </div>
         </div>
 
-        <hr>
-        <h5 class="mb-3">Recursos seleccionados</h5>
+        <h5 style="display:none" class="mb-3">Recursos seleccionados</h5>
 
-        <div id="contenedorSeries" class="row g-3">
+        <div style="display:none" id="contenedorSeries" class="row g-3">
           {{-- tarjetas dinámicas creadas por JS con hidden name="series[]" --}}
         </div>
 
@@ -108,7 +107,7 @@
             </a>
           </div>
           <div class="col-md-6">
-            <button type="submit" class="btn btn-guardar w-100">Guardar Préstamo</button>
+            <button style="display:none" type="submit" class="btn btn-guardar w-100">Guardar Préstamo</button>
           </div>
         </div>
 
@@ -116,23 +115,26 @@
     </div>
   </div>
 
-  {{-- Modal recurso agregado --}}
-  <div class="modal fade" id="modalRecursoAgregado" tabindex="-1" aria-labelledby="modalRecursoAgregadoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title" id="modalRecursoAgregadoLabel">✅ Recurso agregado</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          El recurso fue agregado correctamente a la lista de préstamo.
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
-        </div>
+{{-- Modal recurso agregado --}}
+@if(session('success'))
+<div class="modal fade" id="modalRecursoAgregado" tabindex="-1" aria-labelledby="modalRecursoAgregadoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalRecursoAgregadoLabel">Recurso agregado</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('success') }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" id="btnAceptarModal">Aceptar</button>
       </div>
     </div>
   </div>
+</div>
+@endif
+
 
 <div class="modal fade" id="modalSerieInvalida" tabindex="-1" aria-labelledby="modalSerieInvalidaLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered">
@@ -216,29 +218,38 @@
     }
 
     if (trabajadorSelect && trabajadorHidden) {
-      // sincronizar al cambiar
       trabajadorSelect.addEventListener('change', () => {
         syncAndEnable();
       });
-
-      // sincronizar una vez al cargar (por si el usuario ya venía seleccionado)
       syncAndEnable();
     }
 
     // Mostrar modal de éxito si viene en session
     @if(session('success'))
-      const modalPrestamo = document.getElementById('modalPrestamoGuardado');
+      const modalPrestamo = document.getElementById('modalRecursoAgregado');
       if (modalPrestamo && typeof bootstrap !== 'undefined') {
         const inst = new bootstrap.Modal(modalPrestamo);
         inst.show();
-        modalPrestamo.addEventListener('hidden.bs.modal', () => inst.dispose(), { once: true });
+
+        // Redirigir al index al aceptar o cerrar
+        const btnAceptar = modalPrestamo.querySelector('#btnAceptarModal');
+        if (btnAceptar) {
+          btnAceptar.addEventListener('click', () => {
+            window.location.href = "{{ route('prestamos.index') }}";
+          });
+        }
+        modalPrestamo.addEventListener('hidden.bs.modal', () => {
+          window.location.href = "{{ route('prestamos.index') }}";
+        }, { once: true });
       } else if ('{{ session("success") }}') {
         alert('{{ session("success") }}');
+        window.location.href = "{{ route('prestamos.index') }}";
       }
     @endif
   });
   </script>
 @endpush
+
 
 @push('styles')
 <link href="{{ asset('css/agregarPrestamo.css') }}" rel="stylesheet">

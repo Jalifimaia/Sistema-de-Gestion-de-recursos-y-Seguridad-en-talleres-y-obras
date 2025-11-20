@@ -58,14 +58,14 @@ public function identificarTrabajador(Request $request)
     if ($usuario->id_rol != 3) {
         return response()->json([
             'success' => false,
-            'message' => 'Este usuario no tiene permisos para usar el kiosco'
+            'message' => 'Este usuario no tiene permisos para usar la terminal'
         ]);
     }
 
     if ($usuario->id_estado != 1) {
         return response()->json([
             'success' => false,
-            'message' => 'El usuario no está en estado de "alta" y no puede usar el kiosco'
+            'message' => 'El usuario no está en estado de "alta" y no puede usar la terminal'
         ]);
     }
 
@@ -99,14 +99,14 @@ public function identificarPorQR(Request $request)
     if ($usuario->id_rol != 3) {
         return response()->json([
             'success' => false,
-            'message' => 'Este usuario no tiene permisos para usar el kiosco'
+            'message' => 'Este usuario no tiene permisos para usar la terminal'
         ]);
     }
 
     if ($usuario->id_estado != 1) {
         return response()->json([
             'success' => false,
-            'message' => 'El usuario no está en estado de "alta" y no puede usar el kiosco'
+            'message' => 'El usuario no está en estado de "alta" y no puede usar la terminal'
         ]);
     }
 

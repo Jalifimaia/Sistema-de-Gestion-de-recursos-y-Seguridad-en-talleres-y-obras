@@ -513,7 +513,31 @@ td.acciones .d-flex {
 
 
 
+/* 🟧 Botón Registrar incidente */
+.btn-registrar-incidente {
+  background-color: #b95b0e;
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-registrar-incidente:hover {
+  background-color: #ef6c00;
+}
 
 
 
 
+/* 🔶 Botón buscar */
+.btn-naranja {
+  background-color: #d06842;
+  color: #fff;
+  border: none;
+}
+
+.btn-naranja:hover {
+  background-color: #d06842;
+}

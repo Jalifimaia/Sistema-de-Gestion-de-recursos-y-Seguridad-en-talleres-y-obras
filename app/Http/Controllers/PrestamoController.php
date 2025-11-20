@@ -182,15 +182,16 @@ public function store(PrestamoRequest $request)
     $adminId = Auth::id();
     $series = $validated['series'] ?? [];
 
-    if (empty($series)) {
-        return back()->withErrors(['series' => 'No se enviaron series para prestar.']);
+    // 🚫 Validar que haya exactamente una serie
+    if (count($series) !== 1) {
+        return back()->withErrors(['series' => 'Debe seleccionar exactamente un recurso para el préstamo.']);
     }
 
     DB::beginTransaction();
     try {
         $workerId = $validated['id_trabajador'];
-        $fechaPrestamo = Carbon::today();
-        $fechaDevolucion = Carbon::tomorrow();
+        $fechaPrestamo   = Carbon::now('America/Argentina/Buenos_Aires');
+        $fechaDevolucion = Carbon::now('America/Argentina/Buenos_Aires')->addDay();
 
         $idPrestamo = DB::table('prestamo')->insertGetId([
             'id_usuario'              => $workerId,
@@ -203,43 +204,46 @@ public function store(PrestamoRequest $request)
             'fecha_modificacion'      => now(),
         ]);
 
-        foreach ($series as $idSerie) {
-            // Validar que la serie esté disponible
-            $serie = SerieRecurso::where('id', $idSerie)->where('id_estado', 1)->first();
-            if (! $serie) {
-                throw new \Exception("La serie con id {$idSerie} ya no está disponible.");
-            }
+        // ✅ Tomar la única serie
+        $idSerie = $series[0];
 
-            // Registrar el detalle del préstamo
-            $detalle = DetallePrestamo::create([
-                'id_prestamo'        => $idPrestamo,
-                'id_serie'           => $idSerie,
-                'id_recurso'         => $serie->id_recurso,
-                'id_estado_prestamo' => 2, // Asignado / Activo
-                'created_at'         => now(),
-                'updated_at'         => now(),
-            ]);
-
-            if (! $detalle) {
-                throw new \Exception("No se pudo registrar el préstamo para la serie {$idSerie}.");
-            }
-
-            // Marcar la serie como prestada
-            $serie->update(['id_estado' => 3]);
-
-            // Actualizar stock
-            DB::table('stock')->updateOrInsert(
-                ['id_serie_recurso' => $idSerie],
-                [
-                    'id_recurso'        => $serie->id_recurso,
-                    'id_estado_recurso' => 3,
-                    'id_usuario'        => $workerId,
-                ]
-            );
+        // Validar que la serie esté disponible
+        $serie = SerieRecurso::where('id', $idSerie)->where('id_estado', 1)->first();
+        if (! $serie) {
+            throw new \Exception("La serie con id {$idSerie} ya no está disponible.");
         }
 
+        // Registrar el detalle del préstamo
+        $detalle = DetallePrestamo::create([
+            'id_prestamo'        => $idPrestamo,
+            'id_serie'           => $idSerie,
+            'id_recurso'         => $serie->id_recurso,
+            'id_estado_prestamo' => 2, // Asignado / Activo
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
+
+        if (! $detalle) {
+            throw new \Exception("No se pudo registrar el préstamo para la serie {$idSerie}.");
+        }
+
+        // Marcar la serie como prestada
+        $serie->update(['id_estado' => 3]);
+
+        // Actualizar stock
+        DB::table('stock')->updateOrInsert(
+            ['id_serie_recurso' => $idSerie],
+            [
+                'id_recurso'        => $serie->id_recurso,
+                'id_estado_recurso' => 3,
+                'id_usuario'        => $workerId,
+            ]
+        );
+
         DB::commit();
-        return Redirect::route('prestamos.index')->with('success', 'Préstamo registrado correctamente.');
+
+        // 🔑 Volver a create con mensaje de éxito
+        return Redirect::back()->with('success', 'Recurso agregado correctamente.');
     } catch (\Exception $e) {
         DB::rollBack();
         Log::warning('Error al registrar préstamo: ' . $e->getMessage(), [

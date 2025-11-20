@@ -29,12 +29,16 @@
                 <strong>Estado:</strong> {{ $usuario->estado->nombre ?? 'Sin estado' }}
               </p>
               <div class="d-flex justify-content-between">
-                <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-verperfil btn-sm">
-                  Ver perfil
-                </a>
-                <a href="{{ route('checklist.epp', ['trabajador_id' => $usuario->id]) }}" class="btn btn-success btn-sm">
-                Registrar checklist
-                </a>
+           <a href="{{ route('usuarios.show', ['usuario' => $usuario->id, 'from' => 'sinChecklist']) }}" 
+   class="btn btn-verperfil btn-sm">
+  Ver perfil
+</a>
+
+         <a href="{{ route('checklist.epp', ['trabajador_id' => $usuario->id, 'from' => 'sinChecklist']) }}" 
+   class="btn btn-success btn-sm">
+  Registrar checklist
+</a>
+
               </div>
             </div>
           </div>

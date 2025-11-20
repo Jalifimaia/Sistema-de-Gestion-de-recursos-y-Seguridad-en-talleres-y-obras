@@ -199,3 +199,14 @@
   transform: none !important;    /* evita que se muevan si tenías animación */
   cursor: default;               /* cursor normal */
 }
+
+/* 🔶 Botón buscar */
+.btn-naranja {
+  background-color: #d06842;
+  color: #fff;
+  border: none;
+}
+
+.btn-naranja:hover {
+  background-color: #d06842;
+}
