@@ -1,61 +1,139 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SafeStock – Sistema de gestión de inventario y seguridad en talleres
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+SafeStock es un sistema desarrollado en **Laravel** que busca mejorar la seguridad y organización en talleres, garantizando el cumplimiento del **equipamiento de protección personal (EPP)** y el control de herramientas.
 
-## About Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Objetivo
 
-## Learning Laravel
+SafeStock nace como respuesta a los frecuentes accidentes laborales ocasionados por el incumplimiento del uso de EPP y la falta de una administración efectiva de herramientas.  
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+El sistema brinda una solución integral para supervisores y trabajadores, permitiendo:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- Controlar el estado de las herramientas.
+- Registrar préstamos y devoluciones.
+- Validar el cumplimiento de checklist de seguridad.
+- Detectar faltantes y vencimientos de EPP.
+- Administrar usuarios, roles e incidentes.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Funcionalidades
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Dashboard
+- Resumen diario del taller.
+- Estado general de herramientas y seguridad de los trabajadores.
+- Checklist del día con validación de EPP por trabajador.
 
-### Premium Partners
+### Inventario
+- Gestión completa de recursos y equipos.
+- Búsqueda por nombre, categoría, subcategoría o descripción.
+- Filtros por estado (disponible, baja, reparación, préstamo).
+- Administración de series de recursos.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Control de EPP
+- Registro de cumplimiento de checklist diario.
+- Asignación de EPP a trabajadores.
+- Detección de faltantes y pendientes.
+- Alertas de vencimientos próximos.
 
-## Contributing
+### Reportes
+- Movimientos y préstamos registrados.
+- Ranking de recursos más prestados.
+- Listado de recursos en reparación.
+- Herramientas por trabajador para trazabilidad.
+- Incidentes agrupados por tipo de recurso.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Usuarios
+- Administración de usuarios, roles y permisos.
+- Alta de nuevos usuarios.
+- Filtros por estado y rol.
+- Registro de último acceso.
 
-## Code of Conduct
+### Incidentes
+- Registro y análisis de incidentes.
+- Búsqueda por trabajador, motivo, estado o resolución.
+- Seguimiento de resolución de problemas.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Préstamos
+- Registro de préstamos de recursos.
+- Búsqueda por recurso, serie, trabajador o creador.
+- Filtros por estado y rango de fechas.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Beneficios
 
-## License
+- **Seguridad:** Promueve el uso responsable de herramientas y cumplimiento de EPP.  
+- **Organización:** Centraliza la gestión de inventario y usuarios.  
+- **Trazabilidad:** Permite saber qué trabajador tiene cada recurso y en qué estado se encuentra.  
+- **Prevención:** Detecta vencimientos de EPP y recursos en reparación.  
+ 
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Terminal 
+La terminal de **SafeStock** permite a los trabajadores interactuar con el sistema de manera rápida y accesible, utilizando **comandos de voz** y **códigos QR**.
+
+---
+
+## Funcionalidades
+
+### Inicio de sesión
+- **QR:** Los trabajadores pueden iniciar sesión escaneando su código QR personal.  
+
+
+### Control por voz
+- Reconocimiento de voz continuo para ejecutar comandos como:
+  - Navegación entre pasos del sistema.
+  - Selección de categorías, subcategorías y recursos.
+  - Registro de préstamos o asignaciones.
+  - Consultar recursos asignados.
+  - Devoluciones de recursos.
+
+Ejemplos de comandos de voz:
+- `opción 3`, `volver`, `cerrar`.
+
+### Registro de recursos
+- **Por voz:** El trabajador puede registrar un recurso indicando el nombre o serie mediante comandos de voz.  
+- **Por QR:** Escaneo de código QR para registrar préstamos o asignaciones de recursos.  
+
+### Recursos asignados
+- Visualización de herramientas y equipos de protección personal (EPP) asignados a cada trabajador.  
+
+### Devolución de recursos
+- La devolución de herramientas se realiza escaneando el código QR del recurso.  
+
+---
+
+## Beneficios
+
+- **Accesibilidad:** Interacción rápida mediante voz o QR, reduciendo la necesidad de navegación manual.  
+- **Seguridad:** Garantiza que los trabajadores registren y devuelvan correctamente los recursos.  
+- **Trazabilidad:** Permite saber en todo momento qué recursos están asignados.  
+- **Eficiencia:** Minimiza tiempos de registro y control en el taller.  
+
+---
+
+
+
+## Tecnologías utilizadas
+
+- **Backend:** Laravel  
+- **Frontend:** HTML, Bootstrap, JS  
+- **Base de datos:** MySQL 
+---
+## Equipo
+
+- Anabela Argañaras  
+- David Cardozo  
+- Maia Jalifi  
+- Gaston Roa  
+- Micaela Barroso  
+
+
+
+
+
+
