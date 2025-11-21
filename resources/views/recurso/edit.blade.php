@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Editar Recurso')
+@section('title', 'Editar recurso')
 
 @section('content')
 <div class="container mt-4">
@@ -74,7 +74,7 @@
           <textarea id="descripcion"
                     name="descripcion"
                     class="form-control @error('descripcion') is-invalid @enderror"
-                    placeholder="Descripción..."
+                    placeholder="Descripción (máx. 4 palabras)."
                     rows="3"
                     maxlength="250">{{ old('descripcion', $recurso->descripcion) }}</textarea>
           @error('descripcion')
@@ -86,7 +86,14 @@
         <!-- Costo unitario -->
         <div class="col-md-6">
             <label for="costo_unitario" class="form-label">Costo unitario</label>
-            <input type="number" id="costo_unitario" name="costo_unitario" class="form-control" placeholder="Costo unitario" min="0" step="0.01" value="{{ old('costo_unitario', $recurso->costo_unitario) }}">
+            <input type="text"
+              id="costo_unitario"
+              name="costo_unitario"
+              class="form-control"
+              placeholder="Costo unitario"
+              min="0"
+              step="0.01"
+              value="{{ old('costo_unitario', number_format($recurso->costo_unitario, 0, ',', '.')) }}">
         </div>
 
         <!-- Guardar cambios -->
@@ -176,6 +183,22 @@ document.addEventListener('DOMContentLoaded', function () {
   const modalGuardado = document.getElementById('modalGuardadoExitoso');
   if (modalGuardado && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
     new bootstrap.Modal(modalGuardado).show();
+  }
+
+  const input = document.getElementById('costo_unitario');
+
+  if (input) {
+    input.addEventListener('input', () => {
+      let value = input.value.replace(/\D/g, '');
+      if (value) {
+        input.value = new Intl.NumberFormat('es-AR').format(value);
+      }
+    });
+
+    input.form.addEventListener('submit', () => {
+      // limpiar puntos antes de enviar
+      input.value = input.value.replace(/\./g, '').replace(',', '.');
+    });
   }
 });
 </script>

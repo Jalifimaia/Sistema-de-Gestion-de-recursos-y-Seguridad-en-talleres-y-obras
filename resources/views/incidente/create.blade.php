@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Registrar nuevo incidente')
+
 @section('content')
 <div class="container py-4">
 

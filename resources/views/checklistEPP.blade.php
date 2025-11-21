@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Registro de Checklist Diario')
+@section('title', 'Registro del checklist diario')
 
 @section('content')
   <div class="container py-4">
@@ -18,7 +18,7 @@
 
     <div class="text-center w-100 mt-3 d-flex justify-content-center align-items-center gap-2">
       <img src="{{ asset('images/check.svg') }}" alt="Checklist" class="icono-titulo">
-      <h1 class="titulo-checklist mb-0">Registro de Checklist Diario</h1>
+      <h1 class="titulo-checklist mb-0">Registro del Checklist Diario</h1>
     </div>
   </div>
 </header>

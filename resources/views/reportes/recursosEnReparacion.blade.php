@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Recursos en reparación')
+
 @section('content')
 <div class="container py-4">
 

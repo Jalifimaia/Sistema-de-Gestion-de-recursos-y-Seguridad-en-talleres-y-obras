@@ -21,25 +21,20 @@
     </p>
   </div>
 
- <!-- <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-4">
-    <div class="mt-4">
-    <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
-    </div>
-  </div>-->
-</header>
-
-
-<!-- 🔶 Botón para ver tabla completa del checklist -->
-  <div class="text-start mb-4">
-    <a href="{{ route('checklist.epp.tabla') }}" class="btn btn-naranja">
+  <!-- Botón alineado a la derecha -->
+  <div class="col-auto ms-auto">
+    <a href="{{ route('checklist.epp.tabla') }}" 
+       class="btn btn-vercheck w-auto d-flex align-items-center gap-2">
+      <img src="{{ asset('images/check.svg') }}" alt="Checklist" style="width:24px; height:24px;">
       Ver tabla de checklist diario
     </a>
   </div>
+</header>
 
  <!-- 🔶 Cards funcionales estilo acción urgente -->
-<div class="row g-4 mb-5">
+<div class="row g-4 mb-5 justify-content-center">
   <!-- Checklist Diario -->
-  <div class="col-md-6 col-lg-3">
+  <div class="col-md-6 col-lg-4">
     <div class="card card-action h-100 d-flex flex-column align-items-center text-center">
       <div class="card-body d-flex flex-column align-items-center text-center">
         <div class="d-flex justify-content-start align-items-center w-100 mb-2 gap-2">
@@ -53,7 +48,7 @@
   </div>
 
   <!-- Asignar EPP -->
-  <div class="col-md-6 col-lg-3">
+  <div class="col-md-6 col-lg-4">
     <div class="card card-action h-100 d-flex flex-column align-items-center text-center">
       <div class="card-body d-flex flex-column align-items-center text-center">
         <div class="d-flex justify-content-start align-items-center w-100 mb-2 gap-2">
@@ -66,22 +61,8 @@
     </div>
   </div>
 
-  <!-- Recursos Faltantes -->
-  <div class="col-md-6 col-lg-3">
-    <div class="card card-action h-100 d-flex flex-column align-items-center text-center">
-      <div class="card-body d-flex flex-column align-items-center text-center">
-        <div class="d-flex justify-content-start align-items-center w-100 mb-2 gap-2">
-          <img src="{{ asset('images/faltantes.svg') }}" alt="Faltantes" class="icono-action-inline">
-          <h5 class="card-title fw-semibold mb-0">Recursos Faltantes</h5>
-        </div>
-        <p class="card-text small text-muted">Trabajadores sin todos los EPP obligatorios asignados.</p>
-        <a href="{{ route('epp.faltantes') }}" class="btn btn-action btn-naranja mt-auto">Ver faltantes</a>
-      </div>
-    </div>
-  </div>
-
   <!-- Checklist No Registrado -->
-  <div class="col-md-6 col-lg-3">
+  <div class="col-md-6 col-lg-4">
     <div class="card card-action h-100 d-flex flex-column align-items-center text-center">
       <div class="card-body d-flex flex-column align-items-center text-center">
         <div class="d-flex justify-content-start align-items-center w-100 mb-2 gap-2">

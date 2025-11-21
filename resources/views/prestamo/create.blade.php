@@ -1,14 +1,12 @@
 @extends('layouts.app')
 
-@section('template_title')
-  Registrar Préstamo
-@endsection
+@section('title', 'Registrar préstamo')
 
 @section('content')
 <div class="container py-4">
   <div class="card shadow-sm">
     <div class="card-header bg-orange text-white text-center">
-      <h4 class="mb-0 fw-bold">Registrar Préstamo</h4>
+      <h4 class="mb-0 fw-bold">Registrar préstamo</h4>
     </div>
     <div class="card-body bg-white">
 

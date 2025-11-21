@@ -541,3 +541,37 @@ td.acciones .d-flex {
 .btn-naranja:hover {
   background-color: #d06842;
 }
+
+.card-resumen {
+  min-height: 100px; /* más baja */
+}
+
+.card-resumen .card-body {
+  padding: 1.75rem; /* menos padding vertical */
+}
+
+.subir-cards-usuarios .col-md-4 {
+  flex: 1 1 0;
+}
+
+.btn-agregar{
+  background-color: #b95b0e;
+  color: #f1f1f1;
+  font-size: 1.2rem;
+}
+
+.btn-agregar:hover{
+  background-color: #994c0c;
+  color: #f1f1f1;
+  font-size: 1.2rem;
+}
+
+.btn-agregar .icono-card-titulo {
+  width: 22px;   /* ancho del icono */
+  height: 22px;  /* alto del icono */
+}
+
+.filtrar-por{
+  font-size: 1rem;
+}
+

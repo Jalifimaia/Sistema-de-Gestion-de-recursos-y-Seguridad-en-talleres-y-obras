@@ -371,12 +371,14 @@ class RecursoController extends Controller
 {
     $validated = $request->validated();
 
+    $costo = str_replace('.', '', $validated['costo_unitario']); 
+    $costo = str_replace(',', '.', $costo);
 
     $recurso = Recurso::create([
         'id_subcategoria' => $validated['id_subcategoria'],
         'nombre' => $validated['nombre'],
         'descripcion' => $validated['descripcion'] ?? null,
-        'costo_unitario' => $validated['costo_unitario'],
+        'costo_unitario' => $costo,
         'id_usuario_creacion' => auth()->id(),
         'id_usuario_modificacion' => auth()->id(),
     ]);
@@ -428,17 +430,22 @@ class RecursoController extends Controller
 {
     $validated = $request->validated();
 
+    // Normalizar costo_unitario: quitar separadores de miles y convertir coma a punto
+    $costo = str_replace('.', '', $validated['costo_unitario']); // quita puntos de miles
+    $costo = str_replace(',', '.', $costo); // convierte coma decimal en punto
+
     $recurso = Recurso::findOrFail($id);
     $recurso->update([
         'nombre' => $validated['nombre'],
         'descripcion' => $validated['descripcion'] ?? null,
-        'costo_unitario' => $validated['costo_unitario'],
+        'costo_unitario' => $costo,
         'id_usuario_modificacion' => auth()->id(),
     ]);
 
     return redirect()->route('recursos.edit', $recurso->id)
         ->with('success', 'Recurso actualizado correctamente.');
 }
+
 
 
 public function destroy($id)

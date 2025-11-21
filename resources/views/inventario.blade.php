@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Gestión de Inventario')
+@section('title', 'Inventario')
 
 @section('content')
 <div class="container py-4">
@@ -10,7 +10,7 @@
     <div class="col-md-8">
       <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
         <img src="{{ asset('images/inventario.svg') }}" alt="Icono Inventario" style="height: 35px;">
-        Gestión de Inventario
+        Gestión del Inventario
       </h1>
       <p class="text-muted">Control de herramientas y equipos de protección personal</p>
     </div>

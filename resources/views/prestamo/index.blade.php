@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-  Lista de Préstamos
-@endsection
+@section('title', 'Préstamos')
 
 @section('content')
 

@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    Asignar EPP
-@endsection
+@section('title', 'Asignación de EPP')
 
 @section('content')
 <div class="container mt-4">

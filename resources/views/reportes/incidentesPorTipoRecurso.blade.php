@@ -1,6 +1,8 @@
 
 @extends('layouts.app')
 
+@section('title', 'Incidentes por tipo de recurso')
+
 @section('content')
 <div class="container py-4">
 

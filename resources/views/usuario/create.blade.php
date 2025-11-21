@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    Crear Usuario
-@endsection
+@section('title', 'Agregar Usuario')
 
 @section('content')
 <div class="container py-4">
@@ -17,7 +15,7 @@
 
       <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
         <img src="{{ asset('images/userNuevo.svg') }}" alt="Usuario" class="me-2 icono-volver">
-        Crear Usuario
+        Agregar Usuario
       </h4>
     </div>
   </div>
