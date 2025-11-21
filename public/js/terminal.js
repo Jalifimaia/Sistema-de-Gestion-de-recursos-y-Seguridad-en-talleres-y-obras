@@ -915,7 +915,7 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
   tabla.innerHTML = '';
 
   if (visibles.length === 0) {
-    tabla.innerHTML = `<tr><td colspan="cantidadRecursosPorPagina" class="text-center">No tiene recursos asignados</td></tr>`;
+    tabla.innerHTML = `<tr><td colspan="${porPagina}" class="text-center">No tiene recursos asignados</td></tr>`;
     paginador.innerHTML = '';
     try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
     return;
@@ -923,10 +923,8 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
 
   visibles.forEach((r, index) => {
     const btn = document.createElement('button');
-
     btn.dataset.recurso = r.recurso || '';
     btn.dataset.serie = r.serie || '';
-
     btn.className = 'btn btn-sm btn-primary';
     btn.dataset.detalleId = r.detalle_id;
     btn.dataset.opcionIndex = index + 1;
@@ -945,32 +943,45 @@ function renderTablaRecursos(tablaId, recursos, pagina = 1, paginadorId) {
     tabla.appendChild(row);
   });
 
-  // Mostrar paginas si hay mas de una
-  actualizarVisibilidadPaginador(paginador, totalPaginas);
-
-
+  // ⚡ Paginador con máximo 3 páginas visibles y botones Anterior/Siguiente
   paginador.innerHTML = '';
-  for (let i = 1; i <= totalPaginas; i++) {
-    const btn = document.createElement('button');
-    btn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
-    btn.textContent = "Pagina " + i;
-    btn.onclick = () => {
-      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('paginador click stop failed', e); }
-      setTimeout(() => getRenderer('renderTablaRecursos')(tablaId, recursos, i, paginadorId), 60);
-    };
-    paginador.appendChild(btn);
+  if (totalPaginas > 1) {
+    const maxPaginasVisibles = 3;
+    let inicioPag = Math.max(1, pagina - 1);
+    let finPag = Math.min(totalPaginas, inicioPag + maxPaginasVisibles - 1);
+
+    // Botón Anterior
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `btn btn-sm m-1 ${pagina === 1 ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    prevBtn.textContent = 'Anterior';
+    if (pagina > 1) {
+      prevBtn.onclick = () => setTimeout(() => getRenderer('renderTablaRecursos')(tablaId, recursos, pagina - 1, paginadorId), 60);
+    }
+    paginador.appendChild(prevBtn);
+
+    // Botones de páginas visibles
+    for (let i = inicioPag; i <= finPag; i++) {
+      const pagBtn = document.createElement('button');
+      pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+      pagBtn.textContent = `Página ${i}`;
+      pagBtn.onclick = () => setTimeout(() => getRenderer('renderTablaRecursos')(tablaId, recursos, i, paginadorId), 60);
+      paginador.appendChild(pagBtn);
+    }
+
+    // Botón Siguiente
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `btn btn-sm m-1 ${pagina === totalPaginas ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    nextBtn.textContent = 'Siguiente';
+    if (pagina < totalPaginas) {
+      nextBtn.onclick = () => setTimeout(() => getRenderer('renderTablaRecursos')(tablaId, recursos, pagina + 1, paginadorId), 60);
+    }
+    paginador.appendChild(nextBtn);
   }
 
-  if (tablaId === 'tablaEPP') {
-    window.paginaEPPActual = pagina;
-  }
-  if (tablaId === 'tablaHerramientas') {
-    window.paginaHerramientasActual = pagina;
-  }
+  if (tablaId === 'tablaEPP') window.paginaEPPActual = pagina;
+  if (tablaId === 'tablaHerramientas') window.paginaHerramientasActual = pagina;
 
-  try {
-    setTimeout(() => { safeStartRecognitionGlobal(); console.log('🎤 safeStart tras renderTablaRecursos'); }, 80);
-  } catch (e) { console.warn('renderTablaRecursos safeStart failed', e); }
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
 
 // verificar si la paginación debe mostrarse
@@ -2242,14 +2253,12 @@ function seleccionarCategoria(categoriaId) {
 }
 
 function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
-  try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderSubcategoriasPaginadas: safeStop failed', e); }
+  try { safeStopRecognitionGlobal(); } catch (e) {}
 
   const contenedor = document.getElementById('subcategoria-buttons');
   const paginador = document.getElementById('paginadorSubcategorias');
-  if (!contenedor || !paginador) {
-    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
-    return;
-  }
+  if (!contenedor || !paginador) return;
+
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
@@ -2262,7 +2271,6 @@ function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
     const btn = document.createElement('button');
     btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
     btn.dataset.subcategoriaId = s.id;
-
     btn.innerHTML = `
       <span class="badge-opcion">Opción ${index + 1}</span>
       <span class="flex-grow-1 text-start">${s.nombre}</span>
@@ -2271,24 +2279,35 @@ function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
     contenedor.appendChild(btn);
   });
 
-  // Mostrar paginas si hay mas de una
-  actualizarVisibilidadPaginador(paginador, totalPaginas);
+  // ⚡ Paginador con máximo 3 páginas visibles y botones Anterior/Siguiente
+  if (totalPaginas > 1) {
+    const maxPaginasVisibles = 3;
+    let inicioPag = Math.max(1, pagina - 1);
+    let finPag = Math.min(totalPaginas, inicioPag + maxPaginasVisibles - 1);
 
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `btn btn-sm m-1 ${pagina === 1 ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    prevBtn.textContent = 'Anterior';
+    if (pagina > 1) prevBtn.onclick = () => setTimeout(() => getRenderer('renderSubcategoriasPaginadas')(subcategorias, pagina - 1), 60);
+    paginador.appendChild(prevBtn);
 
-  for (let i = 1; i <= totalPaginas; i++) {
-    const pagBtn = document.createElement('button');
-    pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
-    pagBtn.textContent = "Pagina " + i;
-    pagBtn.onclick = () => {
-      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('pag sub stop failed', e); }
-      setTimeout(() => getRenderer('renderSubcategoriasPaginadas')(subcategorias, i), 60);
-    };
-    paginador.appendChild(pagBtn);
+    for (let i = inicioPag; i <= finPag; i++) {
+      const pagBtn = document.createElement('button');
+      pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+      pagBtn.textContent = `Página ${i}`;
+      pagBtn.onclick = () => setTimeout(() => getRenderer('renderSubcategoriasPaginadas')(subcategorias, i), 60);
+      paginador.appendChild(pagBtn);
+    }
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `btn btn-sm m-1 ${pagina === totalPaginas ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    nextBtn.textContent = 'Siguiente';
+    if (pagina < totalPaginas) nextBtn.onclick = () => setTimeout(() => getRenderer('renderSubcategoriasPaginadas')(subcategorias, pagina + 1), 60);
+    paginador.appendChild(nextBtn);
   }
 
   window.paginaSubcategoriasActual = pagina;
-
-  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) { console.warn('renderSubcategorias safeStart failed', e); }
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
 
 
@@ -2317,10 +2336,8 @@ function renderRecursosPaginados(recursos, pagina = 1) {
 
   const contenedor = document.getElementById('recurso-buttons');
   const paginador = document.getElementById('paginadorRecursos');
-  if (!contenedor || !paginador) {
-    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
-    return;
-  }
+  if (!contenedor || !paginador) return;
+
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
@@ -2333,7 +2350,6 @@ function renderRecursosPaginados(recursos, pagina = 1) {
     const btn = document.createElement('button');
     btn.className = 'btn btn-outline-dark btn-lg d-flex justify-content-between align-items-center m-2';
     btn.dataset.recursoId = r.id;
-
     btn.innerHTML = `
       <span class="badge-opcion">Opción ${index + 1}</span>
       <span class="flex-grow-1 text-start">${r.nombre}</span>
@@ -2342,24 +2358,35 @@ function renderRecursosPaginados(recursos, pagina = 1) {
     contenedor.appendChild(btn);
   });
 
-  // Mostrar paginas si hay mas de una
-  actualizarVisibilidadPaginador(paginador, totalPaginas);
+  // ⚡ Paginador con máximo 3 páginas visibles y botones Anterior/Siguiente
+  if (totalPaginas > 1) {
+    const maxPaginasVisibles = 3;
+    let inicioPag = Math.max(1, pagina - 1);
+    let finPag = Math.min(totalPaginas, inicioPag + maxPaginasVisibles - 1);
 
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `btn btn-sm m-1 ${pagina === 1 ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    prevBtn.textContent = 'Anterior';
+    if (pagina > 1) prevBtn.onclick = () => setTimeout(() => getRenderer('renderRecursosPaginados')(recursos, pagina - 1), 60);
+    paginador.appendChild(prevBtn);
 
-  for (let i = 1; i <= totalPaginas; i++) {
-    const pagBtn = document.createElement('button');
-    pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
-    pagBtn.textContent = "Pagina " + i;
-    pagBtn.onclick = () => {
-      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('pag recursos stop failed', e); }
-      setTimeout(() => getRenderer('renderRecursosPaginados')(recursos, i), 60);
-    };
-    paginador.appendChild(pagBtn);
+    for (let i = inicioPag; i <= finPag; i++) {
+      const pagBtn = document.createElement('button');
+      pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+      pagBtn.textContent = `Página ${i}`;
+      pagBtn.onclick = () => setTimeout(() => getRenderer('renderRecursosPaginados')(recursos, i), 60);
+      paginador.appendChild(pagBtn);
+    }
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `btn btn-sm m-1 ${pagina === totalPaginas ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    nextBtn.textContent = 'Siguiente';
+    if (pagina < totalPaginas) nextBtn.onclick = () => setTimeout(() => getRenderer('renderRecursosPaginados')(recursos, pagina + 1), 60);
+    paginador.appendChild(nextBtn);
   }
 
   window.paginaRecursosActual = pagina;
-
-  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) { console.warn('renderRecursosPaginados safeStart failed', e); }
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
 
 function seleccionarRecurso(recursoId) {
@@ -2391,10 +2418,8 @@ function renderSeriesPaginadas(series, pagina = 1) {
 
   const contenedor = document.getElementById('serie-buttons');
   const paginador = document.getElementById('paginadorSeries');
-  if (!contenedor || !paginador) {
-    try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
-    return;
-  }
+  if (!contenedor || !paginador) return;
+
   contenedor.innerHTML = '';
   paginador.innerHTML = '';
 
@@ -2413,28 +2438,38 @@ function renderSeriesPaginadas(series, pagina = 1) {
       <span class="badge-opcion">Opción ${index + 1}</span>
       <span class="flex-grow-1 text-start">${textoSerie}</span>
     `;
-
     contenedor.appendChild(btn);
   });
 
-  // Mostrar paginas si hay mas de una
-  actualizarVisibilidadPaginador(paginador, totalPaginas);
+  // ⚡ Paginador con máximo 3 páginas visibles y botones Anterior/Siguiente
+  if (totalPaginas > 1) {
+    const maxPaginasVisibles = 3;
+    let inicioPag = Math.max(1, pagina - 1);
+    let finPag = Math.min(totalPaginas, inicioPag + maxPaginasVisibles - 1);
 
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `btn btn-sm m-1 ${pagina === 1 ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    prevBtn.textContent = 'Anterior';
+    if (pagina > 1) prevBtn.onclick = () => setTimeout(() => getRenderer('renderSeriesPaginadas')(series, pagina - 1), 60);
+    paginador.appendChild(prevBtn);
 
-  for (let i = 1; i <= totalPaginas; i++) {
-    const pagBtn = document.createElement('button');
-    pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
-    pagBtn.textContent = "Pagina " + i;
-    pagBtn.onclick = () => {
-      try { safeStopRecognitionGlobal(); } catch (e) { console.warn('pag series stop failed', e); }
-      setTimeout(() => getRenderer('renderSeriesPaginadas')(series, i), 60);
-    };
-    paginador.appendChild(pagBtn);
+    for (let i = inicioPag; i <= finPag; i++) {
+      const pagBtn = document.createElement('button');
+      pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
+      pagBtn.textContent = `Página ${i}`;
+      pagBtn.onclick = () => setTimeout(() => getRenderer('renderSeriesPaginadas')(series, i), 60);
+      paginador.appendChild(pagBtn);
+    }
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `btn btn-sm m-1 ${pagina === totalPaginas ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    nextBtn.textContent = 'Siguiente';
+    if (pagina < totalPaginas) nextBtn.onclick = () => setTimeout(() => getRenderer('renderSeriesPaginadas')(series, pagina + 1), 60);
+    paginador.appendChild(nextBtn);
   }
 
   window.paginaSeriesActual = pagina;
-
-  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) { console.warn('renderSeriesPaginadas safeStart failed', e); }
+  try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
 
 function confirmarSerieModal(serieId, serieTexto = '', options = {}, botonSerie = null) {
@@ -3165,7 +3200,6 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
   const porPagina = cantidadRecursosPorPagina;
   const totalPaginas = Math.ceil(recursos.length / porPagina);
 
-  // ⚡ Si no hay recursos, mostrar mensaje y salir
   if (!Array.isArray(recursos) || recursos.length === 0) {
     contenedor.innerHTML = `<div class="text-center text-muted">No tiene ${esEpp ? 'EPP' : 'herramientas'} asignadas</div>`;
     return;
@@ -3184,13 +3218,11 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
     btn.dataset.opcionIndex = index + 1;
 
     if (!esEpp) {
-      // ⚡ Pasamos recurso + subcategoria + serie al step9
       btn.onclick = () => mostrarStepDevolucionQR(r.serie, r.detalle_id, r.recurso, r.subcategoria);
     } else {
-      btn.disabled = true; // no clickeable en EPP
+      btn.disabled = true;
     }
 
-    // Texto combinado: Subcategoria - Recurso (orden invertido)
     const textoRecurso = (r.subcategoria ? r.subcategoria : '-') + (r.recurso ? ' - ' + r.recurso : '');
 
     btn.innerHTML = `
@@ -3210,9 +3242,26 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
     contenedor.appendChild(btn);
   });
 
-  // ⚡ Solo mostrar paginador si hay más de una página
+  // ⚡ Paginador con máximo 3 páginas visibles y botones Anterior/Siguiente siempre presentes
   if (totalPaginas > 1) {
-    for (let i = 1; i <= totalPaginas; i++) {
+    const maxPaginasVisibles = 3;
+    let inicioPag = Math.max(1, pagina - 1);
+    let finPag = Math.min(totalPaginas, inicioPag + maxPaginasVisibles - 1);
+
+    // Botón Anterior (siempre visible, deshabilitado en primera página)
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `btn btn-sm m-1 ${pagina === 1 ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    prevBtn.textContent = 'Anterior';
+    if (pagina > 1) {
+      prevBtn.onclick = () => {
+        try { safeStopRecognitionGlobal(); } catch (e) {}
+        setTimeout(() => renderRecursosAsignados(recursos, pagina - 1, contenedorId, paginadorId, esEpp), 60);
+      };
+    }
+    paginador.appendChild(prevBtn);
+
+    // Botones de páginas visibles (máximo 3)
+    for (let i = inicioPag; i <= finPag; i++) {
       const pagBtn = document.createElement('button');
       pagBtn.className = `btn btn-sm ${i === pagina ? 'btn-primary' : 'btn-outline-secondary'} m-1`;
       pagBtn.textContent = `Página ${i}`;
@@ -3223,6 +3272,18 @@ function renderRecursosAsignados(recursos, pagina = 1, contenedorId, paginadorId
       };
       paginador.appendChild(pagBtn);
     }
+
+    // Botón Siguiente (siempre visible, deshabilitado en última página)
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `btn btn-sm m-1 ${pagina === totalPaginas ? 'btn-secondary disabled' : 'btn-outline-secondary'}`;
+    nextBtn.textContent = 'Siguiente';
+    if (pagina < totalPaginas) {
+      nextBtn.onclick = () => {
+        try { safeStopRecognitionGlobal(); } catch (e) {}
+        setTimeout(() => renderRecursosAsignados(recursos, pagina + 1, contenedorId, paginadorId, esEpp), 60);
+      };
+    }
+    paginador.appendChild(nextBtn);
   }
 
   if (contenedorId === 'recursos-asignados-epp') window.paginaEPPActual = pagina;
@@ -4836,6 +4897,8 @@ if (step === 'step0') {
     }
 
     // Si estamos en step10 (pantalla de recursos asignados) manejamos comandos allí
+
+// === Step10: Recursos asignados ===
 if (step === 'step10') {
 
   // --- Volver al menú principal ---
@@ -4869,7 +4932,7 @@ if (step === 'step10') {
     return;
   }
 
-  // --- Paginación: "pagina N" ---
+  // --- Paginación directa: "pagina N" ---
   const mp = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
   if (mp) {
     const numero = numeroDesdeToken(mp[1]);
@@ -4881,11 +4944,39 @@ if (step === 'step10') {
     return;
   }
 
+  // --- Paginación por voz: "anterior" / "siguiente" ---
+  if (/\banterior\b/.test(limpio)) {
+    const paginaActual = ultimoTabElegido === 'herramientas'
+      ? (window.paginaHerramientasActual || 1)
+      : (window.paginaEPPActual || 1);
+
+    if (paginaActual > 1) {
+      console.log("📄 Step10: comando 'anterior'");
+      handleStep10Pagina(paginaActual - 1);
+      return;
+    }
+  }
+
+  if (/\bsiguiente\b/.test(limpio)) {
+    const recursos = ultimoTabElegido === 'herramientas'
+      ? window.recursosHerramientas
+      : window.recursosEPP;
+
+    const paginaActual = ultimoTabElegido === 'herramientas'
+      ? (window.paginaHerramientasActual || 1)
+      : (window.paginaEPPActual || 1);
+
+    const totalPaginas = Math.max(1, Math.ceil((recursos?.length || 0) / cantidadRecursosPorPagina));
+    if (paginaActual < totalPaginas) {
+      console.log("📄 Step10: comando 'siguiente'");
+      handleStep10Pagina(paginaActual + 1);
+      return;
+    }
+  }
+
   console.log('⚠️ step10: comando no reconocido', limpio);
   return;
 }
-
-
 
 
     // Comandos globales cuando no estamos bloqueados por modales ni step10
@@ -5067,7 +5158,7 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
 
 // === Step6: Subcategorías ===
 if (step === 'step6') {
-  // --- Paginación ---
+  // --- Paginación directa: "pagina N" ---
   const matchPaginaSub = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
   if (matchPaginaSub && Array.isArray(window.subcategoriasActuales)) {
     const token = matchPaginaSub[1];
@@ -5080,6 +5171,21 @@ if (step === 'step6') {
       }
       console.log("📄 Step6: cambiando a página", numero);
       renderSubcategoriasPaginadas(window.subcategoriasActuales, numero);
+      return;
+    }
+  }
+
+  // --- Paginación por voz: "anterior" / "siguiente" ---
+  if (/\banterior\b/.test(limpio) && window.paginaSubcategoriasActual > 1) {
+    console.log("📄 Step6: comando 'anterior'");
+    renderSubcategoriasPaginadas(window.subcategoriasActuales, window.paginaSubcategoriasActual - 1);
+    return;
+  }
+  if (/\bsiguiente\b/.test(limpio)) {
+    const totalPaginas = Math.max(1, Math.ceil(window.subcategoriasActuales.length / cantidadRecursosPorPagina));
+    if (window.paginaSubcategoriasActual < totalPaginas) {
+      console.log("📄 Step6: comando 'siguiente'");
+      renderSubcategoriasPaginadas(window.subcategoriasActuales, window.paginaSubcategoriasActual + 1);
       return;
     }
   }
@@ -5107,7 +5213,7 @@ if (step === 'step6') {
 
 // === Step7: Recursos ===
 if (step === 'step7') {
-  // --- Paginación ---
+  // --- Paginación directa: "pagina N" ---
   const matchPaginaRec = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
   if (matchPaginaRec && Array.isArray(window.recursosActuales)) {
     const token = matchPaginaRec[1];
@@ -5120,6 +5226,21 @@ if (step === 'step7') {
       }
       console.log("📄 Step7: cambiando a página", numero);
       renderRecursosPaginados(window.recursosActuales, numero);
+      return;
+    }
+  }
+
+  // --- Paginación por voz: "anterior" / "siguiente" ---
+  if (/\banterior\b/.test(limpio) && window.paginaRecursosActual > 1) {
+    console.log("📄 Step7: comando 'anterior'");
+    renderRecursosPaginados(window.recursosActuales, window.paginaRecursosActual - 1);
+    return;
+  }
+  if (/\bsiguiente\b/.test(limpio)) {
+    const totalPaginas = Math.max(1, Math.ceil(window.recursosActuales.length / cantidadRecursosPorPagina));
+    if (window.paginaRecursosActual < totalPaginas) {
+      console.log("📄 Step7: comando 'siguiente'");
+      renderRecursosPaginados(window.recursosActuales, window.paginaRecursosActual + 1);
       return;
     }
   }
@@ -5145,11 +5266,9 @@ if (step === 'step7') {
   return;
 }
 
-
-// === Lógica de Step8 (selección de serie) ===
 // === Step8: Selección de serie ===
 if (step === 'step8') {
-  // --- Paginación ---
+  // --- Paginación directa: "pagina N" ---
   const matchPaginaSer = limpio.match(/^pagina\s*(\d{1,2}|[a-záéíóúñ]+)$/i);
   if (matchPaginaSer && Array.isArray(window.seriesActuales)) {
     const token = matchPaginaSer[1];
@@ -5162,6 +5281,21 @@ if (step === 'step8') {
       }
       console.log("📄 Step8: cambiando a página", numero);
       renderSeriesPaginadas(window.seriesActuales, numero);
+      return;
+    }
+  }
+
+  // --- Paginación por voz: "anterior" / "siguiente" ---
+  if (/\banterior\b/.test(limpio) && window.paginaSeriesActual > 1) {
+    console.log("📄 Step8: comando 'anterior'");
+    renderSeriesPaginadas(window.seriesActuales, window.paginaSeriesActual - 1);
+    return;
+  }
+  if (/\bsiguiente\b/.test(limpio)) {
+    const totalPaginas = Math.max(1, Math.ceil(window.seriesActuales.length / cantidadRecursosPorPagina));
+    if (window.paginaSeriesActual < totalPaginas) {
+      console.log("📄 Step8: comando 'siguiente'");
+      renderSeriesPaginadas(window.seriesActuales, window.paginaSeriesActual + 1);
       return;
     }
   }
@@ -5195,7 +5329,6 @@ if (step === 'step8') {
   console.log("⚠️ Step8: Procesada entrada (si hubo coincidencias)");
   return;
 }
-
 
 
 
