@@ -66,40 +66,36 @@
         <div class="table-responsive mb-4">
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-light">
-                    <tr class="text-orange">
-                        <th>Categoría</th>
-                        <th>Subcategoría</th>
-                        <th>Recurso</th>
-                        <th>Número de serie</th>
-                        <th>Fecha adquisición</th>
-                        <th>Fecha marcado en reparación</th>
-                    </tr>
+                  <tr class="text-orange">
+                    <th>Categoría</th>
+                    <th>Subcategoría</th>
+                    <th>Recurso</th>
+                    <th>Número de serie</th>
+                    <th>Fecha adquisición</th>
+                    <th>Fecha marcado en reparación</th>
+                    <th>Costo unitario</th> <!-- nueva columna -->
+                  </tr>
                 </thead>
                 <tbody>
-                    @foreach($recursos as $r)
-                    <tr>
-                        <td>{{ $r->categoria ?? '-' }}</td>
-                        <td>{{ $r->subcategoria ?? '-' }}</td>
-                        <td>{{ $r->recurso ?? '-' }}</td>
-                        <td>{{ $r->nro_serie }}</td>
-                        <td>
-                            {{ $r->fecha_adquisicion
-                                ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $r->fecha_adquisicion, 'UTC')
-                                    ->setTimezone(config('app.timezone'))
-                                    ->format('d/m/Y')
-                                : '-' }}
-                        </td>
-                        <td>
-                            {{ $r->estado_actualizado_en
-                                ? \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $r->estado_actualizado_en, 'UTC')
-                                    ->setTimezone(config('app.timezone'))
-                                    ->format('d/m/Y ')
-                                : '-' }}
-                        </td>
-                    </tr>
-                    @endforeach
+                  @foreach($recursos as $r)
+                  <tr>
+                    <td>{{ $r->categoria ?? '-' }}</td>
+                    <td>{{ $r->subcategoria ?? '-' }}</td>
+                    <td>{{ $r->recurso ?? '-' }}</td>
+                    <td>{{ $r->nro_serie }}</td>
+                    <td>{{ $r->fecha_adquisicion ? \Carbon\Carbon::parse($r->fecha_adquisicion)->format('d/m/Y') : '-' }}</td>
+                    <td>{{ $r->estado_actualizado_en ? \Carbon\Carbon::parse($r->estado_actualizado_en)->format('d/m/Y') : '-' }}</td>
+                    <td>${{ number_format($r->costo_unitario, 2, ',', '.') }}</td>
+                  </tr>
+                  @endforeach
                 </tbody>
             </table>
+
+            <div class="alert alert-precio fw-bold">
+              Valor total calculado de recursos en reparación: 
+              <span class="precio-total">${{ number_format($totalPerdido, 2, ',', '.') }}</span>
+            </div>
+
             <div class="d-flex justify-content-between align-items-center mt-3">
               <div id="infoPaginacionReparacion" class="text-muted small"></div>
               <ul id="paginacionReparacion" class="pagination mb-0"></ul>

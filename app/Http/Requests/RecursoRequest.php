@@ -33,7 +33,13 @@ class RecursoRequest extends FormRequest
         }
     },
 ],
-        'costo_unitario' => 'required|numeric|min:0',
+        'costo_unitario' => [
+            'required',
+            'numeric',
+            'min:0',
+            'regex:/^\d+(\.\d{1,2})?$/', // máximo 2 decimales
+        ],
+
 
         'id_usuario_creacion' => 'nullable',
         'id_usuario_modificacion' => 'nullable',

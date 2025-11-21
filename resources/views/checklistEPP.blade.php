@@ -80,7 +80,7 @@
 
     <!-- EPP checklist -->
     <div class="row g-3" id="epp-checklist">
-      @foreach(['casco', 'anteojos', 'botas', 'chaleco', 'guantes', 'arnes'] as $epp)
+      @foreach(['casco', 'lentes', 'botas', 'chaleco', 'guantes', 'arnes'] as $epp)
       <div class="col-md-2">
         <div class="form-check">
           <input type="hidden" name="{{ $epp }}" value="0">
@@ -203,9 +203,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const select = document.getElementById('trabajador_id');
   const eppBox = document.getElementById('epp-asignado');
   const eppList = document.getElementById('epp-lista');
-  const checklistItems = ['anteojos', 'botas', 'chaleco', 'guantes', 'arnes', 'casco'];
+  const checklistItems = ['lentes', 'botas', 'chaleco', 'guantes', 'arnes', 'casco'];
   const aliasTipos = {
-    anteojos: 'lentes',
+    lentes: 'lentes',
     botas: 'botas',
     chaleco: 'chaleco',
     guantes: 'guantes',

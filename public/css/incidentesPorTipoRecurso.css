@@ -145,3 +145,17 @@ table.table thead th {
 .btn-filtro:hover {
   background-color: #943d0e;
 }
+
+
+.alert-total {
+  background-color: #9c4848; /* fondo celeste claro */
+  color: #fafafa;           /* texto azul oscuro */
+  border: 1px solid #460000;
+  border-radius: 0%;
+}
+
+.precio-total {
+  font-size: 1.2rem;   /* más grande que el texto normal */
+  font-weight: bold;   /* mantiene el énfasis */
+  color: #ececec;
+}

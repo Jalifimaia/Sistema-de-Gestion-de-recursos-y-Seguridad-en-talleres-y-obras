@@ -121,6 +121,7 @@
           <th>Categoría</th>
           <th>Subcategoría</th>
           <th>Descripción</th>
+          <th class="recurso-costo">Costo unitario</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -138,6 +139,13 @@
           <td class="recurso-categoria">{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
           <td class="recurso-subcategoria">{{ optional($recurso->subcategoria)->nombre ?? 'Sin subcategoría' }}</td>
           <td class="recurso-descripcion">{{ $recurso->descripcion }}</td>
+          <td class="recurso-costo">
+            @if(!is_null($recurso->costo_unitario))
+              ${{ number_format($recurso->costo_unitario, 2, ',', '.') }}
+            @else
+              -
+            @endif
+          </td>
           <td class="text-nowrap acciones-cell">
             @if ($estadoRecurso === 'baja' || $todasBaja)
               <span class="badge bg-secondary fw-semibold">Dado de baja</span>

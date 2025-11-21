@@ -161,3 +161,7 @@ td.text-nowrap > .d-flex {
 .btn-naranja:hover {
   background-color: #d06842;
 }
+
+th.recurso-costo {
+  white-space: nowrap;   /* 🔹 fuerza a que se vea todo seguido */
+}

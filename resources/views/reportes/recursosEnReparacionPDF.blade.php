@@ -35,6 +35,7 @@
                 <th>Número de serie</th>
                 <th>Fecha adquisición</th>
                 <th>Fecha marcado en reparación</th>
+                <th>Costo unitario</th> <!-- 🔹 nueva columna -->
             </tr>
         </thead>
         <tbody>
@@ -62,9 +63,18 @@
                         -
                     @endif
                 </td>
+                <td>
+                    ${{ number_format($r->costo_unitario, 2, ',', '.') }}
+                </td>
             </tr>
             @endforeach
         </tbody>
     </table>
+    
+    <div class="resumen">
+        <strong>Total en reparación:</strong> {{ $recursos->count() }} recursos <br>
+        <strong>Valor económico total:</strong> ${{ number_format($totalPerdido, 2, ',', '.') }}
+    </div>
+
 </body>
 </html>
