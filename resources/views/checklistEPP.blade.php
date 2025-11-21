@@ -23,17 +23,6 @@
   </div>
 </header>
 
-  @if ($errors->any())
-    <div class="alert alert-danger">
-      <strong>Ups...</strong> Hay errores en el formulario:
-      <ul class="mb-0">
-        @foreach ($errors->all() as $error)
-          <li>{{ $error }}</li>
-        @endforeach
-      </ul>
-    </div>
-  @endif
-
   <form id="checklist-form" method="POST" action="{{ route('checklist.epp.store') }}">
 
 

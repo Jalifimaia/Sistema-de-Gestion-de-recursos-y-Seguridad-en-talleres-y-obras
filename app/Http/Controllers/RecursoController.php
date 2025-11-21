@@ -374,13 +374,14 @@ class RecursoController extends Controller
         ->orderByDesc('cantidad_incidentes')
         ->get();
 
-    $totalIncidentes = $incidentes->sum('cantidad_incidentes');
-    $totalEconomico  = $incidentes->sum('costo_total_incidentes'); // 🔹 total global
+    $total = $incidentes->sum('cantidad_incidentes'); // 🔹 definir total
+    $totalEconomico = $incidentes->sum('costo_total_incidentes'); // 🔹 definir total económico
 
     $pdf = Pdf::loadView(
         'reportes.incidentesPorTipoPDF',
-        compact('incidentes', 'fecha_inicio', 'fecha_fin', 'totalIncidentes', 'totalEconomico')
+        compact('incidentes', 'fecha_inicio', 'fecha_fin', 'total', 'totalEconomico')
     );
+
 
     return $pdf->download('reporte_incidentes_por_tipo.pdf');
 }

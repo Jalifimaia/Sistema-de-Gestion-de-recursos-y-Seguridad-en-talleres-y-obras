@@ -52,5 +52,6 @@
         <strong>Impacto económico total:</strong> ${{ number_format($totalEconomico, 2, ',', '.') }}
     </div>
 
+
 </body>
 </html>
