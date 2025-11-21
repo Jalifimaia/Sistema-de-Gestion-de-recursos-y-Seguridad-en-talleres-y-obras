@@ -88,9 +88,13 @@
           </div>
 
           <div class="mt-3 text-end">
-        <a href="{{ route('checklist.epp.tabla') }}" class="btn btn-sm btn-ver-todo">
+            
+<a href="{{ route('checklist.epp.tabla') }}"
+   class="btn btn-sm btn-ver-todo"
+   onclick="sessionStorage.setItem('fromDashboard', 'true')">
     Ver todos los checklist
 </a>
+
 
           </div>
         @endif

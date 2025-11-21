@@ -8,10 +8,12 @@
   <!-- 🔶 Encabezado -->
   <header class="mb-5 py-3 px-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap">
-      <a href="{{ route('controlEPP') }}" class="btn btn-volver d-flex align-items-center">
-        <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
-        Volver
-      </a>
+  <a href="#"
+   class="btn btn-volver d-flex align-items-center"
+   onclick="handleBackClick()">
+    <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+    Volver
+</a>
       <div class="text-center w-100 mt-3 d-flex justify-content-center align-items-center gap-2">
         <img src="{{ asset('images/check.svg') }}" alt="Checklist" class="icono-titulo">
         <h1 class="titulo-checklist mb-0">Checklist diario de cumplimiento de EPP</h1>
@@ -114,6 +116,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+</script>
+
+<script>
+function handleBackClick() {
+    const fromDashboard = sessionStorage.getItem('fromDashboard');
+    if (fromDashboard) {
+        // Limpio el flag para no arrastrarlo
+        sessionStorage.removeItem('fromDashboard');
+        window.location.href = "{{ route('dashboard') }}";
+    } else {
+        window.location.href = "{{ route('controlEPP') }}";
+    }
+}
 </script>
 
 @push('styles')
