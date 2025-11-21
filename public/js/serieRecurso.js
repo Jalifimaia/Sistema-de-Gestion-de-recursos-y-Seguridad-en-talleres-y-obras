@@ -229,6 +229,12 @@ window.agregarFila = function () {
   try {
     if (window.jQuery && typeof window.jQuery.fn.select2 === 'function') {
       $(row).find('select').select2({ tags: true, width: '100%' });
+      // Oculta el input de búsqueda solo en los select2 de tipo-talle
+      $(row).find('select.tipo-talle').on('select2:open', function() {
+        setTimeout(function() {
+          $('.select2-container--open .select2-search__field').hide();
+        }, 0);
+      });
     }
   } catch (e) {}
   generarPreviewCodigoPorFila();

@@ -269,5 +269,11 @@ document.addEventListener('DOMContentLoaded', function () {
 @endpush
 @push('styles')
   <link href="{{ asset('css/agregarSerie.css') }}" rel="stylesheet">
+  <style>
+    /* Oculta el input de búsqueda solo en el select2 de tipo de talle */
+    #tipoTalle + .select2 .select2-search__field {
+      display: none !important;
+    }
+  </style>
 @endpush
 
