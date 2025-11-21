@@ -328,6 +328,6 @@ document.addEventListener('DOMContentLoaded', function () {
 @endpush
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/inventario.css') }}">
+<link rel="stylesheet" href="{{ asset('css/estilos.css') }}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 @endpush

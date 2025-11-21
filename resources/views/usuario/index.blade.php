@@ -126,11 +126,11 @@
               
               <td class="acciones">
                 <div class="acciones-grupo">
-                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-primary btn-accion-compact" title="Ver detalles del usuario">
+                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-ver-series btn-accion-compact" title="Ver detalles del usuario">
                     <i class="bi bi-eye"></i>
                   </a>
 
-                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-orange btn-sm btn-pencil btn-accion-compact" title="Editar">
+                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-sm btn-editar btn-accion-compact" title="Editar">
                     <i class="bi bi-pencil"></i>
                   </a>
 
@@ -380,10 +380,8 @@ document.getElementById('btnConfirmarBaja').addEventListener('click', function()
 </script>
 @endpush
 
-
-
-
 @push('styles')
 <link href="{{ asset('css/usuariosIndex.css') }}?v={{ time() }}" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/estilos.css') }}">
 @endpush
 
