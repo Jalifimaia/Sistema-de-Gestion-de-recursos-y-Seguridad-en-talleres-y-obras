@@ -1924,7 +1924,8 @@ async function registrarPorQRregistroRecursos(codigoQR) {
     if (data.success) {
       const mensaje = `Recurso registrado: ${data.recurso || ''} ${data.serie ? '- Serie: ' + data.serie : ''}`;
       mostrarModalKioscoSinVoz(mensaje, 'success');
-      window.nextStep?.(3); // ← redirige al step3 después de éxito
+      window.nextStep?.(2); // ← redirige al step3 después de éxito
+      limpiarQRregistroRecursosStep13();
       //////////
     } else {
       await limpiarQRregistroRecursosStep13();
@@ -2905,7 +2906,8 @@ function setModoEscaneo(modo) {
     activarEscaneoQRregistroRecursos();
     // escaneo QR no cambia el target de step6
   }
-  window.nextStep(3); // mostrar step3
+  window.nextStep(2); // mostrar step3
+  limpiarQRregistroRecursosStep13();
 }
 
 
@@ -2918,7 +2920,11 @@ function cargarMenuPrincipal() {
     {
       id: 1,
       texto: "Tengo la herramienta en mano",
-      accion: () => setModoEscaneo('manual'),
+      accion: () => {
+        //setModoEscaneo('manual')
+         nextStep(13); 
+         activarEscaneoQRregistroRecursosStep13();
+      },
       clase: "btn-outline-dark",
       icono: "/images/trabajadorHerramienta.svg"
     },
@@ -4967,7 +4973,11 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
       // pero ahora preferimos abrir step10 desde menú con la opción correspondiente.
       if (matchOpcion(textoSimple, 1, "herramienta en mano")) {
         //window.mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
-        setModoEscaneo('manual');
+        //setModoEscaneo('manual');
+        //
+        
+         nextStep(13); 
+         activarEscaneoQRregistroRecursosStep13();
         return;
       }
 
@@ -5246,7 +5256,7 @@ if (step === 'step8') {
     if (step === 'step13') {
       if (limpio.includes("cancelar")) {
         cancelarEscaneoQRregistroRecursosStep13();
-        nextStep(3);
+        nextStep(2);
         return;
       }
 

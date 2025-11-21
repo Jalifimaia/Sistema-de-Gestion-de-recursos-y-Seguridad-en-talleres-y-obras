@@ -191,7 +191,7 @@
       <div class="text-center mt-3">
 
        <button id="btn-cancelar-qr-step13" class="btn btn-outline-danger btn-lg texto-cancelar d-none mt-2"
-          onclick="cancelarEscaneoQRregistroRecursosStep13(); nextStep(3)">
+          onclick="cancelarEscaneoQRregistroRecursosStep13(); nextStep(2)">
           Cancelar escaneo
         </button>
 
