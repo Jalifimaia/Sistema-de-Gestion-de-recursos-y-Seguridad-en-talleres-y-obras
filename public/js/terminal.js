@@ -2187,15 +2187,13 @@ window.abrirStepQRLogin = function () {
   activarEscaneoQRLogin();
 };
 
-/*
+
 window.cancelarEscaneoQRLogin = function () {
   console.log('🔴 cancelarEscaneoQRLogin: llamado');
   detenerEscaneoQRLogin();
   safeStartRecognitionGlobal?.();
-  // antes: nextStep(1);
-  abrirStepQRLogin(); // 👈 redirige a step12
+  nextStep(1);
 };
-*/
 
 
 
@@ -2203,8 +2201,7 @@ window.cancelarEscaneoQRLogin = function () {
 function volverAInicio() {
   localStorage.removeItem('id_usuario');
   console.log('volverAInicio: sesión limpiada');
-  // antes: nextStep(1);
-  abrirStepQRLogin(); // 👈 redirige a step12
+  nextStep(1);
   const claveInput = document.getElementById('clave');
   if (claveInput) claveInput.value = '';
   reactivarReconocimientoGlobal(); // ✅ blindado
@@ -3588,17 +3585,16 @@ function ejecutarCerrarSesion() {
 
   try {
     localStorage.removeItem('id_usuario');
-    console.log('🔓 Sesión cerrada (ejecutarCerrarSesion), volviendo a step12');
+    console.log('🔓 Sesión cerrada (ejecutarCerrarSesion), volviendo a step1');
     BorrarClave();
   } catch (e) {
     console.warn('⚠️ ejecutarCerrarSesion: error limpiando localStorage', e);
   }
 
   try {
-    // antes: nextStep(1);
-    abrirStepQRLogin(); // 👈 redirige a step12
+    nextStep(1);
   } catch (e) {
-    console.warn('⚠️ ejecutarCerrarSesion: abrirStepQRLogin falló', e);
+    console.warn('⚠️ ejecutarCerrarSesion: nextStep(1) falló', e);
   }
 
   reactivarReconocimientoGlobal(); // ✅ blindado
@@ -4808,15 +4804,13 @@ if (!algunModalVisible && /\b(ayuda)\b/.test(limpio)) {
     
 
     // Comando de voz para avanzar desde la pantalla de bienvenida (step0)
-if (step === 'step0') {
-  if (/\b(continuar)\b/.test(limpio)) {
-    console.log('🎤 Comando de voz: avanzar desde step0');
-    // antes: nextStep(1);
-    abrirStepQRLogin(); // 👈 redirige a step12
-    return;
-  }
-}
-
+    if (step === 'step0') {
+      if (/\b(continuar)\b/.test(limpio)) {
+        console.log('🎤 Comando de voz: avanzar desde step0');
+        nextStep(1);
+        return;
+      }
+    }
 
     if (step !== 'step0' && step !== 'step1' && step !== 'step12') {
       if (/\b(cerrar sesión|cerrar sesion)\b/.test(limpio)) {
@@ -5242,11 +5236,11 @@ if (step === 'step8') {
 
     // === Step12: Inicio de sesión con QR ===
     if (step === 'step12') {
-      /*if (/\b(cancelar|cancelar qr|cancelar inicio|cancelar inicio de sesión|cancelar inicio de sesión con qr)\b/.test(limpio)) {
+      if (/\b(cancelar|cancelar qr|cancelar inicio|cancelar inicio de sesión|cancelar inicio de sesión con qr)\b/.test(limpio)) {
         console.log('🎤 Comando de voz: Cancelar inicio de sesión con QR');
         cancelarEscaneoQRLogin(); // tu función actual para cerrar escáner y volver a step1
         return;
-      }*/
+      }
 
       console.log('⚠️ Step12: comando no reconocido', limpio);
       return;

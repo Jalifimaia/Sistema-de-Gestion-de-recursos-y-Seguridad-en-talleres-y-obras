@@ -30,11 +30,9 @@
     </p>
 
     <div class="d-flex flex-column align-items-center gap-3">
-     
-      <!-- ahora -->
-    <button class="btn btn-primary btn-lg d-flex align-items-center gap-2" onclick="abrirStepQRLogin()">
-      <span>Continuar</span>
-    </button>
+      <button class="btn btn-primary btn-lg d-flex align-items-center gap-2" onclick="nextStep(1)">
+        <span>Continuar</span>
+      </button>
 
 
 
@@ -109,18 +107,17 @@
     <!-- Paso 12: Inicio de sesión con QR -->
     <div id="step12" class="step d-none">
       <h2 class="mb-4 text-center titulo-identificar">
-        Inicio de sesión
+        Inicio de sesión con QR
       </h2>
 
-      <!-- Texto de instrucción -->
-      <p class="text-center text-muted mb-3">
-        Muestre su QR de identificación
-      </p>
-
-      <!-- Contenedor del lector QR -->
       <div id="qr-login-reader" style="width:300px; margin:auto;"></div>
-    </div>
 
+      <div class="text-center mt-4">
+        <button class="btn btn-outline-danger btn-lg texto-cancelar mt-2" onclick="cancelarEscaneoQRLogin()">
+          <span>Cancelar escaneo</span>
+        </button>
+      </div>
+    </div>
 
 
 
