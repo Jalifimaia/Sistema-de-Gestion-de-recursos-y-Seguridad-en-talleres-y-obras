@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Resumen Taller')
+@section('title', 'Resumen del taller')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">

@@ -185,12 +185,16 @@
 }
 
 /* Naranja */
-.btn-naranja {
-  background-color: #f57c00;
+.btn-vercheck {
+  background-color: #3daa12c5;
+  border-color: #1f1f1f;
+  outline: none;
 }
-.btn-naranja:hover {
-  background-color: #e66a00;
+.btn-vercheck:hover {
+  background-color: #3daa12c5;
   transform: scale(1.03);
+  border-color: #1f1f1f;
+  outline: none;
 }
 
 /* Desactivar hover en todas las cards resumen */

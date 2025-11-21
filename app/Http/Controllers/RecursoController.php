@@ -120,7 +120,8 @@ class RecursoController extends Controller
                 'sr.nro_serie',
                 'sr.fecha_adquisicion',
                 'ir.updated_at as estado_actualizado_en',
-                'i.id as incidente_id'
+                'i.id as incidente_id',
+                'r.costo_unitario'
             )
             ->distinct();
 
@@ -129,13 +130,16 @@ class RecursoController extends Controller
         }
         
         if ($fecha_fin) {
-            $query->where('prestamo.fecha_prestamo', '<=', Carbon::parse($fecha_fin)->endOfDay());
+            $query->whereDate('ir.updated_at', '<=', Carbon::parse($fecha_fin)->endOfDay());
         }
+
 
         $recursos = $query->orderByDesc('ir.updated_at')->get();
 
         // Opcional: eliminar duplicados por nro_serie
         $recursos = $recursos->unique('nro_serie')->values();
+
+        $totalPerdido = $recursos->sum('costo_unitario');
 
         // Agrupar por categoría para el gráfico
         $agrupado = $recursos->groupBy('categoria')->map(function ($items, $nombre) {
@@ -148,7 +152,7 @@ class RecursoController extends Controller
         $labels = $agrupado->pluck('tipo');
         $valores = $agrupado->pluck('cantidad');
 
-        return view('reportes.recursosEnReparacion', compact('recursos', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
+        return view('reportes.recursosEnReparacion', compact('recursos', 'fecha_inicio', 'fecha_fin', 'labels', 'valores', 'totalPerdido'));
     }
 
 
@@ -177,7 +181,8 @@ class RecursoController extends Controller
                 'sr.nro_serie',
                 'sr.fecha_adquisicion',
                 'ir.updated_at as estado_actualizado_en',
-                'i.id as incidente_id'
+                'i.id as incidente_id',
+                'r.costo_unitario'
             )
             ->distinct();
 
@@ -193,9 +198,11 @@ class RecursoController extends Controller
         // eliminar duplicados por serie si hiciera falta
         $recursos = $recursos->unique('nro_serie')->values();
 
+        $totalPerdido = $recursos->sum('costo_unitario');
+
         $total = $recursos->count();
 
-        $pdf = Pdf::loadView('reportes.recursosEnReparacionPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
+        $pdf = Pdf::loadView('reportes.recursosEnReparacionPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total', 'totalPerdido'));
 
         // forzar descarga
         return $pdf->download('reporte_recursos_en_reparacion.pdf');
@@ -287,7 +294,7 @@ class RecursoController extends Controller
     public function incidentesPorTipo(Request $request)
 {
     $fecha_inicio = $request->input('fecha_inicio');
-    $fecha_fin = $request->input('fecha_fin');
+    $fecha_fin    = $request->input('fecha_fin');
 
     $query = DB::table('incidente_recurso')
         ->join('recurso', 'incidente_recurso.id_recurso', '=', 'recurso.id')
@@ -297,7 +304,61 @@ class RecursoController extends Controller
         ->select(
             'categoria.nombre_categoria',
             DB::raw('COUNT(*) as cantidad_incidentes'),
-            DB::raw('MAX(incidente.fecha_incidente) as ultima_fecha')
+            DB::raw('MAX(incidente.fecha_incidente) as ultima_fecha'),
+            DB::raw('SUM(recurso.costo_unitario) as costo_total_incidentes') // 🔹 suma económica
+        );
+
+    if ($fecha_inicio) {
+        $query->where('incidente.fecha_incidente', '>=', Carbon::parse($fecha_inicio)->startOfDay());
+    }
+
+    if ($fecha_fin) {
+        $query->where('incidente.fecha_incidente', '<=', Carbon::parse($fecha_fin)->endOfDay());
+    }
+
+    // 🔹 obtener incidentes agrupados por categoría
+    $incidentes = $query
+        ->groupBy('categoria.nombre_categoria')
+        ->orderByDesc('cantidad_incidentes')
+        ->get();
+
+    // 🔹 calcular total económico general
+    $totalEconomico = $incidentes->sum('costo_total_incidentes');
+
+    // 🔧 Filtrar solo categorías relevantes para el gráfico
+    $filtrados = $incidentes->filter(function ($item) {
+        return in_array($item->nombre_categoria, ['Herramienta', 'EPP']);
+    });
+
+    $labels  = $filtrados->pluck('nombre_categoria');
+    $valores = $filtrados->pluck('cantidad_incidentes');
+
+    return view('reportes.incidentesPorTipoRecurso', compact(
+        'incidentes',
+        'fecha_inicio',
+        'fecha_fin',
+        'labels',
+        'valores',
+        'totalEconomico' // 🔹 ahora sí definido
+    ));
+}
+
+
+    public function incidentesPorTipoPDF(Request $request)
+{
+    $fecha_inicio = $request->input('fecha_inicio');
+    $fecha_fin    = $request->input('fecha_fin');
+
+    $query = DB::table('incidente_recurso')
+        ->join('recurso', 'incidente_recurso.id_recurso', '=', 'recurso.id')
+        ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
+        ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
+        ->join('incidente', 'incidente_recurso.id_incidente', '=', 'incidente.id')
+        ->select(
+            'categoria.nombre_categoria',
+            DB::raw('COUNT(*) as cantidad_incidentes'),
+            DB::raw('MAX(incidente.fecha_incidente) as ultima_fecha'),
+            DB::raw('SUM(recurso.costo_unitario) as costo_total_incidentes') // 🔹 agregado
         );
 
     if ($fecha_inicio) {
@@ -313,57 +374,18 @@ class RecursoController extends Controller
         ->orderByDesc('cantidad_incidentes')
         ->get();
 
-    // 🔧 Filtrar solo categorías relevantes para el gráfico
-    $filtrados = $incidentes->filter(function ($item) {
-        return in_array($item->nombre_categoria, ['Herramienta', 'EPP']);
-    });
+    $total = $incidentes->sum('cantidad_incidentes'); // 🔹 definir total
+    $totalEconomico = $incidentes->sum('costo_total_incidentes'); // 🔹 definir total económico
 
-    $labels = $filtrados->pluck('nombre_categoria');
-    $valores = $filtrados->pluck('cantidad_incidentes');
+    $pdf = Pdf::loadView(
+        'reportes.incidentesPorTipoPDF',
+        compact('incidentes', 'fecha_inicio', 'fecha_fin', 'total', 'totalEconomico')
+    );
 
-    return view('reportes.incidentesPorTipoRecurso', compact(
-        'incidentes',
-        'fecha_inicio',
-        'fecha_fin',
-        'labels',
-        'valores'
-    ));
+
+    return $pdf->download('reporte_incidentes_por_tipo.pdf');
 }
 
-    public function incidentesPorTipoPDF(Request $request)
-    {
-        $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
-
-        $query = DB::table('incidente_recurso')
-            ->join('recurso', 'incidente_recurso.id_recurso', '=', 'recurso.id')
-            ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id')
-            ->join('categoria', 'subcategoria.categoria_id', '=', 'categoria.id')
-            ->join('incidente', 'incidente_recurso.id_incidente', '=', 'incidente.id')
-            ->select(
-            'categoria.nombre_categoria',
-            DB::raw('COUNT(*) as cantidad_incidentes'),
-            DB::raw('MAX(incidente.fecha_incidente) as ultima_fecha')
-        );
-
-        if ($fecha_inicio) {
-            $query->where('incidente.fecha_incidente', '>=', $fecha_inicio);
-        }
-
-        if ($fecha_fin) {
-            $query->where('incidente.fecha_incidente', '<=', $fecha_fin);
-        }
-
-        $incidentes = $query
-            ->groupBy('categoria.nombre_categoria')
-            ->orderByDesc('cantidad_incidentes')
-            ->get();
-
-        $total = $incidentes->sum('cantidad_incidentes');
-
-        $pdf = Pdf::loadView('reportes/incidentesPorTipoPDF', compact('incidentes', 'fecha_inicio', 'fecha_fin', 'total'));
-        return $pdf->download('reporte_incidentes_por_tipo.pdf');
-    }
 
     
 
@@ -371,12 +393,14 @@ class RecursoController extends Controller
 {
     $validated = $request->validated();
 
+    $costo = str_replace('.', '', $validated['costo_unitario']); 
+    $costo = str_replace(',', '.', $costo);
 
     $recurso = Recurso::create([
         'id_subcategoria' => $validated['id_subcategoria'],
         'nombre' => $validated['nombre'],
         'descripcion' => $validated['descripcion'] ?? null,
-        'costo_unitario' => $validated['costo_unitario'],
+        'costo_unitario' => $costo,
         'id_usuario_creacion' => auth()->id(),
         'id_usuario_modificacion' => auth()->id(),
     ]);
@@ -428,17 +452,22 @@ class RecursoController extends Controller
 {
     $validated = $request->validated();
 
+    // Normalizar costo_unitario: quitar separadores de miles y convertir coma a punto
+    $costo = str_replace('.', '', $validated['costo_unitario']); // quita puntos de miles
+    $costo = str_replace(',', '.', $costo); // convierte coma decimal en punto
+
     $recurso = Recurso::findOrFail($id);
     $recurso->update([
         'nombre' => $validated['nombre'],
         'descripcion' => $validated['descripcion'] ?? null,
-        'costo_unitario' => $validated['costo_unitario'],
+        'costo_unitario' => $costo,
         'id_usuario_modificacion' => auth()->id(),
     ]);
 
     return redirect()->route('recursos.edit', $recurso->id)
         ->with('success', 'Recurso actualizado correctamente.');
 }
+
 
 
 public function destroy($id)

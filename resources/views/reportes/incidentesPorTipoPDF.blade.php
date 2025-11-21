@@ -32,7 +32,7 @@
                 <th>Tipo de recurso</th>
                 <th>Cantidad de incidentes</th>
                 <th>Última fecha de incidente</th>
-
+                <th>Valor económico total</th>
             </tr>
         </thead>
         <tbody>
@@ -41,10 +41,17 @@
                 <td>{{ $item->nombre_categoria }}</td>
                 <td>{{ $item->cantidad_incidentes }}</td>
                 <td>{{ $item->ultima_fecha }}</td>
-
+                <td>${{ number_format($item->costo_total_incidentes, 2, ',', '.') }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
+    
+    <div class="resumen">
+        <strong>Total de incidentes:</strong> {{ $total }} <br>
+        <strong>Impacto económico total:</strong> ${{ number_format($totalEconomico, 2, ',', '.') }}
+    </div>
+
+
 </body>
 </html>

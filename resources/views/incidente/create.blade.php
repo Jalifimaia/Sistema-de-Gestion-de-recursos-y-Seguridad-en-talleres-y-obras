@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Registrar nuevo incidente')
+
 @section('content')
 <div class="container py-4">
 
@@ -16,10 +18,6 @@
     </h4>
   </div>
 
-
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
 
     <form method="POST" action="{{ route('incidente.store') }}">
         @csrf

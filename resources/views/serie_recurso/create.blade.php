@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    Agregar Series a {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
-@endsection
+@section('title', 'Agregar series a ' . $recurso->nombre . ' [' . ($recurso->subcategoria->nombre ?? '') . ']')
 
 @section('content')
 <div class="container py-4">
@@ -15,20 +13,10 @@
         <div class="d-flex align-items-center">
           <img src="{{ asset('images/herradd.svg') }}" alt="Herramienta" style="width: 40px; height: 40px;" class="me-2">
           <h4 class="fw-bold mb-0">
-            Agregar Series para: {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
+            Agregar series para: {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
           </h4>
         </div>
       </div>
-
-    @if ($errors->any())
-      <div class="alert alert-danger">
-        <ul class="mb-0">
-          @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-          @endforeach
-        </ul>
-      </div>
-    @endif
 
     @if (session('success'))
       <div class="alert alert-success">

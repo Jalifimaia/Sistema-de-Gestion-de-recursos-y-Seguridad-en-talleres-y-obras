@@ -1,6 +1,8 @@
 
 @extends('layouts.app')
 
+@section('title', 'Incidentes por tipo de recurso')
+
 @section('content')
 <div class="container py-4">
 
@@ -76,6 +78,7 @@
                     <th>Tipo de recurso</th>
                     <th>Cantidad de incidentes</th>
                     <th>Última fecha de incidente</th>
+                    <th>Valor económico total</th>
                 </tr>
             </thead>
             <tbody>
@@ -84,10 +87,17 @@
                     <td>{{ $item->nombre_categoria }}</td>
                     <td>{{ $item->cantidad_incidentes }}</td>
                     <td>{{ $item->ultima_fecha }}</td>
+                    <td>${{ number_format($item->costo_total_incidentes, 2, ',', '.') }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+
+        <div class="alert alert-total fw-bold">
+          Impacto económico total de incidentes: 
+          <span class="precio-total">${{ number_format($totalEconomico, 2, ',', '.') }}</span>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mt-3">
           <div id="infoPaginacionIncidentes" class="text-muted small"></div>
           <ul id="paginacionIncidentes" class="pagination mb-0"></ul>

@@ -227,6 +227,21 @@ form.addEventListener('keydown', function (e) {
   }
 });
 
+const input = document.getElementById('costo_unitario');
 
+  input.addEventListener('input', () => {
+    // quitamos todo lo que no sea dígito
+    let value = input.value.replace(/\D/g, '');
+    if (value) {
+      // formateamos con separador de miles
+      input.value = new Intl.NumberFormat('es-AR').format(value);
+    }
+  });
+
+  // al enviar el form, limpiamos los puntos para que el backend reciba el número real
+  input.form.addEventListener('submit', () => {
+    input.value = input.value.replace(/\./g, '');
+  });
+  
   console.log('✅ recurso.js cargado');
 });

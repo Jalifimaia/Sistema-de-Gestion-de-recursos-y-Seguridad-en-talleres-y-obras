@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Agregar Recurso')
+@section('title', 'Agregar recurso')
 
 @section('content')
 <div class="container py-4">
@@ -12,19 +12,9 @@
 
         <div class="d-flex align-items-center">
           <img src="{{ asset('images/herradd.svg') }}" alt="Herramienta" style="width: 40px; height: 40px;" class="me-2">
-          <h4 class="fw-bold mb-0">Agregar Nuevo Recurso</h4>
+          <h4 class="fw-bold mb-0">Agregar recurso</h4>
         </div>
       </div>
-
-      @if ($errors->any())
-        <div class="alert alert-danger">
-          <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
 
 
       <form id="recursoForm" method="POST" action="{{ route('recursos.store') }}" novalidate>
@@ -78,7 +68,7 @@
                 id="nombre"
                 name="nombre"
                 class="form-control @error('nombre') is-invalid @enderror"
-                maxlength="60"
+                maxlength="60" placeholder="Ingrese un nombre"
                 required>
           @error('nombre')
             <div class="invalid-feedback">{{ $message }}</div>
@@ -92,7 +82,7 @@
                     name="descripcion"
                     class="form-control @error('descripcion') is-invalid @enderror"
                     rows="3"
-                    maxlength="250"></textarea>
+                    maxlength="250" placeholder="Ingrese una descripción (máx. 4 palabras)"></textarea>
           @error('descripcion')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
@@ -101,14 +91,11 @@
         <!-- Costo unitario -->
         <div class="mb-3">
           <label for="costo_unitario" class="form-label">Costo Unitario</label>
-          <input type="number"
-                id="costo_unitario"
-                name="costo_unitario"
-                class="form-control @error('costo_unitario') is-invalid @enderror"
-                step="0.01"
-                min="0"
-                max="99999999.99"
-                required>
+          <input type="text"
+            id="costo_unitario"
+            name="costo_unitario"
+            class="form-control"
+            required>
           @error('costo_unitario')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror

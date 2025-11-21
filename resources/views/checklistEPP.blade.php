@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Registro de Checklist Diario')
+@section('title', 'Registro del checklist diario')
 
 @section('content')
   <div class="container py-4">
@@ -18,21 +18,10 @@
 
     <div class="text-center w-100 mt-3 d-flex justify-content-center align-items-center gap-2">
       <img src="{{ asset('images/check.svg') }}" alt="Checklist" class="icono-titulo">
-      <h1 class="titulo-checklist mb-0">Registro de Checklist Diario</h1>
+      <h1 class="titulo-checklist mb-0">Registro del Checklist Diario</h1>
     </div>
   </div>
 </header>
-
-  @if ($errors->any())
-    <div class="alert alert-danger">
-      <strong>Ups...</strong> Hay errores en el formulario:
-      <ul class="mb-0">
-        @foreach ($errors->all() as $error)
-          <li>{{ $error }}</li>
-        @endforeach
-      </ul>
-    </div>
-  @endif
 
   <form id="checklist-form" method="POST" action="{{ route('checklist.epp.store') }}">
 
@@ -80,7 +69,7 @@
 
     <!-- EPP checklist -->
     <div class="row g-3" id="epp-checklist">
-      @foreach(['casco', 'anteojos', 'botas', 'chaleco', 'guantes', 'arnes'] as $epp)
+      @foreach(['casco', 'lentes', 'botas', 'chaleco', 'guantes', 'arnes'] as $epp)
       <div class="col-md-2">
         <div class="form-check">
           <input type="hidden" name="{{ $epp }}" value="0">
@@ -203,9 +192,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const select = document.getElementById('trabajador_id');
   const eppBox = document.getElementById('epp-asignado');
   const eppList = document.getElementById('epp-lista');
-  const checklistItems = ['anteojos', 'botas', 'chaleco', 'guantes', 'arnes', 'casco'];
+  const checklistItems = ['lentes', 'botas', 'chaleco', 'guantes', 'arnes', 'casco'];
   const aliasTipos = {
-    anteojos: 'lentes',
+    lentes: 'lentes',
     botas: 'botas',
     chaleco: 'chaleco',
     guantes: 'guantes',

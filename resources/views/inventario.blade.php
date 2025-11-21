@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Gestión de Inventario')
+@section('title', 'Inventario')
 
 @section('content')
 <div class="container py-4">
@@ -10,7 +10,7 @@
     <div class="col-md-8">
       <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
         <img src="{{ asset('images/inventario.svg') }}" alt="Icono Inventario" style="height: 35px;">
-        Gestión de Inventario
+        Gestión del Inventario
       </h1>
       <p class="text-muted">Control de herramientas y equipos de protección personal</p>
     </div>
@@ -121,6 +121,7 @@
           <th>Categoría</th>
           <th>Subcategoría</th>
           <th>Descripción</th>
+          <th class="recurso-costo">Costo unitario</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -138,6 +139,13 @@
           <td class="recurso-categoria">{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
           <td class="recurso-subcategoria">{{ optional($recurso->subcategoria)->nombre ?? 'Sin subcategoría' }}</td>
           <td class="recurso-descripcion">{{ $recurso->descripcion }}</td>
+          <td class="recurso-costo">
+            @if(!is_null($recurso->costo_unitario))
+              ${{ number_format($recurso->costo_unitario, 2, ',', '.') }}
+            @else
+              -
+            @endif
+          </td>
           <td class="text-nowrap acciones-cell">
             @if ($estadoRecurso === 'baja' || $todasBaja)
               <span class="badge bg-secondary fw-semibold">Dado de baja</span>

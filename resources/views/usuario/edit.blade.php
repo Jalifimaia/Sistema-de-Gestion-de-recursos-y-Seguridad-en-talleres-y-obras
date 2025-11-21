@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('template_title')
-    Editar Usuario
-@endsection
+@section('title', 'Editar Usuario')
 
 @section('content')
 <div class="container py-4">

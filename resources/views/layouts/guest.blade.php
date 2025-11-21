@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('images/icono.svg') }}" type="image/svg+xml">
     <title>@yield('title', 'Login')</title>
 
     <!-- Estilos base -->

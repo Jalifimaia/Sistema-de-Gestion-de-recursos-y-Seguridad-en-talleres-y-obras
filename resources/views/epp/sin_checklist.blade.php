@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Checklist No Registrado')
+@section('title', 'Checklist sin registrar')
 
 @section('content')
 <div class="container py-4">
@@ -12,7 +12,7 @@
 
     <div class="d-flex align-items-center">
       <img src="{{ asset('images/checknot.svg') }}" alt="Checklist no registrado" style="width: 28px; height: 28px;" class="me-2">
-      <h4 class="fw-bold mb-0">Checklist no registrado</h4>
+      <h4 class="fw-bold mb-0">Checklist sin registrar</h4>
     </div>
 
   </div>

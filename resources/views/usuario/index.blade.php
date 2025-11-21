@@ -15,35 +15,14 @@
     </h1>
     <p class="text-muted small">Administración de usuarios, permisos y roles del sistema</p>
   </div>
-
-  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end mt-3">
-        <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
-      </div>
 </header>
 
- 
-<div class="row mb-4 subir-cards-usuarios">
-  <!-- Card: Crear usuario -->
-  @auth
-    @if (Auth::user()->rol->nombre_rol === 'Administrador')
-      <div class="col-md-3">
-        <a href="{{ route('usuarios.create') }}" class="card card-resumen card-crear text-center text-decoration-none h-100">
-          <div class="card-body">
-            <h6 class="card-title card-crear d-flex align-items-center justify-content-center gap-2">
-              <img src="{{ asset('images/useraddd.svg') }}" alt="Crear usuario" class="icono-card-titulo">
-              Crear usuario
-            </h6>
-            <small class="text-muted">Alta de nuevo usuario</small>
-          </div>
-        </a>
-      </div>
-    @endif
-  @endauth
-
+<!-- 🔶 Cards resumen -->
+<div class="row mb-1 subir-cards-usuarios g-3">
   <!-- Card: Administradores -->
-  <div class="col-md-3">
+  <div class="col-md-6">
     <div class="card card-resumen text-center h-100">
-      <div class="card-body">
+      <div class="card-body py-3">
         <h6 class="card-title d-flex align-items-center justify-content-center gap-2">
           <img src="{{ asset('images/admin.svg') }}" alt="Administradores" class="icono-card-titulo">
           Administradores
@@ -56,9 +35,9 @@
 
   <!-- Card: Último acceso -->
   @if ($ultimoUsuarioActivo)
-    <div class="col-md-3">
+    <div class="col-md-6">
       <div class="card card-resumen text-center h-100">
-        <div class="card-body">
+        <div class="card-body py-3">
           <h6 class="card-title d-flex align-items-center justify-content-center gap-2">
             <img src="{{ asset('images/access.svg') }}" alt="Último acceso" class="icono-card-titulo">
             Último acceso
@@ -71,13 +50,23 @@
       </div>
     </div>
   @endif
-</div>
+</div><br>
 
 <div class="seccion-usuarios">
 
   <!-- Filtros -->
-  <!-- 🔶 Filtro de usuarios -->
 <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+
+  @auth
+  @if (Auth::user()->rol->nombre_rol === 'Administrador')
+    <a href="{{ route('usuarios.create') }}" 
+       class="btn btn-agregar d-flex align-items-center justify-content-center gap-2 me-2">
+      <img src="{{ asset('images/useraddd.svg') }}" alt="Crear usuario" class="icono-card-titulo">
+      Agregar usuario
+    </a>
+  @endif
+  @endauth
+
   <label class="form-label mb-0 fw-semibold filtrar-por">Filtrar por:</label>
 
   <select id="filtroRol" class="form-select filtro-destacado w-auto">
@@ -94,8 +83,12 @@
     @endforeach
   </select>
 
-  <input type="text" id="buscador" class="form-control buscador-destacado" placeholder="Buscar por nombre o email..." style="width: 280px; max-width: 100%;">
+  <input type="text" id="buscador" 
+         class="form-control buscador-destacado" 
+         placeholder="Buscar por nombre o email..." 
+         style="width: 280px; max-width: 100%;">
 </div>
+
 
 
   <!-- Tabla -->

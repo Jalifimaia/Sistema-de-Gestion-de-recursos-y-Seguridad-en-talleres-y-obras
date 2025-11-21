@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Recursos más prestados')
+
 @section('content')
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
