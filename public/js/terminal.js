@@ -2231,6 +2231,13 @@ function getActiveRecursosTab() {
   return null;
 }*/
 
+// Objeto global para mantener siempre los nombres elegidos
+window.seleccionActual = {
+  subcategoriaNombre: null,
+  recursoNombre: null
+};
+
+
 
 function seleccionarCategoria(categoriaId) {
   const xhr = new XMLHttpRequest();
@@ -2251,6 +2258,8 @@ function seleccionarCategoria(categoriaId) {
 
   xhr.send();
 }
+
+
 
 function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
   try { safeStopRecognitionGlobal(); } catch (e) {}
@@ -2276,6 +2285,13 @@ function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
       <span class="flex-grow-1 text-start">${s.nombre}</span>
       <span class="badge-disponibles">${s.disponibles} disponibles</span>
     `;
+
+    // ⚡ Guardar nombre real y llamar a seleccionarSubcategoria
+    btn.onclick = () => {
+      window.seleccionActual.subcategoriaNombre = s.nombre;
+      seleccionarSubcategoria(s.id);
+    };
+
     contenedor.appendChild(btn);
   });
 
@@ -2310,7 +2326,6 @@ function renderSubcategoriasPaginadas(subcategorias, pagina = 1) {
   try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
 
-
 function seleccionarSubcategoria(subcategoriaId) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', `/terminal/recursos-disponibles/${subcategoriaId}`, true);
@@ -2318,18 +2333,24 @@ function seleccionarSubcategoria(subcategoriaId) {
   xhr.onload = function () {
     try {
       const recursos = JSON.parse(xhr.responseText);
-      console.log('📦 seleccionarSubcategoria: recursos recibidos', recursos);
       window.recursosActuales = recursos.filter(r => r.disponibles > 0);
-  getRenderer('renderRecursosPaginados')(window.recursosActuales, 1);
+
+      getRenderer('renderRecursosPaginados')(window.recursosActuales, 1);
       window.nextStep(7);
+
+      // ✅ Usar siempre seleccionActual
+      const textoEl = document.getElementById('texto-recurso-seleccionado');
+      if (textoEl && window.seleccionActual.subcategoriaNombre) {
+        textoEl.textContent = `Herramienta ${window.seleccionActual.subcategoriaNombre}`;
+      }
     } catch (e) {
-  getRenderer('mostrarModalKioscoSinVoz')('No se pudieron cargar los recursos', 'danger');
-      console.log('❌ No se pudieron cargar los recursos', e);
+      getRenderer('mostrarModalKioscoSinVoz')('No se pudieron cargar los recursos', 'danger');
     }
   };
 
   xhr.send();
 }
+
 
 function renderRecursosPaginados(recursos, pagina = 1) {
   try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderRecursosPaginados: safeStop failed', e); }
@@ -2355,6 +2376,13 @@ function renderRecursosPaginados(recursos, pagina = 1) {
       <span class="flex-grow-1 text-start">${r.nombre}</span>
       <span class="badge-disponibles">${r.disponibles} disponibles</span>
     `;
+
+    // ⚡ Guardar nombre real y llamar a seleccionarRecurso
+    btn.onclick = () => {
+      window.seleccionActual.recursoNombre = r.nombre;
+      seleccionarRecurso(r.id);
+    };
+
     contenedor.appendChild(btn);
   });
 
@@ -2389,6 +2417,7 @@ function renderRecursosPaginados(recursos, pagina = 1) {
   try { setTimeout(() => safeStartRecognitionGlobal(), 80); } catch (e) {}
 }
 
+
 function seleccionarRecurso(recursoId) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', `/terminal/series/${recursoId}`, true);
@@ -2398,20 +2427,30 @@ function seleccionarRecurso(recursoId) {
       const series = JSON.parse(xhr.responseText);
       console.log('🔢 seleccionarRecurso: series recibidas', series);
       window.seriesActuales = series;
-  getRenderer('renderSeriesPaginadas')(series, 1);
+
+      // Renderizar series y avanzar
+      getRenderer('renderSeriesPaginadas')(series, 1);
       window.nextStep(8);
+
+      // ✅ Usar siempre seleccionActual para mostrar el texto
+      const textoEl = document.getElementById('texto-serie-seleccionada');
+      if (textoEl && window.seleccionActual.subcategoriaNombre && window.seleccionActual.recursoNombre) {
+        textoEl.textContent =
+          `Herramienta ${window.seleccionActual.subcategoriaNombre} - ${window.seleccionActual.recursoNombre}`;
+      }
     } catch (e) {
-  getRenderer('mostrarModalKioscoSinVoz')('No se pudieron cargar las series', 'danger');
+      getRenderer('mostrarModalKioscoSinVoz')('No se pudieron cargar las series', 'danger');
       console.log('❌ No se pudieron cargar las series', e);
     }
   };
 
   xhr.onerror = function () {
-  getRenderer('mostrarModalKioscoSinVoz')('Error de red al cargar las series', 'danger');
+    getRenderer('mostrarModalKioscoSinVoz')('Error de red al cargar las series', 'danger');
   };
 
   xhr.send();
 }
+
 
 function renderSeriesPaginadas(series, pagina = 1) {
   try { safeStopRecognitionGlobal(); } catch (e) { console.warn('renderSeriesPaginadas: safeStop failed', e); }

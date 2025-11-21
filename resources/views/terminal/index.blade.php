@@ -225,32 +225,32 @@
       <div id="paginadorSubcategorias" class="d-flex justify-content-center mt-3"></div>
     </div>
 
-    <!-- Paso 7: Recurso -->
-    <div id="step7" class="step">
-      <h2 class="mb-4 text-center">Seleccioná el recurso</h2>
-      <div id="recurso-buttons"></div>
-      <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="nextStep(6)">
-        <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
-        <span>Volver</span>
-      </button>
+<!-- Paso 7: Recurso -->
+<div id="step7" class="step">
+  <h2 class="mb-2 text-center">Seleccioná el recurso</h2>
+  <div id="texto-recurso-seleccionado" class="text-center text-muted mb-4"></div>
 
-      
-      <div id="recurso-buttons"></div>
-      <div id="paginadorRecursos" class="d-flex justify-content-center mt-3"></div>
-    </div>
+  <div id="recurso-buttons"></div>
+  <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="nextStep(6)">
+    <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
+    <span>Volver</span>
+  </button>
+  <div id="paginadorRecursos" class="d-flex justify-content-center mt-3"></div>
+</div>
 
-    <!-- Paso 8: Serie -->
-    <div id="step8" class="step">
-      <h2 class="mb-4 text-center">Seleccioná la serie disponible</h2>
-      <div id="serie-buttons"></div>
-      <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="nextStep(7)">
-        <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
-        <span>Volver</span>
-      </button>
-      <div id="serie-buttons"></div>
-      <div id="paginadorSeries" class="d-flex justify-content-center mt-3"></div>
+<!-- Paso 8: Serie -->
+<div id="step8" class="step">
+  <h2 class="mb-2 text-center">Seleccioná la serie disponible</h2>
+  <div id="texto-serie-seleccionada" class="text-center text-muted mb-4"></div>
 
-    </div>
+  <div id="serie-buttons"></div>
+  <button class="btn btn-primary btn-lg mt-3 texto-volver d-flex align-items-center gap-2" onclick="nextStep(7)">
+    <img src="{{ asset('images/volver.svg') }}" alt="Volver" class="icono-opcion">
+    <span>Volver</span>
+  </button>
+  <div id="paginadorSeries" class="d-flex justify-content-center mt-3"></div>
+</div>
+
 
 <!-- Paso 9: Devolución con escaneo QR -->
 <div id="step9" class="step d-none">
