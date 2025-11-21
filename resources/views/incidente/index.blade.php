@@ -81,9 +81,8 @@
                             </td>
                             <td>
                               <div class="grupo-acciones">
-                              <button class="btn btn-detalles" data-bs-toggle="modal" data-bs-target="#modalIncidente{{ $incidente->id }}">
+                              <button class="btn btn-detalles" data-bs-toggle="modal" data-bs-target="#modalIncidente{{ $incidente->id }}" title="Ver detalles del incidente">
                                 <img src="{{ asset('images/detalles.svg') }}" alt="Detalles" width="16" height="16" class="me-1">
-                                Ver detalles
                               </button>
 
                               @if($incidente->estadoIncidente?->nombre_estado === 'Resuelto')
@@ -91,8 +90,8 @@
                                   <i class="bi bi-lock"></i>
                                 </button>
                               @else
-                                <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-editar">
-                                  <i class="bi bi-pencil me-1"></i> Editar
+                                <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-editar" title="Editar incidente">
+                                  <i class="bi bi-pencil me-1"></i>
                                 </a>
                               @endif
                                 </div>

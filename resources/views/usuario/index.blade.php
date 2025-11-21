@@ -123,11 +123,15 @@
                     data-estado="{{ $usuario->estado->nombre ?? '-' }}">
                 </div>
               </td>
+              
               <td class="acciones">
                 <div class="acciones-grupo">
-                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-ver">Ver</a>
-                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-editar">
-                    <i class="bi bi-pencil"></i> Editar
+                  <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-primary btn-accion-compact" title="Ver detalles del usuario">
+                    <i class="bi bi-eye"></i>
+                  </a>
+
+                  <a href="{{ route('usuarios.edit', $usuario->id) }}" class="btn btn-orange btn-sm btn-pencil btn-accion-compact" title="Editar">
+                    <i class="bi bi-pencil"></i>
                   </a>
 
                   <form action="{{ route('usuarios.baja', $usuario->id) }}" method="POST"
@@ -137,11 +141,11 @@
                     @csrf
                     @php $esBaja = ($usuario->estado->nombre ?? null) === 'Baja'; @endphp
                     <span @if($esBaja) title="Usuario dado de baja" @endif>
-<button type="button"
-        class="btn btn-baja btn-confirmar-baja"
-        @if($esBaja) disabled style="opacity:0.5; cursor:not-allowed;" @endif>
-  Dar de baja
-</button>
+
+                    <button type="button" class="btn btn-sm btn-danger btn-marcar-baja btn-accion-compact btn-confirmar-baja" title="Dar de baja"
+                      @if($esBaja) disabled style="opacity:0.5; cursor:not-allowed;" @endif>
+                      <i class="bi bi-trash"></i>
+                    </button>
 
                     </span>
                   </form>

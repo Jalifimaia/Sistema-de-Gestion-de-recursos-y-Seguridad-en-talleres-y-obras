@@ -110,10 +110,41 @@ window.addEventListener('load', function () {
         const contAcc = document.createElement('div');
         contAcc.className = 'd-flex align-items-center gap-2 flex-wrap';
 
+        // Botón editar-serie (placeholder)
+        const btnEditarSerie = document.createElement('button');
+        btnEditarSerie.type = 'button';
+        btnEditarSerie.className = 'btn btn-sm btn-editar btn-accion-compact';
+        btnEditarSerie.title = 'Editar';
+        btnEditarSerie.innerHTML = '<i class="bi bi-pencil"></i><span class="ms-1">Editar</span>';
+        btnEditarSerie.addEventListener('click', () => {
+          // redirigir a edit si existe ruta, ejemplo:
+          if (serieId) window.location.href = `/serie_recurso/${serieId}/edit`;
+        });
+        contAcc.appendChild(btnEditarSerie);
+
+        // Botón ver QR
+        const btnQr = document.createElement('a');
+        btnQr.href = `/series/${serieId}/qr`; // ruta showQr
+        btnQr.target = '_blank';
+        btnQr.className = 'btn btn-sm btn-success btn-accion';
+        btnQr.title = 'Ver QR';
+        btnQr.innerHTML = '<i class="bi bi-qr-code"></i><span class="ms-1">QR</span>';
+        contAcc.appendChild(btnQr);
+              
+        // Botón descargar QR en PDF (usar la ruta que sí funciona)
+        const btnQrPdf = document.createElement('a');
+        btnQrPdf.href = `/series-qr/${serieId}/pdf`;
+        btnQrPdf.target = '_blank';
+        btnQrPdf.className = 'btn btn-sm btn-warning btn-accion';
+        btnQrPdf.title = 'Descargar QR en PDF';
+        btnQrPdf.innerHTML = '<i class="bi bi-file-earmark-pdf"></i><span class="ms-1">PDF</span>';
+        contAcc.appendChild(btnQrPdf);
+
         // Botón eliminar-serie (marcar baja)
         const btnEliminar = document.createElement('button');
         btnEliminar.type = 'button';
         btnEliminar.className = 'btn btn-sm btn-eliminar-serie btn-danger btn-accion';
+        btnEliminar.title = 'Eliminar (marcar baja)'; 
         btnEliminar.dataset.id = serieId;
         btnEliminar.dataset.nro = nroSerie;
         btnEliminar.innerHTML = '<i class="bi bi-trash"></i><span class="ms-1">Eliminar</span>';
@@ -183,35 +214,7 @@ window.addEventListener('load', function () {
             badge.textContent = 'Baja';
           }
         });
-
         contAcc.appendChild(btnEliminar);
-
-        // Botón editar-serie (placeholder)
-        const btnEditarSerie = document.createElement('button');
-        btnEditarSerie.type = 'button';
-        btnEditarSerie.className = 'btn btn-sm btn-editar-serie btn-accion';
-        btnEditarSerie.innerHTML = '<i class="bi bi-pencil"></i><span class="ms-1">Editar</span>';
-        btnEditarSerie.addEventListener('click', () => {
-          // redirigir a edit si existe ruta, ejemplo:
-          if (serieId) window.location.href = `/serie_recurso/${serieId}/edit`;
-        });
-        contAcc.appendChild(btnEditarSerie);
-
-// Botón ver QR
-const btnQr = document.createElement('a');
-btnQr.href = `/series/${serieId}/qr`; // ruta showQr
-btnQr.target = '_blank';
-btnQr.className = 'btn btn-sm btn-success btn-accion';
-btnQr.innerHTML = '<i class="bi bi-qr-code"></i><span class="ms-1">QR</span>';
-contAcc.appendChild(btnQr);
-
-// Botón descargar QR en PDF (usar la ruta que sí funciona)
-const btnQrPdf = document.createElement('a');
-btnQrPdf.href = `/series-qr/${serieId}/pdf`;
-btnQrPdf.target = '_blank';
-btnQrPdf.className = 'btn btn-sm btn-warning btn-accion';
-btnQrPdf.innerHTML = '<i class="bi bi-file-earmark-pdf"></i><span class="ms-1">PDF</span>';
-contAcc.appendChild(btnQrPdf);
 
         tdAcciones.appendChild(contAcc);
 

@@ -179,6 +179,9 @@
   background-color: #d06842;
   color: white;
   border: none;
+  align-content: center;
+  width: 51px;
+  height: 46px;
 }
 
 .btn-orange:hover {
