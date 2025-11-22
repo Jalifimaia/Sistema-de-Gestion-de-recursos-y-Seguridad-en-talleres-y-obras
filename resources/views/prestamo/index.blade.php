@@ -147,9 +147,16 @@
         </div>
       </div>
 
-      <div class="mt-4 d-flex justify-content-center">
-        {{ $prestamos->links() }}
+
+      <div class="mt-4 d-flex justify-content-between align-items-center">
+        <div class="text-muted small">
+          Mostrando {{ $prestamos->firstItem() }} a {{ $prestamos->lastItem() }} de {{ $prestamos->total() }} préstamos
+        </div>
+        <div>
+          {{ $prestamos->links() }}
+        </div>
       </div>
+
     </div>
   </div>
 </div>
