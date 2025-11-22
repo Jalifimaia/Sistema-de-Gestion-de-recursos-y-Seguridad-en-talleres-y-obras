@@ -165,7 +165,8 @@
                             value="{{ old('fecha_incidente') }}"
                             required
                             aria-describedby="fechaError"
-                            aria-invalid="{{ $errors->has('fecha_incidente') ? 'true' : 'false' }}">
+                            aria-invalid="{{ $errors->has('fecha_incidente') ? 'true' : 'false' }}"
+                            max="{{ now()->format('Y-m-d\TH:i') }}">
 
                     @error('fecha_incidente')
                         <div id="fechaError" class="invalid-feedback d-block">
