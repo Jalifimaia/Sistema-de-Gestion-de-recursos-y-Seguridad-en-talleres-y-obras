@@ -67,11 +67,13 @@ public function index()
         'estadoIncidente',
         'recursos.subcategoria.categoria',
         'recursos.serieRecursos'
-    ])
-    ->paginate(3); // 👈 solo incidentes, no recursos
+    ])->paginate(10);
 
-    $estados = EstadoIncidente::all()->pluck('nombre_estado', 'id')->toArray();
-    
+    foreach ($incidentes as $i) {
+        \Log::debug("Incidente {$i->id} tiene recursos:", $i->recursos->pluck('id')->toArray());
+    }
+
+    $estados = EstadoIncidente::pluck('nombre_estado', 'id')->toArray();
     return view('incidente.index', compact('incidentes', 'estados'));
 }
 
