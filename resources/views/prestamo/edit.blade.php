@@ -88,33 +88,45 @@
         </div>-->
 
         <hr>
-        <h5 class="mb-3">Recursos prestados</h5>
+        <h5 class="mb-3">Recurso</h5>
 
         {{-- Contenedor donde el JS agregará tarjetas; las existentes las renderizamos con data-id-serie y hidden inputs --}}
         <div id="contenedorSeries" class="row g-3">
           @foreach ($prestamo->detallePrestamos as $detalle)
             @php
-              $estado = $detalle->id_estado_prestamo;
-              $baja = $estado == 5;
               $serieId = $detalle->id_serie;
               $recursoNombre = $detalle->serieRecurso->recurso->nombre ?? '-';
               $nroSerie = $detalle->serieRecurso->nro_serie ?? '-';
+
+              // Estado desde la relación
+              $estadoNombre = $detalle->estadoPrestamo->nombre ?? 'Desconocido';
+
+              // Badge por estado
+              switch ($estadoNombre) {
+                case 'Activo':   $badgeClass = 'success'; break;
+                case 'Vencido':  $badgeClass = 'warning'; break;
+                case 'Devuelto': $badgeClass = 'secondary';    break;
+                case 'Cancelado':$badgeClass = 'danger';  break;
+                default:         $badgeClass = 'secondary';
+              }
             @endphp
 
             <div class="col-md-4" data-id-serie="{{ $serieId }}">
-              <div class="card border {{ $baja ? 'border-danger' : 'border-secondary' }}">
+              <div class="card border {{ $badgeClass === 'danger' ? 'border-danger' : 'border-secondary' }}">
                 <div class="card-body">
                   <h6 class="card-title mb-1">{{ $recursoNombre }}</h6>
                   <p class="card-text mb-2">Serie: <strong>{{ $nroSerie }}</strong></p>
-                  <span class="badge bg-{{ $baja ? 'danger' : 'secondary' }}">
-                    {{ $baja ? 'Cancelado' : 'Asignado' }}
+
+                  <span class="badge bg-{{ $badgeClass }}">
+                    {{ $estadoNombre }}
                   </span>
 
                   {{-- Hidden para que el form siga enviando las series ya existentes --}}
                   <input type="hidden" name="series[]" value="{{ $serieId }}">
                   <input type="hidden" name="detalle_id[]" value="{{ $detalle->id }}">
 
-                  @if (!$baja)
+                  {{-- Mostrar botón "Devolver" solo si el estado es Activo o Vencido --}}
+                  @if (in_array($estadoNombre, ['Activo','Vencido']))
                     <button type="button"
                             class="btn btn-sm btn-outline-danger w-100 dar-baja mt-2"
                             data-id="{{ $detalle->id }}">
