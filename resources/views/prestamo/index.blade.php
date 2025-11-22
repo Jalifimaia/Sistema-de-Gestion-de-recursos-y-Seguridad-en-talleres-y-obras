@@ -69,7 +69,6 @@
             <label for="filtro-estado" class="form-label fw-bold">Estado</label>
             <select id="filtro-estado" name="estado" onchange="this.form.submit()" class="form-select filtro-naranja" style="height: 46px;">
               <option value="">Todos</option>
-              <option value="Cancelado" {{ request('estado') == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
               <option value="Activo" {{ request('estado') == 'Activo' ? 'selected' : '' }}>Activo</option>
               <option value="Vencido" {{ request('estado') == 'Vencido' ? 'selected' : '' }}>Vencido</option>
               <option value="Devuelto" {{ request('estado') == 'Devuelto' ? 'selected' : '' }}>Devuelto</option>
@@ -97,42 +96,46 @@
       <div id="contenedorPrestamos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
         @foreach ($prestamos as $p)
           @php
-            $color = match($p->estado) {
-              'Cancelado' => 'danger',
-              'Activo' => 'success',
-              'Vencido' => 'warning',
-              default => 'secondary',
-            };
+            // Forzar que "Cancelado" se muestre como "Devuelto"
+            $estadoNombre = $p->estado === 'Cancelado' ? 'Devuelto' : $p->estado;
+
+            // Badge por estado
+            switch ($estadoNombre) {
+              case 'Activo':   $color = 'success'; break;
+              case 'Vencido':  $color = 'warning'; break;
+              case 'Devuelto': $color = 'secondary';    break;
+              default:         $color = 'secondary';
+            }
           @endphp
 
           <div class="col prestamo-item"
-     data-estado="{{ strtolower($p->estado) }}"
-     data-creador="{{ strtolower($p->creado_por) }}"
-     data-texto="{{ strtolower(($p->subcategoria ?? '') . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
-     data-fecha="{{ $p->fecha_prestamo }}">
-  <div class="card border-secondary shadow-sm h-100 p-1">
-    <div class="card-body p-2">
-      <h6 class="card-title mb-1 fs-6">
-        {{ $p->subcategoria }}
-        <small class="text-muted">
-          ({{ $p->recurso ?? 'Sin marca' }})
-        </small>
-      </h6>
-      <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
-      <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
-      <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
-      <p class="card-text mb-1 small">
-        Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
-      </p>
-      <p class="card-text mb-0 small">
-        Estado: <span class="badge bg-{{ $color }}">{{ $p->estado }}</span>
-      </p>
-      <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-editar w-100 mt-2">
-        <i class="bi bi-pencil me-1"></i> Editar
-      </a>
-    </div>
-  </div>
-</div>
+               data-estado="{{ strtolower($estadoNombre) }}"
+               data-creador="{{ strtolower($p->creado_por) }}"
+               data-texto="{{ strtolower(($p->subcategoria ?? '') . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
+               data-fecha="{{ $p->fecha_prestamo }}">
+            <div class="card border-secondary shadow-sm h-100 p-1">
+              <div class="card-body p-2">
+                <h6 class="card-title mb-1 fs-6">
+                  {{ $p->subcategoria }}
+                  <small class="text-muted">
+                    ({{ $p->recurso ?? 'Sin marca' }})
+                  </small>
+                </h6>
+                <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
+                <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
+                <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
+                <p class="card-text mb-1 small">
+                  Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
+                </p>
+                <p class="card-text mb-0 small">
+                  Estado: <span class="badge bg-{{ $color }}">{{ $estadoNombre }}</span>
+                </p>
+                <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-editar w-100 mt-2">
+                  <i class="bi bi-pencil me-1"></i> Editar
+                </a>
+              </div>
+            </div>
+          </div>
 
         @endforeach
 
