@@ -180,10 +180,8 @@
                     : '' }}">
             </div>
 
-          </div>
-        </div>
 
-<!-- Resolución -->
+            <!-- Resolución -->
 <div class="mb-3" id="resolucion-container" style="display: none;">
   <label for="resolucion" class="form-label">Resolución</label>
   @if(!empty($readonly))
@@ -194,6 +192,10 @@
     <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
   @endif
 </div>
+          </div>
+        </div>
+
+
         <!-- Botones -->
             <div class="text-center mt-4">
               @if(empty($readonly))
@@ -239,7 +241,7 @@
 </script>
 @endif
 
-<!-- Modal error resolución -->
+<!-- Modal error resolución 
 <div class="modal fade" id="modalFaltaResolucion" tabindex="-1" aria-labelledby="modalFaltaResolucionLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -255,7 +257,7 @@
       </div>
     </div>
   </div>
-</div>
+</div>-->
 
 @push('scripts')
 <script>
@@ -277,6 +279,23 @@ document.addEventListener('DOMContentLoaded', function () {
     ayudaNode.id = ayudaContainerId;
     ayudaNode.className = 'mt-2';
     cont.appendChild(ayudaNode);
+  }
+
+  // ========== FUNCIONES DE VALIDACIÓN (definidas primero) ==========
+  function mostrarError(campo) {
+    campo.classList.add('is-invalid');
+    const errorLabel = campo.closest('.mb-3')?.querySelector('.error-label');
+    if (errorLabel) {
+      errorLabel.style.display = 'block';
+    }
+  }
+
+  function ocultarError(campo) {
+    campo.classList.remove('is-invalid');
+    const errorLabel = campo.closest('.mb-3')?.querySelector('.error-label');
+    if (errorLabel) {
+      errorLabel.style.display = 'none';
+    }
   }
 
   // selects de estado de recursos
@@ -335,9 +354,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (bloqueadores.length === 0) {
       ayudaNode.innerHTML = '<div class="text-success"><strong>Puede seleccionar resuelto.</strong> Todos los recursos están en estado Disponible o Baja.</div>';
       enableResueltoOption(true);
-      // mostrar resolucion
-      const resolucionContainer = document.getElementById('resolucion-container');
-      if (resolucionContainer) resolucionContainer.style.display = '';
     } else {
       let html = `
         <div class="d-flex align-items-center gap-2 text-warning fw-semibold">
@@ -347,28 +363,23 @@ document.addEventListener('DOMContentLoaded', function () {
         <ul class="mt-1 mb-0 small text-danger fw-semibold">
       `;
       bloqueadores.forEach(b => {
-        html += `<li>${escapeHtml(b.nombre)} — estado actual: ${escapeHtml(b.estadoText)}</li>`;
+        html += `<li>${escapeHtml(b.nombre)} – estado actual: ${escapeHtml(b.estadoText)}</li>`;
       });
       html += '</ul>';
       ayudaNode.innerHTML = html;
       enableResueltoOption(false);
-      const resolucionContainer = document.getElementById('resolucion-container');
-      if (resolucionContainer) resolucionContainer.style.display = 'none';
     }
   }
 
   function enableResueltoOption(allow) {
     if (!incidenteSelect) return;
-    // buscar opción Resuelto (si existe)
     const optRes = Array.from(incidenteSelect.options).find(o => String(o.value) === String(resueltoId));
     if (optRes) {
       if (allow) {
         optRes.disabled = false;
         optRes.style.display = '';
       } else {
-        // si está seleccionado actualmente y no permitimos, cambiar a valor original o al primero visible
         if (incidenteSelect.value == String(resueltoId)) {
-          // intentar reestablecer selección previa
           if (estadoOriginalSeleccionado) incidenteSelect.value = estadoOriginalSeleccionado;
           else {
             const firstOpt = Array.from(incidenteSelect.options).find(o => !o.disabled && o.style.display !== 'none' && String(o.value) !== String(resueltoId));
@@ -379,13 +390,30 @@ document.addEventListener('DOMContentLoaded', function () {
         optRes.style.display = 'none';
       }
     } else {
-      // si no existe, y allow = true, crearla
       if (allow && resueltoId) {
         const newOpt = document.createElement('option');
         newOpt.value = String(resueltoId);
         newOpt.textContent = 'Resuelto';
         newOpt.selected = false;
         incidenteSelect.appendChild(newOpt);
+      }
+    }
+    // Actualizar visibilidad del campo resolución después de habilitar/deshabilitar
+    onIncidenteChange();
+  }
+
+  function onIncidenteChange() {
+    const resolucionContainer = document.getElementById('resolucion-container');
+    if (!resolucionContainer || !incidenteSelect) return;
+    const seleccionado = incidenteSelect.value;
+    if (String(seleccionado) === String(resueltoId)) {
+      resolucionContainer.style.display = 'block';
+    } else {
+      resolucionContainer.style.display = 'none';
+      // Limpiar error de resolución cuando se oculta
+      const resolucionInput = document.getElementById('resolucion');
+      if (resolucionInput) {
+        ocultarError(resolucionInput);
       }
     }
   }
@@ -402,63 +430,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function onIncidenteChange() {
-    const resolucionContainer = document.getElementById('resolucion-container');
-    if (!resolucionContainer) return;
-    const seleccionado = incidenteSelect.value;
-    if (String(seleccionado) === String(resueltoId)) {
-      resolucionContainer.style.display = '';
-    } else {
-      resolucionContainer.style.display = 'none';
-    }
-  }
+    // La validación de resolución ahora se maneja en validarFormularioEdit()
 
-  // submit handler robusto
-  (function () {
-    const form = document.querySelector('form[action*="/incidente/"]') || document.querySelector('form');
-    if (!form) {
-      console.warn('No se encontró el formulario en la página.');
-      return;
-    }
-
-    form.addEventListener('submit', function (e) {
-      try {
-        if (!incidenteSelect || typeof resueltoId === 'undefined' || resueltoId === null) return;
-
-        const seleccionado = String(incidenteSelect.value);
-        if (seleccionado === String(resueltoId)) {
-          const resolucionInput = document.getElementById('resolucion');
-          const texto = resolucionInput ? resolucionInput.value.trim() : '';
-
-          if (!texto) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-
-            const modalEl = document.getElementById('modalFaltaResolucion');
-            if (modalEl && window.bootstrap && typeof window.bootstrap.Modal === 'function') {
-              const m = new bootstrap.Modal(modalEl);
-              m.show();
-              modalEl.addEventListener('hidden.bs.modal', function handler() {
-                modalEl.removeEventListener('hidden.bs.modal', handler);
-                if (resolucionInput) {
-                  resolucionInput.focus();
-                  resolucionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              });
-            } else {
-              alert('Debe ingresar una resolución para cerrar el incidente.');
-              if (resolucionInput) {
-                resolucionInput.focus();
-                resolucionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Error en validación submit:', err);
-      }
-    }, { passive: false });
-  })();
 
   // inicialización
   attachListeners();
@@ -476,7 +449,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // botón del modal de completar resolución
-// botón del modal de completar resolución
   const btnCompletar = document.getElementById('btnCompletarResolucion');
   if (btnCompletar) {
     btnCompletar.addEventListener('click', () => {
@@ -490,23 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ========== VALIDACIÓN DE CAMPOS OBLIGATORIOS ==========
-  function mostrarError(campo) {
-    campo.classList.add('is-invalid');
-    const errorLabel = campo.closest('.mb-3')?.querySelector('.error-label');
-    if (errorLabel) {
-      errorLabel.style.display = 'block';
-    }
-  }
-
-  function ocultarError(campo) {
-    campo.classList.remove('is-invalid');
-    const errorLabel = campo.closest('.mb-3')?.querySelector('.error-label');
-    if (errorLabel) {
-      errorLabel.style.display = 'none';
-    }
-  }
-
+  // ========== VALIDACIÓN DEL FORMULARIO ==========
   function validarFormularioEdit() {
     let esValido = true;
 
@@ -538,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return esValido;
   }
 
-  // Evento submit del formulario
+  // Evento submit del formulario para validación de campos
   const formEdit = document.getElementById('formEditIncidente');
   if (formEdit) {
     formEdit.addEventListener('submit', function(e) {
