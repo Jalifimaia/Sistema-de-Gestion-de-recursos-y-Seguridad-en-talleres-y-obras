@@ -144,11 +144,12 @@
 </div>
 
 
-        <div class="text-end mt-4 d-flex gap-2 justify-content-end">
-          <a href="{{ route('prestamos.index') }}" class="btn btn-volver d-inline-flex align-items-center">
-            <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
-            Volver
-          </a>
+        <div class="text-start mt-4 d-flex gap-2 justify-content-start">
+            <a href="{{ route('prestamos.index') }}" class="btn btn-volver d-inline-flex align-items-center">
+              <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+              Volver
+            </a>
+
          <!-- <button type="submit" class="btn btn-guardar">Actualizar Préstamo</button>
        --> </div> 
       </form>
