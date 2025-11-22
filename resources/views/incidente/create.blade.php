@@ -19,10 +19,10 @@
   </div>
 
 
-    <form method="POST" action="{{ route('incidente.store') }}">
+    <form method="POST" action="{{ route('incidente.store') }}" id="formIncidente" novalidate>
         @csrf
 
-        <!-- 🧍 DATOS DEL TRABAJADOR -->
+        <!-- 🧠 DATOS DEL TRABAJADOR -->
         <div class="card mb-3">
             <div class="card-header bg-primary text-white">Datos del Trabajador</div>
             <div class="card-body">
@@ -33,7 +33,8 @@
                             <input type="text" id="dni_usuario" class="form-control" required placeholder="Ingrese aquí el DNI del trabajador involucrado" >
                             <button type="button" id="buscarUsuario" class="btn btn-secondary">Buscar</button>
                         </div>
-                        <input type="hidden" name="id_usuario" id="id_usuario">
+                        <input type="hidden" name="id_usuario" id="id_usuario" required>
+                        <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                     </div>
                     <div class="col-md-6">
                         <label>Nombre completo</label>
@@ -67,6 +68,7 @@
                                     </option>
                                 @endforeach
                             </select>
+                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                         <div class="col-md-3">
@@ -74,7 +76,6 @@
                             <select name="recursos[0][id_subcategoria]" class="form-select subcategoria-select" required>
                                 <option value="">Seleccione</option>
                                 @if(old('recursos.0.id_subcategoria'))
-                                    {{-- Si viene por old, mostrar esa opción --}}
                                     <option value="{{ old('recursos.0.id_subcategoria') }}" selected>
                                         {{ collect($subcategorias)->firstWhere('id', old('recursos.0.id_subcategoria'))->nombre ?? 'Seleccionado' }}
                                     </option>
@@ -85,6 +86,7 @@
                                     @endif
                                 @endif
                             </select>
+                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                         <div class="col-md-3">
@@ -102,6 +104,7 @@
                                     @endif
                                 @endif
                             </select>
+                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                         <div class="col-md-3">
@@ -121,6 +124,7 @@
                                     @endif
                                 @endif
                             </select>
+                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                         <div class="col-md-3 mt-3">
@@ -136,6 +140,7 @@
                                     </option>
                                 @endforeach
                             </select>
+                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                     </div>
@@ -156,6 +161,7 @@
                       required
                       maxlength="255"
                       placeholder="Ingrese aquí cuál fue el motivo del incidente (máx. 255 caracteres).">{{ old('descripcion') }}</textarea>
+                    <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                 </div>
                 <div class="mb-3">
                     <label>Fecha del incidente</label>
@@ -167,6 +173,7 @@
                             aria-describedby="fechaError"
                             aria-invalid="{{ $errors->has('fecha_incidente') ? 'true' : 'false' }}"
                             max="{{ now()->format('Y-m-d\TH:i') }}">
+                    <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
 
                     @error('fecha_incidente')
                         <div id="fechaError" class="invalid-feedback d-block">
@@ -238,10 +245,6 @@
       </div>
     </div>
   </div>
-
-
-
-    
 </div>
 
 @if(session('success'))
@@ -308,16 +311,26 @@ function initSelects(block) {
         llenarSubcategorias(cat.value, sub);
         rec.innerHTML = '<option value="">Seleccione</option>';
         ser.innerHTML = '<option value="">Seleccione</option>';
+        ocultarError(cat);
     });
 
     sub.addEventListener('change', () => {
         llenarRecursos(sub.value, rec);
         ser.innerHTML = '<option value="">Seleccione</option>';
+        ocultarError(sub);
     });
 
     rec.addEventListener('change', () => {
         llenarSeries(rec.value, ser);
+        ocultarError(rec);
     });
+
+    ser.addEventListener('change', () => ocultarError(ser));
+    
+    const estado = block.querySelector('.estado-select');
+    if (estado) {
+        estado.addEventListener('change', () => ocultarError(estado));
+    }
 }
 
 document.addEventListener('click', function(e) {
@@ -349,6 +362,12 @@ document.getElementById('agregar-recurso').addEventListener('click', function() 
         const name = sel.getAttribute('name');
         const newName = name.replace(/\d+/, recursoIndex);
         sel.setAttribute('name', newName);
+        sel.classList.remove('is-invalid');
+    });
+    
+    // Ocultar errores en el nuevo bloque
+    newBlock.querySelectorAll('.error-label').forEach(label => {
+        label.style.display = 'none';
     });
 
     container.appendChild(newBlock);
@@ -365,6 +384,7 @@ document.getElementById('buscarUsuario').addEventListener('click', function() {
             if (data.nombre && data.id) {
             document.getElementById('nombre_usuario').value = data.nombre;
             document.getElementById('id_usuario').value = data.id;
+            ocultarError(document.getElementById('id_usuario'));
             } else {
             // mostrar modal con mensaje y limpiar campos
             mostrarModalAvisoUsuario(data.error || 'Usuario no encontrado', 'warning');
@@ -374,6 +394,103 @@ document.getElementById('buscarUsuario').addEventListener('click', function() {
 
         });
 });
+
+// ---------- Validación del formulario ----------
+function mostrarError(campo) {
+    campo.classList.add('is-invalid');
+    const errorLabel = campo.closest('.col-md-6, .col-md-3, .mb-3')?.querySelector('.error-label');
+    if (errorLabel) {
+        errorLabel.style.display = 'block';
+    }
+}
+
+function ocultarError(campo) {
+    campo.classList.remove('is-invalid');
+    const errorLabel = campo.closest('.col-md-6, .col-md-3, .mb-3')?.querySelector('.error-label');
+    if (errorLabel) {
+        errorLabel.style.display = 'none';
+    }
+}
+
+function validarFormulario() {
+    let esValido = true;
+    
+    // Ocultar todos los errores primero
+    document.querySelectorAll('.error-label').forEach(label => {
+        label.style.display = 'none';
+    });
+    document.querySelectorAll('.is-invalid').forEach(campo => {
+        campo.classList.remove('is-invalid');
+    });
+    
+    // Validar usuario
+    const idUsuario = document.getElementById('id_usuario');
+    if (!idUsuario.value) {
+        mostrarError(document.getElementById('dni_usuario'));
+        esValido = false;
+    }
+    
+    // Validar recursos
+    document.querySelectorAll('.recurso-block').forEach(block => {
+        const campos = [
+            block.querySelector('.categoria-select'),
+            block.querySelector('.subcategoria-select'),
+            block.querySelector('.recurso-select'),
+            block.querySelector('.serie-select'),
+            block.querySelector('.estado-select')
+        ];
+        
+        campos.forEach(campo => {
+            if (campo && !campo.value) {
+                mostrarError(campo);
+                esValido = false;
+            }
+        });
+    });
+    
+    // Validar descripción
+    const descripcion = document.querySelector('textarea[name="descripcion"]');
+    if (!descripcion.value.trim()) {
+        mostrarError(descripcion);
+        esValido = false;
+    }
+    
+    // Validar fecha
+    const fecha = document.querySelector('input[name="fecha_incidente"]');
+    if (!fecha.value) {
+        mostrarError(fecha);
+        esValido = false;
+    }
+    
+    return esValido;
+}
+
+// Evento submit del formulario
+document.getElementById('formIncidente').addEventListener('submit', function(e) {
+    if (!validarFormulario()) {
+        e.preventDefault();
+        // Scroll al primer error
+        const primerError = document.querySelector('.is-invalid');
+        if (primerError) {
+            primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            primerError.focus();
+        }
+    }
+});
+
+// Ocultar errores al escribir/cambiar
+document.querySelector('textarea[name="descripcion"]').addEventListener('input', function() {
+    ocultarError(this);
+});
+
+document.querySelector('input[name="fecha_incidente"]').addEventListener('change', function() {
+    ocultarError(this);
+});
+
+document.getElementById('dni_usuario').addEventListener('input', function() {
+    ocultarError(this);
+});
+
 // Mostrar modal de aviso con mensaje dinámico
 function mostrarModalAvisoUsuario(mensaje, tipo = 'danger') {
   try {
@@ -415,5 +532,13 @@ function mostrarModalAvisoRecursos(mensaje = 'Debe haber al menos un recurso car
 
 @push('styles')
 <link href="{{ asset('css/agregarIncidente.css') }}" rel="stylesheet">
+<style>
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .error-label {
+        display: block;
+        font-size: 0.875rem;
+    }
+</style>
 @endpush
-

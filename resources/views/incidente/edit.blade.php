@@ -25,7 +25,7 @@
       </div>
     @endif
 
-    <form method="POST" action="{{ route('incidente.update', $incidente->id) }}">
+    <form method="POST" action="{{ route('incidente.update', $incidente->id) }}" id="formEditIncidente" novalidate>
         @csrf
         @method('PUT')
 
@@ -148,18 +148,19 @@
               @endif
             </div>
 
-            <!-- Motivo / Descripción -->
-            <div class="mb-3">
-              <label for="descripcion" class="form-label">Motivo del incidente</label>
-              @if(!empty($readonly))
-                <textarea name="descripcion" id="descripcion" class="form-control" readonly>{{ $incidente->descripcion }}</textarea>
-                <input type="hidden" name="descripcion" value="{{ $incidente->descripcion }}">
-              @else
-                <textarea name="descripcion" id="descripcion" class="form-control"
-                          required maxlength="255"
-                          placeholder="Ingrese aquí cuál fue el motivo del incidente (máx. 255 caracteres).">{{ old('descripcion', $incidente->descripcion) }}</textarea>
-              @endif
-            </div>
+     <!-- Motivo / Descripción -->
+<div class="mb-3">
+  <label for="descripcion" class="form-label">Motivo del incidente</label>
+  @if(!empty($readonly))
+    <textarea name="descripcion" id="descripcion" class="form-control" readonly>{{ $incidente->descripcion }}</textarea>
+    <input type="hidden" name="descripcion" value="{{ $incidente->descripcion }}">
+  @else
+    <textarea name="descripcion" id="descripcion" class="form-control"
+              required maxlength="255"
+              placeholder="Ingrese aquí cuál fue el motivo del incidente (máx. 255 caracteres).">{{ old('descripcion', $incidente->descripcion) }}</textarea>
+    <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+  @endif
+</div>
 
 
             <!-- Fecha del incidente -->
@@ -182,17 +183,17 @@
           </div>
         </div>
 
-        <!-- Resolución -->
-        <div class="mb-3" id="resolucion-container" style="display: none;">
-          <label for="resolucion" class="form-label">Resolución</label>
-          @if(!empty($readonly))
-            <input type="text" name="resolucion" id="resolucion" class="form-control" value="{{ $incidente->resolucion }}" readonly>
-            <input type="hidden" name="resolucion" value="{{ $incidente->resolucion }}">
-          @else
-            <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}">
-          @endif
-        </div>
-
+<!-- Resolución -->
+<div class="mb-3" id="resolucion-container" style="display: none;">
+  <label for="resolucion" class="form-label">Resolución</label>
+  @if(!empty($readonly))
+    <input type="text" name="resolucion" id="resolucion" class="form-control" value="{{ $incidente->resolucion }}" readonly>
+    <input type="hidden" name="resolucion" value="{{ $incidente->resolucion }}">
+  @else
+    <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}">
+    <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+  @endif
+</div>
         <!-- Botones -->
             <div class="text-center mt-4">
               @if(empty($readonly))
@@ -475,6 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // botón del modal de completar resolución
+// botón del modal de completar resolución
   const btnCompletar = document.getElementById('btnCompletarResolucion');
   if (btnCompletar) {
     btnCompletar.addEventListener('click', () => {
@@ -487,13 +489,104 @@ document.addEventListener('DOMContentLoaded', function () {
       }, 200);
     });
   }
+
+  // ========== VALIDACIÓN DE CAMPOS OBLIGATORIOS ==========
+  function mostrarError(campo) {
+    campo.classList.add('is-invalid');
+    const errorLabel = campo.closest('.mb-3')?.querySelector('.error-label');
+    if (errorLabel) {
+      errorLabel.style.display = 'block';
+    }
+  }
+
+  function ocultarError(campo) {
+    campo.classList.remove('is-invalid');
+    const errorLabel = campo.closest('.mb-3')?.querySelector('.error-label');
+    if (errorLabel) {
+      errorLabel.style.display = 'none';
+    }
+  }
+
+  function validarFormularioEdit() {
+    let esValido = true;
+
+    // Ocultar todos los errores primero
+    document.querySelectorAll('.error-label').forEach(label => {
+      label.style.display = 'none';
+    });
+    document.querySelectorAll('.is-invalid').forEach(campo => {
+      campo.classList.remove('is-invalid');
+    });
+
+    // Validar descripción (motivo)
+    const descripcion = document.getElementById('descripcion');
+    if (descripcion && !descripcion.readOnly && !descripcion.value.trim()) {
+      mostrarError(descripcion);
+      esValido = false;
+    }
+
+    // Validar resolución (solo si el container está visible y el campo no es readonly)
+    const resolucionContainer = document.getElementById('resolucion-container');
+    const resolucion = document.getElementById('resolucion');
+    if (resolucionContainer && resolucionContainer.style.display !== 'none' && resolucion && !resolucion.readOnly) {
+      if (!resolucion.value.trim()) {
+        mostrarError(resolucion);
+        esValido = false;
+      }
+    }
+
+    return esValido;
+  }
+
+  // Evento submit del formulario
+  const formEdit = document.getElementById('formEditIncidente');
+  if (formEdit) {
+    formEdit.addEventListener('submit', function(e) {
+      if (!validarFormularioEdit()) {
+        e.preventDefault();
+        // Scroll al primer error
+        const primerError = document.querySelector('.is-invalid');
+        if (primerError) {
+          primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          primerError.focus();
+        }
+      }
+    }, { capture: true });
+  }
+
+  // Ocultar errores al escribir
+  const descripcionInput = document.getElementById('descripcion');
+  if (descripcionInput) {
+    descripcionInput.addEventListener('input', function() {
+      ocultarError(this);
+    });
+  }
+
+  const resolucionInput = document.getElementById('resolucion');
+  if (resolucionInput) {
+    resolucionInput.addEventListener('input', function() {
+      ocultarError(this);
+    });
+  }
 });
 </script>
+
+
+
 @endpush
 
 @endsection
 
 @push('styles')
 <link href="{{ asset('css/editarIncidente.css') }}" rel="stylesheet">
+<style>
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .error-label {
+        display: block;
+        font-size: 0.875rem;
+    }
+</style>
 @endpush
 
