@@ -189,9 +189,63 @@
   </div>
 </div>
 
+{{-- Modal de confirmación para devolución --}}
+<div class="modal fade" id="modalConfirmarDevolucion" tabindex="-1" aria-labelledby="modalConfirmarDevolucionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalConfirmarDevolucionLabel">Confirmar devolución</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que querés devolver este recurso?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmarDevolucion">Devolver</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 @endsection
 
 @push('scripts')
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let recursoIdSeleccionado = null;
+
+  // Al hacer clic en cualquier botón "Devolver"
+  document.querySelectorAll('.dar-baja').forEach(btn => {
+    btn.addEventListener('click', function () {
+      recursoIdSeleccionado = this.dataset.id; // guardamos el id del detalle
+      const modal = new bootstrap.Modal(document.getElementById('modalConfirmarDevolucion'));
+      modal.show();
+    });
+  });
+
+  // Al confirmar en el modal
+  document.getElementById('btnConfirmarDevolucion').addEventListener('click', function () {
+    if (recursoIdSeleccionado) {
+      // acá podés disparar tu lógica de devolución (AJAX o submit)
+      // ejemplo simple: enviar un form oculto
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/prestamos/${recursoIdSeleccionado}/devolver`; // ajustá la ruta
+      form.innerHTML = `
+        @csrf
+        @method('PUT')
+      `;
+      document.body.appendChild(form);
+      form.submit();
+    }
+  });
+});
+</script>
+
+
   {{-- Exponemos detalles para que el JS los use si los necesita --}}
   <script>window.detalles = @json($detalles ?? []); window.seriesOcultas = @json($seriesOcultas ?? []);</script>
 
