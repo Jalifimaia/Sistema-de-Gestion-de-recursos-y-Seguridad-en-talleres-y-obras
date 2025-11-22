@@ -106,28 +106,34 @@
           @endphp
 
           <div class="col prestamo-item"
-               data-estado="{{ strtolower($p->estado) }}"
-               data-creador="{{ strtolower($p->creado_por) }}"
-               data-texto="{{ strtolower($p->recurso . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
-               data-fecha="{{ $p->fecha_prestamo }}">
-            <div class="card border-secondary shadow-sm h-100 p-1">
-              <div class="card-body p-2">
-                <h6 class="card-title mb-1 fs-6">{{ $p->recurso }}</h6>
-                <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
-                <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
-                <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
-                <p class="card-text mb-1 small">
-                  Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
-                </p>
-                <p class="card-text mb-0 small">
-                  Estado: <span class="badge bg-{{ $color }}">{{ $p->estado }}</span>
-                </p>
-                <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-editar w-100 mt-2">
-                  <i class="bi bi-pencil me-1"></i> Editar
-                </a>
-              </div>
-            </div>
-          </div>
+     data-estado="{{ strtolower($p->estado) }}"
+     data-creador="{{ strtolower($p->creado_por) }}"
+     data-texto="{{ strtolower(($p->subcategoria ?? '') . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
+     data-fecha="{{ $p->fecha_prestamo }}">
+  <div class="card border-secondary shadow-sm h-100 p-1">
+    <div class="card-body p-2">
+      <h6 class="card-title mb-1 fs-6">
+        {{ $p->subcategoria }}
+        <small class="text-muted">
+          ({{ $p->recurso ?? 'Sin marca' }})
+        </small>
+      </h6>
+      <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
+      <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
+      <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
+      <p class="card-text mb-1 small">
+        Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
+      </p>
+      <p class="card-text mb-0 small">
+        Estado: <span class="badge bg-{{ $color }}">{{ $p->estado }}</span>
+      </p>
+      <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-editar w-100 mt-2">
+        <i class="bi bi-pencil me-1"></i> Editar
+      </a>
+    </div>
+  </div>
+</div>
+
         @endforeach
 
         {{-- Mensaje único de "sin resultados" --}}

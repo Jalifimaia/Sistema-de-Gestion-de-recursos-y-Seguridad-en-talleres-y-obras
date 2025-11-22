@@ -26,17 +26,16 @@ public function index(): View
     $fechaInicio = request('fecha_inicio');
     $fechaFin = request('fecha_fin');
 
-    $usuarios = Usuario::whereIn('id_rol', [1, 2])
-    ->pluck('name');
+    $usuarios = Usuario::whereIn('id_rol', [1, 2])->pluck('name');
 
-
-
+    // Mantengo tu variable $query como en el original
     $query = request('search');
 
     $base = DB::table('prestamo')
         ->join('detalle_prestamo', 'prestamo.id', '=', 'detalle_prestamo.id_prestamo')
         ->join('serie_recurso', 'detalle_prestamo.id_serie', '=', 'serie_recurso.id')
         ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
+        ->join('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id') // JOIN agregado para traer la subcategoría
         ->join('usuario as trabajador', 'prestamo.id_usuario', '=', 'trabajador.id')
         ->join('usuario as creador', 'prestamo.id_usuario_creacion', '=', 'creador.id')
         ->join('estado_prestamo', 'detalle_prestamo.id_estado_prestamo', '=', 'estado_prestamo.id')
@@ -45,6 +44,7 @@ public function index(): View
             'trabajador.name as asignado',
             'creador.name as creado_por',
             'recurso.nombre as recurso',
+            'subcategoria.nombre as subcategoria', // SELECT agregado
             'serie_recurso.nro_serie',
             'prestamo.fecha_prestamo',
             'prestamo.fecha_devolucion',
@@ -73,30 +73,27 @@ public function index(): View
                     ->orWhere('creador.name', 'like', "%{$search}%");
             });
         })
-
-
         ->when($query, function ($q) use ($query) {
-        $q->where(function ($sub) use ($query) {
-            $sub->where('recurso.nombre', 'like', "%{$query}%")
-                ->orWhere('serie_recurso.nro_serie', 'like', "%{$query}%")
-                ->orWhere('trabajador.name', 'like', "%{$query}%")
-                ->orWhere('creador.name', 'like', "%{$query}%");
-        });
-    })
+            $q->where(function ($sub) use ($query) {
+                $sub->where('recurso.nombre', 'like', "%{$query}%")
+                    ->orWhere('serie_recurso.nro_serie', 'like', "%{$query}%")
+                    ->orWhere('trabajador.name', 'like', "%{$query}%")
+                    ->orWhere('creador.name', 'like', "%{$query}%");
+            });
+        })
 
         ->groupBy(
             'prestamo.id',
             'trabajador.name',
             'creador.name',
             'recurso.nombre',
+            'subcategoria.nombre', // agregado al groupBy
             'serie_recurso.nro_serie',
             'prestamo.fecha_prestamo',
             'prestamo.fecha_devolucion',
             'prestamo.fecha_creacion',
             'estado_prestamo.nombre'
         )
-
-
         ->orderByDesc('prestamo.fecha_creacion');
 
     $prestamos = DB::table(DB::raw("({$base->toSql()}) as sub"))
