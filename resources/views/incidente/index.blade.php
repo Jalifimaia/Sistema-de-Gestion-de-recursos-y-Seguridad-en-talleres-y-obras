@@ -101,12 +101,15 @@
                     </tbody>
                 </table>
 
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                  <div id="infoPaginacionIncidentes" class="text-muted small"></div>
-                  <ul id="paginacionIncidentes" class="pagination mb-0"></ul>
-                </div>
-                
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="text-muted small">
+              Mostrando {{ $incidentes->firstItem() }} a {{ $incidentes->lastItem() }} de {{ $incidentes->total() }} incidentes
             </div>
+            <div class="ms-auto"> {{-- 👈 esto empuja la paginación a la derecha --}}
+              {{ $incidentes->links() }}
+            </div>
+          </div>
+
         </div>
     </div>
 </div>
@@ -363,6 +366,28 @@
       aplicarFiltrosYPaginar();
   });
   </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Busca cualquier elemento que contenga el texto en inglés
+    document.querySelectorAll('*').forEach(el => {
+        if (el.textContent && el.textContent.trim().match(/^Showing\s+\d+\s+to\s+\d+\s+of\s+\d+\s+results$/)) {
+            // Extrae los números con regex
+            const match = el.textContent.trim().match(/^Showing\s+(\d+)\s+to\s+(\d+)\s+of\s+(\d+)\s+results$/);
+            if (match) {
+                const desde = match[1];
+                const hasta = match[2];
+                const total = match[3];
+                // Reemplaza el texto por la versión en español
+                //el.textContent = `Mostrando ${desde} a ${hasta} de ${total} incidentes`;
+                el.textContent = ""
+            }
+        }
+    });
+});
+</script>
+
+
 @endpush
 
 

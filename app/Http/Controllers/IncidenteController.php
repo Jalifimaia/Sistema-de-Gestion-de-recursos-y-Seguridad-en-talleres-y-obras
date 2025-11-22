@@ -60,18 +60,19 @@ class IncidenteController extends Controller
     // =======================
     // LISTAR INCIDENTES
     // =======================
-    public function index()
-    {
-        $incidentes = Incidente::with([
-            'trabajador',
-            'recursos.subcategoria.categoria',
-            'estadoIncidente'
-        ])->get();
+public function index()
+{
+    $incidentes = Incidente::with([
+        'trabajador',
+        'recursos.subcategoria.categoria',
+        'estadoIncidente'
+    ])->paginate(10); // 👈 en vez de get()
 
-        $estados = EstadoIncidente::all()->pluck('nombre_estado', 'id')->toArray();
-        
-        return view('incidente.index', compact('incidentes', 'estados'));
-    }
+    $estados = EstadoIncidente::all()->pluck('nombre_estado', 'id')->toArray();
+    
+    return view('incidente.index', compact('incidentes', 'estados'));
+}
+
 
     // =======================
     // FORMULARIO CREAR NUEVO
