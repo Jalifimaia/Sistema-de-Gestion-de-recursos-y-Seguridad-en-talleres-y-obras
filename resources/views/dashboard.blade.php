@@ -456,5 +456,34 @@
     }
 
   });
+
+document.addEventListener('DOMContentLoaded', () => {
+  function traducirPaginacion(modalId) {
+    const modal = document.getElementById(modalId);
+
+    if (!modal) return;
+
+    modal.addEventListener('shown.bs.modal', () => {
+      const info = modal.querySelector('.small.text-muted');
+
+      if (info) {
+        const spans = info.querySelectorAll('span.fw-semibold');
+
+        if (spans.length === 3) {
+          const inicio = spans[0].textContent;
+          const fin = spans[1].textContent;
+          const total = spans[2].textContent;
+
+          info.textContent = `Mostrando ${inicio} a ${fin} de ${total} resultados`;
+        }
+      }
+    });
+  }
+
+  traducirPaginacion('modalHerramientasUso');
+  traducirPaginacion('modalDevoluciones');
+});
+
+
 </script>
 @endpush
