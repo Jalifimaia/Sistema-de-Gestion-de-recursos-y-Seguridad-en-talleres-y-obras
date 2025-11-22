@@ -57,7 +57,7 @@
                      class="form-control filtro-naranja"
                      style="height: 100%;"
                      value="{{ request('search') }}"
-                     placeholder="Buscar por recurso, serie, trabajador o creador">
+                     placeholder="Buscar por recurso, marca, serie, trabajador o creador">
               <button class="btn btn-naranja" type="submit">
                 <img src="{{ asset('images/lupa.svg') }}" alt="Buscar" style="width: 16px; height: 16px;">
               </button>
@@ -94,50 +94,50 @@
 
       {{-- Tarjetas de préstamos --}}
       <div id="contenedorPrestamos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-        @foreach ($prestamos as $p)
-          @php
-            // Forzar que "Cancelado" se muestre como "Devuelto"
-            $estadoNombre = $p->estado === 'Cancelado' ? 'Devuelto' : $p->estado;
+       @foreach ($prestamos as $p)
+  @php
+    // Forzar que "Cancelado" se muestre como "Devuelto"
+    $estadoNombre = $p->estado === 'Cancelado' ? 'Devuelto' : $p->estado;
 
-            // Badge por estado
-            switch ($estadoNombre) {
-              case 'Activo':   $color = 'success'; break;
-              case 'Vencido':  $color = 'warning'; break;
-              case 'Devuelto': $color = 'secondary';    break;
-              default:         $color = 'secondary';
-            }
-          @endphp
+    // Badge por estado
+    switch ($estadoNombre) {
+      case 'Activo':   $color = 'success'; break;
+      case 'Vencido':  $color = 'warning'; break;
+      case 'Devuelto': $color = 'secondary'; break;
+      default:         $color = 'secondary';
+    }
+  @endphp
 
-          <div class="col prestamo-item"
-               data-estado="{{ strtolower($estadoNombre) }}"
-               data-creador="{{ strtolower($p->creado_por) }}"
-               data-texto="{{ strtolower(($p->subcategoria ?? '') . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
-               data-fecha="{{ $p->fecha_prestamo }}">
-            <div class="card border-secondary shadow-sm h-100 p-1">
-              <div class="card-body p-2">
-                <h6 class="card-title mb-1 fs-6">
-                  {{ $p->subcategoria }}
-                  <small class="text-muted">
-                    ({{ $p->recurso ?? 'Sin marca' }})
-                  </small>
-                </h6>
-                <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
-                <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
-                <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
-                <p class="card-text mb-1 small">
-                  Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
-                </p>
-                <p class="card-text mb-0 small">
-                  Estado: <span class="badge bg-{{ $color }}">{{ $estadoNombre }}</span>
-                </p>
-                <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-editar w-100 mt-2">
-                  <i class="bi bi-pencil me-1"></i> Editar
-                </a>
-              </div>
-            </div>
-          </div>
+  <div class="col prestamo-item"
+       data-estado="{{ strtolower($estadoNombre) }}"
+       data-creador="{{ strtolower($p->creado_por) }}"
+       data-texto="{{ strtolower(($p->subcategoria ?? '') . ' ' . ($p->recurso ?? '') . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
+       data-fecha="{{ $p->fecha_prestamo }}">
+    <div class="card border-secondary shadow-sm h-100 p-1">
+      <div class="card-body p-2">
+        <h6 class="card-title mb-1 fs-6">
+          {{ $p->subcategoria }}
+          <small class="text-muted">
+            ({{ $p->recurso ?? 'Sin marca' }})
+          </small>
+        </h6>
+        <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
+        <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
+        <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
+        <p class="card-text mb-1 small">
+          Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
+        </p>
+        <p class="card-text mb-0 small">
+          Estado: <span class="badge bg-{{ $color }}">{{ $estadoNombre }}</span>
+        </p>
+        <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-editar w-100 mt-2">
+          <i class="bi bi-pencil me-1"></i> Editar
+        </a>
+      </div>
+    </div>
+  </div>
+@endforeach
 
-        @endforeach
 
         {{-- Mensaje único de "sin resultados" --}}
         <div id="noResultadosMsg"
