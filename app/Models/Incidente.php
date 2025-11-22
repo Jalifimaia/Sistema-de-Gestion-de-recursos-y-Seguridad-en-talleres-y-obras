@@ -68,9 +68,9 @@ public function serieRecurso()
 
 public function recursos()
 {
-    return $this->belongsToMany(\App\Models\Recurso::class, 'incidente_recurso', 'id_incidente', 'id_recurso')
-                ->withPivot(['id_serie_recurso', 'id_estado', 'created_at', 'updated_at'])
-                ->withTimestamps();
+    return $this->belongsToMany(Recurso::class, 'incidente_recurso', 'id_incidente', 'id_recurso')
+                ->withPivot(['id_serie_recurso', 'id_estado'])
+                ->with(['subcategoria.categoria', 'serieRecursos']); // 👈 carga relaciones del recurso
 }
 
 

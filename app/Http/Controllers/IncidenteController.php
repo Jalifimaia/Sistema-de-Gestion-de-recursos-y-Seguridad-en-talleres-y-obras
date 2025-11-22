@@ -64,14 +64,17 @@ public function index()
 {
     $incidentes = Incidente::with([
         'trabajador',
+        'estadoIncidente',
         'recursos.subcategoria.categoria',
-        'estadoIncidente'
-    ])->paginate(10); // 👈 en vez de get()
+        'recursos.serieRecursos'
+    ])
+    ->paginate(3); // 👈 solo incidentes, no recursos
 
     $estados = EstadoIncidente::all()->pluck('nombre_estado', 'id')->toArray();
     
     return view('incidente.index', compact('incidentes', 'estados'));
 }
+
 
 
     // =======================
@@ -95,47 +98,47 @@ public function index()
         return view('incidente.create', compact('categorias', 'trabajadores', 'estados'));
     }
 
-    // =======================
-    // GUARDAR NUEVO INCIDENTE
-    // =======================
-    public function store(Request $request)
-    {
-        $request->validate([
-            'id_usuario' => 'required|exists:usuario,id',
-            'recursos'   => 'required|array|min:1',
-            'recursos.*.id_categoria'     => 'required|exists:categoria,id',
-            'recursos.*.id_subcategoria'  => 'required|exists:subcategoria,id',
-            'recursos.*.id_recurso'       => 'required|exists:recurso,id',
-            'recursos.*.id_serie_recurso' => 'required|exists:serie_recurso,id',
-            'recursos.*.id_estado'        => 'required|exists:estado,id',
-            'descripcion'                 => 'required|string|max:255',
-            'fecha_incidente'             => 'required|date',
+// =======================
+// GUARDAR NUEVO INCIDENTE
+// =======================
+public function store(Request $request)
+{
+    $request->validate([
+        'id_usuario' => 'required|exists:usuario,id',
+        'recursos'   => 'required|array|min:1',
+        'recursos.*.id_categoria'     => 'required|exists:categoria,id',
+        'recursos.*.id_subcategoria'  => 'required|exists:subcategoria,id',
+        'recursos.*.id_recurso'       => 'required|exists:recurso,id',
+        'recursos.*.id_serie_recurso' => 'required|exists:serie_recurso,id',
+        'recursos.*.id_estado'        => 'required|exists:estado,id',
+        'descripcion'                 => 'required|string|max:255',
+        'fecha_incidente'             => 'required|date',
+    ]);
+
+    $usuario = Usuario::where('id', $request->id_usuario)
+                    ->where('id_rol', 3)
+                    ->firstOrFail();
+
+    $estadoRevision = EstadoIncidente::where('nombre_estado', 'En revisión')->first();
+
+    DB::transaction(function() use ($request, $usuario, $estadoRevision, &$incidente) {
+            // normalizar fecha_incidente a UTC
+        $fechaIncidenteUtc = $this->parseToUtc($request->input('fecha_incidente'));
+
+        $incidente = Incidente::create([
+            'id_trabajador'       => $usuario->id,
+            'id_supervisor'       => auth()->id(),
+            'descripcion'         => $request->descripcion,
+            'fecha_incidente'     => $fechaIncidenteUtc,
+            'id_estado_incidente' => $estadoRevision?->id,
+            'fecha_creacion'      => Carbon::now('UTC')->format('Y-m-d H:i:s'),
+            'fecha_modificacion'  => Carbon::now('UTC')->format('Y-m-d H:i:s'),
         ]);
 
-        $usuario = Usuario::where('id', $request->id_usuario)
-                        ->where('id_rol', 3)
-                        ->firstOrFail();
-
-        $estadoRevision = EstadoIncidente::where('nombre_estado', 'En revisión')->first();
-
-        DB::transaction(function() use ($request, $usuario, $estadoRevision, &$incidente) {
-            // normalizar fecha_incidente a UTC
-            $fechaIncidenteUtc = $this->parseToUtc($request->input('fecha_incidente'));
-
-            $incidente = Incidente::create([
-                'id_trabajador'       => $usuario->id,
-                'id_supervisor'       => auth()->id(),
-                'descripcion'         => $request->descripcion,
-                'fecha_incidente'     => $fechaIncidenteUtc,
-                'id_estado_incidente' => $estadoRevision?->id,
-                'fecha_creacion'      => Carbon::now('UTC')->format('Y-m-d H:i:s'),
-                'fecha_modificacion'  => Carbon::now('UTC')->format('Y-m-d H:i:s'),
-            ]);
-
             $attach = [];
-            foreach ($request->recursos as $r) {
+        foreach ($request->recursos as $r) {
                 $attach[$r['id_recurso']] = [
-                    'id_serie_recurso' => $r['id_serie_recurso'],
+                'id_serie_recurso' => $r['id_serie_recurso'],
                     'id_estado' => $r['id_estado'],
                     'created_at' => Carbon::now('UTC')->format('Y-m-d H:i:s'),
                     'updated_at' => Carbon::now('UTC')->format('Y-m-d H:i:s'),
@@ -145,21 +148,21 @@ public function index()
             $incidente->recursos()->sync($attach);
 
             foreach ($request->recursos as $r) {
-                SerieRecurso::where('id', $r['id_serie_recurso'])->update([
+            SerieRecurso::where('id', $r['id_serie_recurso'])->update([
                     'id_estado' => $r['id_estado'],
                     'updated_at' => Carbon::now('UTC')->format('Y-m-d H:i:s'),
-                ]);
-            }
-        });
+            ]);
+        }
+    });
 
-        return redirect()->route('incidente.create')->with('success', '✅ Incidente registrado correctamente.');
-    }
+    return redirect()->route('incidente.create')->with('success', '✅ Incidente registrado correctamente.');
+}
 
     // =======================
     // MOSTRAR UN INCIDENTE
     // =======================
-    public function show($id)
-    {
+public function show($id)
+{
         $incidente = Incidente::with([
             'trabajador',
             'recursos.subcategoria.categoria',
@@ -169,7 +172,7 @@ public function index()
         $estados = Estado::all()->keyBy('id')->map(fn($e) => $e->nombre_estado)->toArray();
 
         return view('incidente.show', compact('incidente', 'estados'));
-    }
+}
 
     // =======================
     // FORMULARIO EDITAR INCIDENTE

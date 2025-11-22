@@ -165,37 +165,36 @@
 
         <hr>
         <h6 class="text-orange">Recursos asociados</h6>
-        <div class="table-responsive">
-          <table class="table table-bordered table-sm">
-            <thead class="table-light">
-              <tr>
-                <th>Categoría</th>
-                <th>Subcategoría</th>
-                <th>Recurso</th>
-                <th>Serie</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              @php
-                $estadoRecursoResuelto = \App\Models\Estado::where('nombre_estado','Resuelto')->first();
-              @endphp
+     <div class="table-responsive">
+  <table class="table table-bordered table-sm">
+    <thead class="table-light">
+      <tr>
+        <th>Categoría</th>
+        <th>Subcategoría</th>
+        <th>Recurso</th>
+        <th>Serie</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($incidente->recursos as $recurso)
+        @php
+          $serie = $recurso->serieRecursos->firstWhere('id', $recurso->pivot->id_serie_recurso);
+          $nroSerie = $serie?->nro_serie ?? '-';
+          $estadoNombre = \App\Models\Estado::find($recurso->pivot->id_estado)?->nombre_estado ?? 'Sin estado';
+        @endphp
+        <tr>
+          <td>{{ $recurso->subcategoria?->categoria?->nombre_categoria ?? '-' }}</td>
+          <td>{{ $recurso->subcategoria?->nombre ?? '-' }}</td>
+          <td>{{ $recurso->nombre ?? '-' }}</td>
+          <td>{{ $nroSerie }}</td>
+          <td>{{ $estadoNombre }}</td>
+        </tr>
+      @endforeach
+    </tbody>
+  </table>
+</div>
 
-              @foreach($incidente->recursos as $recurso)
-                @php
-                  $estadoRecurso = \App\Models\Estado::find($recurso->pivot->id_estado);
-                @endphp
-                <tr>
-                  <td>{{ $recurso->subcategoria?->categoria?->nombre_categoria ?? '-' }}</td>
-                  <td>{{ $recurso->subcategoria?->nombre ?? '-' }}</td>
-                  <td>{{ $recurso->nombre ?? '-' }}</td>
-                  <td>{{ $recurso->serieRecursos->firstWhere('id', $recurso->pivot->id_serie_recurso)?->nro_serie ?? '-' }}</td>
-                  <td>{{ $estados[$recurso->pivot->id_estado] ?? 'Sin estado' }}</td>
-                </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
       </div>
 
 

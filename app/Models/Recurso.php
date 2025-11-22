@@ -113,10 +113,18 @@ class Recurso extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function incidentes()
-    {
-        return $this->hasMany(\App\Models\Incidente::class, 'id', 'id_recurso');
-    }
+public function incidentes()
+{
+    return $this->hasMany(\App\Models\Incidente::class, 'id_recurso', 'id');
+}
+
+public function incidentesPivot()
+{
+    return $this->belongsToMany(Incidente::class, 'incidente_recurso', 'id_recurso', 'id_incidente')
+                ->withPivot(['id_serie_recurso', 'id_estado'])
+                ->withTimestamps();
+}
+
 
     public function estado(): BelongsTo
 {
