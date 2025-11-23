@@ -8,7 +8,7 @@
   <!-- Encabezado -->
   <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div class="d-flex align-items-center gap-3">
-      <a href="{{ url()->previous() }}" class="btn btn-volver d-inline-flex align-items-center">
+      <a href="{{ route('usuarios.index') }}" class="btn btn-volver d-inline-flex align-items-center">
         <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
         Volver
       </a>
@@ -48,7 +48,7 @@
 
     <div class="mb-3">
       <label for="email" class="form-label">Email</label>
-      <input type="email" name="email" id="email" class="form-control"
+      <input type="text" name="email" id="email" class="form-control"
        value="{{ old('email') }}"
        placeholder="Ingrese su dirección de mail"
        maxlength="255">
@@ -63,7 +63,7 @@
               name="password"
               id="password"
               class="form-control"
-              placeholder="Ingrese una contraseña"
+              placeholder="Ingrese una contraseña (mínimo 6 caracteres)"
               maxlength="255">
         <button type="button" class="btn btn-ojoa" id="togglePassword">
           <img src="{{ asset('images/ojocerrado.svg') }}"
@@ -71,8 +71,8 @@
               id="iconPassword"
               style="width:20px; height:20px;">
         </button>
-        <div class="invalid-feedback d-block" id="error-password"></div>
       </div>
+      <div class="invalid-feedback d-block" id="error-password"></div>
     </div>
 
     <!-- Confirmar contraseña -->
@@ -91,8 +91,8 @@
               id="iconPasswordConfirm"
               style="width:20px; height:20px;">
         </button>
-        <div class="invalid-feedback d-block" id="error-password-confirm"></div>
       </div>
+      <div class="invalid-feedback d-block" id="error-password-confirm"></div>
     </div>
 
 
@@ -188,11 +188,92 @@ document.addEventListener('DOMContentLoaded', () => {
   toggleVisibility('password', 'togglePassword', 'iconPassword');
   toggleVisibility('password_confirmation', 'togglePasswordConfirm', 'iconPasswordConfirm');
 
+  // Validación en tiempo real del email
+  const emailInput = document.getElementById('email');
+  
+  emailInput.addEventListener('input', function() {
+    let value = this.value;
+    
+    // Eliminar espacios
+    value = value.replace(/\s/g, '');
+    
+    // Permitir solo caracteres válidos para emails
+    value = value.replace(/[^\w@.-]/g, '');
+    
+    // Solo permitir una @
+    const atCount = (value.match(/@/g) || []).length;
+    if (atCount > 1) {
+      const firstAt = value.indexOf('@');
+      value = value.substring(0, firstAt + 1) + value.substring(firstAt + 1).replace(/@/g, '');
+    }
+    
+    // No permitir @ al inicio
+    if (value.startsWith('@')) {
+      value = value.substring(1);
+    }
+    
+    // No permitir punto al inicio
+    if (value.startsWith('.')) {
+      value = value.substring(1);
+    }
+    
+    // No permitir puntos consecutivos
+    value = value.replace(/\.{2,}/g, '.');
+    
+    // Si hay @, procesar las partes
+    if (value.includes('@')) {
+      const parts = value.split('@');
+      let localPart = parts[0];
+      let domain = parts[1] || '';
+      
+      // Parte local: no puede terminar en punto
+      if (localPart.endsWith('.')) {
+        localPart = localPart.slice(0, -1);
+      }
+      
+      // Parte local: no puede empezar con punto
+      if (localPart.startsWith('.')) {
+        localPart = localPart.substring(1);
+      }
+      
+      // Dominio: no puede empezar con punto, guión o guión bajo
+      domain = domain.replace(/^[.\-_]+/, '');
+      
+      // Si el dominio tiene punto, validar la extensión
+      if (domain.includes('.')) {
+        const domainParts = domain.split('.');
+        
+        // La última parte (extensión) solo puede tener letras
+        const lastIndex = domainParts.length - 1;
+        if (domainParts[lastIndex]) {
+          domainParts[lastIndex] = domainParts[lastIndex].replace(/[^a-zA-Z]/g, '');
+        }
+        
+        // Reconstruir sin partes vacías (excepto si es el último y está escribiendo)
+        domain = domainParts
+          .map((part, idx) => {
+            // Permitir parte vacía en la última posición (está escribiendo)
+            if (idx === lastIndex && part === '') return part;
+            return part;
+          })
+          .join('.');
+      }
+      
+      value = localPart + '@' + domain;
+    } else {
+      // Si no hay @, no permitir que termine en punto
+      if (value.endsWith('.')) {
+        value = value.slice(0, -1);
+      }
+    }
+    
+    this.value = value;
+  });
+
   const form = document.getElementById('crearUsuarioForm');
 
-  const modalErrorEl = document.getElementById('modalErrorCampos');
-
   form.addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevenir envío por defecto
     let hasErrors = false;
 
     // Resetear mensajes previos
@@ -215,21 +296,27 @@ document.addEventListener('DOMContentLoaded', () => {
       hasErrors = true;
     }
 
-    // Email
+    // Email - Validación con regex específico
     const email = form.querySelector('[name="email"]');
+    const emailRegex = /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/;
+    
     if (!email.value.trim()) {
       document.getElementById('error-email').textContent = 'El email es obligatorio';
       hasErrors = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    } else if (!emailRegex.test(email.value)) {
       document.getElementById('error-email').textContent = 'El formato de email es inválido';
       hasErrors = true;
     }
 
-    // Contraseña
+    // Contraseña - Validación con mínimo 6 caracteres
     const password = form.querySelector('[name="password"]');
     const confirm = form.querySelector('[name="password_confirmation"]');
+    
     if (!password.value.trim()) {
       document.getElementById('error-password').textContent = 'La contraseña es obligatoria';
+      hasErrors = true;
+    } else if (password.value.length < 6) {
+      document.getElementById('error-password').textContent = 'La contraseña debe tener al menos 6 caracteres';
       hasErrors = true;
     } else if (password.value !== confirm.value) {
       document.getElementById('error-password-confirm').textContent = 'Las contraseñas no coinciden';
@@ -237,11 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (hasErrors) {
-      e.preventDefault(); // cancela solo si hay errores
+      // No hacer nada, solo mostrar errores
+      return false;
     } else {
-      form.submit(); // envía al backend si todo está bien
+      // Si todo está bien, enviar el formulario
+      form.submit();
     }
-
   });
 
   @if(session('usuario_creado'))
@@ -252,4 +340,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 @endpush
-
