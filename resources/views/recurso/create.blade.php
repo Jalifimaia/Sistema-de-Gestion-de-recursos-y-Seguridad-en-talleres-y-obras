@@ -22,7 +22,6 @@
         @csrf
 
         <div class="row g-3">
-          <!-- Categoría -->
           <div class="col-md-6 mb-3">
             <label for="categoria" class="form-label">Categoría <span class="required-asterisk">*</span></label>
             <select id="categoria" name="categoria" class="form-select" required>
@@ -35,37 +34,33 @@
             </select>
           </div>
 
-          <!-- Subcategoría -->
           <div class="col-md-6 mb-3">
             <label for="id_subcategoria" class="form-label">Subcategoría <span class="required-asterisk">*</span></label>
-            <select id="id_subcategoria" name="id_subcategoria" class="form-select" required disabled>
-              <option value="">Primero seleccioná una categoría</option>
-            </select>
-          </div>
-
-          <!-- Nueva Subcategoría -->
-          <div class="col-12 mb-3  d-none">
-            <label for="nuevaSubcategoria" class="form-label">
-              ¿No encontrás la subcategoría? Agregá una nueva
-            </label>
             <div class="input-group">
-              <input type="text"
-                    id="nuevaSubcategoria"
-                    name="nueva_subcategoria"
-                    class="form-control"
-                    placeholder="Nueva subcategoría"
-                    value="{{ old('nueva_subcategoria') }}">
-              <button type="button"
-                      class="btn btn-agregar-subcategoria"
-                      id="agregarSubcategoria"
-                      disabled>
-                Agregar
-              </button>
+                <select id="id_subcategoria" name="id_subcategoria" class="form-select" required disabled>
+                    <option value="">Primero seleccioná una categoría</option>
+                </select>
+                <button type="button" 
+                        class="btn btn-outline-primary" 
+                        id="btnAbrirModalSubcategoria"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Agregar Subcategoría">
+                    <i class="bi bi-plus-circle"></i>
+                </button>
             </div>
-            <small id="subcategoriaFeedback" class="text-danger d-none">Esta subcategoría ya existe.</small>
+              <small class="text-muted d-block mt-1">¿Necesita agregar una nueva subcategoría? Use el botón <span class="fs-5 fw-bold">+</span></small>          </div>
+          
+          {{-- EL BLOQUE ANTERIOR QUE ESTABA AQUÍ SE ELIMINÓ --}}
+          {{--
+          <div class="col-12 mb-3">
+            <label class="form-label text-muted small">¿Necesita agregar una nueva subcategoría?</label>
+            <button type="button" 
+                    class="btn btn-outline-primary btn-sm w-100" 
+                    id="btnAbrirModalSubcategoria">
+              <i class="bi bi-plus-circle me-2"></i>Agregar nueva subcategoría
+            </button>
           </div>
+          --}}
 
-          <!-- Nombre -->
           <div class="col-md-6 mb-3">
             <label for="nombre" class="form-label">Nombre <span class="required-asterisk">*</span></label>
             <input type="text"
@@ -80,7 +75,6 @@
             @enderror
           </div>
 
-          <!-- Costo unitario -->
           <div class="col-md-6 mb-3">
             <label for="costo_unitario" class="form-label">Costo unitario <span class="required-asterisk">*</span></label>
             <input type="text"
@@ -95,7 +89,6 @@
             @enderror
           </div>
 
-          <!-- Descripción -->
           <div class="col-12 mb-3">
             <label for="descripcion" class="form-label">Descripción <span class="required-asterisk">*</span></label>
             <textarea id="descripcion"
@@ -112,7 +105,6 @@
             @enderror
           </div>
 
-          <!-- Botón guardar -->
           <div class="col-12">
             <button type="submit" class="btn btn-guardar-recurso w-100">
               Guardar recurso
@@ -122,7 +114,48 @@
       </form>
 </div>
 
-<!-- Modal faltan campos -->
+<div class="modal fade" id="modalAgregarSubcategoria" tabindex="-1" aria-labelledby="modalAgregarSubcategoriaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAgregarSubcategoriaLabel">Agregar nueva subcategoría</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="mensajeModalSubcategoria"></div>
+        
+        <div class="mb-3">
+          <label for="categoriaModal" class="form-label">Categoría <span class="required-asterisk">*</span></label>
+          <select id="categoriaModal" class="form-select">
+            <option value="">Seleccione una categoría</option>
+            @foreach($categorias as $categoria)
+              <option value="{{ $categoria->id }}">{{ $categoria->nombre_categoria }}</option>
+            @endforeach
+          </select>
+          <small class="text-muted">Seleccione la categoría para la nueva subcategoría</small>
+        </div>
+        
+        <div class="mb-3">
+          <label for="nombreSubcategoriaModal" class="form-label">Nombre de la subcategoría <span class="required-asterisk">*</span></label>
+          <input type="text" 
+                 class="form-control" 
+                 id="nombreSubcategoriaModal" 
+                 placeholder="Ingrese el nombre"
+                 maxlength="100">
+          <small class="text-muted">Ingrese al menos 2 caracteres</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnGuardarSubcategoria">
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="spinnerGuardar"></span>
+          Guardar subcategoría
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="modalErrorCampos" tabindex="-1" aria-labelledby="modalErrorCamposLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -162,6 +195,151 @@
 
 @push('scripts')
   <script src="{{ asset('js/recurso.js') }}?v={{ time() }}"></script>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const categoriaSelect = document.getElementById('categoria');
+    const subcategoriaSelect = document.getElementById('id_subcategoria'); // DESCOMENTADO
+    const btnAbrirModal = document.getElementById('btnAbrirModalSubcategoria');
+    const modalAgregar = new bootstrap.Modal(document.getElementById('modalAgregarSubcategoria'));
+    const categoriaModal = document.getElementById('categoriaModal');
+    const nombreSubcategoriaModal = document.getElementById('nombreSubcategoriaModal');
+    const btnGuardarSubcategoria = document.getElementById('btnGuardarSubcategoria');
+    const mensajeModalSubcategoria = document.getElementById('mensajeModalSubcategoria');
+    const spinnerGuardar = document.getElementById('spinnerGuardar');
+    
+    // Abrir modal
+    btnAbrirModal.addEventListener('click', function() {
+      mensajeModalSubcategoria.innerHTML = '';
+      nombreSubcategoriaModal.value = '';
+      
+      // Si hay una categoría seleccionada en el formulario, pre-seleccionarla en el modal
+      if (categoriaSelect.value) {
+        categoriaModal.value = categoriaSelect.value;
+      } else {
+        categoriaModal.value = '';
+      }
+      
+      modalAgregar.show();
+    });
+    
+    // Limpiar mensajes al escribir o cambiar categoría
+    nombreSubcategoriaModal.addEventListener('input', function() {
+      mensajeModalSubcategoria.innerHTML = '';
+    });
+    
+    categoriaModal.addEventListener('change', function() {
+      mensajeModalSubcategoria.innerHTML = '';
+    });
+    
+    // Guardar subcategoría
+    btnGuardarSubcategoria.addEventListener('click', async function() {
+      const nombre = nombreSubcategoriaModal.value.trim();
+      const categoriaId = categoriaModal.value;
+      
+      // Validar categoría
+      if (!categoriaId) {
+        mensajeModalSubcategoria.innerHTML = '<div class="alert alert-warning">Por favor, seleccione una categoría.</div>';
+        return;
+      }
+      
+      // Validar nombre
+      if (!nombre) {
+        mensajeModalSubcategoria.innerHTML = '<div class="alert alert-warning">Por favor, ingrese un nombre para la subcategoría.</div>';
+        return;
+      }
+      
+      if (nombre.length < 2) {
+        mensajeModalSubcategoria.innerHTML = '<div class="alert alert-warning">El nombre debe tener al menos 2 caracteres.</div>';
+        return;
+      }
+      
+      // Mostrar spinner
+      spinnerGuardar.classList.remove('d-none');
+      btnGuardarSubcategoria.disabled = true;
+      
+      try {
+        const response = await fetch('/subcategorias', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          },
+          body: JSON.stringify({ 
+            nombre: nombre, 
+            categoria_id: categoriaId 
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          // Error del servidor
+          if (response.status === 409) {
+            mensajeModalSubcategoria.innerHTML = '<div class="alert alert-danger">Esta subcategoría ya existe en esta categoría.</div>';
+          } else if (response.status === 422) {
+            const errores = Object.values(data.errors).flat().join('<br>');
+            mensajeModalSubcategoria.innerHTML = `<div class="alert alert-danger">${errores}</div>`;
+          } else {
+            mensajeModalSubcategoria.innerHTML = `<div class="alert alert-danger">${data.error || 'Error al crear la subcategoría.'}</div>`;
+          }
+          return;
+        }
+        
+        // Éxito - Mostrar mensaje
+        mensajeModalSubcategoria.innerHTML = '<div class="alert alert-success">Subcategoría agregada correctamente.</div>';
+        
+        // Si la categoría del modal coincide con la del formulario, recargar el select
+        if (categoriaId === categoriaSelect.value) {
+          const valorActual = subcategoriaSelect.value; // Referencia al valor actual
+          
+          // Recargar las subcategorías
+          const responseSubcategorias = await fetch(`/inventario/ajax/subcategorias/${encodeURIComponent(categoriaId)}`);
+          const subcategorias = await responseSubcategorias.json();
+          
+          // Reconstruir el select
+          let options = '<option value="">Seleccione una subcategoría</option>';
+          subcategorias.forEach(sub => {
+            options += `<option value="${sub.id}">${sub.nombre}</option>`;
+          });
+          subcategoriaSelect.innerHTML = options; // DESCOMENTADO
+          subcategoriaSelect.disabled = false; // Asegurar que se desbloquee
+          
+          // Restaurar el valor anterior si existía, sino seleccionar la nueva
+          if (valorActual) {
+            subcategoriaSelect.value = valorActual;
+          } else {
+            subcategoriaSelect.value = data.id; // DESCOMENTADO
+          }
+        }
+        
+        // Cerrar el modal después de 1 segundo
+       /* setTimeout(() => {
+          modalAgregar.hide();
+          nombreSubcategoriaModal.value = '';
+          categoriaModal.value = '';
+          mensajeModalSubcategoria.innerHTML = '';
+        }, 1000);*/
+        
+      } catch (error) {
+        mensajeModalSubcategoria.innerHTML = `<div class="alert alert-danger">Error de conexión: ${error.message}</div>`;
+      } finally {
+        // Ocultar spinner
+        spinnerGuardar.classList.add('d-none');
+        btnGuardarSubcategoria.disabled = false;
+      }
+    });
+    
+    // Permitir guardar con Enter
+    nombreSubcategoriaModal.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        btnGuardarSubcategoria.click();
+      }
+    });
+  });
+  </script>
 @endpush
 
 @push('styles')
@@ -172,6 +350,11 @@
     margin-left: 4px;
     color: #dc3545;
     font-weight: 600;
+  }
+  
+  #btnAbrirModalSubcategoria:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   </style>
 @endpush

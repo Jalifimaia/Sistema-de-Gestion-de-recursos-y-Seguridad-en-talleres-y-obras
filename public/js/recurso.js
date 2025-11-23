@@ -3,12 +3,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const mensaje = document.getElementById('mensaje');
   const categoriaSelect = document.getElementById('categoria');
   const subcategoriaSelect = document.getElementById('id_subcategoria');
-  const nuevaSubInput = document.getElementById('nuevaSubcategoria');
-  const agregarBtn = document.getElementById('agregarSubcategoria');
   const descripcion = document.getElementById('descripcion');
   const contador = document.getElementById('contadorPalabras');
   const costoInput = document.getElementById('costo_unitario');
-  const subcategoriaFeedback = document.getElementById('subcategoriaFeedback');
 
   // 🔹 Función para contar palabras
   function contarPalabras(texto) {
@@ -60,33 +57,6 @@ document.addEventListener('DOMContentLoaded', function () {
     limpiarErrorCampo(costoInput);
   });
 
-  // 🔹 Verificar si subcategoría existe
-  function verificarSubcategoriaExiste(nombre) {
-    const nombreNormalizado = nombre.trim().toLowerCase();
-    if (!nombreNormalizado) {
-      agregarBtn.disabled = true;
-      subcategoriaFeedback.classList.add('d-none');
-      return;
-    }
-
-    const yaExiste = Array.from(subcategoriaSelect.options).some(opt =>
-      opt.textContent.trim().toLowerCase() === nombreNormalizado
-    );
-
-    if (yaExiste) {
-      agregarBtn.disabled = true;
-      subcategoriaFeedback.classList.remove('d-none');
-    } else {
-      agregarBtn.disabled = !categoriaSelect.value;
-      subcategoriaFeedback.classList.add('d-none');
-    }
-  }
-
-  // 🔹 Evento input en nueva subcategoría
-  nuevaSubInput.addEventListener('input', function() {
-    verificarSubcategoriaExiste(this.value);
-  });
-
   // 🔹 Cargar subcategorías dinámicamente al cambiar categoría
   categoriaSelect.addEventListener('change', function () {
     const categoriaId = this.value;
@@ -97,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!categoriaId) {
       subcategoriaSelect.innerHTML = '<option value="">Primero seleccioná una categoría</option>';
       subcategoriaSelect.disabled = true;
-      agregarBtn.disabled = true;
       return;
     }
 
@@ -113,63 +82,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         subcategoriaSelect.innerHTML = options;
         subcategoriaSelect.disabled = false;
-        
-        // Reverificar si la subcategoría nueva ya existe
-        verificarSubcategoriaExiste(nuevaSubInput.value);
       })
       .catch(error => {
         subcategoriaSelect.innerHTML = '<option>Error al cargar</option>';
         subcategoriaSelect.disabled = true;
       });
-  });
-
-  // 🔹 Agregar nueva subcategoría
-  agregarBtn.addEventListener('click', function () {
-    const nombre = nuevaSubInput.value.trim();
-    const categoriaId = categoriaSelect.value;
-
-    if (!nombre || !categoriaId) {
-      mensaje.innerHTML = `<div class="alert alert-warning">Escribí un nombre y seleccioná una categoría.</div>`;
-      return;
-    }
-
-    fetch('/subcategorias', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-      },
-      body: JSON.stringify({ nombre, categoria_id: categoriaId }),
-    })
-    .then(async res => {
-      const contentType = res.headers.get('content-type');
-      if (res.ok && contentType && contentType.includes('application/json')) {
-        return res.json();
-      } else if (res.status === 409) {
-        const data = await res.json();
-        throw new Error(data.error || 'Ya existe una subcategoría con ese nombre.');
-      } else if (res.status === 422) {
-        const data = await res.json();
-        const errores = Object.values(data.errors).flat().join('<br>');
-        throw new Error(errores);
-      } else {
-        throw new Error(`Respuesta inesperada del servidor. Código ${res.status}`);
-      }
-    })
-    .then(data => {
-      categoriaSelect.dispatchEvent(new Event('change'));
-      setTimeout(() => {
-        subcategoriaSelect.value = data.id;
-      }, 300);
-
-      nuevaSubInput.value = '';
-      agregarBtn.disabled = true;
-      mensaje.innerHTML = `<div class="alert alert-success">Subcategoría agregada.</div>`;
-    })
-    .catch(error => {
-      mensaje.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
-    });
   });
 
   // 🔹 Función para limpiar error de un campo
@@ -182,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // 🔹 Limpiar errores al interactuar
-  [document.getElementById('nombre'), nuevaSubInput].forEach(el => {
+  [document.getElementById('nombre')].forEach(el => {
     if (el) {
       el.addEventListener('input', function() {
         limpiarErrorCampo(this);
@@ -290,7 +207,6 @@ document.addEventListener('DOMContentLoaded', function () {
       form.reset();
       subcategoriaSelect.innerHTML = '<option value="">Primero seleccioná una categoría</option>';
       subcategoriaSelect.disabled = true;
-      agregarBtn.disabled = true;
       actualizarContador();
 
       const modalEl = document.getElementById('modalRecursoCreado');
