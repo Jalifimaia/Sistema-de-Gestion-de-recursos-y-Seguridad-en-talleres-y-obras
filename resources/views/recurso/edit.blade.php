@@ -24,7 +24,7 @@
 
         <!-- Categoría (editable) -->
         <div class="col-md-6 mb-3">
-            <label for="categoria" class="form-label">Categoría</label>
+            <label for="categoria" class="form-label">Categoría <span class="required-asterisk">*</span></label>
             <select id="categoria" name="categoria_id" class="form-select" required>
                 <option value="">Seleccione una categoría</option>
                 @php
@@ -40,7 +40,7 @@
 
         <!-- Subcategoría (editable) -->
         <div class="col-md-6 mb-3">
-            <label for="id_subcategoria" class="form-label">Subcategoría</label>
+            <label for="id_subcategoria" class="form-label">Subcategoría <span class="required-asterisk">*</span></label>
             <select id="id_subcategoria" name="id_subcategoria" class="form-select" required>
                 @foreach($subcategorias as $subcategoria)
                     <option value="{{ $subcategoria->id }}" {{ $recurso->id_subcategoria == $subcategoria->id ? 'selected' : '' }}>
@@ -52,7 +52,7 @@
 
         <!-- Nombre -->
         <div class="col-md-6 mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
+            <label for="nombre" class="form-label">Nombre <span class="required-asterisk">*</span></label>
             <input type="text" id="nombre" name="nombre"
               class="form-control"
               placeholder = "Ingrese un nombre"
@@ -62,7 +62,7 @@
 
         <!-- Costo unitario -->
         <div class="col-md-6 mb-3">
-            <label for="costo_unitario" class="form-label">Costo unitario</label>
+            <label for="costo_unitario" class="form-label">Costo unitario <span class="required-asterisk">*</span></label>
             <input type="text"
               id="costo_unitario"
               name="costo_unitario"
@@ -74,7 +74,7 @@
 
         <!-- Descripción -->
         <div class="col-12 mb-3">
-          <label for="descripcion" class="form-label">Descripción</label>
+          <label for="descripcion" class="form-label">Descripción <span class="required-asterisk">*</span></label>
           <textarea id="descripcion"
                     name="descripcion"
                     class="form-control @error('descripcion') is-invalid @enderror"
@@ -141,7 +141,7 @@
         Faltan campos por completar. Por favor, revisá el formulario.
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-danger text-white" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -387,4 +387,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
 @push('styles')
   <link href="{{ asset('css/editarRecurso.css') }}" rel="stylesheet">
+
+<style>
+  .required-asterisk {
+    margin-left: 4px;
+    color: #dc3545;
+    font-weight: 600;
+  }
+  </style>
 @endpush
+
