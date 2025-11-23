@@ -51,7 +51,7 @@
               <thead>
                 <tr>
                   <th>Trabajador</th>
-                  <th>Anteojos</th>
+                  <th>lentes</th>
                   <th>Botas</th>
                   <th>Chaleco</th>
                   <th>Guantes</th>
@@ -66,7 +66,7 @@
                 @foreach($checklistsHoy->take(5) as $c)
                   <tr>
                     <td>{{ $c->trabajador->name }}</td>
-                    <td>{!! $c->anteojos ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
+                    <td>{!! $c->lentes ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
                     <td>{!! $c->botas ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
                     <td>{!! $c->chaleco ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
                     <td>{!! $c->guantes ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>

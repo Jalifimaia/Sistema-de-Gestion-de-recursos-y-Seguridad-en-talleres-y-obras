@@ -46,13 +46,13 @@
       </div>
 
       <div class="d-grid mb-3">
-        <button type="submit" class="btn btn-orange btn-login">Ingresar</button>
+        <button type="submit" class="btn btn-orange btn-login w-100">Ingresar</button>
       </div>
-    </form>
 
-    <div class="d-grid mt-3">
-      <a href="{{ url('/terminal') }}" class="btn btn-secondary btn-login">Ir a la Terminal</a>
-    </div>
+      <div class="d-grid mt-3">
+        <a href="{{ url('/terminal') }}" class="btn btn-secondary btn-login w-100">Ir a la Terminal</a>
+      </div>
+
   </div>
 </div>
 @endsection

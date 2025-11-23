@@ -397,7 +397,7 @@ CREATE TABLE `checklist` (
   `id` int(10) UNSIGNED NOT NULL,
   `trabajador_id` int(10) UNSIGNED NOT NULL,
   `supervisor_id` int(10) UNSIGNED NOT NULL,
-  `anteojos` tinyint(1) NOT NULL DEFAULT 0,
+  `lentes` tinyint(1) NOT NULL DEFAULT 0,
   `botas` tinyint(1) NOT NULL DEFAULT 0,
   `chaleco` tinyint(1) NOT NULL DEFAULT 0,
   `guantes` tinyint(1) NOT NULL DEFAULT 0,
@@ -415,14 +415,14 @@ CREATE TABLE `checklist` (
 -- Volcado de datos para la tabla `checklist`
 --
 
-INSERT INTO `checklist` (`id`, `trabajador_id`, `supervisor_id`, `anteojos`, `botas`, `chaleco`, `guantes`, `arnes`, `es_en_altura`, `fecha`, `observaciones`, `created_at`, `updated_at`, `hora`, `critico`) VALUES
+INSERT INTO `checklist` (`id`, `trabajador_id`, `supervisor_id`, `lentes`, `botas`, `chaleco`, `guantes`, `arnes`, `es_en_altura`, `fecha`, `observaciones`, `created_at`, `updated_at`, `hora`, `critico`) VALUES
 (1, 7, 6, 1, 1, 1, 1, 1, 1, '2025-10-16', 'Checklist completo en altura', '2025-10-16 23:36:51', '2025-10-16 23:36:51', NULL, 0),
 (2, 9, 6, 1, 1, 1, 1, 0, 1, '2025-10-20', 'Falta arnés en trabajo en altura', '2025-10-16 23:52:21', '2025-10-21 02:07:57', NULL, 0),
 (3, 8, 6, 1, 1, 1, 1, 0, 0, '2025-10-16', 'Checklist completo en tarea de suelo', '2025-10-16 23:52:33', '2025-10-16 23:52:33', NULL, 0),
 (4, 7, 6, 1, 1, 1, 1, 1, 1, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
 (5, 8, 6, 1, 1, 1, 0, 0, 0, '2025-10-21', 'Faltan guantes y arnés', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
 (6, 9, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés pero trabaja en altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
-(7, 10, 6, 0, 1, 1, 1, 1, 0, '2025-10-21', 'Sin anteojos', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
+(7, 10, 6, 0, 1, 1, 1, 1, 0, '2025-10-21', 'Sin lentes', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
 (8, 14, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
 (9, 23, 6, 1, 1, 1, 1, 0, 1, '2025-10-21', 'Sin arnés en tarea de altura', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),
 (10, 24, 6, 1, 1, 1, 1, 1, 0, '2025-10-21', 'Checklist completo', '2025-10-21 03:37:40', '2025-10-21 03:37:40', NULL, 0),

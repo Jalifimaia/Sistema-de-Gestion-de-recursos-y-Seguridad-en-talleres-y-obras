@@ -12,6 +12,7 @@
         Volver
         </a>
 
+
         <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
         <img src="{{ asset('images/herradd.svg') }}" alt="Reparación" class="me-2" style="width: 28px; height: 28px;">
         Recursos en reparación
@@ -67,21 +68,20 @@
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-light">
                   <tr class="text-orange">
-                    <th>Categoría</th>
-                    <th>Subcategoría</th>
                     <th>Recurso</th>
                     <th>Número de serie</th>
                     <th>Fecha adquisición</th>
                     <th>Fecha marcado en reparación</th>
-                    <th>Costo unitario</th> <!-- nueva columna -->
+                    <th>Costo unitario</th>
                   </tr>
                 </thead>
                 <tbody>
                   @foreach($recursos as $r)
                   <tr>
-                    <td>{{ $r->categoria ?? '-' }}</td>
-                    <td>{{ $r->subcategoria ?? '-' }}</td>
-                    <td>{{ $r->recurso ?? '-' }}</td>
+                    <td>
+                      {{ $r->recurso ?? '-' }}
+                      [{{ $r->subcategoria ?? 'Sin subcategoría' }}]
+                    </td>
                     <td>{{ $r->nro_serie }}</td>
                     <td>{{ $r->fecha_adquisicion ? \Carbon\Carbon::parse($r->fecha_adquisicion)->format('d/m/Y') : '-' }}</td>
                     <td>{{ $r->estado_actualizado_en ? \Carbon\Carbon::parse($r->estado_actualizado_en)->format('d/m/Y') : '-' }}</td>

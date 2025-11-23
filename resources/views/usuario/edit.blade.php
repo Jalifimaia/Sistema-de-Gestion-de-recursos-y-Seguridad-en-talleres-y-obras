@@ -27,17 +27,17 @@
 
     <div class="mb-3">
       <label for="name" class="form-label">Nombre</label>
-      <input type="text" name="name" class="form-control" value="{{ old('name', $usuario->name) }}" required placeholder="Ejemplo: Juan Pérez">
+      <input type="text" name="name" class="form-control" value="{{ old('name', $usuario->name) }}" required placeholder="Ingrese un nombre">
     </div>
 
     <div class="mb-3">
       <label for="dni" class="form-label">DNI</label>
-      <input type="text" name="dni" class="form-control" value="{{ old('dni', $usuario->dni) }}" required placeholder="Ejemplo: 12345678">
+      <input type="text" name="dni" class="form-control" value="{{ old('dni', $usuario->dni) }}" required placeholder="Ingrese su DNI">
     </div>
 
     <div class="mb-3">
       <label for="email" class="form-label">Email</label>
-      <input type="email" name="email" class="form-control" value="{{ old('email', $usuario->email) }}" required placeholder="Ejemplo: juan@example.com">
+      <input type="email" name="email" class="form-control" value="{{ old('email', $usuario->email) }}" required placeholder="Ingrese su email">
     </div>
 
     <div class="mb-3">

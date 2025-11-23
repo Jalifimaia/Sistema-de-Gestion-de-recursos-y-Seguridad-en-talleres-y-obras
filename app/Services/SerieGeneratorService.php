@@ -15,19 +15,13 @@ class SerieGeneratorService
     int $version,
     int $anio,
     int $lote,
-    string $colorNombre,
+    int $colorId,  
     ?string $talleNombre,
     int $cantidad,
     array $extra = []
 ): Collection {
-    // 🔸 Normalizar nombre del color (capitalizado, sin espacios extra)
-    $colorNombreNormalizado = ucfirst(strtolower(trim($colorNombre)));
-
-    // 🔸 Buscar o crear el color sin duplicar
-    $color = Color::firstOrCreate(
-        ['nombre' => $colorNombreNormalizado],
-        ['nombre' => $colorNombreNormalizado]
-    );
+    // 🔸 Buscar el color por ID (ya existe en la tabla colores)
+    $color = Color::findOrFail($colorId);
 
     $fechaAdq = $extra['fecha_adquisicion'] ?? now();
     $fechaVenc = $extra['fecha_vencimiento'] ?? null;

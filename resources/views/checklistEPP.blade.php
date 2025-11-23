@@ -3,104 +3,133 @@
 @section('title', 'Registro del checklist diario')
 
 @section('content')
-  <div class="container py-4">
+  <div class="container pt-3">
   <!-- 🔶 Encabezado -->
-<header class="mb-5 py-3 px-4">
-  <div class="d-flex justify-content-between align-items-center flex-wrap">
+<header class="mb-3 py-2 px-4">
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <!-- Botón volver -->
+    <a href="{{ request('from') === 'sinChecklist' 
+                ? route('controlEPP.sinChecklist') 
+                : route('controlEPP') }}" 
+       class="btn btn-volver d-flex align-items-center">
+      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+      Volver
+    </a>
 
-<a href="{{ request('from') === 'sinChecklist' 
-              ? route('controlEPP.sinChecklist') 
-              : route('controlEPP') }}" 
-   class="btn btn-volver d-flex align-items-center">
-  <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
-  Volver
-</a>
-
-    <div class="text-center w-100 mt-3 d-flex justify-content-center align-items-center gap-2">
-      <img src="{{ asset('images/check.svg') }}" alt="Checklist" class="icono-titulo">
-      <h1 class="titulo-checklist mb-0">Registro del Checklist Diario</h1>
+    <!-- Título al lado -->
+    <div class="d-flex align-items-center gap-2">
+      <img src="{{ asset('images/checkk.svg') }}" alt="Checklist" class="icono-titulo">
+      <h1 class="titulo-checklist fw-bold mb-0">Registro del Checklist Diario</h1>
     </div>
   </div>
 </header>
 
-  <form id="checklist-form" method="POST" action="{{ route('checklist.epp.store') }}">
 
+  <div class="card card-check border rounded shadow-sm mt-2">
+  <div class="card-body">
+    <form id="checklist-form" class="w-100" method="POST" action="{{ route('checklist.epp.store') }}">
+      @csrf
 
-    @csrf
+      <!-- Trabajador -->
+      <div class="mb-3">
+        <label for="trabajador_id" class="form-label">Trabajador</label>
+        <select name="trabajador_id" id="trabajador_id"
+                class="form-select @error('trabajador_id') is-invalid @enderror"
+                {{ isset($preseleccionado) ? 'disabled' : '' }} required>
+          <option value="">Seleccionar trabajador...</option>
+          @foreach($trabajadores as $t)
+            <option value="{{ $t->id }}"
+              {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
+              {{ $t->name }}
+            </option>
+          @endforeach
+        </select>
+        @error('trabajador_id')
+          <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+      </div>
 
-    <!-- Trabajador -->
-    <div class="mb-3">
-      <label for="trabajador_id" class="form-label">Trabajador</label>
-      <select name="trabajador_id" id="trabajador_id" class="form-select @error('trabajador_id') is-invalid @enderror"
-        {{ isset($preseleccionado) ? 'disabled' : '' }} required>
-        <option value="">Seleccionar trabajador...</option>
-        @foreach($trabajadores as $t)
-          <option value="{{ $t->id }}"
-            {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
-            {{ $t->name }}
-          </option>
-        @endforeach
-      </select>
-      @error('trabajador_id')
-        <div class="invalid-feedback">{{ $message }}</div>
-      @enderror
-    </div>
+      <!-- Aviso -->
+      <div id="aviso-checklist" class="text-danger mt-2 d-none"></div>
 
-    <div id="aviso-checklist" class="text-danger mt-2 d-none"></div>
-
-
-    <!-- EPP asignado -->
-    <div id="epp-asignado" class="alert alert-info d-none">
-      <strong>EPP asignado:</strong>
-      <ul id="epp-lista" class="mb-0"></ul>
-    </div>
-
-    @if (isset($preseleccionado))
-      <input type="hidden" name="trabajador_id" value="{{ $preseleccionado }}">
-    @endif
-
-    <!-- Trabajo en altura -->
-    <div class="mb-3 form-check">
-      <input type="hidden" name="es_en_altura" value="0">
-      <input type="checkbox" name="es_en_altura" id="es_en_altura" class="form-check-input" value="1" {{ old('es_en_altura') ? 'checked' : '' }}>
-      <label for="es_en_altura" class="form-check-label">¿Trabaja en altura hoy?</label>
-    </div>
-
-
-    <!-- EPP checklist -->
-    <div class="row g-3" id="epp-checklist">
-      @foreach(['casco', 'lentes', 'botas', 'chaleco', 'guantes', 'arnes'] as $epp)
-      <div class="col-md-2">
-        <div class="form-check">
-          <input type="hidden" name="{{ $epp }}" value="0">
-          <input type="checkbox" name="{{ $epp }}" id="{{ $epp }}" class="form-check-input" value="1" {{ old($epp) ? 'checked' : '' }}>
-          <label for="{{ $epp }}" class="form-check-label text-capitalize">{{ $epp }}</label>
+      <!-- EPP asignado -->
+      <div id="epp-asignado" class="alert alertaEPP d-none">
+        <strong>EPP asignado:</strong><br>
+        <div class="table-responsive mb-2">
+          <table class="table table-sm table-bordered text-center mb-0" id="epp-tabla">
+            <thead>
+              <tr id="epp-thead"></tr>
+            </thead>
+            <tbody>
+              <tr id="epp-tbody"></tr>
+            </tbody>
+          </table>
         </div>
-        <div class="text-danger small d-none" id="alert-{{ $epp }}">No tiene {{ $epp }} asignado</div>
-        @error($epp)
+      </div>
+
+      @if (isset($preseleccionado))
+        <input type="hidden" name="trabajador_id" value="{{ $preseleccionado }}">
+      @endif
+
+      <!-- Trabajo en altura -->
+      <div class="mb-3 form-check">
+        <input type="hidden" name="es_en_altura" value="0">
+        <input type="checkbox" name="es_en_altura" id="es_en_altura"
+               class="form-check-input" value="1" {{ old('es_en_altura') ? 'checked' : '' }}>
+        <label for="es_en_altura" class="form-check-label">¿Trabaja en altura hoy?</label>
+      </div>
+
+      @php
+        $alias = [
+          'lentes' => 'Lentes',
+          'casco' => 'Casco',
+          'botas' => 'Botas',
+          'chaleco' => 'Chaleco',
+          'guantes' => 'Guantes',
+          'arnes' => 'Arnés',
+        ];
+      @endphp
+
+      <!-- EPP checklist -->
+      <div class="row g-3" id="epp-checklist">
+        @foreach(array_keys($alias) as $epp)
+          <div class="col-md-2">
+            <div class="form-check">
+              <input type="hidden" name="{{ $epp }}" value="0">
+              <input type="checkbox" name="{{ $epp }}" id="{{ $epp }}"
+                     class="form-check-input" value="1" {{ old($epp) ? 'checked' : '' }}>
+              <label for="{{ $epp }}" class="form-check-label">{{ $alias[$epp] }}</label>
+            </div>
+            <div class="text-danger small d-none" id="alert-{{ $epp }}">
+              <strong>No tiene {{ $alias[$epp] }} asignado</strong>
+            </div>
+            @error($epp)
+              <div class="text-danger small">{{ $message }}</div>
+            @enderror
+          </div>
+        @endforeach
+      </div>
+
+      <!-- Observaciones -->
+      <div class="mt-3">
+        <label for="observaciones" class="form-label">Observaciones</label>
+        <textarea name="observaciones" id="observaciones"
+                  class="form-control" placeholder="Observaciones...">{{ old('observaciones') }}</textarea>
+        @error('observaciones')
           <div class="text-danger small">{{ $message }}</div>
         @enderror
       </div>
-      @endforeach
-    </div>
 
-    <!-- Observaciones -->
-    <div class="mt-3">
-      <label for="observaciones" class="form-label">Observaciones</label>
-      <textarea name="observaciones" id="observaciones" class="form-control">{{ old('observaciones') }}</textarea>
-      @error('observaciones')
-        <div class="text-danger small">{{ $message }}</div>
-      @enderror
-    </div>
+      <!-- Botón alineado a la derecha -->
+      <div class="mt-4 d-flex justify-content-end w-100">
+        <button type="submit" class="btn btn-reg">
+          Registrar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
-    <!-- Botón -->
-    <div class="mt-4 text-center">
-      <button type="submit" class="btn btn-reg w-100">
-        Registrar Checklist
-      </button>
-    </div>
-
-  </form>
 </div>
 
 <!-- 🔶 Modal de advertencia -->
@@ -135,7 +164,7 @@
         <!-- contenido dinámico -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -191,7 +220,8 @@
 document.addEventListener('DOMContentLoaded', function () {
   const select = document.getElementById('trabajador_id');
   const eppBox = document.getElementById('epp-asignado');
-  const eppList = document.getElementById('epp-lista');
+  const thead = document.getElementById('epp-thead');
+  const tbody = document.getElementById('epp-tbody');
   const checklistItems = ['lentes', 'botas', 'chaleco', 'guantes', 'arnes', 'casco'];
   const aliasTipos = {
     lentes: 'lentes',
@@ -223,39 +253,42 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-select.addEventListener('change', function () {
-  const userId = this.value;
-  if (!userId) return;
+  select.addEventListener('change', function () {
+    const userId = this.value;
+    if (!userId) return;
 
-  const eppPromise = fetch(`/epp/asignados/${userId}`).then(res => res.json());
-  const checklistPromise = fetch(`/checklist/validar-hoy/${userId}`).then(res => res.json());
+    const eppPromise = fetch(`/epp/asignados/${userId}`).then(res => res.json());
+    const checklistPromise = fetch(`/checklist/validar-hoy/${userId}`).then(res => res.json());
 
-  Promise.all([eppPromise, checklistPromise]).then(([eppData, checklistData]) => {
-    // Mostrar EPP asignado
-    eppList.innerHTML = '';
-    if (eppData.length === 0) {
-      eppList.innerHTML = '<li>No tiene EPP asignado</li>';
-    } else {
-      eppData.forEach(epp => {
-        eppList.innerHTML += `<li>${epp.tipo}: ${epp.serie}</li>`;
-      });
-    }
-    eppBox.classList.remove('d-none');
-    validarChecklistContraAsignado(eppData);
+    Promise.all([eppPromise, checklistPromise]).then(([eppData, checklistData]) => {
+      // Mostrar EPP asignado en tabla
+      thead.innerHTML = '';
+      tbody.innerHTML = '';
 
-    // Mostrar aviso checklist
-    const aviso = document.getElementById('aviso-checklist');
-    if (checklistData.existe) {
-      aviso.textContent = `Al trabajador ya se le realizó el checklist hoy.`;
-      aviso.classList.remove('d-none');
-    } else {
-      aviso.textContent = '';
-      aviso.classList.add('d-none');
-    }
+      if (eppData.length === 0) {
+        thead.innerHTML = '<th>No tiene EPP asignado</th>';
+        tbody.innerHTML = '<td>-</td>';
+      } else {
+        eppData.forEach(epp => {
+          thead.innerHTML += `<th>${epp.tipo}</th>`;
+          tbody.innerHTML += `<td>${epp.serie}</td>`;
+        });
+      }
+
+      eppBox.classList.remove('d-none');
+      validarChecklistContraAsignado(eppData);
+
+      // Mostrar aviso checklist
+      const aviso = document.getElementById('aviso-checklist');
+        if (checklistData.existe) {
+          aviso.innerHTML = `<strong>Al trabajador ya se le realizó el checklist hoy.</strong>`;
+          aviso.classList.remove('d-none');
+        } else {
+          aviso.innerHTML = '';
+          aviso.classList.add('d-none');
+        }
+    });
   });
-});
-
-
 
   if (select.value) {
     select.dispatchEvent(new Event('change'));
@@ -263,6 +296,28 @@ select.addEventListener('change', function () {
 
   // Validación antes de enviar
   document.getElementById('checklist-form').addEventListener('submit', function (e) {
+
+    const trabajadorId = document.getElementById('trabajador_id').value;
+
+    if (!trabajadorId) {
+    e.preventDefault();
+    const modal = new bootstrap.Modal(document.getElementById('modalErrorChecklist'));
+    document.getElementById('modalErrorChecklistContenido').textContent =
+      'Debés seleccionar un trabajador antes de registrar el checklist.';
+    modal.show();
+    return;
+  }
+
+  // 🚫 Caso 2: trabajador sin EPP asignado
+  if (asignados.length === 0) {
+    e.preventDefault();
+    const modal = new bootstrap.Modal(document.getElementById('modalErrorChecklist'));
+    document.getElementById('modalErrorChecklistContenido').textContent =
+      'No se puede registrar el checklist: el trabajador no tiene ningún EPP asignado.';
+    modal.show();
+    return;
+  }
+
     let bloqueado = false;
     let incompleto = false;
     let critico = false;
@@ -343,4 +398,5 @@ select.addEventListener('change', function () {
 });
 </script>
 @endpush
+
 

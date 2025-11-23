@@ -287,7 +287,7 @@ public function devolverRecurso($id)
 
     if (!$checklist) return false;
 
-    $basicos = $checklist->anteojos && $checklist->botas && $checklist->chaleco && $checklist->guantes;
+    $basicos = $checklist->lentes && $checklist->botas && $checklist->chaleco && $checklist->guantes;
 
     return $checklist->es_en_altura ? $basicos && $checklist->arnes : $basicos;
 }

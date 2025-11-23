@@ -24,7 +24,7 @@
 
   <div class="row g-4">
   <!-- Tarjeta: Préstamos registrados -->
-  <div class="col-md-6 col-lg-4">
+  <div class="col-md-6 col-lg-4 d-none">
     <div class="card card-report shadow-sm h-100 d-flex flex-column justify-content-between">
       <div class="card-header text-center bg-white border-0 pb-0">
         <img src="{{ asset('images/prestamos.svg') }}" alt="Préstamos" class="banner-card-img">

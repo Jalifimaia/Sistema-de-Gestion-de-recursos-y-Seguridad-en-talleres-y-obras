@@ -38,7 +38,7 @@
         <tbody>
             @foreach($recursos as $r)
             <tr>
-                <td>{{ $r->nombre }}</td>
+                <td>{{ $r->nombre }} [{{ $r->subcategoria_nombre ?? 'Sin subcategoría' }}]</td>
                 <td>{{ $r->cantidad_prestamos }}</td>
                 <td>{{ $r->ultima_fecha }}</td>
 

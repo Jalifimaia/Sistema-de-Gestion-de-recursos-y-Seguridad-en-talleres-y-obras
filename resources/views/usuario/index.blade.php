@@ -15,14 +15,32 @@
     </h1>
     <p class="text-muted small">Administración de usuarios, permisos y roles del sistema</p>
   </div>
+
 </header>
 
-<!-- 🔶 Cards resumen -->
-<div class="row mb-1 subir-cards-usuarios g-3">
+ 
+<div class="row mb-4 subir-cards-usuarios">
+  <!-- Card: Crear usuario -->
+  @auth
+    @if (Auth::user()->rol->nombre_rol === 'Administrador')
+      <div class="col-md-3 div-ultimo d-none">
+        <a href="{{ route('usuarios.create') }}" class="card card-resumen card-crear text-center text-decoration-none h-100">
+          <div class="card-body">
+            <h6 class="card-title card-crear d-flex align-items-center justify-content-center gap-2">
+              <img src="{{ asset('images/useraddd.svg') }}" alt="Crear usuario" class="icono-card-titulo">
+              Crear usuario
+            </h6>
+            <small class="text-muted">Alta de nuevo usuario</small>
+          </div>
+        </a>
+      </div>
+    @endif
+  @endauth
+
   <!-- Card: Administradores -->
-  <div class="col-md-6">
+  <div class="col-md-3 div-ultimo d-none">
     <div class="card card-resumen text-center h-100">
-      <div class="card-body py-3">
+      <div class="card-body">
         <h6 class="card-title d-flex align-items-center justify-content-center gap-2">
           <img src="{{ asset('images/admin.svg') }}" alt="Administradores" class="icono-card-titulo">
           Administradores
@@ -35,9 +53,9 @@
 
   <!-- Card: Último acceso -->
   @if ($ultimoUsuarioActivo)
-    <div class="col-md-6">
+    <div class="col-md-3 div-ultimo d-none">
       <div class="card card-resumen text-center h-100">
-        <div class="card-body py-3">
+        <div class="card-body">
           <h6 class="card-title d-flex align-items-center justify-content-center gap-2">
             <img src="{{ asset('images/access.svg') }}" alt="Último acceso" class="icono-card-titulo">
             Último acceso
@@ -50,43 +68,48 @@
       </div>
     </div>
   @endif
-</div><br>
+</div>
 
 <div class="seccion-usuarios">
 
-  <!-- Filtros -->
-<div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-
+  <!-- 🔶 Botón Agregar usuario arriba, más chico y a la izquierda -->
   @auth
-  @if (Auth::user()->rol->nombre_rol === 'Administrador')
-    <a href="{{ route('usuarios.create') }}" 
-       class="btn btn-agregar d-flex align-items-center justify-content-center gap-2 me-2">
-      <img src="{{ asset('images/useraddd.svg') }}" alt="Crear usuario" class="icono-card-titulo">
-      Agregar usuario
-    </a>
-  @endif
+    @if (Auth::user()->rol->nombre_rol === 'Administrador')
+      <div class="mb-3 text-start">
+        <a href="{{ route('usuarios.create') }}" 
+           class="btn btn-agregar btn-sm d-inline-flex align-items-center gap-2">
+          <img src="{{ asset('images/useraddd.svg') }}" alt="Crear usuario" class="icono-card-titulo" style="width:18px;">
+          Agregar usuario
+        </a>
+      </div>
+    @endif
   @endauth
 
-  <label class="form-label mb-0 fw-semibold filtrar-por">Filtrar por:</label>
+  <!-- 🔶 Buscador y filtros en la misma fila -->
+  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+    <!-- Buscador más largo -->
+    <input type="text" id="buscador" 
+           class="form-control buscador-destacado" 
+           placeholder="Buscar por nombre o email..." 
+           style="width: 340px; max-width: 100%;">
 
-  <select id="filtroRol" class="form-select filtro-destacado w-auto">
-    <option value="todos">Todos los roles</option>
-    @foreach($roles as $rol)
-      <option value="{{ $rol->nombre_rol }}">{{ $rol->nombre_rol }}</option>
-    @endforeach
-  </select>
+    <!-- Filtros al lado del buscador -->
+    <label class="form-label mb-0 fw-semibold filtrar-por">Filtrar por:</label>
 
-  <select id="filtroEstado" class="form-select filtro-destacado w-auto">
-    <option value="todos">Todos los estados</option>
-    @foreach($estados as $estado)
-      <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
-    @endforeach
-  </select>
+    <select id="filtroRol" class="form-select filtro-destacado w-auto">
+      <option value="todos">Todos los roles</option>
+      @foreach($roles as $rol)
+        <option value="{{ $rol->nombre_rol }}">{{ $rol->nombre_rol }}</option>
+      @endforeach
+    </select>
 
-  <input type="text" id="buscador" 
-         class="form-control buscador-destacado" 
-         placeholder="Buscar por nombre o email..." 
-         style="width: 280px; max-width: 100%;">
+    <select id="filtroEstado" class="form-select filtro-destacado w-auto">
+      <option value="todos">Todos los estados</option>
+      @foreach($estados as $estado)
+        <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
+      @endforeach
+    </select>
+  </div>
 </div>
 
 
@@ -119,9 +142,9 @@
                 <div id="estado-usuario-{{ $usuario->id }}"
                     class="badge estado-usuario px-3 py-2 rounded"
                     data-estado="{{ $usuario->estado->nombre ?? '-' }}">
+                  {{ $usuario->estado->nombre ?? '-' }}
                 </div>
               </td>
-              
               <td class="acciones">
                 <div class="acciones-grupo">
                   <a href="{{ route('usuarios.show', $usuario->id) }}" class="btn btn-sm btn-ver-series btn-accion-compact" title="Ver detalles del usuario">
@@ -247,8 +270,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       return okRol && okEstado && okTexto;
     });
-
-    console.log('visibles:', visibles.length);
   }
 
   function mostrarPagina(pagina) {
@@ -291,8 +312,6 @@ document.addEventListener('DOMContentLoaded', function () {
         paginacion.appendChild(li);
       }
     }
-
-    console.log('paginaActual:', paginaActual, 'rango:', inicio, fin);
   }
 
   function aplicarFiltros() {
@@ -322,43 +341,43 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.getElementById('btnConfirmarBaja').addEventListener('click', function() {
-  if (!formSeleccionado) return;
+    if (!formSeleccionado) return;
 
-  const boton = formSeleccionado.querySelector('button');
-  const fila = formSeleccionado.closest('tr');
-  const estadoCell = fila.querySelector('.estado');
-  const nombre = formSeleccionado.dataset.nombre;
-  const rol = formSeleccionado.dataset.rol;
+    const boton = formSeleccionado.querySelector('button');
+    const fila = formSeleccionado.closest('tr');
+    const estadoDiv = fila.querySelector('[id^="estado-usuario-"]');
+    const nombre = formSeleccionado.dataset.nombre;
+    const rol = formSeleccionado.dataset.rol;
 
-  fetch(formSeleccionado.action, {
-    method: 'POST',
-    headers: { 'X-CSRF-TOKEN': formSeleccionado.querySelector('[name=_token]').value }
-  }).then(res => {
-    if (res.ok) {
-      // Actualizar estado visual
-      estadoCell.innerText = 'Baja';
-      fila.setAttribute('data-estado', 'Baja');
-      boton.disabled = true;
-      boton.style.opacity = '0.5';
-      boton.style.cursor = 'not-allowed';
-      aplicarFiltros();
+    fetch(formSeleccionado.action, {
+      method: 'POST',
+      headers: { 'X-CSRF-TOKEN': formSeleccionado.querySelector('[name=_token]').value }
+    }).then(res => {
+      if (res.ok) {
+        // Actualizar estado visual
+        if (estadoDiv) {
+          estadoDiv.dataset.estado = 'Baja';
+          aplicarEstiloEstado(estadoDiv);
+        }
+        fila.setAttribute('data-estado', 'Baja');
+        boton.disabled = true;
+        boton.style.opacity = '0.5';
+        boton.style.cursor = 'not-allowed';
+        aplicarFiltros();
 
-      // ✅ Mostrar modal de éxito
-      const modalExitoEl = document.getElementById('modalExitoBaja');
-      const contenido = document.getElementById('modalExitoBajaContenido');
-      if (modalExitoEl && contenido) {
-      contenido.innerHTML = `Usuario <strong>${nombre}</strong> [<em>${rol}</em>] dado de baja correctamente.`;
-        const modalExito = new bootstrap.Modal(modalExitoEl);
-        modalExito.show();
-        setTimeout(() => modalExito.hide(), 4000); // opcional: cerrar solo
+        // ✅ Mostrar modal de éxito
+        const modalExitoEl = document.getElementById('modalExitoBaja');
+        const contenido = document.getElementById('modalExitoBajaContenido');
+        if (modalExitoEl && contenido) {
+          contenido.innerHTML = `Usuario <strong>${nombre}</strong> [<em>${rol}</em>] dado de baja correctamente.`;
+          const modalExito = new bootstrap.Modal(modalExitoEl);
+          modalExito.show();
+          setTimeout(() => modalExito.hide(), 4000);
+        }
       }
-    }
-
-    // Cerrar modal de confirmación
-    modal.hide();
+      modal.hide();
+    });
   });
-});
-
 
   // 🔶 Estado visual y fecha
   const alerta = document.getElementById('alertaEstado');
@@ -370,42 +389,48 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 5000);
   }
 
-  const today = new Date();
-  const dia = String(today.getDate()).padStart(2, '0');
-  const mes = String(today.getMonth() + 1).padStart(2, '0');
-  const año = today.getFullYear();
-  const horas = String(today.getHours()).padStart(2, '0');
-  const minutos = String(today.getMinutes()).padStart(2, '0');
-  const segundos = String(today.getSeconds()).padStart(2, '0');
-  document.getElementById("today").textContent = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
-
   function capitalizar(texto) {
     return texto.split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
   }
 
-  document.querySelectorAll('[id^="estado-usuario-"]').forEach(div => {
+  // 🔶 Helper único para aplicar estilos de estado
+  function aplicarEstiloEstado(div) {
     const estado = (div.dataset.estado || '').toLowerCase();
-    if (estado) {
-      div.textContent = capitalizar(estado);
-      div.style.display = 'inline-block';
-    } else {
-      div.style.display = 'none';
-    }
-    div.className = 'badge px-2 py-1 rounded';
+    div.textContent = capitalizar(estado);
+    div.style.display = estado ? 'inline-block' : 'none';
+
+    div.className = '';
+    div.classList.add('badge','px-2','py-1','rounded');
+
     switch (estado) {
-      case 'alta': div.classList.add('bg-success','text-white'); break;
-      case 'baja': div.classList.add('bg-danger','text-white'); break;
-      case 'stand by': div.classList.add('bg-secondary','text-white'); div.style.fontStyle='italic'; break;
-      default: div.classList.add('bg-light','text-dark'); break;
+      case 'alta':
+        div.classList.add('bg-success','text-white');
+        break;
+      case 'baja':
+        div.classList.add('bg-danger','text-white');
+        break;
+      case 'stand by':
+        div.classList.add('bg-secondary','text-white');
+        div.style.fontStyle = 'italic';
+        break;
+      default:
+        div.classList.add('bg-light','text-dark');
+        break;
     }
     div.style.fontSize = '1rem';
-  });
+  }
+
+  // Al cargar
+  document.querySelectorAll('[id^="estado-usuario-"]').forEach(aplicarEstiloEstado);
+
 });
 </script>
 @endpush
 
+
+
+
+
 @push('styles')
 <link href="{{ asset('css/usuariosIndex.css') }}?v={{ time() }}" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/estilos.css') }}">
 @endpush
-

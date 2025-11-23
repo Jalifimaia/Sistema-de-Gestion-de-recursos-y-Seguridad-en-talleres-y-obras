@@ -554,6 +554,7 @@ td.acciones .d-flex {
   flex: 1 1 0;
 }
 
+
 .btn-agregar{
   background-color: #b95b0e;
   color: #f1f1f1;
@@ -575,3 +576,14 @@ td.acciones .d-flex {
   font-size: 1rem;
 }
 
+.div-admin {
+  display: none !important;
+}
+
+.div-ultimo {
+  display: none !important;
+}
+
+.fecha-destacada {
+  display: none !important;
+}

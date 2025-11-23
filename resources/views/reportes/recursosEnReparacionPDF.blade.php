@@ -29,21 +29,20 @@
     <table>
         <thead>
             <tr>
-                <th>Categoría</th>
-                <th>Subcategoría</th>
                 <th>Recurso</th>
                 <th>Número de serie</th>
                 <th>Fecha adquisición</th>
                 <th>Fecha marcado en reparación</th>
-                <th>Costo unitario</th> <!-- 🔹 nueva columna -->
+                <th>Costo unitario</th>
             </tr>
         </thead>
         <tbody>
             @foreach($recursos as $r)
             <tr>
-                <td>{{ $r->categoria ?? '-' }}</td>
-                <td>{{ $r->subcategoria ?? '-' }}</td>
-                <td>{{ $r->recurso ?? $r->nombre ?? '-' }}</td>
+                <td>
+                    {{ $r->recurso ?? $r->nombre ?? '-' }}
+                    [{{ $r->subcategoria ?? 'Sin subcategoría' }}]
+                </td>
                 <td>{{ $r->nro_serie }}</td>
                 <td>
                     @if(!empty($r->fecha_adquisicion))
@@ -58,14 +57,12 @@
                     @if(!empty($r->estado_actualizado_en))
                         {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $r->estado_actualizado_en, 'UTC')
                             ->setTimezone(config('app.timezone'))
-                            ->format('d/m/Y ') }}
+                            ->format('d/m/Y') }}
                     @else
                         -
                     @endif
                 </td>
-                <td>
-                    ${{ number_format($r->costo_unitario, 2, ',', '.') }}
-                </td>
+                <td>${{ number_format($r->costo_unitario, 2, ',', '.') }}</td>
             </tr>
             @endforeach
         </tbody>

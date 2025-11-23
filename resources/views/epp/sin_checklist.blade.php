@@ -14,41 +14,47 @@
       <img src="{{ asset('images/checknot.svg') }}" alt="Checklist no registrado" style="width: 28px; height: 28px;" class="me-2">
       <h4 class="fw-bold mb-0">Checklist sin registrar</h4>
     </div>
-
   </div>
+
   <p class="text-muted">Estos trabajadores no tienen checklist cargado hoy. Podés ingresar a su perfil para registrar o revisar.</p>
 
   @if ($sinChecklist->count())
-    <div class="row g-3">
-      @foreach ($sinChecklist as $usuario)
-        <div class="col-md-6 col-lg-4">
-          <div class="card shadow-sm h-100">
-            <div class="card-body">
-              <h5 class="card-title">{{ $usuario->name }}</h5>
-              <p class="card-text text-muted mb-2">
-                <strong>Estado:</strong> {{ $usuario->estado->nombre ?? 'Sin estado' }}
-              </p>
-              <div class="d-flex justify-content-between">
-           <a href="{{ route('usuarios.show', ['usuario' => $usuario->id, 'from' => 'sinChecklist']) }}" 
-   class="btn btn-verperfil btn-sm">
-  Ver perfil
-</a>
-
-         <a href="{{ route('checklist.epp', ['trabajador_id' => $usuario->id, 'from' => 'sinChecklist']) }}" 
-   class="btn btn-success btn-sm">
-  Registrar checklist
-</a>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      @endforeach
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle">
+        <thead class="table-light">
+          <tr class="text-orange">
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach ($sinChecklist as $usuario)
+            <tr>
+              <td>{{ $usuario->name }}</td>
+              <td>{{ $usuario->estado->nombre ?? 'Sin estado' }}</td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  <a href="{{ route('usuarios.show', ['usuario' => $usuario->id, 'from' => 'sinChecklist']) }}" 
+                     class="btn btn-verperfil btn-sm">
+                    Ver perfil
+                  </a>
+                  <a href="{{ route('checklist.epp', ['trabajador_id' => $usuario->id, 'from' => 'sinChecklist']) }}" 
+                     class="btn btn-success btn-sm">
+                    Registrar checklist
+                  </a>
+                </div>
+              </td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
     </div>
   @else
     <div class="alert alert-success">✅ Todos los trabajadores tienen checklist registrado hoy.</div>
   @endif
 </div>
+
 @endsection
 
 @push('styles')

@@ -37,7 +37,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class SerieRecurso extends Model
 {
-    protected $with = ['estado'];
+    protected $with = ['estado', 'color'];
     protected $table = 'serie_recurso';
     protected $perPage = 20;
 

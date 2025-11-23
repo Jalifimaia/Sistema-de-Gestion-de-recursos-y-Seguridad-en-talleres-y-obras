@@ -30,72 +30,79 @@ class RecursoController extends Controller
     }
 
     public function recursosMasPrestados(Request $request)
-    {
-        $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
-        
+{
+    $fecha_inicio = $request->input('fecha_inicio');
+    $fecha_fin = $request->input('fecha_fin');
 
-        $query = DB::table('detalle_prestamo')
+    $query = DB::table('detalle_prestamo')
         ->join('prestamo', 'detalle_prestamo.id_prestamo', '=', 'prestamo.id')
         ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
+        ->leftJoin('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id') // 👈 join con subcategoría
         ->select(
             'recurso.nombre',
+            'subcategoria.nombre as subcategoria_nombre', // 👈 seleccionamos el nombre de la subcategoría
             DB::raw('COUNT(*) as cantidad_prestamos'),
             DB::raw('MAX(prestamo.fecha_prestamo) as ultima_fecha')
         );
 
-        if ($fecha_inicio) {
-            $query->where('prestamo.fecha_prestamo', '>=', $fecha_inicio);
-        }
-
-        if ($fecha_fin) {
-            $query->where('prestamo.fecha_prestamo', '<=', Carbon::parse($fecha_fin)->endOfDay());
-        }
-
-        $recursos = $query
-            ->groupBy('recurso.id', 'recurso.nombre')
-            ->orderByDesc('ultima_fecha')
-            ->get();
-
-        $labels = $recursos->pluck('nombre');
-        $valores = $recursos->pluck('cantidad_prestamos');
-
-
-        return view('reportes.recursosMasPrestados', compact('recursos', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
+    if ($fecha_inicio) {
+        $query->where('prestamo.fecha_prestamo', '>=', $fecha_inicio);
     }
+
+    if ($fecha_fin) {
+        $query->where('prestamo.fecha_prestamo', '<=', Carbon::parse($fecha_fin)->endOfDay());
+    }
+
+    $recursos = $query
+        ->groupBy('recurso.id', 'recurso.nombre', 'subcategoria.nombre') // 👈 incluimos subcategoría en el groupBy
+        ->orderByDesc('ultima_fecha')
+        ->get();
+
+
+    $labels = $recursos->map(function($r) {
+        return $r->nombre . ' [' . ($r->subcategoria_nombre ?? 'Sin subcategoría') . ']';
+    });
+
+    $valores = $recursos->pluck('cantidad_prestamos');
+
+    return view('reportes.recursosMasPrestados', compact('recursos', 'fecha_inicio', 'fecha_fin', 'labels', 'valores'));
+}
+
     public function recursosMasPrestadosPDF(Request $request)
-    {
-        $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
+{
+    $fecha_inicio = $request->input('fecha_inicio');
+    $fecha_fin = $request->input('fecha_fin');
 
-        $query = DB::table('detalle_prestamo')
-            ->join('prestamo', 'detalle_prestamo.id_prestamo', '=', 'prestamo.id')
-            ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
-            ->select(
-        'recurso.nombre',
-        DB::raw('COUNT(*) as cantidad_prestamos'),
-        DB::raw('MAX(prestamo.fecha_prestamo) as ultima_fecha')
-    );
+    $query = DB::table('detalle_prestamo')
+        ->join('prestamo', 'detalle_prestamo.id_prestamo', '=', 'prestamo.id')
+        ->join('recurso', 'detalle_prestamo.id_recurso', '=', 'recurso.id')
+        ->leftJoin('subcategoria', 'recurso.id_subcategoria', '=', 'subcategoria.id') // 👈 join con subcategoría
+        ->select(
+            'recurso.nombre',
+            'subcategoria.nombre as subcategoria_nombre', // 👈 seleccionamos subcategoría
+            DB::raw('COUNT(*) as cantidad_prestamos'),
+            DB::raw('MAX(prestamo.fecha_prestamo) as ultima_fecha')
+        );
 
-
-        if ($fecha_inicio) {
-            $query->where('prestamo.fecha_prestamo', '>=', $fecha_inicio);
-        }
-
-        if ($fecha_fin) {
-            $query->where('prestamo.fecha_prestamo', '<=', $fecha_fin);
-        }
-
-        $recursos = $query
-            ->groupBy('recurso.id', 'recurso.nombre')
-            ->orderByDesc('ultima_fecha')
-            ->get();
-
-        $total = $recursos->sum('cantidad_prestamos');
-
-        $pdf = Pdf::loadView('reportes.recursosMasPrestadosPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
-        return $pdf->download('reporte_recursos_mas_prestados.pdf');
+    if ($fecha_inicio) {
+        $query->where('prestamo.fecha_prestamo', '>=', $fecha_inicio);
     }
+
+    if ($fecha_fin) {
+        $query->where('prestamo.fecha_prestamo', '<=', $fecha_fin);
+    }
+
+    $recursos = $query
+        ->groupBy('recurso.id', 'recurso.nombre', 'subcategoria.nombre') // 👈 incluimos subcategoría en el groupBy
+        ->orderByDesc('ultima_fecha')
+        ->get();
+
+    $total = $recursos->sum('cantidad_prestamos');
+
+    $pdf = Pdf::loadView('reportes.recursosMasPrestadosPDF', compact('recursos', 'fecha_inicio', 'fecha_fin', 'total'));
+    return $pdf->download('reporte_recursos_mas_prestados.pdf');
+}
+
 
     public function recursosEnReparacion(Request $request)
     {

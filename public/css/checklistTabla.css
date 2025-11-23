@@ -1,9 +1,21 @@
 /* 🔷 Encabezado principal */
 .titulo-checklist {
   font-size: 2rem;
-  font-weight: 700;
   color: #2e2e2e;
   margin-bottom: 0.25rem;
+  font-weight: 400;        
+  font-stretch: condensed;  
+  letter-spacing: -0.5px;  
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  text-decoration: none;
+  border: none;            
+  box-shadow: none;         
+  background-image: none;  
+}
+
+.titulo-checklist::after,
+.titulo-checklist::before {
+  content: none !important; 
 }
 
 /* 🔷 Botón volver */
@@ -28,6 +40,8 @@
   width: 20px;
   flex-shrink: 0;
 }
+
+
 
 /* 🔷 Cards de acción */
 .card-action {
@@ -137,7 +151,7 @@ header {
 /* 🔷 Card de tabla más cerca del buscador */
 .card.shadow-sm.mb-4 {
   margin-top: -0.5rem;
-  border-color: #d28219;
+  border-color: #a0600c;
 }
 
 #tablaChecklistDiario thead {
@@ -154,19 +168,42 @@ header {
 }
 
 .tabla-epp thead th {
-  background-color: #a58809 !important;
+  background-color: #b14910 !important;
   color: #fff !important;
 }
 
 .icono-titulo {
-  height: 32px;
-  width: 32px;
-  animation: pulse 1.5s infinite ease-in-out;
-  flex-shrink: 0;
+  width: 33px;   /* ajustá según tu diseño */
+  height: 33px;
+  filter: invert(47%) sepia(97%) saturate(1000%) hue-rotate(358deg) brightness(65%) contrast(92%);
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.12); }
-  100% { transform: scale(1); }
+.icono-check {
+  width: 32px;   /* tamaño para el check */
+  height: 32px;
+  display: inline-block;
+  vertical-align: middle;
 }
+
+.icono-cross {
+  width: 24px;   /* tamaño para la cruz */
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Aplica a toda la tabla */
+.tabla-epp {
+  border: 2px solid #923b01;   /* borde naranja */
+}
+
+/* Aplica a cada celda */
+.tabla-epp th,
+.tabla-epp td {
+  border: 1px solid #923b01; /* gris claro, visible incluso en celdas vacías */
+  padding: 0.5rem;
+}
+
+
+
+

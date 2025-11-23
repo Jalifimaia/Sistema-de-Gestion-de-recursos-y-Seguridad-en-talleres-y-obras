@@ -131,3 +131,30 @@ label {
   background-color: #218838;   /* verde más oscuro al hover */
   color: #fff;
 }
+
+#epp-asignado table thead th {
+  background-color: #bb6118 !important; /* naranja */
+  color: #fcfcfc !important;            /* texto blanco */
+  font-weight: 700;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  font-size: 1.1rem; 
+}
+
+/* Div que contiene el EPP asignado con outline */
+#epp-asignado {
+  outline: 1px solid #8b4319;                 /* contorno negro */
+  outline-offset: 0;
+  border-radius: 6px;                      /* opcional: esquinas redondeadas */
+  padding: 0.75rem;                        /* un poco de aire interno */
+}
+
+/* Labels más grandes y con color uniforme */
+form label,
+form .form-label,
+form .form-check-label {
+  font-size: 1.2rem;
+  color: #222;
+}
+
+

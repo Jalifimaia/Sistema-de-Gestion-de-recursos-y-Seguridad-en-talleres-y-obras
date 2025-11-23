@@ -13,11 +13,7 @@
   flex-shrink: 0;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.12); }
-  100% { transform: scale(1); }
-}
+
 
 /* 🔷 Botón volver */
 .btn-volver {
@@ -81,35 +77,6 @@ label,
   color: #333;
 }
 
-/* 🔷 Select con borde destacado */
-select.form-select {
-  border: 2px solid #ad7600;
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-select.form-select:focus {
-  border-color: #4d1f00;
-  box-shadow: 0 0 0 3px rgba(212, 235, 6, 0.2);
-  outline: none;
-}
-
-/* 🔷 Campo de observaciones con borde destacado */
-textarea.form-control {
-  border: 2px solid #ad7600;
-  border-radius: 6px;
-  padding: 0.75rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  resize: vertical;
-  min-height: 120px;
-}
-
-textarea.form-control:focus {
-  border-color: #4d1f00;
-  box-shadow: 0 0 0 3px rgba(212, 235, 6, 0.2);
-  outline: none;
-}
 
 /* 🔷 Compactar el bloque de trabajador + checklist + observaciones */
 #checklist-form .mb-3,
@@ -135,31 +102,145 @@ textarea.form-control:focus {
 }
 
 .btn-reg {
-    background-color: #388e3c;
-    color: whitesmoke;
-}
-
-
-.btn-reg {
-  background-color: #28a745;   /* verde Bootstrap */
-  color: #fff;
+  background-color: #1e7422;
+  color: #ffffff;
   font-weight: 600;
-  font-size: 1.1rem;
-  padding: 0.75rem;
+  font-size: 1.2rem;   /* 👈 agrandado */
+  padding: 0.5rem 1.1rem; 
   border-radius: 8px;
-  border: none;
-  max-width: 95%;              /* ocupa casi toda la pantalla */
-  display: block;
-  margin: 0 auto;              /* centrado */
-  transition: background-color 0.2s ease-in-out;
 }
 
 .btn-reg:hover {
-  background-color: #218838;   /* verde más oscuro al hover */
-  color: #fff;
+  background-color: #124d15;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.2rem;   /* 👈 agrandado */
+  padding: 0.5rem 1.1rem; 
+  border-radius: 8px;
 }
 
 #aviso-checklist {
   padding-bottom: 15px;
   padding-top: 5px;
 }
+
+.icono-titulo {
+  width: 33px;   /* ajustá según tu diseño */
+  height: 33px;
+  filter: invert(47%) sepia(97%) saturate(1000%) hue-rotate(358deg) brightness(65%) contrast(92%);
+}
+
+.titulo-checklist {
+  font-size: 2rem;
+  color: #2e2e2e;
+  margin-bottom: 0.25rem;
+  font-weight: 400;        
+  font-stretch: condensed;  
+  letter-spacing: -0.5px;  
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  text-decoration: none;
+  border: none;            
+  box-shadow: none;         
+  background-image: none;  
+}
+
+.titulo-checklist::after,
+.titulo-checklist::before {
+  content: none !important; 
+}
+
+.card-check {
+  background-color: #ffedc9;
+}
+
+/* Select y textarea siempre con borde negro */
+#checklist-form select.form-select,
+#checklist-form textarea.form-control {
+  border: 1px solid #505050 !important;
+  outline: none !important;
+}
+
+/* Checkbox siempre con borde negro */
+#checklist-form .form-check-input {
+  border: 1px solid #505050 !important;
+}
+
+/* Select y textarea siempre con borde + outline grueso negro */
+#checklist-form select.form-select,
+#checklist-form textarea.form-control {
+  border: 1px solid #636363 !important;     /* borde más grueso */
+  outline: 1px solid #636363 !important;    /* contorno externo siempre visible */
+  outline-offset: 0;                     /* pegado al borde */
+  box-shadow: none !important;
+}
+
+/* Checkbox siempre con borde grueso negro */
+#checklist-form .form-check-input {
+  border: 1px solid #034e00 !important;     /* borde más grueso */
+  outline: 1px solid #034e00 !important;    /* contorno externo */
+  outline-offset: 0;
+  box-shadow: none !important;
+}
+
+/* Forzar outline negro en todos los inputs, selects y textareas */
+#checklist-form input.form-control:focus,
+#checklist-form select.form-select:focus,
+#checklist-form textarea.form-control:focus {
+  outline: 1px solid #505050 !important;
+  border-color: #505050 !important;
+  box-shadow: none !important;
+}
+
+/* También para checkboxes */
+#checklist-form .form-check-input:focus {
+  outline: 1px solid #035800 !important;
+  border-color: #035800 !important;
+  box-shadow: none !important;
+}
+
+/* Forzar color de fondo y texto en el encabezado de la tabla */
+#epp-asignado table thead th {
+  background-color: #bb6118 !important; /* naranja */
+  color: #fcfcfc !important;            /* texto blanco */
+  font-weight: 700;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  font-size: 1.1rem; 
+}
+
+.alertaEPP {
+  background-color: #fffaf6;
+}
+
+#epp-asignado .table-responsive {
+  margin-top: 1rem;   /* separa la tabla del texto */
+}
+
+/* Card del checklist con outline */
+.card-check {
+  background-color: #ffedc9;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35); /* sombra más intensa */
+  outline: 1px solid #8b4319;                 /* contorno negro */
+  outline-offset: 0;                       /* pegado al borde */
+}
+
+/* Div que contiene el EPP asignado con outline */
+#epp-asignado {
+  outline: 1px solid #8b4319;                 /* contorno negro */
+  outline-offset: 0;
+  border-radius: 6px;                      /* opcional: esquinas redondeadas */
+  padding: 0.75rem;                        /* un poco de aire interno */
+}
+
+/* Labels más en negrita */
+#checklist-form label,
+#checklist-form .form-check-label,
+#checklist-form .form-label {
+  font-size: 1.2rem;
+  color: #222;                   /* un poco más oscuro para contraste */
+}
+
+
+
+
+

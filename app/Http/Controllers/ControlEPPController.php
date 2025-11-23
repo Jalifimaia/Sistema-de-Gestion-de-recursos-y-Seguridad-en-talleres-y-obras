@@ -40,7 +40,7 @@ class ControlEPPController extends Controller
 
         // Validar cumplimiento
         $checklistCompletos = $checklists->filter(function ($c) {
-            $basicos = $c->anteojos && $c->botas && $c->chaleco && $c->guantes;
+            $basicos = $c->lentes && $c->botas && $c->chaleco && $c->guantes;
             return $c->es_en_altura ? $basicos && $c->arnes : $basicos;
         })->count();
 
@@ -104,7 +104,12 @@ class ControlEPPController extends Controller
 {
     $nombre = $request->input('nombre');
 
-    $recursos = Recurso::with(['subcategoria.categoria', 'usuarioRecursos.usuario'])
+    $recursos = Recurso::with([
+            'subcategoria.categoria',
+            'usuarioRecursos.usuario',
+            'serieRecursos.color',
+            'serieRecursos.talleModel'
+        ])
         ->where(function ($q) use ($nombre) {
             $q->where('nombre', 'like', "%$nombre%")
               ->orWhere('descripcion', 'like', "%$nombre%");
@@ -117,28 +122,44 @@ class ControlEPPController extends Controller
     $data = [];
 
     foreach ($recursos as $recurso) {
-        // Verificamos si usuarioRecursos es una colección y tiene elementos
+        $subcategoria = strtolower($recurso->subcategoria->nombre ?? '');
+        $requiereTalle = in_array($subcategoria, ['chaleco', 'botas']);
+
         if ($recurso->usuarioRecursos instanceof \Illuminate\Support\Collection && $recurso->usuarioRecursos->isNotEmpty()) {
             foreach ($recurso->usuarioRecursos as $ur) {
                 $usuario = $ur->usuario;
-                $data[] = [
-                    'trabajador' => $usuario ? $usuario->nombre_usuario : 'Sin asignar',
-                    'nombre' => $recurso->nombre,
-                    'descripcion' => $recurso->descripcion,
-                    'subcategoria' => $recurso->subcategoria->nombre ?? '',
-                    'categoria' => $recurso->subcategoria->categoria->nombre_categoria ?? '',
-                    'costo_unitario' => $recurso->costo_unitario,
-                ];
+                foreach ($recurso->serieRecursos as $serie) {
+                    $item = [
+                        'trabajador'   => $usuario ? $usuario->nombre_usuario : 'Sin asignar',
+                        'nombre'       => $recurso->nombre,
+                        'descripcion'  => $recurso->descripcion,
+                        'subcategoria' => $recurso->subcategoria->nombre ?? '',
+                        'categoria'    => $recurso->subcategoria->categoria->nombre_categoria ?? '',
+                        'costo_unitario' => $recurso->costo_unitario,
+                        'color'        => $serie->color ? $serie->color->nombre : 'Sin color',
+                    ];
+                    if ($requiereTalle) {
+                        $item['talle'] = $serie->talleModel ? $serie->talleModel->nombre : ($serie->talle ?? 'Sin talle');
+                    }
+                    $data[] = $item;
+                }
             }
         } else {
-            $data[] = [
-                'trabajador' => 'Sin asignar',
-                'nombre' => $recurso->nombre,
-                'descripcion' => $recurso->descripcion,
-                'subcategoria' => $recurso->subcategoria->nombre ?? '',
-                'categoria' => $recurso->subcategoria->categoria->nombre_categoria ?? '',
-                'costo_unitario' => $recurso->costo_unitario,
-            ];
+            foreach ($recurso->serieRecursos as $serie) {
+                $item = [
+                    'trabajador'   => 'Sin asignar',
+                    'nombre'       => $recurso->nombre,
+                    'descripcion'  => $recurso->descripcion,
+                    'subcategoria' => $recurso->subcategoria->nombre ?? '',
+                    'categoria'    => $recurso->subcategoria->categoria->nombre_categoria ?? '',
+                    'costo_unitario' => $recurso->costo_unitario,
+                    'color'        => $serie->color ? $serie->color->nombre : 'Sin color',
+                ];
+                if ($requiereTalle) {
+                    $item['talle'] = $serie->talleModel ? $serie->talleModel->nombre : ($serie->talle ?? 'Sin talle');
+                }
+                $data[] = $item;
+            }
         }
     }
 
@@ -148,6 +169,7 @@ class ControlEPPController extends Controller
         'message' => $data ? null : 'No se encuentran resultados'
     ]);
 }
+
 
 
     public function matrizChecklist(Request $request)
@@ -235,7 +257,7 @@ public function store(Request $request)
         'observaciones' => 'nullable|string',
         'es_en_altura' => 'nullable|boolean',
         'casco' => 'nullable|boolean',
-        'anteojos' => 'nullable|boolean',
+        'lentes' => 'nullable|boolean',
         'botas' => 'nullable|boolean',
         'chaleco' => 'nullable|boolean',
         'guantes' => 'nullable|boolean',
@@ -244,13 +266,14 @@ public function store(Request $request)
 
     $request->merge([
         'observaciones' => $request->observaciones ?: 'Sin observaciones',
+        'lentes' => $request->boolean('lentes'),
     ]);
 
     // 🔎 Validar que los EPP marcados como usados estén asignados
     $eppsMarcados = collect([
         'casco' => $request->boolean('casco'),
         'guantes' => $request->boolean('guantes'),
-        'lentes' => $request->boolean('anteojos'),
+        'lentes' => $request->boolean('lentes'),
         'botas' => $request->boolean('botas'),
         'chaleco' => $request->boolean('chaleco'),
         'arnes' => $request->boolean('arnes'),
@@ -284,7 +307,7 @@ public function store(Request $request)
             'hora' => Carbon::now()->format('H:i'),
             'es_en_altura' => $request->boolean('es_en_altura'),
             'casco' => $request->boolean('casco'),
-            'anteojos' => $request->boolean('anteojos'),
+            'lentes' => $request->boolean('lentes'),
             'botas' => $request->boolean('botas'),
             'chaleco' => $request->boolean('chaleco'),
             'guantes' => $request->boolean('guantes'),
@@ -304,7 +327,7 @@ public function store(Request $request)
         'hora' => Carbon::now()->format('H:i'),
         'es_en_altura' => $request->boolean('es_en_altura'),
         'casco' => $request->boolean('casco'),
-        'anteojos' => $request->boolean('anteojos'),
+        'lentes' => $request->boolean('lentes'),
         'botas' => $request->boolean('botas'),
         'chaleco' => $request->boolean('chaleco'),
         'guantes' => $request->boolean('guantes'),
@@ -411,9 +434,9 @@ public function storeAsignacionEPP(Request $request)
     'guantes.required' => 'Seleccioná guantes.',
     'guantes.integer' => 'Valor inválido para guantes.',
     'guantes.exists' => 'La serie de guantes seleccionada no existe.',
-    'lentes.required' => 'Seleccioná anteojos.',
-    'lentes.integer' => 'Valor inválido para anteojos.',
-    'lentes.exists' => 'La serie de anteojos seleccionada no existe.',
+    'lentes.required' => 'Seleccioná lentes.',
+    'lentes.integer' => 'Valor inválido para lentes.',
+    'lentes.exists' => 'La serie de lentes seleccionada no existe.',
     'botas.required' => 'Seleccioná botas.',
     'botas.integer' => 'Valor inválido para botas.',
     'botas.exists' => 'La serie de botas seleccionada no existe.',
@@ -431,7 +454,7 @@ $attributes = [
     'usuario_id' => 'trabajador',
     'casco' => 'casco',
     'guantes' => 'guantes',
-    'lentes' => 'anteojos',
+    'lentes' => 'lentes',
     'botas' => 'botas',
     'chaleco' => 'chaleco',
     'arnes' => 'arnés',
@@ -526,19 +549,16 @@ $request->validate([
 }
 
 
-public function buscarSeriesEPP(Request $request)
+public function getDisponibles($tipo)
 {
-    $tipo = $request->input('tipo');
-    $query = $request->input('q');
-
-    // 🔒 Mapeo fijo entre frontend y nombres reales
+    // Mapeo de tipo a subcategoría (normalizado)
     $mapa = [
-        'casco' => 'Casco',
-        'guantes' => 'guantes',
-        'lentes' => 'lentes',
-        'botas' => 'botas',
+        'casco'   => 'Casco',
+        'guantes' => 'Guantes',
+        'lentes'  => 'Lentes',
+        'botas'   => 'Botas',
         'chaleco' => 'Chaleco',
-        'arnes' => 'Arnes',
+        'arnes'   => 'Arnes',
     ];
 
     $nombreSubcat = $mapa[$tipo] ?? null;
@@ -547,35 +567,113 @@ public function buscarSeriesEPP(Request $request)
         return response()->json([]);
     }
 
-    $baseQuery = SerieRecurso::whereHas('recurso.subcategoria', function ($q) use ($nombreSubcat) {
-        $q->where('nombre', $nombreSubcat);
-    })
-    ->whereHas('estado', function ($q) {
-        $q->where('nombre_estado', 'Disponible');
-    })
-    ->whereDoesntHave('usuarioRecurso')
-    ->with(['recurso', 'estado']);
+    // 👇 Cargar relaciones de color y talleModel
+    $series = SerieRecurso::with(['color', 'talleModel', 'recurso.subcategoria', 'estado'])
+        ->whereHas('recurso.subcategoria', function ($q) use ($nombreSubcat) {
+            $q->where('nombre', $nombreSubcat);
+        })
+        ->whereHas('estado', function ($q) {
+            $q->where('nombre_estado', 'Disponible'); // 👈 Cambié "nombre_estado" a "nombre"
+        })
+        ->whereDoesntHave('usuarioRecurso')
+        ->get();
 
-    if (!empty($query)) {
-        $baseQuery->whereRaw('LOWER(TRIM(nro_serie)) LIKE ?', ['%' . strtolower(trim($query)) . '%']);
-    }
-
-    $series = $baseQuery->limit(20)->get();
-
-    if ($tipo === 'guantes') {
-    \Log::info('Guantes disponibles:', $series->pluck('nro_serie')->toArray());
-}
-
-
+    // 👇 Formatear respuesta con color y talle desde relaciones
     return response()->json($series->map(function ($serie) {
         return [
             'id' => $serie->id,
             'nro_serie' => $serie->nro_serie,
-            'recurso' => $serie->recurso->nombre,
-            'vencimiento' => Carbon::parse($serie->fecha_vencimiento)->format('d/m/Y'),
+            'color' => $serie->color ? $serie->color->nombre : null,  // 👈 Desde relación
+            'talle' => $serie->talleModel ? $serie->talleModel->nombre : $serie->talle, // 👈 Prioriza talleModel
         ];
     }));
 }
+
+/**
+ * Obtiene EPP ya asignados a un usuario (para mostrar en la tabla)
+ * Ruta esperada: GET /epp/asignados/{userId}
+ */
+public function getAsignados($userId)
+{
+    // 👇 Eager loading de relaciones necesarias
+    $asignados = UsuarioRecurso::with(['serieRecurso.recurso.subcategoria', 'serieRecurso.color', 'serieRecurso.talleModel'])
+        ->where('id_usuario', $userId)
+        ->whereNull('fecha_devolucion')  // Solo asignados actualmente
+        ->get();
+
+    return response()->json($asignados->map(function ($asignacion) {
+        $serie = $asignacion->serieRecurso;
+        $subcategoria = $serie->recurso->subcategoria->nombre ?? 'Desconocido';
+
+        return [
+            'tipo' => strtolower($subcategoria),
+            'serie' => $serie->nro_serie,
+            'color' => $serie->color ? $serie->color->nombre : null,
+            'talle' => $serie->talleModel ? $serie->talleModel->nombre : $serie->talle,
+        ];
+    }));
+}
+
+// 🔧 TAMBIÉN CORRIJO EL MÉTODO buscarSeriesEPP (línea ~481)
+public function buscarSeriesEPP(Request $request)
+{
+    $tipo = $request->input('tipo');
+    $query = $request->input('q');
+
+    $mapa = [
+        'casco'   => 'Casco',
+        'guantes' => 'Guantes',
+        'lentes'  => 'Lentes',
+        'botas'   => 'Botas',
+        'chaleco' => 'Chaleco',
+        'arnes'   => 'Arnes',
+    ];
+
+    $nombreSubcat = $mapa[$tipo] ?? null;
+
+    if (!$nombreSubcat) {
+        return response()->json([]);
+    }
+
+    $series = SerieRecurso::whereHas('recurso.subcategoria', function ($q) use ($nombreSubcat) {
+            $q->where('nombre', $nombreSubcat);
+        })
+        ->whereHas('estado', function ($q) {
+            $q->where('nombre_estado', 'Disponible'); // 👈 CORRECCIÓN: era "nombre_estado"
+        })
+        ->whereDoesntHave('usuarioRecurso')
+        ->with(['recurso.subcategoria', 'color', 'talleModel', 'estado'])
+        ->when($query, function ($q) use ($query) {
+            $q->whereRaw('LOWER(TRIM(nro_serie)) LIKE ?', ['%' . strtolower(trim($query)) . '%']);
+        })
+        ->limit(20)
+        ->get();
+
+    return response()->json($series->map(function ($serie) {
+        return [
+            'id'        => $serie->id,
+            'nro_serie' => $serie->nro_serie,
+            'recurso'   => optional($serie->recurso)->nombre ?? 'Sin recurso',
+            'color'     => $serie->color ? $serie->color->nombre : null, // 👈 Desde relación
+            'talle'     => $serie->talleModel ? $serie->talleModel->nombre : $serie->talle,
+        ];
+    }));
+}
+
+public function getDisponiblesPorQuery(Request $request)
+{
+    $tipo = $request->input('tipo');
+    
+    if (!$tipo) {
+        return response()->json([]);
+    }
+    
+    // Reutilizar el método getDisponibles
+    return $this->getDisponibles($tipo);
+}
+
+
+
 
 public function faltantes()
 {
@@ -586,7 +684,7 @@ public function faltantes()
 
     // Mapeo por ID de subcategoría (más robusto)
     $mapaEpp = [
-        'anteojos' => $subcategoriasEpp['lentes']->id ?? null,
+        'lentes' => $subcategoriasEpp['lentes']->id ?? null,
         'botas'    => $subcategoriasEpp['botas']->id ?? null,
         'chaleco'  => $subcategoriasEpp['chaleco']->id ?? null,
         'guantes'  => $subcategoriasEpp['guantes']->id ?? null,

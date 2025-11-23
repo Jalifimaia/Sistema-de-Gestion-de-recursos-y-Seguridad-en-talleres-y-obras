@@ -68,7 +68,6 @@
                 <tr class="text-orange">
                     <th>Trabajador</th>
                     <th>Herramienta</th>
-                    <th>Subcategoría</th>
                     <th>Número de serie</th>
                     <th>Fecha de adquisición</th>
                 </tr>
@@ -77,10 +76,12 @@
                 @foreach($herramientas as $item)
                 <tr>
                     <td>{{ $item->trabajador }}</td>
-                    <td>{{ $item->herramienta }}</td>
-                    <td>{{ $item->subcategoria }}</td>
+                    <td>
+                        {{ $item->herramienta }}
+                        [{{ $item->subcategoria ?? 'Sin subcategoría' }}]
+                    </td>
                     <td>{{ $item->nro_serie }}</td>
-                    <td>{{ \Carbon\Carbon::parse($item->fecha_adquisicion)->format('d/m/Y H:i') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($item->fecha_adquisicion)->format('d/m/Y') }}</td>
                 </tr>
                 @endforeach
             </tbody>

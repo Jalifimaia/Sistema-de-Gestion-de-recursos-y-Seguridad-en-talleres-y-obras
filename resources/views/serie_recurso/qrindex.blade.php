@@ -79,6 +79,13 @@
     </div>
   @endif
 </div>
+
+  <div id="toastQR" class="toast position-fixed bottom-0 end-0 m-3 text-bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">✅ Código QR copiado al portapapeles</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
 @endsection
 
 @push('styles')
@@ -117,6 +124,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
       window.location.search = usp.toString();
     }, 400);
+  });
+
+  document.querySelectorAll('.copiar-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const codigo = btn.getAttribute('data-codigo');
+      if (!codigo) return;
+
+      try {
+        await navigator.clipboard.writeText(codigo);
+
+        // Mostrar toast
+        const toastEl = document.getElementById('toastQR');
+        if (toastEl) {
+          const toast = new bootstrap.Toast(toastEl);
+          toast.show();
+        }
+      } catch (err) {
+        console.error('Error al copiar:', err);
+        alert('❌ No se pudo copiar el código');
+      }
+    });
   });
 });
 </script>

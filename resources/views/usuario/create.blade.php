@@ -237,8 +237,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (hasErrors) {
-      e.preventDefault(); // Cancela el envío si hay errores
+      e.preventDefault(); // cancela solo si hay errores
+    } else {
+      form.submit(); // envía al backend si todo está bien
     }
+
   });
 
   @if(session('usuario_creado'))

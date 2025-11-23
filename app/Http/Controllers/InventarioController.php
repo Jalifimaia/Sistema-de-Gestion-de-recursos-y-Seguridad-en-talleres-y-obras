@@ -91,7 +91,7 @@ class InventarioController extends Controller
 
     if (!$checklist) return false;
 
-    $basicos = $checklist->anteojos && $checklist->botas && $checklist->chaleco && $checklist->guantes;
+    $basicos = $checklist->lentes && $checklist->botas && $checklist->chaleco && $checklist->guantes;
 
     if ($checklist->es_en_altura) {
         return $basicos && $checklist->arnes;

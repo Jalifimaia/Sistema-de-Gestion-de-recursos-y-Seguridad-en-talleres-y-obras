@@ -66,6 +66,7 @@ Route::get('/csrf-token', function () {
 });
 
 
+
 //URls de la terminal
 Route::prefix('terminal')->group(function () {
     Route::get('/', [KioskoController::class, 'index'])->name('terminal.index');
@@ -155,6 +156,7 @@ Route::get('/checklist-epp/tabla', [ControlEPPController::class, 'verSoloCheckli
 Route::get('/checklist-epp', [ControlEPPController::class, 'create'])->name('checklist.epp');
 Route::post('/checklist-epp', [ControlEPPController::class, 'store'])->name('checklist.epp.store');
 
+Route::get('/series-epp', [ControlEPPController::class, 'getDisponiblesPorQuery']);
 
 
 Route::get('/checklist/validar-hoy/{id}', [ControlEPPController::class, 'validarHoy']);
@@ -174,11 +176,17 @@ Route::get('/epp/asignados/{id}', function ($id) {
 
         $epps = $usuario->usuarioRecursos->map(function ($ur) {
             return [
-                'tipo' => $ur->tipo_epp ?? ($ur->recurso->subcategoria->nombre ?? 'Sin tipo'),
-                'serie' => $ur->serieRecurso->nro_serie ?? 'Sin serie',
-                'fecha' => optional($ur->fecha_asignacion)->format('d/m/Y'),
+                'tipo'  => $ur->tipo_epp ?? optional(optional($ur->recurso)->subcategoria)->nombre ?? 'Sin tipo',
+                'serie' => optional($ur->serieRecurso)->nro_serie ?? 'Sin serie',
+                'color' => optional($ur->serieRecurso)->color 
+                        ?? optional(optional($ur->serieRecurso)->recurso)->color 
+                        ?? 'Sin color',
+                'talle' => optional($ur->serieRecurso)->talle 
+                        ?? optional(optional($ur->serieRecurso)->recurso)->talle 
+                        ?? 'Sin talle',
             ];
-        });
+});
+
 
         return response()->json($epps);
     } catch (\Throwable $e) {
@@ -190,7 +198,6 @@ Route::get('/epp/asignados/{id}', function ($id) {
 
 
 Route::get('/trabajadores/por-estado/{estado}', [UserController::class, 'porEstado']);
-Route::get('/epp/disponibles/{tipo}', [ControlEPPController::class, 'buscarSeriesEPP']);
 
 /*
 |--------------------------------------------------------------------------
@@ -322,8 +329,20 @@ Route::post('usuarios/{id}/activar-con-epp', [ControlEPPController::class, 'acti
 Route::post('usuarios/{id}/standby', [UserController::class, 'standby'])->name('usuarios.standby');
 
 Route::post('/asignarEPP', [ControlEPPController::class, 'store'])->name('asignarEPP.store');
-Route::get('/series-epp', [ControlEPPController::class, 'buscarSeriesEPP']);
 
+
+Route::prefix('epp')->group(function () {
+    // Obtener series disponibles por tipo (para el formulario de asignación)
+    Route::get('/disponibles/{tipo}', [ControlEPPController::class, 'getDisponibles']);
+    
+    // Obtener EPP asignados a un usuario (para la tabla de estado)
+    Route::get('/asignados/{userId}', [ControlEPPController::class, 'getAsignados']);
+    
+    // Buscar series con filtro (para select2)
+    Route::get('/buscar', [ControlEPPController::class, 'buscarSeriesEPP']);
+    
+    // ... tus otras rutas de EPP
+});
 
 Route::get('serie_recurso/create-con-recurso/{id}', [SerieRecursoController::class, 'createConRecurso'])
     ->name('serie_recurso.createConRecurso');

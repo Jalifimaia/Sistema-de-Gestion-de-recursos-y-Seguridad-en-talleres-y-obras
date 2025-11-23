@@ -6,20 +6,22 @@
 <div class="container py-4">
 
   <!-- 🔶 Encabezado -->
-  <header class="mb-5 py-3 px-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap">
-  <a href="#"
-   class="btn btn-volver d-flex align-items-center"
-   onclick="handleBackClick()">
-    <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
-    Volver
-</a>
-      <div class="text-center w-100 mt-3 d-flex justify-content-center align-items-center gap-2">
-        <img src="{{ asset('images/check.svg') }}" alt="Checklist" class="icono-titulo">
-        <h1 class="titulo-checklist mb-0">Checklist diario de cumplimiento de EPP</h1>
-      </div>
+<header class="mb-5 py-3 px-4">
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <a href="#"
+       class="btn btn-volver d-flex align-items-center"
+       onclick="handleBackClick()">
+      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+      Volver
+    </a>
+
+    <div class="d-flex align-items-center gap-2">
+      <img src="{{ asset('images/checkk.svg') }}" alt="Checklist" class="icono-titulo">
+      <h1 class="titulo-checklist fw-bold mb-0">Checklist diario de cumplimiento de EPP</h1>
     </div>
-  </header>
+  </div>
+</header>
+
 
   <!-- 🔶 Buscador -->
   <div class="mb-4 d-flex gap-2 flex-wrap">
@@ -28,15 +30,15 @@
   </div>
 
   <!-- 🔶 Tabla checklist diario -->
-  <div class="card shadow-sm mb-4">
+
     <div class="card-body">
       <!--<h5 class="card-title fw-bold text-center">Registro de hoy</h5>-->
       <div class="table-responsive">
-  <table id="tablaChecklistDiario" class="table table-bordered text-center tabla-epp">
+  <table id="tablaChecklistDiario" class="table table-bordered table-striped text-center tabla-epp">
     <thead>
       <tr>
         <th>Trabajador</th>
-        <th>Anteojos</th>
+        <th>Lentes</th>
         <th>Botas</th>
         <th>Chaleco</th>
         <th>Guantes</th>
@@ -48,33 +50,29 @@
       </tr>
     </thead>
     <tbody>
-      @foreach($checklists as $c)
-      <tr>
-        <td>{{ $c->trabajador->name }}</td>
-        <td>{!! $c->anteojos ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
-        <td>{!! $c->botas ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
-        <td>{!! $c->chaleco ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
-        <td>{!! $c->guantes ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
-        <td>{!! $c->arnes ? '<span style="color:green;">✔️</span>' : '<span style="color:red;">❌</span>' !!}</td>
-        <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
-        <td>
-          @if($c->critico)
-            <span class="badge bg-danger">Crítico</span>
-          @else
-            <span class="badge bg-success">OK</span>
-          @endif
-        </td>
-        <td>{{ \Carbon\Carbon::parse($c->hora)->format('d/m/Y H:i') }}</td>
-        <td>{{ $c->observaciones ?? '—' }}</td>
-      </tr>
-      @endforeach
-    </tbody>
+  @foreach($checklists as $c)
+    <tr>
+      <td>{{ $c->trabajador->name }}</td>
+
+      <td>@if($c->lentes)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
+      <td>@if($c->botas)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
+      <td>@if($c->chaleco)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
+      <td>@if($c->guantes)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
+      <td>@if($c->arnes)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
+
+      <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
+
+      <td>{!! $c->critico ? '<span class="badge bg-danger">Crítico</span>' : '<span class="badge bg-success">Normal</span>' !!}</td>
+      <td>{{ \Carbon\Carbon::parse($c->fecha)->format('d/m/Y') }}</td>
+      <td>{{ $c->observaciones }}</td>
+    </tr>
+  @endforeach
+</tbody>
+
   </table>
 </div>
 
     </div>
-  </div>
-
 
 
   <!-- 🔶 Modal detalle -->

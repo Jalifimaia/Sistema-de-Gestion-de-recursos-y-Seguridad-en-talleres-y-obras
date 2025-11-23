@@ -27,28 +27,40 @@
       <h5 class="mb-0 fw-bold">Filtros de trabajador</h5>
     </div>
     <div class="card-body">
-      <div class="mb-3">
-        <label for="estado_filtro" class="form-label">Estado</label>
-        <select id="estado_filtro" class="form-select">
-          <option value="" selected disabled>-- Filtrar por estado --</option>
-          <option value="alta">Trabajadores en alta</option>
-          <option value="standby">Trabajadores en stand by</option>
-        </select>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="estado_filtro" class="form-label">Estado</label>
+          <select id="estado_filtro" class="form-select">
+            <option value="" selected disabled>Seleccione un estado</option>
+            <option value="alta">Trabajadores en alta</option>
+            <option value="standby">Trabajadores en stand by</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="usuario_id" class="form-label">Trabajador</label>
+          <select name="usuario_id" id="usuario_id" class="form-select select2" required>
+            <option value="">Seleccione un trabajador</option>
+            @foreach ($usuarios as $usuario)
+              <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
+            @endforeach
+          </select>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label for="usuario_id" class="form-label">Trabajador</label>
-        <select name="usuario_id" id="usuario_id" class="form-select select2" required>
-          <option value="">-- Seleccionar trabajador --</option>
-          @foreach ($usuarios as $usuario)
-            <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
-          @endforeach
-        </select>
-      </div>
+      <div id="epp-asignado" class="alert alertaEPP d-none mt-3">
+        <strong class="d-block mb-2">EPP ya asignado:</strong>
 
-      <div id="epp-asignado" class="alert alert-info d-none">
-        <strong>EPP ya asignado:</strong>
-        <ul id="epp-lista" class="mb-0"></ul>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered text-center mb-0" id="epp-tabla">
+            <thead>
+              <tr id="epp-thead"></tr>
+            </thead>
+            <tbody>
+              <tr id="epp-tbody"></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -59,17 +71,63 @@
       <h5 class="mb-0 fw-bold">Asignación de elementos de protección</h5>
     </div>
     <div class="card-body">
-      @foreach (['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'] as $tipo)
-        <div class="mb-3">
-          <label for="{{ $tipo }}" class="form-label">{{ ucfirst($tipo) }}</label>
-          <select name="{{ $tipo }}" id="{{ $tipo }}" class="form-select select2-epp" data-tipo="{{ $tipo }}">
-            <option value="">-- Seleccionar {{ $tipo }} disponible --</option>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="casco" class="form-label">Casco</label>
+          <select name="casco" id="casco" class="form-select select2-epp" data-tipo="casco" data-placeholder="Buscar serie...">
+            <option value="">-- Seleccionar casco disponible --</option>
           </select>
-          <div class="text-danger small d-none" id="alert-{{ $tipo }}">Ya tiene {{ $tipo }} asignado</div>
+          <div class="text-danger small d-none" id="alert-casco">Ya tiene casco asignado</div>
+          <div class="text-danger small d-none" id="alert-casco-vacio">Debe seleccionar un casco</div>
         </div>
-      @endforeach
 
-      <div class="mb-3">
+        <div class="col-md-6">
+          <label for="guantes" class="form-label">Guantes</label>
+          <select name="guantes" id="guantes" class="form-select select2-epp" data-tipo="guantes">
+            <option value="">-- Seleccionar guantes disponibles --</option>
+          </select>
+          <div class="text-danger small d-none" id="alert-guantes">Ya tiene guantes asignado</div>
+          <div class="text-danger small d-none" id="alert-guantes-vacio">Debe seleccionar guantes</div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="lentes" class="form-label">Lentes</label>
+          <select name="lentes" id="lentes" class="form-select select2-epp" data-tipo="lentes">
+            <option value="">-- Seleccionar lentes disponibles --</option>
+          </select>
+          <div class="text-danger small d-none" id="alert-lentes">Ya tiene lentes asignado</div>
+          <div class="text-danger small d-none" id="alert-lentes-vacio">Debe seleccionar lentes</div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="botas" class="form-label">Botas</label>
+          <select name="botas" id="botas" class="form-select select2-epp" data-tipo="botas">
+            <option value="">-- Seleccionar botas disponibles --</option>
+          </select>
+          <div class="text-danger small d-none" id="alert-botas">Ya tiene botas asignado</div>
+          <div class="text-danger small d-none" id="alert-botas-vacio">Debe seleccionar botas</div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="chaleco" class="form-label">Chaleco</label>
+          <select name="chaleco" id="chaleco" class="form-select select2-epp" data-tipo="chaleco">
+            <option value="">-- Seleccionar chaleco disponible --</option>
+          </select>
+          <div class="text-danger small d-none" id="alert-chaleco">Ya tiene chaleco asignado</div>
+          <div class="text-danger small d-none" id="alert-chaleco-vacio">Debe seleccionar un chaleco</div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="arnes" class="form-label">Arnés</label>
+          <select name="arnes" id="arnes" class="form-select select2-epp" data-tipo="arnes">
+            <option value="">-- Seleccionar arnés disponible --</option>
+          </select>
+          <div class="text-danger small d-none" id="alert-arnes">Ya tiene arnés asignado</div>
+          <div class="text-danger small d-none" id="alert-arnes-vacio">Debe seleccionar un arnés</div>
+        </div>
+      </div>
+
+      <div class="mt-3">
         <label for="fecha_asignacion" class="form-label">Fecha de asignación</label>
         <div class="input-group" onclick="this.querySelector('input').showPicker()" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ') this.querySelector('input').showPicker()">
           <input type="date" name="fecha_asignacion" id="fecha_asignacion" class="form-control" required value="{{ now()->toDateString() }}">
@@ -81,13 +139,12 @@
   <!-- Botones -->
   <div class="text-center mt-4">
     <input type="hidden" name="todos_asignados" id="todos_asignados" value="0">
-    <button type="submit" id="submitBtn" class="btn btn-guardar w-100 mb-5">
+    <button type="button" id="submitBtn" class="btn btn-guardar w-100 mb-5">
       Guardar asignación
     </button>
   </div>
-
-
 </form>
+
 
 </div>
 
@@ -121,11 +178,11 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('load', function () {
     const selectEstado = document.getElementById('estado_filtro');
     const selectTrabajador = document.getElementById('usuario_id');
     const eppBox = document.getElementById('epp-asignado');
-    const eppList = document.getElementById('epp-lista');
+    const eppList = document.getElementById('epp-tabla');
     const tipos = ['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'];
     const form = document.querySelector('form');
     const submitBtn = document.getElementById('submitBtn');
@@ -170,9 +227,42 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 const asignados = data.map(epp => (epp.tipo || '').toLowerCase());
-                eppList.innerHTML = data.length
-                    ? data.map(epp => `<li>${epp.tipo}: ${epp.serie}</li>`).join('')
-                    : '<li>No tiene EPP asignado</li>';
+                const thead = document.getElementById('epp-thead');
+                const tbody = document.getElementById('epp-tbody');
+
+                // Tipos en orden fijo
+                const tiposOrdenados = ['casco', 'guantes', 'lentes', 'botas', 'chaleco', 'arnes'];
+
+                // Crear encabezado con los tipos
+                thead.innerHTML = `
+                  <tr>
+                    ${tiposOrdenados.map(tipo => `<th class="text-capitalize">${tipo}</th>`).join('')}
+                  </tr>
+                `;
+
+                // Crear fila con las series asignadas
+                if (data.length) {
+                  const seriesPorTipo = Object.fromEntries(tiposOrdenados.map(tipo => [tipo, '-']));
+
+                  data.forEach(epp => {
+                    const tipo = (epp.tipo || '').toLowerCase();
+                    if (seriesPorTipo[tipo]) {
+                      seriesPorTipo[tipo] = epp.serie || '-';
+                    }
+                  });
+
+                  tbody.innerHTML = `
+                    <tr>
+                      ${tiposOrdenados.map(tipo => `<td>${seriesPorTipo[tipo]}</td>`).join('')}
+                    </tr>
+                  `;
+                } else {
+                  tbody.innerHTML = `
+                    <tr>
+                      ${tiposOrdenados.map(() => `<td>-</td>`).join('')}
+                    </tr>
+                  `;
+                }
                 eppBox.classList.remove('d-none');
 
                 tipos.forEach(tipo => {
@@ -190,17 +280,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     // cargar opciones disponibles (si querés evitar cargas innecesarias podés condicionar)
                     if (select && !select.disabled) {
                         fetch(`/epp/disponibles/${tipo}`)
-                            .then(res => res.json())
-                            .then(opciones => {
-                                select.innerHTML = `<option value="">-- Seleccionar ${tipo} disponible --</option>`;
-                                opciones.forEach(epp => {
-                                    select.innerHTML += `<option value="${epp.id}">${epp.serie}</option>`;
-                                });
+                          .then(res => res.json())
+                          .then(opciones => {
+                            select.innerHTML = `<option value="">-- Seleccionar ${tipo} disponible --</option>`;
+                            opciones.forEach(epp => {
+                              let texto = epp.nro_serie;
+
+                              // Si tiene color o talle, los agregamos correctamente
+                              if (epp.color && epp.talle) {
+                                texto += ` - ${epp.color} - Talle ${epp.talle}`;
+                              } else if (epp.color) {
+                                texto += ` - ${epp.color}`;
+                              } else if (epp.talle) {
+                                texto += ` - Talle ${epp.talle}`;
+                              }
+
+                              select.innerHTML += `<option value="${epp.id}">${texto}</option>`;
                             });
-                    } else if (select) {
-                        // si está deshabilitado, limpiamos opciones para evitar que se envíen valores
+                          });
+
+                      } else if (select) {
                         select.innerHTML = `<option value="">-- ${tipo} asignado --</option>`;
-                    }
+                      }
+
                 });
 
                 actualizarEstadoBoton();
@@ -214,42 +316,95 @@ document.addEventListener('DOMContentLoaded', function () {
         cargarEPP(this.value);
     });
 
-    selectEstado.addEventListener('change', function () {
-        const estado = this.value;
-        if (!estado) return;
+    // Al inicio
+selectTrabajador.disabled = true;
 
-        fetch(`/trabajadores/por-estado/${estado}`)
-            .then(res => res.json())
-            .then(data => {
-                selectTrabajador.innerHTML = '<option value="">-- Seleccionar trabajador --</option>';
-                data.forEach(user => {
-                    selectTrabajador.innerHTML += `<option value="${user.id}">${user.name}</option>`;
-                });
+// En el change de estado
+selectEstado.addEventListener('change', function () {
+    const estado = this.value;
+    if (!estado) return;
 
-                // Resetear EPP (no seleccionar trabajador aún)
-                cargarEPP(null);
+    fetch(`/trabajadores/por-estado/${estado}`)
+        .then(res => res.json())
+        .then(data => {
+            selectTrabajador.innerHTML = '<option value="">Seleccione un trabajador</option>';
+            data.forEach(user => {
+                selectTrabajador.innerHTML += `<option value="${user.id}">${user.name}</option>`;
             });
-    });
+
+            // Habilitar recién ahora
+            selectTrabajador.disabled = false;
+        });
+});
+
 
     // Interceptar submit por seguridad (aun con botón deshabilitado)
-    form.addEventListener('submit', function (e) {
-        const todosAsignados = tipos.every(tipo => {
-            const select = document.getElementById(tipo);
-            return select && select.disabled;
-        });
+   form.addEventListener('submit', function (e) {
 
-        if (todosAsignados) {
-            // evitar envío y mostrar modal
-            e.preventDefault();
-            const modal = new bootstrap.Modal(document.getElementById('modalEppCompleto'));
-            if (modal) modal.show();
-            // hidden ya actualizado por actualizarEstadoBoton()
-        }
-    });
+    console.log('✅ Evento submit disparado');
+  let incompletos = [];
+
+  tipos.forEach(tipo => {
+    const select = document.getElementById(tipo);
+    const alertaAsignado = document.getElementById('alert-' + tipo);
+    const alertaVacio = document.getElementById('alert-' + tipo + '-vacio');
+
+    const valor = select?.value?.trim();
+    const estaAsignado = select?.disabled;
+
+    // Caso: no asignado y vacío → error
+    if (!estaAsignado && !valor) {
+      incompletos.push(tipo);
+      if (alertaVacio) alertaVacio.classList.remove('d-none');
+      if (select) select.classList.add('is-invalid'); // borde rojo
+    } else {
+      if (alertaVacio) alertaVacio.classList.add('d-none');
+      if (select) select.classList.remove('is-invalid');
+    }
+
+    // Caso: ya asignado → mostrar mensaje correspondiente
+    if (estaAsignado) {
+      if (alertaAsignado) alertaAsignado.classList.remove('d-none');
+    } else {
+      if (alertaAsignado) alertaAsignado.classList.add('d-none');
+    }
+  });
+
+  // Si hay incompletos, bloquear envío
+  if (incompletos.length > 0) {
+    e.preventDefault();
+    submitBtn.disabled = false;
+    return;
+  }
+
+  // Si no hay incompletos, enviamos el formulario manualmente
+  submitBtn.type = "submit";
+  submitBtn.click();
+
+
+
+  // Caso: todos asignados → mostrar modal
+  const todosAsignados = tipos.every(tipo => {
+    const select = document.getElementById(tipo);
+    return select && select.disabled;
+  });
+
+  if (todosAsignados) {
+    e.preventDefault();
+    const modal = new bootstrap.Modal(document.getElementById('modalEppCompleto'));
+    if (modal) modal.show();
+  }
+});
+
+
 
     // Si la vista carga con un trabajador ya seleccionado, disparar carga
     const initialUser = selectTrabajador.value;
     if (initialUser) cargarEPP(initialUser);
+    
+    submitBtn.addEventListener('click', () => {
+      form.dispatchEvent(new Event('submit', { cancelable: true }));
+    });
 });
 </script>
 

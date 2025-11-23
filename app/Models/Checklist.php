@@ -19,7 +19,7 @@ class Checklist extends Model
     protected $fillable = [
     'trabajador_id',
     'supervisor_id',
-    'anteojos',
+    'lentes',
     'botas',
     'chaleco',
     'guantes',
@@ -34,7 +34,7 @@ class Checklist extends Model
 
     // Cast automático de booleanos
     protected $casts = [
-        'anteojos' => 'boolean',
+        'lentes' => 'boolean',
         'botas' => 'boolean',
         'chaleco' => 'boolean',
         'guantes' => 'boolean',

@@ -30,6 +30,7 @@ class UsuarioRecurso extends Model
 }
 
 
+
     public function recurso()
     {
         return $this->belongsTo(Recurso::class, 'id_recurso');

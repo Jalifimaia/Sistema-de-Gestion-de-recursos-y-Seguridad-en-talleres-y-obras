@@ -20,6 +20,7 @@ use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use Spatie\Browsershot\Browsershot;
 use App\Models\Color;
 use App\Services\SerieGeneratorService;
+use App\Models\SerieRecursoCodigo;
 
 
 class SerieRecursoController extends Controller
@@ -40,75 +41,50 @@ class SerieRecursoController extends Controller
      */
 
 
-public function storeMultiple(SerieRecursoRequest $request, SerieGeneratorService $generator)
+public function storeMultiple(Request $request, SerieGeneratorService $generator)
 {
-    $data = $request->validated();
+    $validated = $request->validate([
+        
+        'id_recurso' => 'required|exists:recurso,id',
+        'version' => 'required|integer|min:1',
+        'anio' => 'required|integer|min:2000',
+        'lote' => 'required|integer|min:1',
+        'fecha_adquisicion' => 'required|date|before_or_equal:today',
+        'fecha_vencimiento' => 'nullable|date|after:fecha_adquisicion',
+        'id_estado' => 'required|exists:estado,id',
+        'combinaciones' => 'required|json',
+    ]);
 
-    if (\Carbon\Carbon::parse($data['fecha_adquisicion'])->isAfter(now())) {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'fecha_adquisicion' => 'La fecha de adquisición no puede ser mayor a la fecha actual.'
-        ]);
+    $combinaciones = json_decode($request->combinaciones, true);
+    if (empty($combinaciones)) {
+        return response()->json(['message' => 'No hay combinaciones válidas'], 422);
     }
 
-    $recurso = Recurso::with('subcategoria')->findOrFail($data['id_recurso']);
-    $combinaciones = json_decode($data['combinaciones'], true) ?? [];
+    $recurso = Recurso::findOrFail($request->id_recurso);
 
-    $subcategoria = strtolower($recurso->subcategoria->nombre ?? '');
-    $requiereTalle = in_array($subcategoria, ['chaleco', 'botas']);
-    $tipoEsperado = match ($subcategoria) {
-        'chaleco' => 'Ropa',
-        'botas' => 'Calzado',
-        default => null,
-    };
-
-    $errores = [];
-
-    foreach ($combinaciones as $i => $combo) {
-        $tipoTalle = strtolower($combo['tipo_talle'] ?? '');
-        $talle = $combo['talle'] ?? null;
-        $color = $combo['color_nombre'] ?? null;
-        $cantidad = $combo['cantidad'] ?? null;
-
-        if (empty($color)) {
-            $errores["combinaciones.$i.color_nombre"] = ['Falta color en la combinación.'];
-        }
-
-        if ($requiereTalle && (empty($talle) || empty($tipoTalle))) {
-            $errores["combinaciones.$i.talle"] = ['Falta talle o tipo de talle.'];
-        }
-
-        if ($requiereTalle && $tipoEsperado && !in_array($tipoTalle, [strtolower($tipoEsperado), 'otro'])) {
-            $errores["combinaciones.$i.tipo_talle"] = ["El tipo de talle debe ser '{$tipoEsperado}' u 'Otro' para el recurso seleccionado."];
-        }
-
-        if (empty($cantidad) || $cantidad < 1) {
-            $errores["combinaciones.$i.cantidad"] = ['Cantidad inválida.'];
-        }
-    }
-
-    if (!empty($errores)) {
-        throw \Illuminate\Validation\ValidationException::withMessages($errores);
-    }
-
-    foreach ($combinaciones as $combo) {
+    foreach ($combinaciones as $comb) {
         $generator->createForCombination(
             $recurso,
-            $data['version'],
-            $data['anio'],
-            $data['lote'],
-            $combo['color_nombre'],
-            $requiereTalle ? $combo['talle'] : null,
-            (int) $combo['cantidad'],
+            (int) $request->version,
+            (int) $request->anio,
+            (int) $request->lote,
+            (int) $comb['color_id'],              // 👈 ahora pasás el ID
+            $comb['talle'] ?? null,
+            (int) $comb['cantidad'],
             [
-                'fecha_adquisicion' => $data['fecha_adquisicion'],
-                'fecha_vencimiento' => $data['fecha_vencimiento'] ?? null,
-                'id_estado' => Estado::where('nombre_estado', 'Disponible')->value('id') ?? 1,
+                'fecha_adquisicion' => $request->fecha_adquisicion,
+                'fecha_vencimiento' => $request->fecha_vencimiento,
+                'id_estado' => $request->id_estado,
             ]
         );
     }
 
-    return response()->json(['success' => true]);
+    return response()->json([
+        'message' => 'Series creadas exitosamente',
+        'total' => array_sum(array_column($combinaciones, 'cantidad'))
+    ]);
 }
+
 
 
 
