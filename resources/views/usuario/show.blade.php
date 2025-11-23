@@ -12,19 +12,21 @@
     <div class="container py-4">
   <div class="row g-4 align-items-start">
     
-    <!-- Columna izquierda: datos -->
-    <div class="col-md-8">
-      <div class="d-flex align-items-center gap-3 mb-4">
-<a href="{{ request('from') === 'sinChecklist' 
-              ? route('controlEPP.sinChecklist') 
-              : route('usuarios.index') }}" 
-   class="btn btn-volver d-flex align-items-center">
-  <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icon-volver me-2">
-  Volver
-</a>
+<!-- Columna izquierda: datos -->
+<div class="col-md-8">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{{ request()->query('from') === 'sinChecklist' 
+                  ? url('/controlEPP') 
+                  : url('/usuarios') }}" 
+       class="btn btn-volver d-flex align-items-center">
+      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icon-volver me-2">
+      Volver
+    </a>
 
-        <h1 class="titulo-con-linea mb-0">{{ $usuario->name }}</h1>
-      </div>
+    <h1 class="titulo-con-linea mb-0">{{ $usuario->name }}</h1>
+  </div>
+</div>
+
 
 
       <p><strong>Rol:</strong> {{ $usuario->rol->nombre_rol ?? 'Sin rol' }}</p>

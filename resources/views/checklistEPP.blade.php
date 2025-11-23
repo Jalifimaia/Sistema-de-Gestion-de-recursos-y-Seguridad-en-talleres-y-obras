@@ -7,14 +7,13 @@
   <!-- 🔶 Encabezado -->
 <header class="mb-3 py-2 px-4">
   <div class="d-flex align-items-center gap-3 flex-wrap">
-    <!-- Botón volver -->
-    <a href="{{ request('from') === 'sinChecklist' 
-                ? route('controlEPP.sinChecklist') 
-                : route('controlEPP') }}" 
-       class="btn btn-volver d-flex align-items-center">
-      <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
-      Volver
-    </a>
+<!-- Botón volver -->
+<a href="{{ url('/controlEPP') }}" 
+   class="btn btn-volver d-flex align-items-center">
+  <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
+  Volver
+</a>
+
 
     <!-- Título al lado -->
     <div class="d-flex align-items-center gap-2">
