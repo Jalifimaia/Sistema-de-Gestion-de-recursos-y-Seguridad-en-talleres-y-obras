@@ -126,9 +126,6 @@ function validarDuplicados(mostrarErrores = false) {
 
     // Faltantes
     if (!color || (requiereTalleLocal && (!talle || !tipoTalle))) {
-      // nota: la variable requiereTalleLocal ya está definida; aquí se usa para el log
-    }
-    if (!color || (requiereTalleLocal && (!talle || !tipoTalle))) {
       hayCamposFaltantes = true;
       console.log(`  ❗ faltantes en fila ${index}`);
     }
@@ -161,22 +158,27 @@ function validarDuplicados(mostrarErrores = false) {
     hayDuplicados, hayCantidadCero, hayCamposFaltantes, hayTipoTalleInconsistente, hayTipoTalleIncorrecto, hayErroresBasicos
   });
 
-  if (mostrarErrores && hayErroresBasicos) {
-    mostrarErrorCombinaciones(true, 'Corregí las combinaciones marcadas en rojo antes de continuar.');
-  } else if (!hayErroresBasicos) {
-    mostrarErrorCombinaciones(false);
-  }
+  // Mostrar errores básicos en el bloque de combinaciones
+  if (mostrarErrores) {
+    if (hayErroresBasicos) {
+      mostrarErrorCombinaciones(true, 'Corregí las combinaciones marcadas en rojo antes de continuar.');
+    } else {
+      mostrarErrorCombinaciones(false);
+    }
 
-  if (mostrarErrores && hayTipoTalleIncorrecto) {
-    const modalEl = document.getElementById('modalErrorTipoTalle');
-    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-      new bootstrap.Modal(modalEl).show();
+    // Mostrar modal de tipo de talle incorrecto
+    if (hayTipoTalleIncorrecto) {
+      const modalEl = document.getElementById('modalErrorTipoTalle');
+      if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        new bootstrap.Modal(modalEl).show();
+      }
     }
   }
 
-  const hayErrores = hayErroresBasicos || hayTipoTalleIncorrecto;
-  console.log('✅ validarDuplicados resultado:', { hayErrores, retorno: !hayErrores });
-  return !hayErrores;
+  const valido = !hayErroresBasicos && !hayTipoTalleIncorrecto;
+  console.log('✅ validarDuplicados resultado:', { valido, hayErroresBasicos, hayTipoTalleIncorrecto });
+
+  return { valido, hayErroresBasicos, hayTipoTalleIncorrecto };
 }
 
 // Actualizar talles dinámicos
@@ -577,17 +579,19 @@ if (form) {
     mostrarErrorCombinaciones(false);
     console.log('👌 Todo completo en combinaciones y campos principales, seguimos.');
 
-    // 4) Validar duplicados y reglas
-    const ok = validarDuplicados(true);
-    console.log('🔁 validarDuplicados(true) retorno:', ok);
-    if (!ok) {
-      const modalErrorCampos = document.getElementById('modalErrorCampos');
-      if (modalErrorCampos && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        new bootstrap.Modal(modalErrorCampos).show();
-      }
-      console.log('⛔ Fin submit: errores en duplicados/reglas');
-      return;
+// 4) Validar duplicados y reglas
+const resultado = validarDuplicados(true);
+if (!resultado.valido) {
+  if (resultado.hayErroresBasicos) {
+    const modalErrorCampos = document.getElementById('modalErrorCampos');
+    if (modalErrorCampos && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      new bootstrap.Modal(modalErrorCampos).show();
     }
+  }
+  // si hayTipoTalleIncorrecto, ya se muestra su modal dentro de validarDuplicados
+  console.log('⛔ Fin submit: errores en duplicados/reglas');
+  return;
+}
 
     // 5) Armar payload
     const combinaciones = [];
