@@ -558,7 +558,7 @@ function mostrarAyudaYGestionarResuelto() {
 <link href="{{ asset('css/editarIncidente.css') }}" rel="stylesheet">
 <style>
     .is-invalid {
-        border-color: #dc3545 !important;
+        /*border-color: #dc3545 !important;*/
     }
     .error-label {
         display: block;

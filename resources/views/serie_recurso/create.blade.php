@@ -279,14 +279,14 @@ document.addEventListener('DOMContentLoaded', function () {
 <style>
   /* Consistencia visual de errores */
   .is-invalid {
-    border-color: #dc3545 !important;
+    /*border-color: #dc3545 !important;*/
     box-shadow: none;
   }
   
   /* Asegurar que los select también muestren el borde rojo */
   select.is-invalid,
   select.form-select.is-invalid {
-    border-color: #dc3545 !important;
+    /*border-color: #dc3545 !important;*/
     box-shadow: none;
   }
   
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function () {
   
   /* Borde rojo para Select2 cuando está inválido */
   .select2-invalid {
-    border-color: #dc3545 !important;
+    /*border-color: #dc3545 !important;*/
     box-shadow: none !important;
   }
   
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* Borde rojo para Select2 cuando el td está inválido */
 td.td-invalid .select2-selection {
-  border-color: #dc3545 !important;
+  /*border-color: #dc3545 !important;*/
   box-shadow: none !important;
 }
 

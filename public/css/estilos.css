@@ -925,3 +925,8 @@ td.text-nowrap > .d-flex {
 .btn-naranja:hover {
   background-color: #d06842;
 }
+
+/*poner todos los input en color normal*/
+.form-control.is-invalid, .was-validated .form-control:invalid {
+  border: 2px solid #b14910 !important;
+}
