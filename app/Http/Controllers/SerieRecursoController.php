@@ -97,12 +97,12 @@ public function createConRecurso($id)
     ->get();
 
 
-    // ✅ Agrupar talles por tipo
+    //Agrupar talles por tipo
     $talles = \App\Models\Talle::all()
         ->groupBy('tipo')
         ->map(fn($group) => $group->pluck('nombre')->values());
 
-    // ✅ Obtener estado "Disponible"
+    // Obtener estado "Disponible"
     $estadoDisponible = Estado::where('nombre_estado', 'Disponible')->firstOrFail();
 
     return view('serie_recurso.create', compact('recurso', 'colores', 'talles', 'estadoDisponible'));
@@ -183,6 +183,32 @@ public function createConRecurso($id)
     return view('serie_recurso.qrindex', compact('series'));
 }
 
+public function buscar(Request $request)
+{
+    $query = $request->get('search');
+
+    $series = SerieRecurso::with(['recurso.subcategoria', 'recurso.categoria'])
+        ->when($query, function ($q) use ($query) {
+            $q->where(function ($sub) use ($query) {
+                $sub->where('nro_serie', 'like', "%{$query}%")
+                    ->orWhereHas('recurso', function ($qr) use ($query) {
+                        $qr->where('nombre', 'like', "%{$query}%")
+                           ->orWhereHas('subcategoria', fn($qs) => $qs->where('nombre', 'like', "%{$query}%"))
+                           ->orWhereHas('categoria', fn($qc) => $qc->where('nombre_categoria', 'like', "%{$query}%"));
+                    });
+            });
+        })
+        ->orderByDesc('id')
+        ->paginate(18)
+        ->onEachSide(1)
+        ->withQueryString()                      // mantiene ?search y ?page
+        ->withPath(route('series.buscar'));      // links apuntan a la ruta AJAX
+
+    return response()->json([
+        'html' => view('partials.series_cards', compact('series'))->render()
+    ]);
+}
+
 
 
 
@@ -194,7 +220,7 @@ public function exportQrPdf($id)
 {
     $serie = SerieRecurso::with('recurso')->findOrFail($id);
 
-    // ✅ Generar QR como imagen PNG en base64 (sin Imagick)
+    //Generar QR como imagen PNG en base64 (sin Imagick)
     $qrBase64 = base64_encode(\QrCode::format('png')->size(200)->generate($serie->codigo_qr));
 
     return \Pdf::loadView('serie_recurso.qrpdf', [

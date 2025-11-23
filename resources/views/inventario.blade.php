@@ -75,18 +75,19 @@
   </div>
 </section>
 
-  <!-- Botones: Agregar + QR -->
-<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-  <a href="{{ route('recursos.create') }}" class="btn btn-orange d-flex align-items-center gap-2">
-    <img src="{{ asset('images/mas.svg') }}" alt="Icono agregar" style="height: 35px;">
-    <span class="texto-boton-grande">Agregar recurso</span>
+ <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <a href="{{ route('recursos.create') }}" class="btn btn-agregar">
+    Agregar recurso
   </a>
 
-  <a href="{{ url('/series-qr') }}" class="btn btn-outline-orange d-flex align-items-center gap-2">
+  <a href="{{ url('/series-qr') }}" class="btn btn-outline-orange d-flex justify-content-center align-items-center">
     <img src="{{ asset('images/qr2.svg') }}" alt="QR icono" style="height: 35px;">
     <span class="texto-boton-grande btn-qr">Códigos QR</span>
   </a>
+
+
 </div>
+
 
 <!-- Filtro y buscador -->
 <div class="d-flex flex-wrap align-items-center gap-3 mb-3">

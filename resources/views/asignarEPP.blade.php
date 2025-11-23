@@ -341,7 +341,7 @@ selectEstado.addEventListener('change', function () {
     // Interceptar submit por seguridad (aun con botón deshabilitado)
    form.addEventListener('submit', function (e) {
 
-    console.log('✅ Evento submit disparado');
+    console.log('Evento submit disparado');
   let incompletos = [];
 
   tipos.forEach(tipo => {

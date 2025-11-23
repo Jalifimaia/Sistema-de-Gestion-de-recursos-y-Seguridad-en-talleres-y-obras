@@ -60,7 +60,7 @@ public function store(UserRequest $request): RedirectResponse
         $data['id_estado'] = $estadoStandBy->id;
     }
 
-    $data['codigo_qr'] = 'USR-' . Str::uuid(); // ✅ QR único
+    $data['codigo_qr'] = 'USR-' . Str::uuid(); // qR único
 
     User::create($data);
 

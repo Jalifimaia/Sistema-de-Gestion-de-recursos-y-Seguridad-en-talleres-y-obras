@@ -157,7 +157,7 @@ public function store(Request $request)
         }
     });
 
-    return redirect()->route('incidente.create')->with('success', '✅ Incidente registrado correctamente.');
+    return redirect()->route('incidente.create')->with('success', 'Incidente registrado correctamente.');
 }
 
     // =======================
@@ -298,7 +298,7 @@ public function show($id)
 
             DB::commit();
 
-            return redirect()->route('incidente.edit', $id)->with('success', '✅ Incidente actualizado correctamente.');
+            return redirect()->route('incidente.edit', $id)->with('success', 'Incidente actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error al actualizar incidente: ' . $e->getMessage(), [

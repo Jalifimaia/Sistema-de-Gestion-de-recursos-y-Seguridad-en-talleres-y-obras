@@ -93,32 +93,30 @@ table.table thead th {
   height: 18px;
 }
 
-.pagination .page-link {
-  color: #b95b0e;
-  border: 1px solid #b95b0e;
-  background-color: #fff;
-  transition: all 0.2s ease;
+.btn-ver-grafico {
+  border-color: #1f1f1f;
+  outline: none;
 }
 
-.pagination .page-link:hover {
+.btn-ver-grafico:hover {
+  background-color: #c9c9c9;
+  border-color: #1f1f1f;
+  outline: none;
+}
+
+.btn-filtro {
+  background-color: #b14910;
   color: #fff;
-  background-color: #b95b0e;
-  border-color: #b95b0e;
+  font-weight: 500;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
 }
 
-.pagination .page-item.active .page-link {
-  color: #fff;
-  background-color: #b95b0e;
-  border-color: #b95b0e;
+.btn-filtro:hover {
+  background-color: #943d0e;
 }
-
-.pagination .page-item.disabled .page-link {
-  color: #ccc;
-  border-color: #ddd;
-  background-color: #f8f9fa;
-}
-
-/*AAA*/
 
 .pagination {
   display: flex;
@@ -148,29 +146,4 @@ table.table thead th {
   background-color: #d06842;
   color: white;
   border-color: #d06842;
-}
-
-.btn-ver-grafico {
-  border-color: #1f1f1f;
-  outline: none;
-}
-
-.btn-ver-grafico:hover {
-  background-color: #c9c9c9;
-  border-color: #1f1f1f;
-  outline: none;
-}
-
-.btn-filtro {
-  background-color: #b14910;
-  color: #fff;
-  font-weight: 500;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.btn-filtro:hover {
-  background-color: #943d0e;
 }

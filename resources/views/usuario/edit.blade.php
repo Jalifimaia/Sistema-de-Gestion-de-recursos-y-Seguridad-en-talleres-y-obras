@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   })();
 
-  // ✅ Modal automático para mensajes del sistema
+  // Modal automático para mensajes del sistema
 (function autocloseSystemModal() {
   @if(session('success'))
     (function () {

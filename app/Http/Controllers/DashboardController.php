@@ -25,12 +25,16 @@ public function index()
 
     $herramientasEnUso = SerieRecurso::where('id_estado', 3)->count();
 
-    $herramientasEnUsoLista = SerieRecurso::with('recurso.subcategoria.categoria')
-        ->whereHas('recurso.subcategoria.categoria', function ($query) {
+    $herramientasEnUsoLista = \App\Models\DetallePrestamo::with([
+            'serieRecurso.recurso.subcategoria.categoria',
+            'prestamo.usuario'
+        ])
+        ->whereHas('serieRecurso.recurso.subcategoria.categoria', function ($query) {
             $query->where('nombre_categoria', 'Herramienta');
         })
-        ->where('id_estado', 3)
+        ->where('id_estado_prestamo', 2) // estado "en uso"
         ->paginate(6, ['*'], 'herramientas_uso_page');
+
 
 
     $herramientasTotales = DB::table('serie_recurso')

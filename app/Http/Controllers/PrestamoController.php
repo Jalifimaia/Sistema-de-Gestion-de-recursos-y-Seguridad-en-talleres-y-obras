@@ -202,7 +202,7 @@ public function store(PrestamoRequest $request)
             'fecha_modificacion'      => now(),
         ]);
 
-        // ✅ Tomar la única serie
+        //Tomar la única serie
         $idSerie = $series[0];
 
         // Validar que la serie esté disponible

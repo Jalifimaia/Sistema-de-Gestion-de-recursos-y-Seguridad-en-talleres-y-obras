@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
 class DetallePrestamo extends Model
 {
     protected $table = 'detalle_prestamo';
-    public $timestamps = false; // 👈 importante, tu tabla no tiene created_at/updated_at
+    public $timestamps = false; //  importante tabla no tiene created_at/updated_at
 
     protected $perPage = 20;
 

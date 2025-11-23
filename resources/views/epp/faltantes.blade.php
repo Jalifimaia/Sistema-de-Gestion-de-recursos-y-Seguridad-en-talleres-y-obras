@@ -41,7 +41,7 @@
       </table>
     </div>
   @else
-    <div class="alert alert-success">✅ Todos los trabajadores tienen sus EPP asignados.</div>
+    <div class="alert alert-success">Todos los trabajadores tienen sus EPP asignados.</div>
   @endif
 </div>
 @endsection
