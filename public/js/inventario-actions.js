@@ -1,24 +1,86 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const modalEl = document.getElementById('modalConfirmBajaRecurso');
-  const modalText = document.getElementById('modalConfirmBajaText');
+  // Modales
+  const modalConfirmEl = document.getElementById('modalConfirmBajaRecurso');
+  const modalErrorEl = document.getElementById('modalErrorPrestamos');
+  
+  const modalConfirmInstance = (modalConfirmEl && typeof bootstrap?.Modal === 'function') ? new bootstrap.Modal(modalConfirmEl) : null;
+  const modalErrorInstance = (modalErrorEl && typeof bootstrap?.Modal === 'function') ? new bootstrap.Modal(modalErrorEl) : null;
+  
+  const modalConfirmText = document.getElementById('modalConfirmBajaText');
   const modalConfirmBtn = document.getElementById('modalBajaConfirm');
   const modalCancelBtn = document.getElementById('modalBajaCancel');
-  const modalInstance = (modalEl && typeof bootstrap?.Modal === 'function') ? new bootstrap.Modal(modalEl) : null;
+  const modalErrorNombre = document.getElementById('modalErrorNombreRecurso');
+  
   let currentForm = null;
   let currentRow = null;
 
   // Attach click to eliminar buttons
   document.querySelectorAll('.btn-marcar-baja').forEach(btn => {
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', async function (e) {
+      e.preventDefault(); // Prevenir cualquier acción por defecto
+      
       currentForm = this.closest('.marcar-baja-form');
       currentRow = currentForm.closest('tr');
       const nombre = currentForm?.dataset.nombre || 'Recurso';
+      const action = currentForm.getAttribute('action');
+      
+      // Extraer el ID del recurso de la URL: /recursos/{id}/baja
+      const parts = action.split('/').filter(p => p); // Filtrar partes vacías
+      const recursoId = parts[parts.length - 2]; // Penúltimo elemento
+      
+      console.log('Action URL:', action);
+      console.log('Parts:', parts);
+      console.log('Recurso ID:', recursoId);
 
-      if (modalText) {
-        modalText.textContent = `¿Seguro que querés marcar como baja el recurso "${nombre}"?`;
+      // Verificar si tiene préstamos activos antes de mostrar el modal
+      try {
+        const url = `/recursos/${recursoId}/verificar-prestamos`;
+        console.log('Fetching:', url);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Data received:', data);
+
+        if (data.tiene_prestamos) {
+          // Mostrar modal de error
+          console.log('Mostrando modal de error - tiene préstamos');
+          if (modalErrorNombre) {
+            modalErrorNombre.textContent = nombre;
+          }
+          if (modalErrorInstance) modalErrorInstance.show();
+          
+          // Limpiar referencias
+          currentForm = null;
+          currentRow = null;
+        } else {
+          // Mostrar modal de confirmación
+          console.log('Mostrando modal de confirmación - no tiene préstamos');
+          if (modalConfirmText) {
+            modalConfirmText.textContent = `¿Seguro que querés marcar como baja el recurso "${nombre}"?`;
+          }
+          if (modalConfirmInstance) modalConfirmInstance.show();
+        }
+      } catch (error) {
+        console.error('Error al verificar préstamos:', error);
+        // En caso de error, mostrar el modal de confirmación por defecto
+        if (modalConfirmText) {
+          modalConfirmText.textContent = `¿Seguro que querés marcar como baja el recurso "${nombre}"?`;
+        }
+        if (modalConfirmInstance) modalConfirmInstance.show();
       }
-
-      if (modalInstance) modalInstance.show();
     });
   });
 
@@ -32,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     try {
       const res = await fetch(action, {
-        method: 'DELETE', // 🔑 ahora coincide con la ruta y el form
+        method: 'DELETE',
         headers: {
           'X-CSRF-TOKEN': token,
           'X-Requested-With': 'XMLHttpRequest',
@@ -41,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         body: JSON.stringify({})
       });
-
 
       if (res.ok) {
         const accionesCell = currentRow.querySelector('.acciones-cell');
@@ -62,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error('Error en petición de baja:', err);
       alert('Error al marcar como baja. Revisá la consola.');
     } finally {
-      if (modalInstance) modalInstance.hide();
+      if (modalConfirmInstance) modalConfirmInstance.hide();
       if (modalConfirmBtn) modalConfirmBtn.disabled = false;
       currentForm = null;
       currentRow = null;

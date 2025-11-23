@@ -200,6 +200,30 @@
     </div>
   </div>
 
+<!-- Modal de error cuando el recurso tiene préstamos activos -->
+<div class="modal fade" id="modalErrorPrestamos" tabindex="-1" aria-labelledby="modalErrorPrestamosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="modalErrorPrestamosLabel">No se puede dar de baja</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-start gap-3">
+          <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2rem;"></i>
+          <div>
+            <p class="mb-2"><strong id="modalErrorNombreRecurso"></strong></p>
+            <p class="mb-0">Este recurso tiene series con préstamos registrados. No se puede dar de baja mientras existan préstamos activos asociados.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   <!-- Modal Confirmación baja (global para recurso) -->
   <div class="modal fade" id="modalConfirmBajaRecurso" tabindex="-1" aria-labelledby="modalConfirmBajaLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

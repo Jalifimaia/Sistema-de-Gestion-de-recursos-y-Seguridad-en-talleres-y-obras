@@ -21,6 +21,8 @@ Route::post('/subcategorias', [SubcategoriaController::class, 'store']);
 
 Route::get('/recomendaciones', [RecomendacionController::class, 'index']);
 
+Route::get('/recursos/{id}/verificar-prestamos', [RecursoController::class, 'verificarPrestamos']);
+
 /*
 |--------------------------------------------------------------------------
 | Rutas API para Préstamos

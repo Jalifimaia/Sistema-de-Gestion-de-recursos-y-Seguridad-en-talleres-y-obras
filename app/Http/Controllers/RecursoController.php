@@ -522,7 +522,18 @@ public function destroy($id)
         : redirect()->route('inventario.index')->with('success_modal', 'Recurso marcado como dado de baja.');
 }
 
+public function verificarPrestamos($id)
+{
+    $recurso = Recurso::with('serieRecursos.detallePrestamos')->findOrFail($id);
 
+    $tienePrestamos = $recurso->serieRecursos->some(function ($serie) {
+        return $serie->detallePrestamos()->exists();
+    });
+
+    return response()->json([
+        'tiene_prestamos' => $tienePrestamos
+    ]);
+}
 
 
 
