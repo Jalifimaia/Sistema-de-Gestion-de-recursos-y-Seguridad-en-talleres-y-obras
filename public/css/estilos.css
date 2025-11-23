@@ -185,6 +185,13 @@
   height: 46px;
 }
 
+.btn-orange-inicioSesion {
+  background-color: #d06842;
+  color: white;
+  border: none;
+  align-content: center;
+}
+
 .btn-orange:hover {
   background-color: #b85c3a;
   color: white;
