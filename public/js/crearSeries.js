@@ -282,7 +282,7 @@ window.agregarFila = function () {
   cols += `
     <td>
       <select class="form-select color-select">
-        <option value="" disabled selected>Seleccione o escriba</option>
+        <option value="" disabled selected>Seleccione el color</option>
         ${selectColor}
       </select>
     </td>
@@ -294,21 +294,37 @@ window.agregarFila = function () {
   row.innerHTML = cols;
   tbody.appendChild(row);
 
-  try {
-    if (window.jQuery && typeof window.jQuery.fn.select2 === 'function') {
-      $(row).find('select').select2({ tags: true, width: '100%' });
+// En window.agregarFila, reemplazá la inicialización Select2:
+try {
+  if (window.jQuery && typeof window.jQuery.fn.select2 === 'function') {
+    // Tipo de talle: sin tags, sin búsqueda
+    $(row).find('select.tipo-talle').select2({
+      tags: false,
+      width: '100%',
+      minimumResultsForSearch: Infinity
+    }).on('select2:open', function() {
+      setTimeout(function() {
+        $('.select2-container--open .select2-search__field').hide();
+      }, 0);
+    });
 
-      $(row).find('select').on('select2:select select2:clear', function() {
-        this.dispatchEvent(new Event('change', { bubbles: true }));
-      });
+    // Talle y Color: sin tags, sin búsqueda
+    $(row).find('select.talle-select, select.color-select').select2({
+      tags: false,
+      width: '100%',
+      minimumResultsForSearch: Infinity
+    }).on('select2:open', function() {
+      setTimeout(function() {
+        $('.select2-container--open .select2-search__field').hide();
+      }, 0);
+    });
 
-      $(row).find('select.tipo-talle').on('select2:open', function() {
-        setTimeout(function() {
-          $('.select2-container--open .select2-search__field').hide();
-        }, 0);
-      });
-    }
-  } catch (e) {}
+    // Eventos para disparar change desde Select2 (mantener)
+    $(row).find('select').on('select2:select select2:clear', function() {
+      this.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+} catch (e) {}
 
   generarPreviewCodigoPorFila();
   validarDuplicados(false);

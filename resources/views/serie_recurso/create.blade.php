@@ -134,7 +134,7 @@
       </table>
 
       <!-- Mensaje de error de combinaciones -->
-      <div id="error-combinaciones" class="alert alert-danger d-none mt-2" role="alert"></div>
+      <div id="error-combinaciones" class="alert alert-danger d-none mt-2" role="alert" ></div>
 
       <div class="d-flex justify-content-start gap-3 mt-3 flex-wrap">
         <button type="button" class="btn btn-combinacion" onclick="agregarFila()">+ Agregar combinación</button>
@@ -322,6 +322,11 @@ document.addEventListener('DOMContentLoaded', function () {
 td.td-invalid .select2-selection {
   /*border-color: #dc3545 !important;*/
   box-shadow: none !important;
+}
+
+#error-combinaciones {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 </style>
