@@ -253,7 +253,6 @@
               <tr>
                 <th>Serie</th>
                 <th>Estado</th>
-                <th>Color</th>
                 <th>Acciones</th>
               </tr>
             </thead>

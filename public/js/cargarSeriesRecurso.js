@@ -220,7 +220,7 @@ window.addEventListener('load', function () {
 
         fila.appendChild(tdSerie);
         fila.appendChild(tdEstado);
-        fila.appendChild(tdColor);
+        //fila.appendChild(tdColor);
         fila.appendChild(tdAcciones);
         tablaBody.appendChild(fila);
       });
