@@ -165,3 +165,11 @@ td.text-nowrap > .d-flex {
 th.recurso-costo {
   white-space: nowrap;   /* 🔹 fuerza a que se vea todo seguido */
 }
+
+.text-orange {
+  color: #f57c00;
+}
+
+.d-flex.flex-wrap.gap-4 > div {
+  font-size: 0.95rem;
+}
