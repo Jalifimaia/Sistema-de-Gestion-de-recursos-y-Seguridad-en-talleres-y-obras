@@ -7,6 +7,36 @@ document.addEventListener('DOMContentLoaded', function () {
   const agregarBtn = document.getElementById('agregarSubcategoria');
   const descripcion = document.getElementById('descripcion');
 
+// 🔹 Limpiar errores al interactuar con los campos
+function limpiarErrorCampo(campo) {
+  const container = campo.closest('.mb-3') || campo.parentElement;
+  const errorExistente = container.querySelector('.text-danger.small.mt-1');
+  if (errorExistente) {
+    errorExistente.remove();
+  }
+}
+
+// Para inputs y textarea
+[document.getElementById('nombre'), 
+ document.getElementById('descripcion'), 
+ document.getElementById('costo_unitario'),
+ nuevaSubInput].forEach(el => {
+  if (el) {
+    el.addEventListener('input', function() {
+      limpiarErrorCampo(this);
+    });
+  }
+});
+
+// Para selects
+[categoriaSelect, subcategoriaSelect].forEach(el => {
+  if (el) {
+    el.addEventListener('change', function() {
+      limpiarErrorCampo(this);
+    });
+  }
+});
+
   // 🔹 Cargar subcategorías dinámicamente al cambiar categoría
   categoriaSelect.addEventListener('change', function () {
     const categoriaId = this.value;
@@ -126,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const error = document.createElement('div');
     error.className = 'text-danger small mt-1';
     error.id = 'error-descripcion';
-    error.textContent = '⚠️ Te pasaste de las 4 palabras.';
+    error.textContent = 'Te pasaste de las 4 palabras.';
     container.appendChild(error);
     if (!firstInvalid) firstInvalid = descripcion;
   }

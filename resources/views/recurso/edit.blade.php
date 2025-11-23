@@ -10,30 +10,23 @@
         Volver
       </a>
 
-  <div class="d-flex align-items-center">
-    <img src="{{ asset('images/lapiz.svg') }}" alt="Editar" style="width: 36px; height: 36px;" class="me-2">
-    <h4 class="fw-bold mb-0">Editar recurso</h4>
-  </div>
-</div>
-
-
-    <div class="alert alert-warning d-flex align-items-start gap-2">
-      <img src="{{ asset('images/precaucion.svg') }}" alt="Precaución" class="icono-precaucion mt-1">
-      <div>
-        <strong>Importante:</strong> La categoría y subcategoría no pueden modificarse una vez creado el recurso.
-        <br>Si necesitas cambiar la categoría (por ejemplo, de EPP a Herramienta), debes eliminar el recurso y volver a registrarlo.
+      <div class="d-flex align-items-center">
+        <img src="{{ asset('images/lapiz.svg') }}" alt="Editar" style="width: 36px; height: 36px;" class="me-2">
+        <h4 class="fw-bold mb-0">Editar recurso</h4>
       </div>
     </div>
 
+    <div id="mensaje"></div>
 
     <form id="recursoForm" class="row g-3 mb-3" method="POST" action="{{ route('recursos.update', $recurso->id) }}">
         @csrf
         @method('PUT')
 
-        <!-- Categoría (bloqueada) -->
-        <div class="col-md-6">
+        <!-- Categoría (editable) -->
+        <div class="col-md-6 mb-3">
             <label for="categoria" class="form-label">Categoría</label>
-            <select id="categoria" name="categoria_id" class="form-select" disabled>
+            <select id="categoria" name="categoria_id" class="form-select" required>
+                <option value="">Seleccione una categoría</option>
                 @php
                     $categoriaId = \App\Models\Subcategoria::find($recurso->id_subcategoria)->categoria_id ?? '';
                 @endphp
@@ -43,57 +36,56 @@
                     </option>
                 @endforeach
             </select>
-            <input type="hidden" name="categoria_id" value="{{ $categoriaId }}">
         </div>
 
-        <!-- Subcategoría (bloqueada) -->
-        <div class="col-md-6">
-            <label for="subcategoria" class="form-label">Subcategoría</label>
-            <select id="subcategoria" name="subcategoria_id" class="form-select" disabled>
+        <!-- Subcategoría (editable) -->
+        <div class="col-md-6 mb-3">
+            <label for="id_subcategoria" class="form-label">Subcategoría</label>
+            <select id="id_subcategoria" name="id_subcategoria" class="form-select" required>
                 @foreach($subcategorias as $subcategoria)
                     <option value="{{ $subcategoria->id }}" {{ $recurso->id_subcategoria == $subcategoria->id ? 'selected' : '' }}>
                         {{ $subcategoria->nombre }}
                     </option>
                 @endforeach
             </select>
-            <input type="hidden" name="id_subcategoria" value="{{ $recurso->id_subcategoria }}">
         </div>
 
         <!-- Nombre -->
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3">
             <label for="nombre" class="form-label">Nombre</label>
             <input type="text" id="nombre" name="nombre"
               class="form-control"
+              placeholder = "Ingrese un nombre"
               maxlength="60"
               value="{{ old('nombre', $recurso->nombre) }}" required>
         </div>
 
-        <!-- Descripción -->
-        <div class="col-12">
-          <label for="descripcion" class="form-label">Descripción</label>
-          <textarea id="descripcion"
-                    name="descripcion"
-                    class="form-control @error('descripcion') is-invalid @enderror"
-                    placeholder="Descripción (máx. 4 palabras)."
-                    rows="3"
-                    maxlength="250">{{ old('descripcion', $recurso->descripcion) }}</textarea>
-          @error('descripcion')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-        </div>
-
-
         <!-- Costo unitario -->
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3">
             <label for="costo_unitario" class="form-label">Costo unitario</label>
             <input type="text"
               id="costo_unitario"
               name="costo_unitario"
               class="form-control"
               placeholder="Costo unitario"
-              min="0"
-              step="0.01"
-              value="{{ old('costo_unitario', number_format($recurso->costo_unitario, 0, ',', '.')) }}">
+              value="{{ old('costo_unitario', number_format($recurso->costo_unitario, 0, ',', '.')) }}"
+              required>
+        </div>
+
+        <!-- Descripción -->
+        <div class="col-12 mb-3">
+          <label for="descripcion" class="form-label">Descripción</label>
+          <textarea id="descripcion"
+                    name="descripcion"
+                    class="form-control @error('descripcion') is-invalid @enderror"
+                    placeholder="Descripción (máx. 4 palabras)."
+                    rows="3"
+                    maxlength="250"
+                    required>{{ old('descripcion', $recurso->descripcion) }}</textarea>
+          <small id="contadorPalabras" class="text-muted">0/4 palabras</small>
+          @error('descripcion')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
         </div>
 
         <!-- Guardar cambios -->
@@ -102,7 +94,7 @@
         </div>
     </form>
 
-    <div class="d-flex justify-content-start gap-3 flex-wrap botones-inferiores">
+    <div class="d-none d-flex justify-content-start gap-3 flex-wrap botones-inferiores">
       <a href="{{ route('recursos.create') }}" class="btn btn-nuevo">
         + Registrar nuevo recurso
       </a>
@@ -110,13 +102,12 @@
       <form id="deleteRecursoForm" action="{{ route('recursos.destroy', $recurso->id) }}" method="POST">
         @csrf
         @method('DELETE')
-        <button type="button" class="btn btn-eliminar d-flex align-items-center gap-2" id="btnOpenEliminar">
+        <button type="button" class="d-none btn btn-eliminar d-flex align-items-center gap-2" id="btnOpenEliminar">
           <img src="{{ asset('images/delete.svg') }}" alt="Eliminar" style="width: 20px; height: 20px;">
           Eliminar recurso
         </button>
       </form>
     </div>
-
 </div>
 
 <!-- Modal Confirmar Eliminación -->
@@ -133,6 +124,24 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Error Campos -->
+<div class="modal fade" id="modalErrorCampos" tabindex="-1" aria-labelledby="modalErrorCamposLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalErrorCamposLabel">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Faltan campos por completar. Por favor, revisá el formulario.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -163,7 +172,199 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // Eliminar: abrir modal al hacer click en el botón
+  const form = document.getElementById('recursoForm');
+  const categoriaSelect = document.getElementById('categoria');
+  const subcategoriaSelect = document.getElementById('id_subcategoria');
+  const descripcion = document.getElementById('descripcion');
+  const contador = document.getElementById('contadorPalabras');
+  const costoInput = document.getElementById('costo_unitario');
+
+  // 🔹 Desactivar validación nativa del navegador
+  form.setAttribute('novalidate', true);
+
+  // 🔹 Bloquear subcategoría si no hay categoría seleccionada
+  function actualizarEstadoSubcategoria() {
+    if (!categoriaSelect.value) {
+      subcategoriaSelect.disabled = true;
+      subcategoriaSelect.innerHTML = '<option value="">Primero seleccioná una categoría</option>';
+    }
+  }
+  actualizarEstadoSubcategoria();
+
+  // 🔹 Función para contar palabras
+  function contarPalabras(texto) {
+    const palabras = texto.trim().split(/\s+/).filter(p => p.length > 0);
+    return palabras.length;
+  }
+
+  // 🔹 Actualizar contador de palabras
+  function actualizarContador() {
+    const cantidad = descripcion.value.trim() === '' ? 0 : contarPalabras(descripcion.value);
+    contador.textContent = `${cantidad}/4 palabras`;
+    contador.classList.toggle('text-danger', cantidad > 4);
+    contador.classList.toggle('text-muted', cantidad <= 4);
+  }
+
+  // 🔹 Limitar a 4 palabras en descripción (permitiendo espacio después de la 4ta)
+  descripcion.addEventListener('input', function() {
+    const texto = this.value;
+    const palabras = texto.trim().split(/\s+/).filter(p => p.length > 0);
+    
+    if (palabras.length > 4) {
+      // Mantener solo las primeras 4 palabras + espacio si lo había
+      const cuatroPalabras = palabras.slice(0, 4).join(' ');
+      this.value = cuatroPalabras;
+    }
+    
+    actualizarContador();
+    limpiarErrorCampo(this);
+  });
+
+  // Bloquear espacio si ya hay 4 palabras completas
+  descripcion.addEventListener('keydown', function(e) {
+    if (e.key === ' ') {
+      const palabras = this.value.trim().split(/\s+/).filter(p => p.length > 0);
+      if (palabras.length >= 4) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  // Inicializar contador
+  actualizarContador();
+
+  // 🔹 Cargar subcategorías al cambiar categoría
+  categoriaSelect.addEventListener('change', function () {
+    const categoriaId = this.value;
+    subcategoriaSelect.innerHTML = '<option>Cargando...</option>';
+    subcategoriaSelect.disabled = true;
+
+    if (!categoriaId) {
+      subcategoriaSelect.innerHTML = '<option value="">Primero seleccioná una categoría</option>';
+      subcategoriaSelect.disabled = true;
+      return;
+    }
+
+    fetch(`/inventario/ajax/subcategorias/${encodeURIComponent(categoriaId)}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        let options = '<option value="">Seleccione una subcategoría</option>';
+        data.forEach(sub => {
+          options += `<option value="${sub.id}">${sub.nombre}</option>`;
+        });
+        subcategoriaSelect.innerHTML = options;
+        subcategoriaSelect.disabled = false;
+      })
+      .catch(error => {
+        subcategoriaSelect.innerHTML = '<option>Error al cargar</option>';
+        subcategoriaSelect.disabled = false;
+      });
+
+    limpiarErrorCampo(this);
+  });
+
+  // 🔹 Función para limpiar error de un campo
+  function limpiarErrorCampo(campo) {
+    const container = campo.closest('.mb-3') || campo.closest('.col-md-6') || campo.closest('.col-12') || campo.parentElement;
+    const errorExistente = container.querySelector('.text-danger.small.mt-1');
+    if (errorExistente) {
+      errorExistente.remove();
+    }
+  }
+
+  // 🔹 Limpiar errores al interactuar
+  [document.getElementById('nombre'), costoInput].forEach(el => {
+    if (el) {
+      el.addEventListener('input', function() {
+        limpiarErrorCampo(this);
+      });
+    }
+  });
+
+  subcategoriaSelect.addEventListener('change', function() {
+    limpiarErrorCampo(this);
+  });
+
+  // 🔹 Validación del formulario
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    // Limpiar errores previos
+    form.querySelectorAll('.text-danger.small.mt-1').forEach(el => el.remove());
+
+    let firstInvalid = null;
+    let hayErrores = false;
+
+    // Validar campos requeridos
+    const requiredFields = form.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+      const container = field.closest('.mb-3') || field.closest('.col-md-6') || field.closest('.col-12') || field.parentElement;
+
+      if (!field.value.trim()) {
+        const error = document.createElement('div');
+        error.className = 'text-danger small mt-1';
+        error.textContent = 'Este campo es obligatorio.';
+        container.appendChild(error);
+        if (!firstInvalid) firstInvalid = field;
+        hayErrores = true;
+      }
+    });
+
+    // Validar que haya subcategoría seleccionada (si está habilitado)
+    if (!subcategoriaSelect.disabled && !subcategoriaSelect.value) {
+      const container = subcategoriaSelect.closest('.mb-3') || subcategoriaSelect.closest('.col-md-6') || subcategoriaSelect.parentElement;
+      if (!container.querySelector('.text-danger.small.mt-1')) {
+        const error = document.createElement('div');
+        error.className = 'text-danger small mt-1';
+        error.textContent = 'Este campo es obligatorio.';
+        container.appendChild(error);
+        if (!firstInvalid) firstInvalid = subcategoriaSelect;
+        hayErrores = true;
+      }
+    }
+
+    // Validar descripción: máximo 4 palabras
+    const palabras = contarPalabras(descripcion.value);
+    if (palabras > 4) {
+      const container = descripcion.closest('.col-12') || descripcion.parentElement;
+      const error = document.createElement('div');
+      error.className = 'text-danger small mt-1';
+      error.textContent = '⚠️ La descripción debe tener máximo 4 palabras.';
+      container.appendChild(error);
+      if (!firstInvalid) firstInvalid = descripcion;
+      hayErrores = true;
+    }
+
+    if (hayErrores) {
+      firstInvalid.focus();
+      const modalErrorEl = document.getElementById('modalErrorCampos');
+      if (modalErrorEl && typeof bootstrap !== 'undefined') {
+        new bootstrap.Modal(modalErrorEl).show();
+      }
+      return;
+    }
+
+    // Limpiar formato del costo antes de enviar
+    costoInput.value = costoInput.value.replace(/\./g, '').replace(',', '.');
+
+    // Enviar formulario
+    form.submit();
+  });
+
+  // 🔹 Formateo del costo unitario
+  if (costoInput) {
+    costoInput.addEventListener('input', () => {
+      let value = costoInput.value.replace(/\D/g, '');
+      if (value) {
+        costoInput.value = new Intl.NumberFormat('es-AR').format(value);
+      }
+    });
+  }
+
+  // 🔹 Modal de eliminación
   const btnOpenEliminar = document.getElementById('btnOpenEliminar');
   const modalConfirmEl = document.getElementById('modalConfirmDelete');
   const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -172,33 +373,13 @@ document.addEventListener('DOMContentLoaded', function () {
   if (btnOpenEliminar && modalConfirmEl && confirmDeleteBtn && deleteForm) {
     const bsModal = new bootstrap.Modal(modalConfirmEl);
     btnOpenEliminar.addEventListener('click', () => bsModal.show());
-
-    confirmDeleteBtn.addEventListener('click', () => {
-      // enviar el form de eliminación
-      deleteForm.submit();
-    });
+    confirmDeleteBtn.addEventListener('click', () => deleteForm.submit());
   }
 
-  // Mostrar modal de guardado si existe
+  // 🔹 Mostrar modal de guardado exitoso
   const modalGuardado = document.getElementById('modalGuardadoExitoso');
-  if (modalGuardado && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+  if (modalGuardado && typeof bootstrap !== 'undefined') {
     new bootstrap.Modal(modalGuardado).show();
-  }
-
-  const input = document.getElementById('costo_unitario');
-
-  if (input) {
-    input.addEventListener('input', () => {
-      let value = input.value.replace(/\D/g, '');
-      if (value) {
-        input.value = new Intl.NumberFormat('es-AR').format(value);
-      }
-    });
-
-    input.form.addEventListener('submit', () => {
-      // limpiar puntos antes de enviar
-      input.value = input.value.replace(/\./g, '').replace(',', '.');
-    });
   }
 });
 </script>
@@ -207,4 +388,3 @@ document.addEventListener('DOMContentLoaded', function () {
 @push('styles')
   <link href="{{ asset('css/editarRecurso.css') }}" rel="stylesheet">
 @endpush
-
