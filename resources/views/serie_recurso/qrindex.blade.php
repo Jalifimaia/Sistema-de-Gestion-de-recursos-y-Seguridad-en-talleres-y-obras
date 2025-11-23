@@ -21,7 +21,9 @@
     </div>
 
     <!-- Botón imprimir lote -->
-    <a href="{{ route('series.qr.lote.pdf', ['page' => request('page', 1)]) }}"
+     <!-- SE DESACTIVO POR LAS DUDAS -->
+    <!--<a href="{ route('series.qr.lote.pdf', ['page' => request('page', 1)]) }}"-->
+    <a 
        class="btn btn-print d-flex align-items-center mt-2 mt-md-0" target="_blank">
       <img src="{{ asset('images/print.svg') }}" alt="Imprimir" class="me-2" style="width: 20px; height: 20px;">
       Imprimir QR en lote
