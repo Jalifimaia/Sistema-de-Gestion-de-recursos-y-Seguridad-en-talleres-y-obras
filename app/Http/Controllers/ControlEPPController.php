@@ -370,46 +370,24 @@ public function store(Request $request)
 
 public function activarConEPP($id)
 {
-    $usuario = Usuario::with('usuarioRecursos', 'estado')->findOrFail($id);
+    $usuario = Usuario::with('estado')->findOrFail($id);
 
-    // Solo permitir activar si está en stand by o ya en Alta
-    $estadoActual = optional($usuario->estado)->nombre;
-    if (! in_array($estadoActual, ['stand by', 'Alta'])) {
-        return back()->withErrors(['estado' => "No se puede dar de alta desde el estado '{$estadoActual}'. Primero pase a stand by."]);
-    }
-
-    // Validar EPP solo si es trabajador
-    if ($usuario->id_rol === 3) {
-        $tiposAsignados = $usuario->usuarioRecursos
-            ->pluck('tipo_epp')
-            ->filter()
-            ->map(fn($t) => strtolower(trim($t)))
-            ->unique()
-            ->values()
-            ->toArray();
-
-        $tiposObligatorios = ['casco','guantes','lentes','botas','chaleco','arnes'];
-        $faltantes = array_diff($tiposObligatorios, $tiposAsignados);
-
-        if (count($faltantes) > 0) {
-            return back()->withErrors([
-                'faltantes' => 'No se puede dar de alta. Faltan: ' . implode(', ', $faltantes)
-            ])->withInput();
-        }
-    }
-
+    // Buscar estado Alta
     $estadoAlta = EstadoUsuario::where('nombre', 'Alta')->first();
     if (!$estadoAlta) {
         return back()->withErrors(['estado' => 'No se encontró el estado "Alta".']);
     }
 
+    // Asignar estado Alta directamente
     $usuario->id_estado = $estadoAlta->id;
     $usuario->usuario_modificacion = auth()->id();
     $usuario->save();
 
     \Log::info("Usuario {$usuario->id} activado a Alta por usuario " . auth()->id());
 
-    return redirect()->route('usuarios.edit', $usuario->id)->with('success', 'Usuario dado de alta correctamente.');
+    return redirect()
+        ->route('usuarios.edit', $usuario->id)
+        ->with('success', 'Usuario dado de alta correctamente.');
 }
 
 

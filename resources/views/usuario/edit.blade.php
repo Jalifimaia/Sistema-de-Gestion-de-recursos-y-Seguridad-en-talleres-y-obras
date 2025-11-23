@@ -123,35 +123,56 @@
   </form>
 
   <!-- Acciones de estado -->
-  <div class="d-flex justify-content-center gap-2 mt-4">
-    @php $estado = $usuario->estado?->nombre; @endphp
+<!-- Acciones de estado -->
+<div class="d-flex justify-content-center gap-2 mt-4">
+  @php $estado = $usuario->estado?->nombre; @endphp
 
-    <form method="POST" action="{{ route('usuarios.activarConEPP', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="alta">
-      @csrf
-      <button type="button"
-        class="btn btn-success btn-confirmar-estado {{ $estado === 'Alta' ? 'opacity-50' : '' }}"
-        {{ $estado === 'Alta' ? 'disabled' : ($estado === 'Baja' ? 'disabled' : '') }}
-        title="{{ $estado === 'Baja' ? 'Usuario en Baja: primero pasar a Stand by para asignar EPP' : ($estado === 'Alta' ? 'Ya está activo' : 'Cambiar a estado Alta') }}">
-        Dar de alta
-      </button>
-    </form>
+  <form method="POST" action="{{ route('usuarios.activarConEPP', $usuario->id) }}"
+        class="form-estado"
+        data-nombre="{{ $usuario->name }}"
+        data-rol="{{ $usuario->rol->nombre_rol }}"
+        data-accion="alta"
+        data-estado="{{ $estado }}">
+    @csrf
+    <button type="button"
+      class="btn btn-success btn-confirmar-estado {{ $estado === 'Alta' ? 'opacity-50' : '' }}"
+      {{ $estado === 'Alta' ? 'disabled' : '' }}
+      title="{{ $estado === 'Baja' ? 'Usuario en Baja: primero pasar a Stand by para asignar EPP' : ($estado === 'Alta' ? 'Ya está activo' : 'Cambiar a estado Alta') }}">
+      Dar de alta
+    </button>
+  </form>
 
-    <form method="POST" action="{{ route('usuarios.baja', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="baja">
-      @csrf
-      <button type="button" class="btn btn-danger btn-confirmar-estado {{ $estado === 'Baja' ? 'opacity-50' : '' }}" {{ $estado === 'Baja' ? 'disabled' : '' }} title="{{ $estado === 'Baja' ? 'Ya está dado de baja' : 'Cambiar a estado Baja' }}">
-        Dar de baja
-      </button>
-    </form>
+  <form method="POST" action="{{ route('usuarios.baja', $usuario->id) }}"
+        class="form-estado"
+        data-nombre="{{ $usuario->name }}"
+        data-rol="{{ $usuario->rol->nombre_rol }}"
+        data-accion="baja"
+        data-estado="{{ $estado }}">
+    @csrf
+    <button type="button"
+      class="btn btn-danger btn-confirmar-estado {{ $estado === 'Baja' ? 'opacity-50' : '' }}"
+      {{ $estado === 'Baja' ? 'disabled' : '' }}
+      title="{{ $estado === 'Baja' ? 'Ya está dado de baja' : 'Cambiar a estado Baja' }}">
+      Dar de baja
+    </button>
+  </form>
 
-    <form method="POST" action="{{ route('usuarios.standby', $usuario->id) }}" class="form-estado" data-nombre="{{ $usuario->name }}" data-rol="{{ $usuario->rol->nombre_rol }}" data-accion="stand by">
-      @csrf
-      <button type="button" class="btn btn-warning btn-confirmar-estado {{ $estado === 'stand by' ? 'opacity-50' : '' }}"
-              {{ $estado === 'stand by' ? 'disabled' : '' }}
-              title="{{ $estado === 'stand by' ? 'Ya está en stand by' : 'Cambiar a estado Stand by' }}">
-        Poner en <em>stand by</em>
-      </button>
-    </form>
-  </div>
+  <form method="POST" action="{{ route('usuarios.standby', $usuario->id) }}"
+        class="form-estado"
+        data-nombre="{{ $usuario->name }}"
+        data-rol="{{ $usuario->rol->nombre_rol }}"
+        data-accion="stand by"
+        data-estado="{{ $estado }}">
+    @csrf
+    <button type="button"
+      class="btn btn-warning btn-confirmar-estado {{ strtolower($estado) === 'stand by' ? 'opacity-50' : '' }}"
+      {{ strtolower($estado) === 'stand by' ? 'disabled' : '' }}
+      title="{{ strtolower($estado) === 'stand by' ? 'Ya está en stand by' : 'Cambiar a estado Stand by' }}">
+      Poner en <em>stand by</em>
+    </button>
+  </form>
+</div>
+
 </div>
 
 
@@ -505,29 +526,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const botonesEstado = document.querySelectorAll('.btn-confirmar-estado');
   if (botonesEstado.length) {
-    botonesEstado.forEach(boton => {
-      boton.addEventListener('click', function () {
-        formEstadoSeleccionado = this.closest('form');
+botonesEstado.forEach(boton => {
+  boton.addEventListener('click', function () {
+    formEstadoSeleccionado = this.closest('form');
 
-        const nombre = getAttrSafe(formEstadoSeleccionado, 'data-nombre', 'Usuario');
-        const rol = getAttrSafe(formEstadoSeleccionado, 'data-rol', '');
-        const accion = getAttrSafe(formEstadoSeleccionado, 'data-accion', 'cambiar');
-        const estadoActual = getAttrSafe(formEstadoSeleccionado, 'data-estado', '');
+    const nombre = getAttrSafe(formEstadoSeleccionado, 'data-nombre', 'Usuario');
+    const rol = getAttrSafe(formEstadoSeleccionado, 'data-rol', '');
+    const accion = getAttrSafe(formEstadoSeleccionado, 'data-accion', 'cambiar');
+    const estadoActual = getAttrSafe(formEstadoSeleccionado, 'data-estado', '');
 
-        let mensaje;
-        if (accion === 'alta' && estadoActual.toLowerCase() === 'baja') {
-          mensaje = 'El usuario está en Baja. Primero debe pasarse a stand by para asignarle EPP; luego podrá activarse. ¿Desea continuar?';
-        } else {
-          mensaje = `¿Desea dar de ${accion} a ${nombre}${rol ? ' (' + rol + ')' : ''}?`;
-        }
+    // 👉 Siempre mensaje genérico, sin validación especial
+    let mensaje = `¿Desea dar de ${accion} a ${nombre}${rol ? ' (' + rol + ')' : ''}?`;
 
-        const texto = document.getElementById('textoConfirmacionEstado');
-        if (texto) texto.textContent = mensaje;
+    const texto = document.getElementById('textoConfirmacionEstado');
+    if (texto) texto.textContent = mensaje;
 
-        const modalEl = document.getElementById('modalConfirmarEstado');
-        if (modalEl) new bootstrap.Modal(modalEl).show();
-      });
-    });
+    const modalEl = document.getElementById('modalConfirmarEstado');
+    if (modalEl) new bootstrap.Modal(modalEl).show();
+  });
+});
+
   }
 
   // Confirmación del modal de estado (submit)
