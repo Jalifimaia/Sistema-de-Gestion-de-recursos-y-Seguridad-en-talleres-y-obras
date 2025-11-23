@@ -46,37 +46,32 @@
     </div>
 
     <!-- Contenedor colapsable -->
-    <div class="collapse" id="estadoCollapse">
-      <div class="card-body">
-        <div class="row g-3">
-          @php
-            $estadoItems = [
-              ['label' => 'Herramientas disponibles', 'valor' => "$herramientasDisponibles/$herramientasTotales"],
-              ['label' => 'EPP en stock', 'valor' => "$eppStock/$eppTotales"],
-              ['label' => 'En reparación', 'valor' => $elementosReparacion],
-              ['label' => 'EPP vencidos', 'valor' => $eppVencidos],
-              ['label' => 'Elementos dañados', 'valor' => $elementosDañados],
-            ];
-          @endphp
+<!-- Estado del Inventario -->
+<div class="collapse" id="estadoCollapse">
+  <div class="card-body">
 
-          @foreach ($estadoItems as $item)
-            <div class="col-6 col-md-4 col-lg-2">
-              <div class="border rounded p-3 text-center h-100 bg-light d-flex flex-column justify-content-center shadow-sm" style="border-left: 5px solid #f57c00;">
-                <div class="fw-semibold text-muted small">{{ $item['label'] }}</div>
-                <div class="fs-5 fw-bold text-orange">{{ $item['valor'] }}</div>
-              </div>
-            </div>
-          @endforeach
 
-          <!-- Botón exportar -->
-          <div class="col-6 col-md-4 col-lg-2 d-flex align-items-center justify-content-center">
-            <a href="{{ route('inventario.exportar') }}" class="btn btn-csv btn-sm w-100 btn-csv">
-              <i class="bi bi-download me-1"></i> Exportar CSV
-            </a>
-          </div>
+    <div class="d-flex flex-wrap gap-4">
+      @php
+        $estadoItems = [
+          ['label' => 'Herramientas disponibles', 'valor' => "$herramientasDisponibles/$herramientasTotales"],
+          ['label' => 'EPP en stock', 'valor' => "$eppStock/$eppTotales"],
+          ['label' => 'En reparación', 'valor' => $elementosReparacion],
+          ['label' => 'EPP vencidos', 'valor' => $eppVencidos],
+          ['label' => 'Elementos dañados', 'valor' => $elementosDañados],
+        ];
+      @endphp
+
+      @foreach ($estadoItems as $item)
+        <div class="d-flex align-items-center">
+          <span class="fw-semibold text-muted me-2">{{ $item['label'] }}:</span>
+          <span class="fw-bold text-orange">{{ $item['valor'] }}</span>
         </div>
-      </div>
+      @endforeach
     </div>
+  </div>
+</div>
+
   </div>
 </section>
 
@@ -253,7 +248,6 @@
               <tr>
                 <th>Serie</th>
                 <th>Estado</th>
-                <th>Color</th>
                 <th>Acciones</th>
               </tr>
             </thead>

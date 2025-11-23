@@ -16,102 +16,110 @@
         </div>
       </div>
 
+      <div id="mensaje"></div>
 
       <form id="recursoForm" method="POST" action="{{ route('recursos.store') }}" novalidate>
         @csrf
 
-        <!-- Categoría -->
-        <div class="mb-3">
-          <label for="categoria" class="form-label">Categoría</label>
-          <select id="categoria" name="categoria" class="form-select" required>
-            <option value="">Seleccione una categoría</option>
-            @foreach($categorias as $categoria)
-              <option value="{{ $categoria->id }}" {{ old('categoria') == $categoria->id ? 'selected' : '' }}>
-                {{ $categoria->nombre_categoria }}
-              </option>
-            @endforeach
-          </select>
-        </div>
+        <div class="row g-3">
+          <!-- Categoría -->
+          <div class="col-md-6 mb-3">
+            <label for="categoria" class="form-label">Categoría <span class="required-asterisk">*</span></label>
+            <select id="categoria" name="categoria" class="form-select" required>
+              <option value="">Seleccione una categoría</option>
+              @foreach($categorias as $categoria)
+                <option value="{{ $categoria->id }}" {{ old('categoria') == $categoria->id ? 'selected' : '' }}>
+                  {{ $categoria->nombre_categoria }}
+                </option>
+              @endforeach
+            </select>
+          </div>
 
-        <!-- Subcategoría -->
-        <div class="mb-3">
-          <label for="id_subcategoria" class="form-label">Subcategoría</label>
-          <select id="id_subcategoria" name="id_subcategoria" class="form-select" required disabled>
-            <option value="">Seleccione una subcategoría</option>
-          </select>
-        </div>
+          <!-- Subcategoría -->
+          <div class="col-md-6 mb-3">
+            <label for="id_subcategoria" class="form-label">Subcategoría <span class="required-asterisk">*</span></label>
+            <select id="id_subcategoria" name="id_subcategoria" class="form-select" required disabled>
+              <option value="">Primero seleccioná una categoría</option>
+            </select>
+          </div>
 
-        <!-- Nueva Subcategoría -->
-        <div class="mt-2 mb-3">
-          <label for="nuevaSubcategoria" class="form-label">
-            ¿No encontrás la subcategoría? Agregá una nueva
-          </label>
-          <div class="input-group">
+          <!-- Nueva Subcategoría -->
+          <div class="col-12 mb-3  d-none">
+            <label for="nuevaSubcategoria" class="form-label">
+              ¿No encontrás la subcategoría? Agregá una nueva
+            </label>
+            <div class="input-group">
+              <input type="text"
+                    id="nuevaSubcategoria"
+                    name="nueva_subcategoria"
+                    class="form-control"
+                    placeholder="Nueva subcategoría"
+                    value="{{ old('nueva_subcategoria') }}">
+              <button type="button"
+                      class="btn btn-agregar-subcategoria"
+                      id="agregarSubcategoria"
+                      disabled>
+                Agregar
+              </button>
+            </div>
+            <small id="subcategoriaFeedback" class="text-danger d-none">Esta subcategoría ya existe.</small>
+          </div>
+
+          <!-- Nombre -->
+          <div class="col-md-6 mb-3">
+            <label for="nombre" class="form-label">Nombre <span class="required-asterisk">*</span></label>
             <input type="text"
-                  id="nuevaSubcategoria"
-                  name="nueva_subcategoria"
-                  class="form-control"
-                  placeholder="Nueva subcategoría"
-                  value="{{ old('nueva_subcategoria') }}">
-            <button type="button"
-                    class="btn btn-agregar-subcategoria"
-                    id="agregarSubcategoria">
-              Agregar
+                  id="nombre"
+                  name="nombre"
+                  class="form-control @error('nombre') is-invalid @enderror"
+                  maxlength="60"
+                  placeholder="Ingrese un nombre"
+                  required>
+            @error('nombre')
+              <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+
+          <!-- Costo unitario -->
+          <div class="col-md-6 mb-3">
+            <label for="costo_unitario" class="form-label">Costo unitario <span class="required-asterisk">*</span></label>
+            <input type="text"
+              id="costo_unitario"
+              name="costo_unitario"
+              class="form-control"
+              placeholder="Ingrese el costo"
+              inputmode="numeric"
+              required>
+            @error('costo_unitario')
+              <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+
+          <!-- Descripción -->
+          <div class="col-12 mb-3">
+            <label for="descripcion" class="form-label">Descripción <span class="required-asterisk">*</span></label>
+            <textarea id="descripcion"
+          name="descripcion"
+          class="form-control @error('descripcion') is-invalid @enderror"
+          rows="3"
+          maxlength="250"
+          placeholder="Ingrese una descripción (máx. 4 palabras)"
+          required></textarea>
+
+            <small id="contadorPalabras" class="text-muted">0/4 palabras</small>
+            @error('descripcion')
+              <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+
+          <!-- Botón guardar -->
+          <div class="col-12">
+            <button type="submit" class="btn btn-guardar-recurso w-100">
+              Guardar recurso
             </button>
           </div>
         </div>
-
-        <!-- Nombre -->
-        <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre</label>
-          <input type="text"
-                id="nombre"
-                name="nombre"
-                class="form-control @error('nombre') is-invalid @enderror"
-                maxlength="60" placeholder="Ingrese un nombre"
-                required>
-          @error('nombre')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-        </div>
-
-        <!-- Descripción -->
-        <div class="mb-3">
-          <label for="descripcion" class="form-label">Descripción</label>
-          <textarea id="descripcion"
-                    name="descripcion"
-                    class="form-control @error('descripcion') is-invalid @enderror"
-                    rows="3"
-                    maxlength="250" placeholder="Ingrese una descripción (máx. 4 palabras)"></textarea>
-          @error('descripcion')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-        </div>
-
-        <!-- Costo unitario -->
-        <div class="mb-3">
-          <label for="costo_unitario" class="form-label">Costo Unitario</label>
-          <input type="text"
-            id="costo_unitario"
-            name="costo_unitario"
-            class="form-control"
-            required>
-          @error('costo_unitario')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @enderror
-        </div>
-
-
-        <div class="text-end">
-          <button type="submit" class="btn btn-guardar-recurso w-100">
-            Guardar Recurso
-          </button>
-        </div>
-
       </form>
-
-
-
 </div>
 
 <!-- Modal faltan campos -->
@@ -126,12 +134,11 @@
         Faltan campos por completar. Por favor, revisá el formulario.
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-danger text-white" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
 </div>
-
 
 <div class="modal fade" id="modalRecursoCreado" tabindex="-1" aria-labelledby="modalRecursoCreadoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -151,7 +158,6 @@
   </div>
 </div>
 
-
 @endsection
 
 @push('scripts')
@@ -160,5 +166,12 @@
 
 @push('styles')
   <link href="{{ asset('css/agregarRecurso.css') }}" rel="stylesheet">
-@endpush
 
+  <style>
+  .required-asterisk {
+    margin-left: 4px;
+    color: #dc3545;
+    font-weight: 600;
+  }
+  </style>
+@endpush

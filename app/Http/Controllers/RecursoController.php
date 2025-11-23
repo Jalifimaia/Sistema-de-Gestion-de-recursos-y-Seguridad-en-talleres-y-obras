@@ -455,7 +455,7 @@ class RecursoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(RecursoRequest $request, $id)
+public function update(RecursoRequest $request, $id)
 {
     $validated = $request->validated();
 
@@ -465,6 +465,7 @@ class RecursoController extends Controller
 
     $recurso = Recurso::findOrFail($id);
     $recurso->update([
+        'id_subcategoria' => $validated['id_subcategoria'],
         'nombre' => $validated['nombre'],
         'descripcion' => $validated['descripcion'] ?? null,
         'costo_unitario' => $costo,
