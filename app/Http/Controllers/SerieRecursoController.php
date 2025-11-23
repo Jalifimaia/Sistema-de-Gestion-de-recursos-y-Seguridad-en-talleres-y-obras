@@ -201,14 +201,13 @@ public function buscar(Request $request)
         ->orderByDesc('id')
         ->paginate(18)
         ->onEachSide(1)
-        ->withQueryString()                      // mantiene ?search y ?page
-        ->withPath(route('series.buscar'));      // links apuntan a la ruta AJAX
+        ->withQueryString()
+        ->withPath(route('series.buscar'));
 
     return response()->json([
         'html' => view('partials.series_cards', compact('series'))->render()
     ]);
 }
-
 
 
 

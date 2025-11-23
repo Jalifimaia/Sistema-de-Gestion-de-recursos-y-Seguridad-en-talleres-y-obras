@@ -140,18 +140,48 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function engancharLinks() {
-    container.querySelectorAll('.pagination a').forEach(link => {
-      link.addEventListener('click', e => {
+    // Usar event delegation en el container en lugar de enganchar cada link individualmente
+    const paginationContainer = container.querySelector('.pagination');
+    if (!paginationContainer) return;
+
+    // Remover listeners anteriores si existen
+    const newPaginationContainer = paginationContainer.cloneNode(true);
+    paginationContainer.parentNode.replaceChild(newPaginationContainer, paginationContainer);
+
+    // Agregar listener al contenedor de paginación
+    newPaginationContainer.addEventListener('click', (e) => {
+      // Buscar el enlace clickeado o su padre si es un span/svg
+      const link = e.target.closest('a');
+      
+      if (link && link.href) {
         e.preventDefault();
-        cargarSeries(link.href);
-      });
+        e.stopPropagation();
+        
+        // Extraer el número de página del href original
+        const urlObj = new URL(link.href);
+        const page = urlObj.searchParams.get('page') || 1;
+        
+        // Construir URL hacia la ruta AJAX
+        const searchValue = input.value.trim();
+        let ajaxUrl = `/series/buscar?page=${page}`;
+        
+        if (searchValue) {
+          ajaxUrl += `&search=${encodeURIComponent(searchValue)}`;
+        }
+        
+        cargarSeries(ajaxUrl);
+      }
     });
   }
 
   function engancharCopiar() {
     container.querySelectorAll('.copiar-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const codigo = btn.getAttribute('data-codigo');
+      // Remover listeners anteriores
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      
+      newBtn.addEventListener('click', async () => {
+        const codigo = newBtn.getAttribute('data-codigo');
         if (!codigo) return;
         try {
           await navigator.clipboard.writeText(codigo);
