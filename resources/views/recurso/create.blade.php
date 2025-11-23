@@ -99,11 +99,13 @@
           <div class="col-12 mb-3">
             <label for="descripcion" class="form-label">Descripción</label>
             <textarea id="descripcion"
-                      name="descripcion"
-                      class="form-control @error('descripcion') is-invalid @enderror"
-                      rows="3"
-                      maxlength="250"
-                      placeholder="Ingrese una descripción (máx. 4 palabras)"></textarea>
+          name="descripcion"
+          class="form-control @error('descripcion') is-invalid @enderror"
+          rows="3"
+          maxlength="250"
+          placeholder="Ingrese una descripción (máx. 4 palabras)"
+          required></textarea>
+
             <small id="contadorPalabras" class="text-muted">0/4 palabras</small>
             @error('descripcion')
               <div class="invalid-feedback">{{ $message }}</div>
