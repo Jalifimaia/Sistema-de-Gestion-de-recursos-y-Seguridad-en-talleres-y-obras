@@ -257,8 +257,13 @@ window.addEventListener('load', function () {
 
     const total = filas.length;
     if (total === 0) {
-      tablaBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay series que coincidan</td></tr>';
-      return;
+    // Ocultar todas las filas
+    Array.from(tablaBody.querySelectorAll('tr')).forEach(f => f.style.display = 'none');
+
+    // Mostrar mensaje fuera del tbody
+    info.textContent = 'No hay series que coincidan';
+    pag.innerHTML = '';
+    return;
     }
 
     const paginas = Math.ceil(total / porPagina);

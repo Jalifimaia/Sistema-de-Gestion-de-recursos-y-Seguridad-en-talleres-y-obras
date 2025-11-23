@@ -44,7 +44,7 @@
 
 
       <div class="d-grid mb-3">
-        <button type="submit" class="btn btn-orange btn-login">Ingresar</button>
+        <button type="submit" class="btn btn-orange-inicioSesion btn-login">Ingresar</button>
       </div>
     </form>
 
