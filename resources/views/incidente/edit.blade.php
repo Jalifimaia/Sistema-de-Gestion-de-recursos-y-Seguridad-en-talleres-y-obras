@@ -303,15 +303,27 @@ document.addEventListener('DOMContentLoaded', function () {
     return Array.from(document.querySelectorAll('select[name^="recursos"][name$="[id_estado]"].recurso-estado-select'));
   }
 
-  function nombreRecursoParaSelect(sel) {
-    const card = sel.closest('.recurso-block') || sel.closest('.card') || sel.parentElement;
-    if (!card) return 'Recurso';
-    const nameInput = card.querySelector('input[type="text"][readonly]');
-    if (nameInput && nameInput.value) return nameInput.value;
-    const header = card.querySelector('.card-header');
-    if (header) return header.textContent.trim();
-    return 'Recurso';
-  }
+function nombreRecursoParaSelect(sel) {
+  const card = sel.closest('.recurso-block');
+  if (!card) return 'Recurso';
+
+  // Buscar inputs visibles con los valores
+  const categoriaInput = card.querySelector('input[name*="[id_categoria]"]')?.previousElementSibling;
+  const subcategoriaInput = card.querySelector('input[name*="[id_subcategoria]"]')?.previousElementSibling;
+  const recursoInput = card.querySelector('input[name*="[id_recurso]"]')?.previousElementSibling;
+
+  const categoria = categoriaInput?.value || '';
+  const subcategoria = subcategoriaInput?.value || '';
+  const recurso = recursoInput?.value || '';
+
+  // Construir string compuesto
+  let nombreCompuesto = '';
+  if (categoria) nombreCompuesto += categoria;
+  if (subcategoria) nombreCompuesto += (nombreCompuesto ? ' – ' : '') + subcategoria;
+  if (recurso) nombreCompuesto += (nombreCompuesto ? ' – ' : '') + recurso;
+
+  return nombreCompuesto || 'Recurso';
+}
 
   function textEstadoSel(sel) {
     return sel.options[sel.selectedIndex]?.text?.trim() || 'Sin estado';
@@ -348,28 +360,37 @@ document.addEventListener('DOMContentLoaded', function () {
     return bloqueadores;
   }
 
-  function mostrarAyudaYGestionarResuelto() {
-    const bloqueadores = calcularBloqueadores();
+  
+function mostrarAyudaYGestionarResuelto() {
+  const bloqueadores = calcularBloqueadores();
 
-    if (bloqueadores.length === 0) {
-      ayudaNode.innerHTML = '<div class="text-success"><strong>Puede seleccionar resuelto.</strong> Todos los recursos están en estado Disponible o Baja.</div>';
-      enableResueltoOption(true);
-    } else {
-      let html = `
-        <div class="d-flex align-items-center gap-2 text-warning fw-semibold">
-          <img src="/images/precaucion.svg" alt="Precaución" class="icono-precaucion">
-          <span>Para marcar el incidente como <strong>Resuelto</strong>, todos los recursos deben estar en estado <strong>Disponible</strong> o <strong>Baja</strong>.</span>
-        </div>
-        <ul class="mt-1 mb-0 small text-danger fw-semibold">
-      `;
-      bloqueadores.forEach(b => {
-        html += `<li>${escapeHtml(b.nombre)} – estado actual: ${escapeHtml(b.estadoText)}</li>`;
-      });
-      html += '</ul>';
-      ayudaNode.innerHTML = html;
-      enableResueltoOption(false);
-    }
+  if (bloqueadores.length === 0) {
+    ayudaNode.innerHTML = `
+      <div style="background-color: #e0f7fa; padding: 8px; border-radius: 4px;">
+        Puede seleccionar <strong>Resuelto.</strong> Todos los recursos están en estado Disponible o Baja.
+      </div>`;
+    enableResueltoOption(true);
+  } else {
+    let html = `
+      <div class="d-flex align-items-center gap-2" style="background-color: #e0f7fa; padding: 8px; border-radius: 4px;">
+        <img src="/images/precaucion.svg" alt="Precaución" class="icono-precaucion d-none">
+        <span>Para marcar el incidente como <strong>Resuelto</strong>, todos los recursos deben estar en estado <strong>Disponible</strong> o <strong>Baja</strong>.</span>
+      </div>
+      <ul class="mt-1 mb-0 small text-danger fw-semibold">
+    `;
+    bloqueadores.forEach(b => {
+      // b.nombre ya devuelve "Categoría – Subcategoría – Recurso"
+      const partes = b.nombre.split(' – ');
+      const categoria = partes[0] || 'Recurso';
+      const detalle = partes.slice(1).join(' – ');
+      html += `<li>${escapeHtml(categoria)}${detalle ? ' (' + escapeHtml(detalle) + ')' : ''}: ${escapeHtml(b.estadoText)}</li>`;
+    });
+    html += '</ul>';
+    ayudaNode.innerHTML = html;
+    enableResueltoOption(false);
   }
+}
+
 
   function enableResueltoOption(allow) {
     if (!incidenteSelect) return;
