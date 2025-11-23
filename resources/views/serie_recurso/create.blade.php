@@ -78,36 +78,35 @@
         <div id="error-lote" class="text-danger small mt-1 d-none">Este campo es obligatorio.</div>
       </div>
 
-<!-- Fecha de adquisición (date, bloqueada hasta hoy, click en toda el área) -->
-<div class="col-12 col-md-6">
-  <label for="fecha_adquisicion" class="form-label mb-1">
-    Fecha de Adquisición <span class="required-asterisk">*</span>
-  </label>
+      <!-- Fecha de adquisición (date, bloqueada hasta hoy, click en toda el área) -->
+      <div class="col-12 col-md-6">
+        <label for="fecha_adquisicion" class="form-label mb-1">
+          Fecha de adquisición <span class="required-asterisk">*</span>
+        </label>
 
-  <div class="input-group date-click-wrap" onclick="this.querySelector('input').showPicker()">
-    <input
-      type="date"
-      name="fecha_adquisicion"
-      id="fecha_adquisicion"
-      class="form-control @error('fecha_adquisicion') is-invalid @enderror"
-      value="{{ old('fecha_adquisicion') }}"
-      required
-      aria-describedby="error-fecha_adquisicion"
-      aria-invalid="{{ $errors->has('fecha_adquisicion') ? 'true' : 'false' }}"
-      max="{{ now()->format('Y-m-d') }}"
-    >
-  </div>
+        <div class="input-group date-click-wrap" onclick="this.querySelector('input').showPicker()">
+          <input
+            type="date"
+            name="fecha_adquisicion"
+            id="fecha_adquisicion"
+            class="form-control @error('fecha_adquisicion') is-invalid @enderror"
+            value="{{ old('fecha_adquisicion') }}"
+            required
+            aria-describedby="error-fecha_adquisicion"
+            aria-invalid="{{ $errors->has('fecha_adquisicion') ? 'true' : 'false' }}"
+            max="{{ now()->format('Y-m-d') }}"
+          >
+        </div>
 
-  <div id="error-fecha_adquisicion" class="text-danger small mt-1 d-none">Este campo es obligatorio.</div>
-  @error('fecha_adquisicion')
-    <div class="invalid-feedback" id="error-fecha_adquisicion">{{ $message }}</div>
-  @enderror
-</div>
-
+        <div id="error-fecha_adquisicion" class="text-danger small mt-1 d-none">Este campo es obligatorio.</div>
+        @error('fecha_adquisicion')
+          <div class="invalid-feedback" id="error-fecha_adquisicion">{{ $message }}</div>
+        @enderror
+      </div>
 
       <!-- Fecha de vencimiento -->
       <div class="col-12 col-md-6">
-        <label for="fecha_vencimiento" class="form-label mb-1">Fecha de Vencimiento (opcional)</label>
+        <label for="fecha_vencimiento" class="form-label mb-1">Fecha de vencimiento (opcional)</label>
         <div class="input-group" onclick="this.querySelector('input').showPicker()">
           <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" class="form-control">
         </div>
@@ -115,12 +114,12 @@
     </div>
 
     <div class="mb-4 mt-4">
-      <h5>Series por {{ $requiereTalle ? 'Talle y Color' : 'Color' }}</h5>
+      <h5>Series por {{ $requiereTalle ? 'talle y color' : 'color' }}</h5>
       <table class="table table-bordered text-center">
         <thead>
           <tr>
             @if($requiereTalle)
-              <th>Tipo de Talle</th>
+              <th>Tipo de talle</th>
               <th>Talle</th>
             @endif
             <th>Color</th>
@@ -134,9 +133,12 @@
         </tbody>
       </table>
 
+      <!-- Mensaje de error de combinaciones -->
+      <div id="error-combinaciones" class="alert alert-danger d-none mt-2" role="alert"></div>
+
       <div class="d-flex justify-content-start gap-3 mt-3 flex-wrap">
         <button type="button" class="btn btn-combinacion" onclick="agregarFila()">+ Agregar combinación</button>
-        <button type="submit" class="btn btn-guardar" id="btnGuardar" disabled>Guardar Series</button>
+        <button type="submit" class="btn btn-guardar" id="btnGuardar">Guardar series</button>
       </div>
     </div>
   </form>
@@ -178,6 +180,24 @@
     </div>
   </div>
 </div>
+
+<!-- Modal faltan campos -->
+<div class="modal fade" id="modalErrorCampos" tabindex="-1" aria-labelledby="modalErrorCamposLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalErrorCamposLabel">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Faltan campos por completar. Por favor, revisá el formulario.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger text-white" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -188,21 +208,12 @@
   window.requiereTalle = @json($requiereTalle);
   window.tallesPorTipo = @json($talles);
 </script>
-<script src="{{ asset('js/serieRecurso.js') }}"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('formSeries');
-
-  // Limitar lote a 5 dígitos
-  const loteInput = document.getElementById('lote');
-  loteInput.addEventListener('input', () => {
-    if (loteInput.value.length > 5) {
-      loteInput.value = loteInput.value.slice(0, 5);
-    }
-  });
 
   // Helper: mostrar/ocultar error para un campo
   function setFieldError(field, show) {
@@ -238,12 +249,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Validación al enviar
-  form.addEventListener('submit', function (e) {
-    const ok = validarYEnviar();
-    if (!ok) e.preventDefault();
-  });
-
   function validarYEnviar() {
     const requiredFields = Array.from(form.querySelectorAll('[required]'));
     let firstInvalid = null;
@@ -263,7 +268,10 @@ document.addEventListener('DOMContentLoaded', function () {
     return true;
   }
 });
+
 </script>
+<script src="{{ asset('js/crearSeries.js') }}"></script>
+
 @endpush
 
 @push('styles')
@@ -274,6 +282,25 @@ document.addEventListener('DOMContentLoaded', function () {
     border-color: #dc3545 !important;
     box-shadow: none;
   }
+  
+  /* Asegurar que los select también muestren el borde rojo */
+  select.is-invalid,
+  select.form-select.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: none;
+  }
+  
+  /* Fondo rojo para td con campos inválidos */
+  td.td-invalid {
+    background-color: #f8d7da !important;
+  }
+  
+  /* Borde rojo para Select2 cuando está inválido */
+  .select2-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: none !important;
+  }
+  
   .required-asterisk {
     margin-left: 4px;
     color: #dc3545;
@@ -290,5 +317,12 @@ document.addEventListener('DOMContentLoaded', function () {
   #tipoTalle + .select2 .select2-search__field {
     display: none !important;
   }
+
+  /* Borde rojo para Select2 cuando el td está inválido */
+td.td-invalid .select2-selection {
+  border-color: #dc3545 !important;
+  box-shadow: none !important;
+}
+
 </style>
 @endpush
