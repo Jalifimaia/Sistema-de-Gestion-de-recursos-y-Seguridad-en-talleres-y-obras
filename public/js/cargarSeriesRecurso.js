@@ -108,9 +108,10 @@ window.addEventListener('load', function () {
         tdAcciones.className = 'text-nowrap';
 
         const contAcc = document.createElement('div');
-        contAcc.className = 'd-flex align-items-center gap-2 flex-wrap';
+        contAcc.className = 'd-flex justify-content-center align-items-center gap-2 flex-wrap';
 
-        // Botón editar-serie (placeholder)
+        // Botón editar-serie (placeholder) NO SE USA
+        /*
         const btnEditarSerie = document.createElement('button');
         btnEditarSerie.type = 'button';
         btnEditarSerie.className = 'btn btn-sm btn-editar btn-accion-compact';
@@ -121,6 +122,7 @@ window.addEventListener('load', function () {
           if (serieId) window.location.href = `/serie_recurso/${serieId}/edit`;
         });
         contAcc.appendChild(btnEditarSerie);
+        */
 
         // Botón ver QR
         const btnQr = document.createElement('a');

@@ -51,7 +51,7 @@
       </table>
     </div>
   @else
-    <div class="alert alert-success">✅ Todos los trabajadores tienen checklist registrado hoy.</div>
+    <div class="alert alert-success">Todos los trabajadores tienen checklist registrado hoy.</div>
   @endif
 </div>
 

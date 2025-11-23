@@ -157,7 +157,7 @@ table.table thead th {
   background-color: #1b5e20;
 }
 
-/* ✅ Estilo cuando está deshabilitado */
+/* Estilo cuando está deshabilitado */
 .btn-guardar:disabled {
   background-color: #a5d6a7;
   color: #fff;

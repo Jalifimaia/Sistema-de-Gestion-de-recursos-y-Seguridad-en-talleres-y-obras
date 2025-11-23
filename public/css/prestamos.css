@@ -109,30 +109,6 @@ input[type="date"]:focus {
   border-color: #d06842;
 }
 
-/* 🔶 Paginación naranja */
-.pagination {
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.page-link {
-  color: #3b3b3b;
-  border: 1px solid #d06842;
-  font-weight: 500;
-}
-
-.page-link:hover {
-  background-color: #d06842;
-  color: #fff;
-  border-color: #d06842;
-}
-
-.page-item.active .page-link {
-  background-color: #d06842;
-  border-color: #af5636;
-  color: #fff;
-}
-
 
 p.small.text-muted {
   display: none;
@@ -148,4 +124,34 @@ p.small.text-muted {
 
 .btn-naranja:hover {
   background-color: #d06842;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding-left: 0;
+}
+
+.page-item {
+  margin: 0 2px;
+}
+
+.page-link {
+  color: #d06842;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #ffd1be;
+}
+
+.page-item.active .page-link {
+  background-color: #d06842;
+  color: white;
+  border-color: #d06842;
 }

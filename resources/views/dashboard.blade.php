@@ -29,6 +29,55 @@
     </div>-->
   </header>
 
+  <!-- Estadísticas principales -->
+  <div class="row g-4 mb-4 subir-cards">
+    <div class="row g-4 mt-1 mb-4">
+      <div class="col-md-4">
+        <div class="card card-resumen card-resumen-cuadrada">
+          <div class="card-body">
+            <!-- Trabajadores Activos -->
+            <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
+              data-bs-toggle="modal" data-bs-target="#modalUsuariosActivos">
+              <img src="{{ asset('images/workers.svg') }}" alt="Trabajadores Activos" class="icono-card">
+              <h2 class="fw-bold mb-1">{{ $usuariosActivos }}</h2>
+              <p class="mb-0 titulo-card">Trabajadores Activos</p>
+              <small class="text-muted subtitulo-card">Registrados en el sistema</small>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Herramientas en Uso -->
+      <div class="col-md-4">
+        <div class="card card-resumen card-resumen-cuadrada">
+          <div class="card-body">
+            <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
+              data-bs-toggle="modal" data-bs-target="#modalHerramientasUso">
+              <img src="{{ asset('images/herra.svg') }}" alt="Herramientas en Uso" class="icono-card">
+              <h2 class="fw-bold mb-1">{{ $herramientasEnUso }}</h2>
+              <p class="mb-0 titulo-card">Herramientas en Uso</p>
+              <small class="text-muted subtitulo-card">de {{ $herramientasTotales }} disponibles</small>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertas Activas -->
+      <div class="col-md-4">
+        <div class="card card-resumen card-resumen-cuadrada">
+          <div class="card-body">
+            <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" data-bs-toggle="modal" data-bs-target="#modalAlertas">
+              <img src="{{ asset('images/alertas.svg') }}" alt="Alertas Activas" class="icono-card">
+              <h2 class="fw-bold mb-1">{{ $alertasActivas }}</h2>
+              <p class="mb-0 titulo-card">Alertas Activas</p>
+              <small class="text-muted subtitulo-card">Requieren atención</small>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Checklists del Día (desplegable) -->
   <div class="accordion mb-4 mover-acordeon-arriba" id="accordionChecklists">
     <div class="accordion-item">
@@ -88,62 +137,13 @@
             </div>
 
             <div class="mt-3 text-end">
-              <a href="{{ route('checklist.epp.tabla') }}"
+              <a href="{{ route('controlEPP') }}"
                  class="btn btn-sm btn-ver-todo"
                  onclick="sessionStorage.setItem('fromDashboard', 'true')">
-                  Ver todos los checklist
+                  Ver todos los checklist 
               </a>
             </div>
           @endif
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Estadísticas principales -->
-  <div class="row g-4 mb-4 subir-cards">
-    <div class="row g-4 mt-1 mb-4">
-      <div class="col-md-4">
-        <div class="card card-resumen card-resumen-cuadrada">
-          <div class="card-body">
-            <!-- Trabajadores Activos -->
-            <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
-              data-bs-toggle="modal" data-bs-target="#modalUsuariosActivos">
-              <img src="{{ asset('images/workers.svg') }}" alt="Trabajadores Activos" class="icono-card">
-              <h2 class="fw-bold mb-1">{{ $usuariosActivos }}</h2>
-              <p class="mb-0 titulo-card">Trabajadores Activos</p>
-              <small class="text-muted subtitulo-card">Registrados en el sistema</small>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Herramientas en Uso -->
-      <div class="col-md-4">
-        <div class="card card-resumen card-resumen-cuadrada">
-          <div class="card-body">
-            <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
-              data-bs-toggle="modal" data-bs-target="#modalHerramientasUso">
-              <img src="{{ asset('images/herra.svg') }}" alt="Herramientas en Uso" class="icono-card">
-              <h2 class="fw-bold mb-1">{{ $herramientasEnUso }}</h2>
-              <p class="mb-0 titulo-card">Herramientas en Uso</p>
-              <small class="text-muted subtitulo-card">de {{ $herramientasTotales }} disponibles</small>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Alertas Activas -->
-      <div class="col-md-4">
-        <div class="card card-resumen card-resumen-cuadrada">
-          <div class="card-body">
-            <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" data-bs-toggle="modal" data-bs-target="#modalAlertas">
-              <img src="{{ asset('images/alertas.svg') }}" alt="Alertas Activas" class="icono-card">
-              <h2 class="fw-bold mb-1">{{ $alertasActivas }}</h2>
-              <p class="mb-0 titulo-card">Alertas Activas</p>
-              <small class="text-muted subtitulo-card">Requieren atención</small>
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -193,8 +193,19 @@
                   <div class="text-center text-muted">No hay alertas vencidas.</div>
                 @endforelse
               </div>
-              <div class="mt-3">
-                {{ $alertasVencidas->appends(['modal' => 'alertas', 'tab' => 'vencidos'])->links() }}
+              <div class="mt-3 d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                  Mostrando {{ $alertasVencidas->firstItem() }} a {{ $alertasVencidas->lastItem() }} de {{ $alertasVencidas->total() }} vencimientos
+                </div>
+                <div>
+                  @if ($alertasVencidas->hasPages())
+                    {{ $alertasVencidas->appends(['modal' => 'alertas', 'tab' => 'vencidos'])->links() }}
+                  @else
+                    <ul class="pagination mb-0">
+                      <li class="page-item active"><span class="page-link">1</span></li>
+                    </ul>
+                  @endif
+                </div>
               </div>
             </div>
 
@@ -212,8 +223,19 @@
                   <div class="text-center text-muted">No hay alertas de stock bajo.</div>
                 @endforelse
               </div>
-              <div class="mt-3">
-                {{ $stockBajo->appends(['modal' => 'alertas', 'tab' => 'stock'])->links() }}
+              <div class="mt-3 d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                  Mostrando {{ $stockBajo->firstItem() }} a {{ $stockBajo->lastItem() }} de {{ $stockBajo->total() }} alertas
+                </div>
+                <div>
+                  @if ($stockBajo->hasPages())
+                    {{ $stockBajo->appends(['modal' => 'alertas', 'tab' => 'stock'])->links() }}
+                  @else
+                    <ul class="pagination mb-0">
+                      <li class="page-item active"><span class="page-link">1</span></li>
+                    </ul>
+                  @endif
+                </div>
               </div>
             </div>
 
@@ -231,8 +253,19 @@
                   <div class="text-center text-muted">No hay herramientas sin devolución.</div>
                 @endforelse
               </div>
-              <div class="mt-3">
-                {{ $herramientasNoDevueltas->appends(['modal' => 'alertas', 'tab' => 'devoluciones'])->links() }}
+              <div class="mt-3 d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                  Mostrando {{ $herramientasNoDevueltas->firstItem() }} a {{ $herramientasNoDevueltas->lastItem() }} de {{ $herramientasNoDevueltas->total() }} herramientas
+                </div>
+                <div>
+                  @if ($herramientasNoDevueltas->hasPages())
+                    {{ $herramientasNoDevueltas->appends(['modal' => 'alertas', 'tab' => 'devoluciones'])->links() }}
+                  @else
+                    <ul class="pagination mb-0">
+                      <li class="page-item active"><span class="page-link">1</span></li>
+                    </ul>
+                  @endif
+                </div>
               </div>
             </div>
           </div>
@@ -241,6 +274,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- Modal: Herramientas en uso -->
   <div class="modal fade" id="modalHerramientasUso" tabindex="-1" aria-labelledby="modalHerramientasUsoLabel" aria-hidden="true">
@@ -254,11 +288,15 @@
         
         <div class="modal-body">
           <div class="row g-3">
-            @forelse($herramientasEnUsoLista as $herramienta)
+            @forelse($herramientasEnUsoLista as $detalle)
               <div class="col-md-6">
                 <div class="alert alert-info shadow-sm h-100">
-                  <strong>{{ $herramienta->recurso->subcategoria->nombre }} - {{ $herramienta->recurso->nombre }}</strong><br>
-                  <small>Serie: {{ $herramienta->nro_serie }}</small>
+                  <strong class="fs-5">
+                    {{ $detalle->serieRecurso->recurso->subcategoria->nombre }} - {{ $detalle->serieRecurso->recurso->nombre }}
+                  </strong><br>
+                  <small><strong>Serie:</strong> {{ $detalle->serieRecurso->nro_serie }}</small><br>
+                  <small><strong>Trabajador:</strong> {{ $detalle->prestamo->usuario->name ?? 'No asignado' }}</small><br>
+                  <small><strong>Fecha préstamo:</strong> {{ \Carbon\Carbon::parse($detalle->prestamo->fecha_prestamo)->format('d/m/Y') }}</small>
                 </div>
               </div>
             @empty
@@ -267,9 +305,22 @@
           </div>
 
           <!-- Paginación -->
-          <div class="mt-3">
-            {{ $herramientasEnUsoLista->appends(['modal' => 'herramientasUso'])->links() }}
+          <div class="mt-3 d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+              Mostrando {{ $herramientasEnUsoLista->firstItem() }} a {{ $herramientasEnUsoLista->lastItem() }} de {{ $herramientasEnUsoLista->total() }} registros
+            </div>
+            <div>
+              @if ($herramientasEnUsoLista->hasPages())
+                {{ $herramientasEnUsoLista->appends(['modal' => 'herramientasUso'])->links('pagination::bootstrap-5') }}
+              @else
+                <ul class="pagination mb-0">
+                  <li class="page-item active"><span class="page-link">1</span></li>
+                </ul>
+              @endif
+            </div>
           </div>
+
+
         </div>
         
       </div>
@@ -302,9 +353,21 @@
           </div>
 
           <!-- Paginación -->
-          <div class="mt-3">
-            {{ $usuariosActivosLista->appends(['modal' => 'usuariosActivos'])->links() }}
-          </div>
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+              <div class="text-muted small">
+                Mostrando {{ $usuariosActivosLista->firstItem() }} a {{ $usuariosActivosLista->lastItem() }} de {{ $usuariosActivosLista->total() }} trabajadores
+              </div>
+              <div>
+                @if ($usuariosActivosLista->hasPages())
+                  {{ $usuariosActivosLista->appends(['modal' => 'usuariosActivos'])->links() }}
+                @else
+                  <ul class="pagination mb-0">
+                    <li class="page-item active"><span class="page-link">1</span></li>
+                  </ul>
+                @endif
+              </div>
+            </div>
+
         </div>
 
       </div>
@@ -312,7 +375,7 @@
   </div>
 
   <!-- Gráfico de estado general del inventario -->
-  <div class="row mt-4">
+  <div class="row mt-4 d-none">
     <div class="col-12">
       <div class="card card-resumen h-100 card-alerta w-100">
         <div class="card-body">

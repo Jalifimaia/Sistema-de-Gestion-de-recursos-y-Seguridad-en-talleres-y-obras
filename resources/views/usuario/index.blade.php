@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
         boton.style.cursor = 'not-allowed';
         aplicarFiltros();
 
-        // ✅ Mostrar modal de éxito
+        // Mostrar modal de éxito
         const modalExitoEl = document.getElementById('modalExitoBaja');
         const contenido = document.getElementById('modalExitoBajaContenido');
         if (modalExitoEl && contenido) {

@@ -86,11 +86,11 @@ Route::prefix('terminal')->group(function () {
     Route::get('/series/{recursoId}', [KioskoController::class, 'getSeries']);
     Route::get('/recursos-asignados/{usuarioId}', [KioskoController::class, 'recursosAsignados']);
     
-    // ✅ EPP asignados (permanentes)
+    // EPP asignados (permanentes)
     Route::get('/epp-asignados/{usuarioId}', [KioskoController::class, 'eppAsignados']);
 
 
-    // ✅ Devolución
+    // Devolución
     Route::post('/validar-qr-devolucion', [PrestamoTerminalController::class, 'validarQRDevolucion']);
     Route::post('/devolver/{detalleId}', [PrestamoTerminalController::class, 'devolverRecurso']);
     Route::post('/devolver-recurso', [PrestamoTerminalController::class, 'devolverPorQR']);
@@ -349,6 +349,7 @@ Route::get('serie_recurso/create-con-recurso/{id}', [SerieRecursoController::cla
 Route::post('serie_recurso/store-multiple', [SerieRecursoController::class, 'storeMultiple'])
     ->name('serie_recurso.storeMultiple');
 
+Route::get('/series/buscar', [SerieRecursoController::class, 'buscar'])->name('series.buscar');
 
 
 

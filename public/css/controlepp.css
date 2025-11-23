@@ -126,7 +126,7 @@
 
 .card-action {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-left: 4px solid #f57c00;
+  border-left: 4px solid #b14910;
   border-radius: 8px;
 }
 
@@ -204,13 +204,306 @@
   cursor: default;               /* cursor normal */
 }
 
-/* 🔶 Botón buscar */
+
+#modalChecklist .modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+#modalChecklist .table {
+  font-size: 0.9rem;
+}
+
+#modalChecklist .modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.bg-modalll {
+  background-color: #3e8f1e;
+}
+
+.bg-modalllS {
+  background-color: #8f351e;
+}
+
+/*TABLA CHECKLIST*/
+.titulo-checklist {
+  font-size: 2rem;
+  color: #2e2e2e;
+  margin-bottom: 0.25rem;
+  font-weight: 400;        
+  font-stretch: condensed;  
+  letter-spacing: -0.5px;  
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  text-decoration: none;
+  border: none;            
+  box-shadow: none;         
+  background-image: none;  
+}
+
+.titulo-checklist::after,
+.titulo-checklist::before {
+  content: none !important; 
+}
+
+/* 🔷 Botón volver */
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #e0e0e0;
+  transform: translateX(-2px);
+  color: #000;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+
+
+/* 🔷 Cards de acción */
+.card-action {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid #b14910;
+  border-radius: 8px;
+}
+
+.card-action:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 🔷 Íconos en títulos de cards */
+.icono-action-inline {
+  height: 28px;
+  width: 28px;
+  animation: pulse 1.5s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* 🔷 Botones de acción por tipo */
+.btn-action {
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 100%;
+  color: #fff;
+}
+
+.btn-verde {
+  background-color: #388e3c;
+}
+.btn-verde:hover {
+  background-color: #2e7d32;
+  transform: scale(1.03);
+}
+
+.btn-azul {
+  background-color: #1976d2;
+}
+.btn-azul:hover {
+  background-color: #1565c0;
+  transform: scale(1.03);
+}
+
+.btn-rojo {
+  background-color: #d32f2f;
+}
+.btn-rojo:hover {
+  background-color: #c62828;
+  transform: scale(1.03);
+}
+
+
+/* 🔷 Tabla checklist */
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+}
+
+#buscadorTrabajador {
+  border: 2px solid #914600;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+}
+
+#buscadorTrabajador:focus {
+  border-color: #d28219;
+  box-shadow: 0 0 0 3px rgba(221, 99, 0, 0.2);
+}
+
+/* 🔷 Encabezado más compacto */
+header {
+  margin-bottom: 2rem !important; /* antes estaba en mb-5 (~3rem) */
+  padding-bottom: 1rem;
+}
+
+/* 🔷 Espaciado más ajustado entre buscador y tabla */
+#buscadorTrabajador {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  background-color: #fff2e6;
+}
+
+/* 🔷 Card de tabla más cerca del buscador */
+.card.shadow-sm.mb-4 {
+  margin-top: -0.5rem;
+  border-color: #a0600c;
+}
+
+#tablaChecklistDiario thead {
+  background-color: #d29119; /* Azul institucional */
+  color: #fff;
+}
+
+#tablaChecklistDiario thead th {
+  font-weight: 600;
+  padding: 0.75rem;
+  border-bottom: 2px solid #572e00;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.tabla-epp thead th {
+  background-color: #b14910 !important;
+  color: #fff !important;
+}
+
+.icono-titulo {
+  width: 33px;   /* ajustá según tu diseño */
+  height: 33px;
+  filter: invert(47%) sepia(97%) saturate(1000%) hue-rotate(358deg) brightness(65%) contrast(92%);
+}
+
+.icono-check {
+  width: 32px;   /* tamaño para el check */
+  height: 32px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icono-cross {
+  width: 24px;   /* tamaño para la cruz */
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Aplica a toda la tabla */
+.tabla-epp {
+  border: 2px solid #923b01;   /* borde naranja */
+}
+
+/* Aplica a cada celda */
+.tabla-epp th,
+.tabla-epp td {
+  border: 1px solid #923b01; /* gris claro, visible incluso en celdas vacías */
+  padding: 0.5rem;
+}
+
+.cards-funcionales {
+  margin-top: -1rem !important; /* sube las cards un poco */
+}
+
+header.row {
+  padding-bottom: 0.25rem; /* menos aire debajo del título */
+}
+
+#modalChecklist .table thead th {
+  background-color: #d06842 !important; /* naranja */
+  color: #fff !important;               /* texto blanco */
+  font-weight: 600;
+  text-transform: uppercase;
+  border-bottom: 2px solid #923b01;     /* borde más oscuro */
+}
+
+/* Outline completo para la tabla dentro del modal Checklist */
+#modalChecklist .table {
+  outline: 2px solid #d06842;   /* color y grosor del contorno */
+  outline-offset: 0;            /* pegado al borde */
+  border-collapse: collapse;    /* asegura que se vea prolijo */
+}
+
+/* Bordes internos de cada celda */
+#modalChecklist .table th,
+#modalChecklist .table td {
+  border: 1px solid #d06842;    /* mismo color que el outline */
+  padding: 0.5rem;
+}
+
 .btn-naranja {
-  background-color: #d06842;
+  background-color: #b14910;
   color: #fff;
   border: none;
 }
-
 .btn-naranja:hover {
-  background-color: #d06842;
+  background-color: #973a07;
+  color: #fff;
+  transform: scale(1.03);
 }
+
+/* Outline delicado para cards */
+.card-outline {
+  border: 1px solid #493723;   /* un naranja suave */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08); /* sombra ligera */
+  border-radius: 8px;          /* esquinas redondeadas */
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding-left: 0;
+}
+
+.page-item {
+  margin: 0 2px;
+}
+
+.page-link {
+  color: #d06842;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #ffd1be;
+}
+
+.page-item.active .page-link {
+  background-color: #d06842;
+  color: white;
+  border-color: #d06842;
+}
+
+
+
+

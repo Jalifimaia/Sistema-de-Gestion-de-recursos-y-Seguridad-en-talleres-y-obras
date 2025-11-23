@@ -448,26 +448,37 @@ padding-top: 0.25rem;
   color: #fff;
 }
 
-/* Cambiar color de los links de paginación */
-.pagination .page-link {
-  color: #b14910; /* rojo Bootstrap (danger) */
-}
-
-/* Cambiar color de fondo y texto cuando está activo */
-.pagination .page-item.active .page-link {
-  background-color: #b14910; /* rojo */
-  border-color: #b14910;
-  color: #fff; /* texto blanco */
-}
-
-/* Cambiar color al pasar el mouse */
-.pagination .page-link:hover {
-  color: #b14910; /* rojo más oscuro */
-}
-
 .bg-modall {
   background-color: #b14910 ;
   color: #fff;
 }
 
+.pagination {
+  display: flex;
+  list-style: none;
+  padding-left: 0;
+}
 
+.page-item {
+  margin: 0 2px;
+}
+
+.page-link {
+  color: #d06842;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #ffd1be;
+}
+
+.page-item.active .page-link {
+  background-color: #d06842;
+  color: white;
+  border-color: #d06842;
+}

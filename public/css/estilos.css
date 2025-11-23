@@ -371,8 +371,10 @@ h1, .titulo-principal {
 }
 
 .texto-boton-grande {
-  font-size: 1.15rem;
-  font-weight: 500;
+  padding: 0.6rem 1.8rem;   /* más ancho */
+  font-size: 1.1rem;        /* texto un poquito más grande */
+  font-weight: 600;
+  border-radius: 6px;
 }
 
 .btn.btn-orange,
@@ -929,4 +931,12 @@ td.text-nowrap > .d-flex {
 /*poner todos los input en color normal*/
 .form-control.is-invalid, .was-validated .form-control:invalid {
   border: 2px solid #b14910 !important;
+}
+.btn-agregar {
+  padding: 0.6rem 1.8rem;   /* más ancho */
+  font-size: 1.1rem;        /* texto un poquito más grande */
+  font-weight: 600;
+  border-radius: 6px;
+  background-color: #d06842;
+  color: #ebebeb;
 }
