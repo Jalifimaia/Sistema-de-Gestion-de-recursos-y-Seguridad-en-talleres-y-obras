@@ -50,7 +50,7 @@
             <option value="{{ $i }}">{{ $i }}</option>
           @endfor
         </select>
-        <div id="error-version" class="text-danger small mt-1 d-none">Este campo es obligatorio.</div>
+        <div id="error-version" class="text-danger small mt-1 d-none  no-asterisk">Este campo es obligatorio.</div>
       </div>
 
       <!-- Año -->
@@ -62,7 +62,7 @@
             <option value="{{ $y }}">{{ $y }}</option>
           @endfor
         </select>
-        <div id="error-anio" class="text-danger small mt-1 d-none">Este campo es obligatorio.</div>
+        <div id="error-anio" class="text-danger small mt-1 d-none  no-asterisk">Este campo es obligatorio.</div>
       </div>
 
       <!-- Lote -->
@@ -75,7 +75,7 @@
                placeholder="Ingrese el número de lote"
                min="1"
                required>
-        <div id="error-lote" class="text-danger small mt-1 d-none">Este campo es obligatorio.</div>
+        <div id="error-lote" class="text-danger small mt-1 d-none  no-asterisk">Este campo es obligatorio.</div>
       </div>
 
       <!-- Fecha de adquisición (date, bloqueada hasta hoy, click en toda el área) -->
@@ -98,7 +98,7 @@
           >
         </div>
 
-        <div id="error-fecha_adquisicion" class="text-danger small mt-1 d-none">Este campo es obligatorio.</div>
+        <div id="error-fecha_adquisicion" class="text-danger small mt-1 d-none  no-asterisk">Este campo es obligatorio.</div>
         @error('fecha_adquisicion')
           <div class="invalid-feedback" id="error-fecha_adquisicion">{{ $message }}</div>
         @enderror

@@ -15,6 +15,36 @@ document.addEventListener('DOMContentLoaded', function () {
   function haySeriesAgregadas() { return contenedorSeries && contenedorSeries.querySelectorAll('input[name="series[]"]').length > 0; }
   function limpiarBackdropsYBody() { document.querySelectorAll('.modal-backdrop').forEach(b => b.remove()); document.body.classList.remove('modal-open'); }
 
+  // Función para validar selects
+  function validarSelect(select) {
+    const errorLabel = select.parentElement.querySelector('.error-label');
+    if (!select.value || select.selectedIndex === 0) {
+      if (errorLabel) errorLabel.style.display = 'block';
+      return false;
+    } else {
+      if (errorLabel) errorLabel.style.display = 'none';
+      return true;
+    }
+  }
+
+  // Agregar event listeners para ocultar errores al cambiar valor
+  function agregarValidacionChange(select) {
+    if (!select) return;
+    select.addEventListener('change', function() {
+      const errorLabel = this.parentElement.querySelector('.error-label');
+      if (this.value && this.selectedIndex !== 0) {
+        if (errorLabel) errorLabel.style.display = 'none';
+      }
+    });
+  }
+
+  // Aplicar validación a todos los selects
+  agregarValidacionChange(trabajadorSelect);
+  agregarValidacionChange(categoriaSelect);
+  agregarValidacionChange(subcategoriaSelect);
+  agregarValidacionChange(recursoSelect);
+  agregarValidacionChange(serieSelect);
+
   // Sincronizar hidden con select si existiera (y seguridad inicial)
   function syncTrabajadorHidden() {
     const val = trabajadorSelect ? (trabajadorSelect.value || '') : (trabajadorHidden ? trabajadorHidden.value : '');
@@ -45,9 +75,9 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(res => { if (!res.ok) throw new Error('Respuesta no OK'); return res.json(); })
       .then(data => {
         if (!subcategoriaSelect) return;
-        subcategoriaSelect.innerHTML = '<option selected disabled>Seleccione una subcategoría</option>';
-        if (recursoSelect) recursoSelect.innerHTML = '<option selected disabled>Seleccione un recurso</option>';
-        if (serieSelect) serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
+        subcategoriaSelect.innerHTML = '<option value="" selected disabled>Seleccione una subcategoría</option>';
+        if (recursoSelect) recursoSelect.innerHTML = '<option value="" selected disabled>Seleccione un recurso</option>';
+        if (serieSelect) serieSelect.innerHTML = '<option value="" selected disabled>Seleccione una serie</option>';
         data.forEach(sub => {
           const nombre = sub.nombre || sub.nombre_subcategoria || 'Sin nombre';
           subcategoriaSelect.insertAdjacentHTML('beforeend', `<option value="${sub.id}">${nombre}</option>`);
@@ -64,8 +94,8 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(res => { if (!res.ok) throw new Error('Respuesta no OK'); return res.json(); })
       .then(data => {
         if (!recursoSelect) return;
-        recursoSelect.innerHTML = '<option selected disabled>Seleccione un recurso</option>';
-        if (serieSelect) serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
+        recursoSelect.innerHTML = '<option value="" selected disabled>Seleccione un recurso</option>';
+        if (serieSelect) serieSelect.innerHTML = '<option value="" selected disabled>Seleccione una serie</option>';
         data.forEach(r => {
           recursoSelect.insertAdjacentHTML('beforeend', `<option value="${r.id}">${r.nombre}</option>`);
         });
@@ -81,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(res => { if (!res.ok) throw new Error('Respuesta no OK'); return res.json(); })
       .then(data => {
         if (!serieSelect) return;
-        serieSelect.innerHTML = '<option selected disabled>Seleccione una serie</option>';
+        serieSelect.innerHTML = '<option value="" selected disabled>Seleccione una serie</option>';
         data.forEach(s => {
           serieSelect.insertAdjacentHTML('beforeend', `<option value="${s.id}">${s.nro_serie}</option>`);
         });
@@ -96,10 +126,32 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(err => { console.error('Error al cargar series:', err); alert('No se pudieron cargar las series.'); });
   });
 
-  // Handler Agregar (modificado para un solo recurso y submit inmediato)
+  // Handler Agregar (modificado para validar campos)
   if (agregarBtn && contenedorSeries && serieSelect && recursoSelect) {
     agregarBtn.addEventListener('click', (e) => {
       e.preventDefault();
+
+      // Validar todos los selects antes de continuar
+      const trabajadorValido = validarSelect(trabajadorSelect);
+      const categoriaValida = validarSelect(categoriaSelect);
+      const subcategoriaValida = validarSelect(subcategoriaSelect);
+      const recursoValido = validarSelect(recursoSelect);
+      const serieValida = validarSelect(serieSelect);
+
+      // Si alguno no es válido, mostrar modal y detener la ejecución
+      if (!trabajadorValido || !categoriaValida || !subcategoriaValida || !recursoValido || !serieValida) {
+        const modalError = document.getElementById('modalErrorCampos');
+        if (modalError && typeof bootstrap !== 'undefined') {
+          limpiarBackdropsYBody();
+          const modal = new bootstrap.Modal(modalError);
+          modal.show();
+          modalError.addEventListener('hidden.bs.modal', () => {
+            try { modal.dispose(); } catch (e) {}
+            limpiarBackdropsYBody();
+          }, { once: true });
+        }
+        return;
+      }
 
       // sincronizar trabajador
       syncTrabajadorHidden();

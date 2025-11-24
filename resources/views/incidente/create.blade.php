@@ -33,7 +33,7 @@
                             <button type="button" id="buscarUsuario" class="btn btn-secondary">Buscar</button>
                         </div>
                         <input type="hidden" name="id_usuario" id="id_usuario" required>
-                        <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                        <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                     </div>
                     <div class="col-md-6">
                         <label>Nombre completo</label>
@@ -67,7 +67,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                         <div class="col-md-3">
@@ -85,7 +85,7 @@
                                     @endif
                                 @endif
                             </select>
-                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                         <div class="col-md-3">
@@ -103,7 +103,7 @@
                                     @endif
                                 @endif
                             </select>
-                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                         <div class="col-md-3">
@@ -123,7 +123,7 @@
                                     @endif
                                 @endif
                             </select>
-                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                         <div class="col-md-3 mt-3">
@@ -139,7 +139,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                         </div>
 
                     </div>
@@ -165,7 +165,7 @@
                       required
                       maxlength="255"
                       placeholder="Ingrese el motivo (máximo 255 caracteres)">{{ old('descripcion') }}</textarea>
-                    <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                    <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                 </div>
                 <div class="mb-3">
                     <label>Fecha del incidente</label>
@@ -177,7 +177,7 @@
                             aria-describedby="fechaError"
                             aria-invalid="{{ $errors->has('fecha_incidente') ? 'true' : 'false' }}"
                             max="{{ now()->format('Y-m-d\TH:i') }}">
-                    <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                    <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
 
                     @error('fecha_incidente')
                         <div id="fechaError" class="invalid-feedback d-block">
