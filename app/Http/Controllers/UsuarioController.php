@@ -65,12 +65,14 @@ public function checklists($id)
 public function incidentes($id)
 {
     $items = Incidente::where('id_trabajador', $id)
-        ->with(['recurso', 'estadoIncidente'])
+        ->with(['recursos', 'estadoIncidente'])
         ->orderByDesc('fecha_incidente')
         ->paginate(10);
 
     return view('usuario.partials.incidentes', compact('items'));
 }
+
+
 
 /** Pestaña: prestamos (paginado) */
 public function prestamos($id)

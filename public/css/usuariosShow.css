@@ -98,7 +98,7 @@
 }
 
 .custom-tabs .nav-link.active {
-  background-color: #df851e; /* naranja */
+  background-color: #cc5f37; /* naranja */
   color: #fff;
   border-radius: 4px 4px 0 0;
 }
@@ -121,16 +121,16 @@
 
 /* 1) Fuerza color de fondo y texto del thead */
 #tab-content table thead {
-  background-color: #df851e;
+  background-color: #cc5f37;
   color: #fff;
 }
 
 /* 2) Asegura que las celdas del thead hereden el color y fondo */
 #tab-content table thead th,
 #tab-content table thead td {
-  background-color: #df851e; /* fondo naranja en cada celda */
+  background-color: #cc5f37; /* fondo naranja en cada celda */
   color: #fff;
-  border-color: #c47419;     /* borde ligeramente más oscuro para definición */
+  border-color: #cc5f37;     /* borde ligeramente más oscuro para definición */
 }
 
 /* 3) Mantener stripes del tbody sin afectar el thead */
@@ -145,7 +145,7 @@
 }
 
 .titulo-con-linea {
-  border-bottom: 4px solid #f57c00; /* línea naranja */
+  border-bottom: 4px solid #b14910; /* línea naranja */
   padding-bottom: 0.3rem;
   margin-bottom: 0; /* ya controlamos con el flex */
   font-weight: bold;
@@ -174,3 +174,22 @@
   height: 18px;
 }
 
+.icon-epp {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
+.icon-check {
+  width: 28px;   /* más grande solo el check */
+  height: 28px;
+}
+
+.table td .icon-epp {
+  display: block;
+  margin: 0 auto; /* centra horizontalmente */
+}
+
+.table {
+  border: 2px solid #b14910;
+}

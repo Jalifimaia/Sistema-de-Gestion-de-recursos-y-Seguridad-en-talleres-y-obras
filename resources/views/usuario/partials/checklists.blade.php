@@ -1,20 +1,63 @@
-<table class="table table-sm table-bordered">
-  <thead>
+<table class="table table-striped table-hover table-bordered custom-table table-naranja">
+  <thead class="table-orange">
     <tr>
-      <th>Fecha</th><th>lentes</th><th>Botas</th><th>Chaleco</th><th>Guantes</th><th>Arnés</th><th>Altura</th><th>Observaciones</th>
+      <th>Fecha</th>
+      <th>Lentes</th>
+      <th>Botas</th>
+      <th>Chaleco</th>
+      <th>Guantes</th>
+      <th>Arnés</th>
+      <th>Altura</th>
+      <th>Observaciones</th>
     </tr>
   </thead>
   <tbody>
     @forelse($items as $c)
       <tr>
         <td>{{ \Carbon\Carbon::parse($c->fecha)->format('d/m/Y') }}</td>
-        <td>{{ $c->lentes ? 'Sí' : 'No' }}</td>
-        <td>{{ $c->botas ? 'Sí' : 'No' }}</td>
-        <td>{{ $c->chaleco ? 'Sí' : 'No' }}</td>
-        <td>{{ $c->guantes ? 'Sí' : 'No' }}</td>
-        <td>{{ $c->arnes ? 'Sí' : 'No' }}</td>
-        <td>{{ $c->es_en_altura ? 'Sí' : 'No' }}</td>
-        <td>{{ $c->observaciones ?? '-' }}</td>
+        <td>
+          @if($c->lentes)
+            <img src="{{ asset('images/checkCheck.svg') }}" alt="Sí" class="icon-epp icon-check">
+          @else
+            <img src="{{ asset('images/crossCross.svg') }}" alt="No" class="icon-epp">
+          @endif
+        </td>
+        <td>
+          @if($c->botas)
+            <img src="{{ asset('images/checkCheck.svg') }}" alt="Sí" class="icon-epp icon-check">
+          @else
+            <img src="{{ asset('images/crossCross.svg') }}" alt="No" class="icon-epp">
+          @endif
+        </td>
+        <td>
+          @if($c->chaleco)
+            <img src="{{ asset('images/checkCheck.svg') }}" alt="Sí" class="icon-epp icon-check">
+          @else
+            <img src="{{ asset('images/crossCross.svg') }}" alt="No" class="icon-epp">
+          @endif
+        </td>
+        <td>
+          @if($c->guantes)
+            <img src="{{ asset('images/checkCheck.svg') }}" alt="Sí" class="icon-epp icon-check">
+          @else
+            <img src="{{ asset('images/crossCross.svg') }}" alt="No" class="icon-epp">
+          @endif
+        </td>
+        <td>
+          @if($c->arnes)
+            <img src="{{ asset('images/checkCheck.svg') }}" alt="Sí" class="icon-epp icon-check">
+          @else
+            <img src="{{ asset('images/crossCross.svg') }}" alt="No" class="icon-epp">
+          @endif
+        </td>
+        <td>
+          @if($c->es_en_altura)
+            <img src="{{ asset('images/checkCheck.svg') }}" alt="Sí" class="icon-epp icon-check">
+          @else
+            <img src="{{ asset('images/crossCross.svg') }}" alt="No" class="icon-epp">
+          @endif
+        </td>
+        <td style="min-width: 200px;">{{ $c->observaciones ?? '-' }}</td>
       </tr>
     @empty
       <tr><td colspan="8" class="text-muted">No hay checklist registrados.</td></tr>
@@ -22,6 +65,6 @@
   </tbody>
 </table>
 
-<div class="mt-2">
+<div class="mt-2 d-flex justify-content-end">
   {{ $items->links() }}
 </div>
