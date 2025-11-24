@@ -52,7 +52,7 @@
 }
 
 .card .btn-editar:hover {
-  background-color: #ef6c00;
+  background-color: #b95b0e;
 }
 
 /* 🔶 Badge de estado */
@@ -79,17 +79,6 @@
 
 .btn-nuevo-prestamo:hover {
   background-color: #37a73d;
-}
-
-/* 🔶 Botón buscar */
-.btn-naranja {
-  background-color: #d06842;
-  color: #fff;
-  border: none;
-}
-
-.btn-naranja:hover {
-  background-color: #d06842;
 }
 
 /* 🔶 Outline naranja para filtros y búsqueda */
@@ -123,7 +112,8 @@ p.small.text-muted {
 }
 
 .btn-naranja:hover {
-  background-color: #d06842;
+  background-color: #b95b0e;
+  color: #fff;
 }
 
 .pagination {
@@ -154,4 +144,30 @@ p.small.text-muted {
   background-color: #d06842;
   color: white;
   border-color: #d06842;
+}
+
+.buscador-destacado,
+.filtro-destacado {
+  border: 2px solid #d06842;
+  border-radius: 6px;
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+
+.buscador-destacado:focus,
+.filtro-destacado:focus {
+  border-color: #ef6c00;
+  outline: none;
+}
+
+.filtrar-por {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.filtro-destacado {
+  border: 2px solid #d06842;
+  border-radius: 6px;
+  padding-right: 2rem; /* 🔧 espacio extra para la flechita */
+  min-width: 160px;     /* 🔧 ancho mínimo para evitar recortes */
 }

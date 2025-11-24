@@ -181,15 +181,15 @@ header {
 .icono-check {
   width: 32px;   /* tamaño para el check */
   height: 32px;
-  display: inline-block;
-  vertical-align: middle;
+  display: block;    /* convierte el img en bloque */
+  margin: 0 auto; 
 }
 
 .icono-cross {
   width: 24px;   /* tamaño para la cruz */
   height: 24px;
-  display: inline-block;
-  vertical-align: middle;
+  display: block;    /* convierte el img en bloque */
+  margin: 0 auto; 
 }
 
 /* Aplica a toda la tabla */

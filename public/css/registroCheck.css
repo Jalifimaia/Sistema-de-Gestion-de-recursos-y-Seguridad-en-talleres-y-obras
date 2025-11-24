@@ -27,9 +27,9 @@
 }
 
 .btn-volver:hover {
-  background-color: #e0e0e0;
+  background-color: #ac3416;
   transform: translateX(-2px);
-  color: #000;
+  color: #ffff;
 }
 
 .icono-volver {
@@ -224,13 +224,6 @@ label,
   outline-offset: 0;                       /* pegado al borde */
 }
 
-/* Div que contiene el EPP asignado con outline */
-#epp-asignado {
-  outline: 1px solid #8b4319;                 /* contorno negro */
-  outline-offset: 0;
-  border-radius: 6px;                      /* opcional: esquinas redondeadas */
-  padding: 0.75rem;                        /* un poco de aire interno */
-}
 
 /* Labels más en negrita */
 #checklist-form label,
@@ -250,8 +243,56 @@ label,
   border: 1px solid #b14910 !important;
 }
 
+#epp-asignado table {
+  border: 1px solid #b14910 !important;   /* borde más notorio */
+  outline: 2px solid #b14910 !important;  /* contorno exterior */
+  outline-offset: 2px;                    /* pequeña separación visual */
+  border-radius: 4px;                     /* esquinas suaves */
+}
 
+/* También reforzamos las líneas internas */
+#epp-asignado th,
+#epp-asignado td {
+  border: 1px solid #b14910 !important;
+}
 
+/* 🔶 Header naranja personalizado para el modal de checklist incompleto */
+#modalChecklistIncompleto .modal-header {
+  background-color: #c75e1d !important; /* tu tono de naranja */
+  color: #fff !important;               /* texto blanco */
+  border-bottom: none;
+}
 
+#modalChecklistIncompleto .modal-title {
+  font-weight: 700;
+}
+
+#modalChecklistIncompleto .btn-close {
+  filter: invert(1); /* para que se vea sobre el fondo oscuro */
+}
+
+#epp-checklist .text-danger.small {
+  display: block;
+  margin-top: 4px;
+  margin-left: 1.6rem; /* alinea con el texto del label */
+  font-size: 0.85rem;
+}
+
+#epp-checklist .form-check-label {
+  display: inline-block;
+  margin-left: 0.25rem;
+}
+
+#epp-checklist .text-danger.small {
+  display: block;
+  margin-top: 6px;     /* separación vertical */
+  margin-left: 0.1rem;   /* antes 1.6rem → más cerca del checkbox */
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+header .btn-volver {
+  margin-left: -1.5rem; /* empuja el botón un poco hacia la izquierda */
+}
 
 

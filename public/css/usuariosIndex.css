@@ -458,17 +458,13 @@ td.acciones .d-flex {
   background-color: #b95b0e;
   color: #f1f1f1;
   font-size: 1.2rem;
+  padding: 8px 14px;
 }
 
 .btn-agregar:hover{
   background-color: #994c0c;
   color: #f1f1f1;
   font-size: 1.2rem;
-}
-
-.btn-agregar .icono-card-titulo {
-  width: 22px;   /* ancho del icono */
-  height: 22px;  /* alto del icono */
 }
 
 .filtrar-por{
@@ -516,3 +512,18 @@ td.acciones .d-flex {
   color: white;
   border-color: #d06842;
 }
+
+/* 🔶 Outline estilo naranja para la tabla de usuarios */
+.table-naranja {
+  border: 2px solid #b14910 !important;   /* color principal */
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px #b14910 inset;    /* simula contorno sin sobresalir */
+}
+
+/* Bordes internos */
+.table-naranja th,
+.table-naranja td {
+  border: 1px solid #b14910 !important;
+}
+
+

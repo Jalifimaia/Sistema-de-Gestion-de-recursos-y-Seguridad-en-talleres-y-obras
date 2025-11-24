@@ -483,3 +483,22 @@ padding-top: 0.25rem;
   border-color: #d06842;
 }
 
+.icono-check {
+  height: 28px;   /* ajustá según tu diseño */
+  width: 28px;
+  display: block;    /* convierte el img en bloque */
+  margin: 0 auto; 
+}
+
+
+.icono-cross {
+  height: 20px;   /* ajustá según tu diseño */
+  width: 20px;
+  display: block;    /* convierte el img en bloque */
+  margin: 0 auto; 
+}
+
+.subir-bienvenida {
+  font-size: 1rem;
+}
+

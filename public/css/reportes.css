@@ -84,7 +84,7 @@
 
 /* 🔷 Card con movimiento */
 .card-report {
-  border-left: 4px solid #f57c00;
+  border-left: 4px solid #bb6713;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -101,5 +101,6 @@
 }
 
 .btn-naranja:hover {
-  background-color: #d06842;
+  background-color: #b35a39;
+  color: #fff;
 }

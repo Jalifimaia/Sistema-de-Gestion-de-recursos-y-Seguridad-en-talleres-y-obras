@@ -24,29 +24,31 @@
   <!-- Botón registrar -->
   <div class="mb-3 text-start">
     <a href="{{ route('incidente.create') }}" class="btn btn-registrar-incidente">
-      + Registrar nuevo incidente
+    Registrar nuevo incidente
     </a>
   </div>
 
-  <!-- Buscador y filtro -->
-  <div class="row mb-3 align-items-center g-2">
-    <div class="col-md-8">
-      <input
-        type="text"
-        id="buscadorIncidentes"
-        class="form-control"
-        placeholder="Buscar por trabajador, motivo, estado o resolución...">
-    </div>
+ <!-- Buscador y filtro -->
+<div class="row mb-3 align-items-center g-2">
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-1">
+    <!-- Buscador más corto -->
+    <input
+      type="text"
+      id="buscadorIncidentes"
+      class="form-control buscador-destacado"
+      placeholder="Buscar por trabajador, motivo, estado o resolución...">
 
-    <div class="col-md-4">
-      <select id="filtroEstadoIncidente" class="form-select">
-        <option value="">Todos los estados</option>
-        @foreach($estados as $id => $nombre)
-          <option value="{{ $nombre }}">{{ $nombre }}</option>
-        @endforeach
-      </select>
-    </div>
+    <!-- Select de filtro más ancho -->
+    <select id="filtroEstadoIncidente" class="form-select filtro-destacado">
+      <option value="">Todos los estados</option>
+      @foreach($estados as $id => $nombre)
+        <option value="{{ $nombre }}">{{ $nombre }}</option>
+      @endforeach
+    </select>
   </div>
+</div>
+
+
 
   @if(session('success'))
     <div id="alertaEstado" class="alert alert-success alert-dismissible fade show" role="alert">
@@ -55,8 +57,6 @@
     </div>
   @endif
 
-  <div class="card shadow-sm">
-    <div class="card-body">
       <div class="table-responsive">
         <table class="table-naranja align-middle mb-0" id="tablaIncidentes">
           <thead>
@@ -116,8 +116,7 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+
 </div>
 
 <!-- Modales de detalle -->

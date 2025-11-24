@@ -37,60 +37,10 @@ input[type="date"].form-control:focus {
   background-color: #f9a825;
 }
 
-.btn-volver {
-  background-color: #d3401b;
-  border: 1px solid #ccc;
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-  color: #fff;
-  border-radius: 6px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-volver:hover {
-  background-color: #e0e0e0;
-  transform: translateX(-2px);
-  color: #000;
-}
-
-.icono-volver {
-  width: 20px;
-  height: 20px;
-}
-
 table.table thead th {
   background-color: #b14910 !important;
   color: #fff !important;
   font-weight: 600 !important;
-}
-
-.btn-volver {
-  background-color: #d3401b;
-  color: #fff;
-  font-weight: 500;
-  border: none;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.95rem;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  max-width: 100%;
-  width: auto; /* 👈 esto es clave */
-  flex-shrink: 0; /* 👈 evita que se estire */
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-volver:hover {
-  background-color: #e0e0e0;
-  color: #000;
-  transform: translateX(-2px);
-}
-
-.icono-volver {
-  width: 18px;
-  height: 18px;
 }
 
 .btn-ver-grafico {
@@ -146,4 +96,38 @@ table.table thead th {
   background-color: #d06842;
   color: white;
   border-color: #d06842;
+}
+
+.btn-volver {
+  background-color: #b14910;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: rgb(146, 43, 17);
+  transform: translateX(-2px);
+  color: #ffff;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.table-responsive table {
+  border: 2px solid #b14910 !important;   /* reemplaza el outline */
+  border-radius: 6px;                     /* esquinas redondeadas */
+  box-shadow: 0 0 0 2px #b14910 inset;    /* da relieve interno sin sobresalir */
+}
+
+/* Reforzar bordes internos */
+.table-responsive th,
+.table-responsive td {
+  border: 1px solid #b14910 !important;
 }

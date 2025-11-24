@@ -77,8 +77,7 @@
     @if (Auth::user()->rol->nombre_rol === 'Administrador')
       <div class="mb-3 text-start">
         <a href="{{ route('usuarios.create') }}" 
-           class="btn btn-agregar btn-sm d-inline-flex align-items-center gap-2">
-          <img src="{{ asset('images/useraddd.svg') }}" alt="Crear usuario" class="icono-card-titulo" style="width:18px;">
+          class="btn btn-agregar btn-sm d-inline-flex align-items-center gap-2">
           Agregar usuario
         </a>
       </div>
@@ -91,10 +90,7 @@
     <input type="text" id="buscador" 
            class="form-control buscador-destacado" 
            placeholder="Buscar por nombre o email..." 
-           style="width: 340px; max-width: 100%;">
-
-    <!-- Filtros al lado del buscador -->
-    <label class="form-label mb-0 fw-semibold filtrar-por">Filtrar por:</label>
+           style="width: 720px; max-width: 100%;">
 
     <select id="filtroRol" class="form-select filtro-destacado w-auto">
       <option value="todos">Todos los roles</option>

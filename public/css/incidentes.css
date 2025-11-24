@@ -58,7 +58,6 @@
   background-color: #757575;
 }
 
-/* 🟧 Botón Registrar incidente */
 .btn-registrar-incidente {
   background-color: #b95b0e;
   color: #fff;
@@ -70,30 +69,8 @@
 }
 
 .btn-registrar-incidente:hover {
-  background-color: #ef6c00;
-}
-
-#buscadorIncidentes::placeholder {
-  color: #999;
-}
-
-#filtroEstadoIncidente {
-  min-width: 180px;
-}
-
-/* Outline visible en buscador y select */
-#buscadorIncidentes,
-#filtroEstadoIncidente {
-  border: 1px solid #b95b0e;   /* naranja */
-  outline: none;
-  box-shadow: none;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-#buscadorIncidentes:focus,
-#filtroEstadoIncidente:focus {
-  border-color: #b95b0e;
-  box-shadow: 0 0 0 2px rgba(255, 127, 0, 0.3); /* glow naranja */
+  background-color: #ac5004;
+  color: #fff;
 }
 
 /* Reducir espacio debajo del header */
@@ -177,3 +154,87 @@ header.row.mb-4 {
 .btn-naranja:hover {
   background-color: #d06842;
 }
+
+.buscador-destacado,
+.filtro-destacado {
+  border: 2px solid #d06842;
+  border-radius: 6px;
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+
+.buscador-destacado:focus,
+.filtro-destacado:focus {
+  border-color: #ef6c00;
+  outline: none;
+}
+
+.filtrar-por {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.filtro-destacado {
+  border: 2px solid #d06842;
+  border-radius: 6px;
+  padding-right: 2rem; /* 🔧 espacio extra para la flechita */
+  min-width: 160px;     /* 🔧 ancho mínimo para evitar recortes */
+}
+
+#buscadorIncidentes {
+  min-width: 60%;
+}
+
+.row.mb-3.align-items-center.g-2 .d-flex {
+  flex-wrap: nowrap !important; /* todos en una sola línea */
+}
+
+.table-naranja {
+  border: 2px solid #b14910 !important;   /* borde principal */
+  border-radius: 6px;                     /* esquinas suaves */
+  box-shadow: 0 0 0 2px #b14910 inset;    /* contorno interno limpio */
+}
+
+/* Bordes internos de la tabla */
+.table-naranja th,
+.table-naranja td {
+  border: 1px solid #b14910 !important;
+}
+
+/* 🔧 Compactar tabla */
+.table-naranja th,
+.table-naranja td {
+  padding: 0.4rem 0.6rem !important; /* reduce el alto de cada fila */
+  vertical-align: middle;             /* centra verticalmente el texto */
+}
+
+/* 🔧 Dar más ancho a la columna "Fecha del incidente" */
+.table-naranja th:nth-child(5),
+.table-naranja td:nth-child(5) {
+  min-width: 160px; /* aumenta el ancho mínimo */
+  white-space: nowrap; /* evita salto de línea */
+}
+
+/* 🔧 Ajuste general para mantener la tabla prolija */
+.table-naranja {
+  font-size: 0.95rem; /* un poco más compacta visualmente */
+}
+
+.table-naranja thead th {
+  padding-top: 0.8rem !important;
+  padding-bottom: 0.8rem !important;
+}
+
+.buscador-destacado {
+  flex: 0 0 300px;   /* ancho fijo más corto */
+  height: 46px;
+}
+
+.filtro-destacado {
+  flex: 0 0 200px;   /* ancho más largo para el select */
+  height: 46px !important;
+  width: 300px !important;
+}
+
+.buscador-destacado { flex: 2; }
+.filtro-destacado { flex: 1; }

@@ -24,10 +24,10 @@
 <section id="estado-inventario" class="mb-4">
   <div class="card shadow border custom-margin-top card-estado">
     <!-- Header con botón toggle -->
-    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+    <div class="card-header bg-inventario border-bottom d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center gap-2">
         <!-- Botón toggle collapse -->
-        <button class="btn btn-sm btn-light p-1 d-flex justify-content-center align-items-center"
+        <button class="btn btn-sm btn-downn p-1 d-flex justify-content-center align-items-center"
                 style="width: 32px; height: 32px;"
                 type="button"
                 data-bs-toggle="collapse"
@@ -39,8 +39,7 @@
 
         <!-- Título y subtítulo -->
         <div class="d-flex align-items-center gap-2">
-          <span class="fw-bold">Estado del Inventario</span>
-          <span class="text-muted small">- Resumen general de las herramientas y del equipo de protección personal</span>
+          <span class="fw-bold textoInventario">Estado del Inventario</span>
         </div>
       </div>
     </div>
@@ -75,16 +74,21 @@
   </div>
 </section>
 
- <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-  <a href="{{ route('recursos.create') }}" class="btn btn-agregar">
-    Agregar recurso
-  </a>
+ <div class="d-flex flex-wrap align-items-start gap-2 mb-3">
 
-  <a href="{{ url('/series-qr') }}" class="btn btn-outline-orange d-flex justify-content-center align-items-center">
-    <img src="{{ asset('images/qr2.svg') }}" alt="QR icono" style="height: 35px;">
-    <span class="texto-boton-grande btn-qr">Códigos QR</span>
-  </a>
+  <div class="d-flex flex-wrap align-items-start gap-2 mb-1">
 
+    <a href="{{ route('recursos.create') }}" class="btn btn-agregar">
+      Agregar recurso
+    </a>
+    
+    <a href="{{ url('/series-qr') }}" 
+      class="btn btn-qr" style="background-color: #e2e2e2ff; border: 2px solid #4b4b4bff; font-size: 1.1rem;">
+      <span>Códigos QR</span>
+    </a>
+
+
+  </div>
 
 </div>
 
@@ -94,18 +98,17 @@
   <!-- Buscar -->
   <input type="text" id="buscador"
          class="form-control buscador-destacado"
-         style="height: 46px; flex: 1;"
          placeholder="Buscar por nombre, categoria, subcategoria o descripción...">
 
   <!-- Filtro -->
   <select id="filtroInventario"
-          class="form-select filtro-destacado"
-          style="height: 46px; width: auto;">
+          class="form-select filtro-destacado">
     <option value="todos">Todos</option>
     <option value="herramienta">Herramientas</option>
     <option value="epp">EPP</option>
   </select>
 </div>
+
 
 <!-- Tabla -->
 <div class="card-body">
@@ -366,6 +369,6 @@ document.addEventListener('DOMContentLoaded', function () {
 @endpush
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/estilos.css') }}">
+<link rel="stylesheet" href="{{ asset('css/inventario.css') }}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 @endpush

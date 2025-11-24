@@ -78,7 +78,7 @@
             <option value="">-- Seleccionar casco disponible --</option>
           </select>
           <div class="text-danger small d-none" id="alert-casco">Ya tiene casco asignado</div>
-          <div class="text-danger small d-none" id="alert-casco-vacio">Debe seleccionar un casco</div>
+          <div class="text-danger small d-none" id="alert-casco-vacio"><strong>Debe seleccionar un casco</strong></div>
         </div>
 
         <div class="col-md-6">
@@ -137,9 +137,9 @@
   </div>
 
   <!-- Botones -->
-  <div class="text-center mt-4">
+  <div class="d-flex justify-content-end mt-4">
     <input type="hidden" name="todos_asignados" id="todos_asignados" value="0">
-    <button type="button" id="submitBtn" class="btn btn-guardar w-100 mb-5">
+    <button type="button" id="submitBtn" class="btn btn-guardar px-4 py-2">
       Guardar asignación
     </button>
   </div>

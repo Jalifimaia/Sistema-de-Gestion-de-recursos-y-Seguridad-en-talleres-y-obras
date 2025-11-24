@@ -5,7 +5,7 @@
 @section('content')
 <div class="container pt-3">
   <!-- 🔶 Encabezado -->
-<header class="mb-3 py-2 px-4">
+<header class="mb-4 py-2 px-4">
   <div class="d-flex align-items-center gap-3 flex-wrap">
 <!-- Botón volver -->
 <a href="{{ url('/controlEPP') }}" 
@@ -68,47 +68,73 @@
   </div>
 </div>
 
-<!-- Card: Checklist EPP -->
-<div class="card mb-3 card-outline shadow-sm border">
-  <div class="card-header fw-bold">
-    Checklist
-  </div>
-  <div class="card-body">
-    <div class="row g-3" id="epp-checklist">
-      @foreach($alias as $epp => $nombre)
-        <div class="col-md-2">
-          <div class="form-check">
-            <input type="hidden" name="{{ $epp }}" value="0">
-            <input type="checkbox" name="{{ $epp }}" id="{{ $epp }}"
-                   class="form-check-input" value="1" {{ old($epp) ? 'checked' : '' }}>
-            <label for="{{ $epp }}" class="form-check-label">{{ $nombre }}</label>
-          </div>
-          <div class="text-danger small d-none" id="alert-{{ $epp }}">
-            <strong>No tiene {{ $nombre }} asignado</strong>
-          </div>
-          @error($epp)
-            <div class="text-danger small">{{ $message }}</div>
-          @enderror
+        <!-- Tabla EPP asignado -->
+        <div id="epp-asignado" class="table-responsive d-none mt-3">
+          <table class="table table-sm align-middle text-center mb-0">
+            <thead>
+              <tr id="epp-thead"></tr>
+            </thead>
+            <tbody>
+              <tr id="epp-tbody"></tr>
+            </tbody>
+          </table>
         </div>
-      @endforeach
+      </div>
     </div>
-  </div>
-</div>
 
-<!-- Card: Observaciones -->
-<div class="card mb-3 card-outline shadow-sm border">
-  <div class="card-header fw-bold">
-    Observaciones
-  </div>
-  <div class="card-body">
-    <textarea name="observaciones" id="observaciones"
-              class="form-control" placeholder="Observaciones...">{{ old('observaciones') }}</textarea>
-    @error('observaciones')
-      <div class="text-danger small">{{ $message }}</div>
-    @enderror
-  </div>
-</div>
 
+    <!-- Card: Checklist EPP -->
+    <div class="card mb-3 card-outline shadow-sm border">
+      <div class="card-header fw-bold">
+        Checklist
+      </div>
+      <div class="card-body">
+        <div class="row g-3" id="epp-checklist">
+          @foreach($alias as $epp => $nombre)
+            <div class="col-md-2">
+              <div class="form-check">
+                <input type="hidden" name="{{ $epp }}" value="0">
+                <input type="checkbox" name="{{ $epp }}" id="{{ $epp }}"
+                      class="form-check-input" value="1" {{ old($epp) ? 'checked' : '' }}>
+                <label for="{{ $epp }}" class="form-check-label">{{ $nombre }}</label>
+              </div>
+              <div class="text-danger small d-none" id="alert-{{ $epp }}">
+                <strong>No tiene {{ $nombre }}<br>asignado</strong>
+              </div>
+              @error($epp)
+                <div class="text-danger small">{{ $message }}</div>
+              @enderror
+            </div>
+          @endforeach
+
+          <!-- 🚀 Checkbox movido: Trabajo en altura -->
+          <div class="col-md-3 d-flex align-items-center">
+            <div class="form-check">
+              <input type="hidden" name="es_en_altura" value="0">
+              <input type="checkbox" name="es_en_altura" id="es_en_altura"
+                    class="form-check-input" value="1" {{ old('es_en_altura') ? 'checked' : '' }}>
+              <label for="es_en_altura" class="form-check-label">
+                ¿Trabaja en altura hoy?
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card: Observaciones -->
+    <div class="card mb-3 card-outline shadow-sm border">
+      <div class="card-header fw-bold">
+        Observaciones
+      </div>
+      <div class="card-body">
+        <textarea name="observaciones" id="observaciones"
+                  class="form-control" placeholder="Observaciones...">{{ old('observaciones') }}</textarea>
+        @error('observaciones')
+          <div class="text-danger small">{{ $message }}</div>
+        @enderror
+      </div>
+    </div>
 
     <!-- Botón -->
     <div class="d-flex justify-content-end">
@@ -117,14 +143,15 @@
       </button>
     </div>
   </form>
+
 </div>
 
 
 <!-- 🔶 Modal de advertencia -->
 <div class="modal fade" id="modalChecklistIncompleto" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content border-warning">
-      <div class="modal-header bg-warning text-dark">
+    <div class="modal-content">
+      <div class="modal-header">
         <h5 class="modal-title fw-bold">Checklist incompleto</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
@@ -228,36 +255,32 @@ document.addEventListener('DOMContentLoaded', function () {
   const thead = document.getElementById('epp-thead');
   const tbody = document.getElementById('epp-tbody');
   const checklistItems = ['lentes', 'botas', 'chaleco', 'guantes', 'arnes', 'casco'];
-  const aliasTipos = {
-    lentes: 'lentes',
-    botas: 'botas',
-    chaleco: 'chaleco',
-    guantes: 'guantes',
-    arnes: 'arnes',
-    casco: 'casco'
-  };
 
   let asignados = [];
 
+  // 🔧 Validar checklist contra EPP asignado
   function validarChecklistContraAsignado(data) {
-    asignados = data.map(item => item.tipo.toLowerCase().trim().replace(/\s+/g, ''));
+    // Normalizar tipos asignados
+    asignados = data.map(item => item.tipo.toLowerCase().trim());
 
     checklistItems.forEach(epp => {
       const checkbox = document.getElementById(epp);
       const alerta = document.getElementById('alert-' + epp);
-      const tipoReal = aliasTipos[epp] || epp;
-      const tiene = asignados.includes(tipoReal);
+
+      // Verificar si algún tipo asignado contiene la palabra clave del EPP
+      const tiene = asignados.some(tipo => tipo.includes(epp));
 
       if (!tiene) {
         alerta.classList.remove('d-none');
-        checkbox.classList.add('border-danger');
+        checkbox.classList.add('is-invalid');
       } else {
         alerta.classList.add('d-none');
-        checkbox.classList.remove('border-danger');
+        checkbox.classList.remove('is-invalid');
       }
     });
   }
 
+  // 🔧 Al cambiar trabajador
   select.addEventListener('change', function () {
     const userId = this.value;
     if (!userId) return;
@@ -285,13 +308,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Mostrar aviso checklist
       const aviso = document.getElementById('aviso-checklist');
-        if (checklistData.existe) {
-          aviso.innerHTML = `<strong>Al trabajador ya se le realizó el checklist hoy.</strong>`;
-          aviso.classList.remove('d-none');
-        } else {
-          aviso.innerHTML = '';
-          aviso.classList.add('d-none');
-        }
+      if (checklistData.existe) {
+        aviso.innerHTML = `<strong>Al trabajador ya se le realizó el checklist hoy.</strong>`;
+        aviso.classList.remove('d-none');
+      } else {
+        aviso.innerHTML = '';
+        aviso.classList.add('d-none');
+      }
     });
   });
 
@@ -299,48 +322,47 @@ document.addEventListener('DOMContentLoaded', function () {
     select.dispatchEvent(new Event('change'));
   }
 
-  // Validación antes de enviar
+  // 🔧 Validación antes de enviar
   document.getElementById('checklist-form').addEventListener('submit', function (e) {
-
     const trabajadorId = document.getElementById('trabajador_id').value;
 
+    // 🚫 Caso 1: sin trabajador
     if (!trabajadorId) {
-    e.preventDefault();
-    const modal = new bootstrap.Modal(document.getElementById('modalErrorChecklist'));
-    document.getElementById('modalErrorChecklistContenido').textContent =
-      'Debés seleccionar un trabajador antes de registrar el checklist.';
-    modal.show();
-    return;
-  }
+      e.preventDefault();
+      const modal = new bootstrap.Modal(document.getElementById('modalErrorChecklist'));
+      document.getElementById('modalErrorChecklistContenido').textContent =
+        'Debés seleccionar un trabajador antes de registrar el checklist.';
+      modal.show();
+      return;
+    }
 
-  // 🚫 Caso 2: trabajador sin EPP asignado
-  if (asignados.length === 0) {
-    e.preventDefault();
-    const modal = new bootstrap.Modal(document.getElementById('modalErrorChecklist'));
-    document.getElementById('modalErrorChecklistContenido').textContent =
-      'No se puede registrar el checklist: el trabajador no tiene ningún EPP asignado.';
-    modal.show();
-    return;
-  }
+    // 🚫 Caso 2: trabajador sin EPP asignado
+    if (asignados.length === 0) {
+      e.preventDefault();
+      const modal = new bootstrap.Modal(document.getElementById('modalErrorChecklist'));
+      document.getElementById('modalErrorChecklistContenido').textContent =
+        'No se puede registrar el checklist: el trabajador no tiene ningún EPP asignado.';
+      modal.show();
+      return;
+    }
 
     let bloqueado = false;
     let incompleto = false;
     let critico = false;
 
     checklistItems.forEach(campo => {
-      const tipoReal = aliasTipos[campo] || campo;
       const checkbox = document.getElementById(campo);
       const marcado = checkbox.checked;
-      const tieneAsignado = asignados.includes(tipoReal);
+      const tieneAsignado = asignados.some(tipo => tipo.includes(campo));
 
       if (marcado && !tieneAsignado) {
         bloqueado = true;
-        checkbox.classList.add('border-danger');
+        checkbox.classList.add('is-invalid');
       }
 
       if (tieneAsignado && !marcado && campo !== 'arnes') {
         incompleto = true;
-        checkbox.classList.add('border-warning');
+        checkbox.classList.add('is-warning');
       }
     });
 
@@ -363,13 +385,12 @@ document.addEventListener('DOMContentLoaded', function () {
       lista.innerHTML = '';
 
       checklistItems.forEach(campo => {
-        const tipoReal = aliasTipos[campo] || campo;
         const checkbox = document.getElementById(campo);
         const marcado = checkbox.checked;
-        const tieneAsignado = asignados.includes(tipoReal);
+        const tieneAsignado = asignados.some(tipo => tipo.includes(campo));
 
         if (tieneAsignado && !marcado && campo !== 'arnes') {
-          lista.innerHTML += `<li>${tipoReal.charAt(0).toUpperCase() + tipoReal.slice(1)}</li>`;
+          lista.innerHTML += `<li>${campo.charAt(0).toUpperCase() + campo.slice(1)}</li>`;
         }
       });
 
@@ -387,14 +408,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Mostrar modal si el backend devolvió error de EPP no asignado
+  // 🔧 Mostrar modal si el backend devolvió error
   @if($errors->has('epp_asignacion'))
     const modalError = new bootstrap.Modal(document.getElementById('modalErrorChecklist'));
     document.getElementById('modalErrorChecklistContenido').textContent = @json($errors->first('epp_asignacion'));
     modalError.show();
   @endif
 
-  // Mostrar modal si el backend devolvió éxito
+  // 🔧 Mostrar modal si el backend devolvió éxito
   @if(session('success'))
     const modalExito = new bootstrap.Modal(document.getElementById('modalChecklistExito'));
     document.getElementById('modalChecklistExitoContenido').textContent = @json(session('success'));
@@ -403,5 +424,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+
 
 
