@@ -84,28 +84,35 @@
     @endif
   @endauth
 
-  <!-- 🔶 Buscador y filtros en la misma fila -->
-  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-    <!-- Buscador más largo -->
-    <input type="text" id="buscador" 
-           class="form-control buscador-destacado" 
-           placeholder="Buscar por nombre o email..." 
-           style="width: 720px; max-width: 100%;">
+<!-- 🔶 Buscador y filtros en la misma fila -->
+  <div class="row g-3 mb-3">
+    <!-- Buscador -->
+    <div class="col-md-6">
+      <input type="text" id="buscador" 
+             class="form-control buscador-destacado" 
+             placeholder="Buscar por nombre o email...">
+    </div>
 
-    <select id="filtroRol" class="form-select filtro-destacado w-auto">
-      <option value="todos">Todos los roles</option>
-      @foreach($roles as $rol)
-        <option value="{{ $rol->nombre_rol }}">{{ $rol->nombre_rol }}</option>
-      @endforeach
-    </select>
+    <!-- Filtro rol -->
+    <div class="col-md-3">
+      <select id="filtroRol" class="form-select filtro-destacado">
+        <option value="todos">Todos los roles</option>
+        @foreach($roles as $rol)
+          <option value="{{ $rol->nombre_rol }}">{{ $rol->nombre_rol }}</option>
+        @endforeach
+      </select>
+    </div>
 
-    <select id="filtroEstado" class="form-select filtro-destacado w-auto">
-      <option value="todos">Todos los estados</option>
-      @foreach($estados as $estado)
-        <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
-      @endforeach
-    </select>
-  </div>
+    <!-- Filtro estado -->
+    <div class="col-md-3">
+      <select id="filtroEstado" class="form-select filtro-destacado">
+        <option value="todos">Todos los estados</option>
+        @foreach($estados as $estado)
+          <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
+        @endforeach
+      </select>
+    </div>
+</div>
 </div>
 
 
