@@ -37,11 +37,11 @@
           <div class="col-md-6 mb-3">
             <label for="id_subcategoria" class="form-label">Subcategoría <span class="required-asterisk">*</span></label>
             <div class="input-group">
-                <select id="id_subcategoria" name="id_subcategoria" class="form-select" required disabled>
+                <select id="id_subcategoria" name="id_subcategoria" class="form-select form-sub" required disabled>
                     <option value="">Primero seleccioná una categoría</option>
                 </select>
                 <button type="button" 
-                        class="btn btn-outline-primary" 
+                        class="btn btn-mas" 
                         id="btnAbrirModalSubcategoria"
                         data-bs-toggle="tooltip" data-bs-placement="top" title="Agregar Subcategoría">
                     <i class="bi bi-plus-circle"></i>

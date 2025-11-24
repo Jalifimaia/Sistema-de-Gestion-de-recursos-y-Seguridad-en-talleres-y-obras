@@ -128,7 +128,7 @@ window.addEventListener('load', function () {
         const btnQr = document.createElement('a');
         btnQr.href = `/series/${serieId}/qr`; // ruta showQr
         btnQr.target = '_blank';
-        btnQr.className = 'btn btn-sm btn-success btn-accion';
+        btnQr.className = 'btn btn-sm btn-success btn-verQR btn-accion btn-accion-compact';
         btnQr.title = 'Ver QR';
         btnQr.innerHTML = '<i class="bi bi-qr-code"></i><span class="ms-1">QR</span>';
         contAcc.appendChild(btnQr);
@@ -137,7 +137,7 @@ window.addEventListener('load', function () {
         const btnQrPdf = document.createElement('a');
         btnQrPdf.href = `/series-qr/${serieId}/pdf`;
         btnQrPdf.target = '_blank';
-        btnQrPdf.className = 'btn btn-sm btn-warning btn-accion';
+        btnQrPdf.className = 'btn btn-sm btn-pdf btn-accion btn-accion-compact';
         btnQrPdf.title = 'Descargar QR en PDF';
         btnQrPdf.innerHTML = '<i class="bi bi-file-earmark-pdf"></i><span class="ms-1">PDF</span>';
         contAcc.appendChild(btnQrPdf);
@@ -145,7 +145,7 @@ window.addEventListener('load', function () {
         // Botón eliminar-serie (marcar baja)
         const btnEliminar = document.createElement('button');
         btnEliminar.type = 'button';
-        btnEliminar.className = 'btn btn-sm btn-eliminar-serie btn-danger btn-accion';
+        btnEliminar.className = 'btn btn-sm btn-marcar-baja btn-accion-compact';
         btnEliminar.title = 'Eliminar (marcar baja)'; 
         btnEliminar.dataset.id = serieId;
         btnEliminar.dataset.nro = nroSerie;
