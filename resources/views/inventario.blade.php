@@ -83,7 +83,7 @@
     </a>
     
     <a href="{{ url('/series-qr') }}" 
-      class="btn btn-qr" style="background-color: #e2e2e2ff; border: 2px solid #4b4b4bff; font-size: 1.1rem;">
+      class="btn btn-qr" style="font-size: 1.1rem;">
       <span>Códigos QR</span>
     </a>
 
@@ -181,7 +181,7 @@
                 <form method="POST" action="{{ route('recursos.baja', $recurso->id) }}" class="marcar-baja-form" data-nombre="{{ $recurso->nombre }}">
                     @csrf
                     @method('DELETE')
-                    <button type="button" class="btn btn-sm btn-danger btn-marcar-baja btn-accion-compact" title="Dar de baja">
+                    <button type="button" class="btn btn-sm btn-marcar-baja btn-accion-compact" title="Dar de baja">
                         <i class="bi bi-trash"></i>
                     </button>
                 </form>
