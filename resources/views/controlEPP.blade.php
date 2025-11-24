@@ -162,24 +162,21 @@
 
  
 <!-- Modal: Checklist sin registrar -->
-<div class="modal fade" id="modalChecklist" tabindex="-1" aria-labelledby="modalChecklistLabel" aria-hidden="true">
-  <div class="modal-dialog modal-md"> 
+<div class="modal fade" id="modalChecklist" tabindex="-1" aria-labelledby="modalChecklistLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered"> 
     <div class="modal-content">
       
-      <div class="modal-header bg-modalllS text-white justify-content-center">
-        <h5 class="modal-title fw-bold" id="modalChecklistLabel">
-          Checklist sin registrar
-        </h5>
-        <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" 
-                data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalChecklistLabel">Checklist sin registrar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       
       <div class="modal-body">
         @if ($sinChecklist->count())
           <div class="table-responsive">
-            <table class="table table-sm table-striped align-middle">
+            <table class="table-naranja align-middle mb-0">
               <thead class="table-light">
-                <tr class="text-orange">
+                <tr>
                   <th>Nombre</th>
                   <th>Estado</th>
                   <th class="text-center">Acciones</th>
@@ -204,15 +201,18 @@
             </table>
           </div>
 
-    <!-- Paginación -->
-    <div class="mt-3">
-      {{ $sinChecklist->appends(['modal' => 'checklist'])->links() }}
+          <!-- Paginación -->
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="text-muted small">Mostrando {{ $sinChecklist->count() }} registros</div>
+            {{ $sinChecklist->appends(['modal' => 'checklist'])->links() }}
+          </div>
+        @else
+          <div class="text-center text-muted">Todos los trabajadores tienen checklist registrado hoy.</div>
+        @endif
+      </div>
     </div>
-  @else
-    <div class="text-center text-muted">Todos los trabajadores tienen checklist registrado hoy.</div>
-  @endif
+  </div>
 </div>
-
 
 
       

@@ -132,13 +132,11 @@
 
 .card-action:hover {
   transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .icono-action-inline {
   height: 28px;
   width: 28px;
-  animation: pulse 1.5s infinite ease-in-out;
   flex-shrink: 0;
 }
 
@@ -206,7 +204,7 @@
 
 
 #modalChecklist .modal-body {
-  max-height: 70vh;
+  max-height: 90vh;
   overflow-y: auto;
 }
 
@@ -215,7 +213,6 @@
 }
 
 #modalChecklist .modal-body {
-  max-height: 60vh;
   overflow-y: auto;
 }
 
@@ -280,15 +277,13 @@
 }
 
 .card-action:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px) scale(1.01);
 }
 
 /* 🔷 Íconos en títulos de cards */
 .icono-action-inline {
   height: 28px;
   width: 28px;
-  animation: pulse 1.5s infinite ease-in-out;
   flex-shrink: 0;
 }
 
@@ -464,7 +459,7 @@ header.row {
 .btn-naranja:hover {
   background-color: #973a07;
   color: #fff;
-  transform: scale(1.03);
+  /*transform: scale(1.03);*/
 }
 
 /* Outline delicado para cards */

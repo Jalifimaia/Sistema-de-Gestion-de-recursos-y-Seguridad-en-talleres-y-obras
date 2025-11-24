@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const modalConfirmBtn = document.getElementById('modalBajaConfirm');
   const modalCancelBtn = document.getElementById('modalBajaCancel');
   const modalErrorNombre = document.getElementById('modalErrorNombreRecurso');
+  const modalErrorCategoriaSubcategoria = document.getElementById('modalErrorCategoriaSubcategoria');
   
   let currentForm = null;
   let currentRow = null;
@@ -22,6 +23,11 @@ document.addEventListener('DOMContentLoaded', function () {
       currentForm = this.closest('.marcar-baja-form');
       currentRow = currentForm.closest('tr');
       const nombre = currentForm?.dataset.nombre || 'Recurso';
+      
+      // Obtener categoría y subcategoría de la fila
+      const categoria = currentRow.querySelector('.recurso-categoria')?.textContent.trim() || '';
+      const subcategoria = currentRow.querySelector('.recurso-subcategoria')?.textContent.trim() || '';
+      
       const action = currentForm.getAttribute('action');
       
       // Extraer el ID del recurso de la URL: /recursos/{id}/baja
@@ -59,6 +65,9 @@ document.addEventListener('DOMContentLoaded', function () {
           console.log('Mostrando modal de error - tiene préstamos');
           if (modalErrorNombre) {
             modalErrorNombre.textContent = nombre;
+          }
+          if (modalErrorCategoriaSubcategoria) {
+            modalErrorCategoriaSubcategoria.textContent = `${categoria} - ${subcategoria}`;
           }
           if (modalErrorInstance) modalErrorInstance.show();
           
