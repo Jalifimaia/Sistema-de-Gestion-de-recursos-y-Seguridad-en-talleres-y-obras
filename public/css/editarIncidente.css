@@ -1,31 +1,3 @@
-/* Encabezado */
-.btn-volver {
-  background-color: #d3401b;
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.875rem;
-  padding: 0.35rem 0.75rem;
-  border: none;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  line-height: 1.2;
-  max-width: fit-content;
-  height: auto;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-volver:hover {
-  background-color: #c62828;
-}
-
-.icono-volver {
-  width: 18px;
-  height: 18px;
-}
-
 h4.text-orange {
   font-size: 1.25rem;
   font-weight: 600;
@@ -162,4 +134,30 @@ ul.text-danger li {
 
 .text-warning {
   color: #f57c00 !important;
+}
+
+.text-orange {
+  font-size: 1.5rem;
+}
+
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #ac3416;
+  transform: translateX(-2px);
+  color: #ffff;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
 }

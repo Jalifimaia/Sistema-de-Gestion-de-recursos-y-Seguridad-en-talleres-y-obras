@@ -5,7 +5,7 @@
 @section('content')
 <div class="container py-4">
   <div class="card shadow-sm">
-    <div class="card-header bg-warning text-dark text-center">
+    <div class="card-header bg-editar text-center">
       <h4 class="mb-0">Editar préstamo</h4>
     </div>
     <div class="card-body bg-white">
@@ -87,7 +87,8 @@
           </div>
         </div>-->
 
-        <hr>
+        <hr class="hrClase">
+
         <h5 class="mb-3">Recurso</h5>
 
         {{-- Contenedor donde el JS agregará tarjetas; las existentes las renderizamos con data-id-serie y hidden inputs --}}
@@ -132,7 +133,7 @@
           {{-- Mostrar botón "Devolver" solo si el estado es Activo o Vencido --}}
           @if (in_array($estadoNombre, ['Activo','Vencido']))
             <button type="button"
-                    class="btn btn-sm btn-outline-danger w-100 dar-baja mt-2"
+                    class="btn btn-sm btn-dev w-100 dar-baja mt-2"
                     data-id="{{ $detalle->id }}">
               Devolver
             </button>

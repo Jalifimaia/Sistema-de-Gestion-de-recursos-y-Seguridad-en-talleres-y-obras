@@ -14,7 +14,6 @@
       </a>
 
       <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
-        <img src="{{ asset('images/userNuevo.svg') }}" alt="Usuario" class="me-2 icono-volver">
         Editar Usuario
       </h4>
     </div>
@@ -101,77 +100,91 @@
       </div>
     </div>
 
-    <div class="mb-3">
-      <label class="form-label no-asterisk">Estado actual</label>
-      <div>
-        @if ($usuario->estado?->nombre === 'Alta')
-          <span class="badge badge-estado bg-success text-white">Activo (Alta)</span>
-        @elseif ($usuario->estado?->nombre === 'Baja')
-          <span class="badge badge-estado bg-danger">Inactivo (Baja)</span>
-        @elseif ($usuario->estado?->nombre === 'stand by')
-          <span class="badge badge-estado bg-secondary text-white">Stand by</span>
-        @else
-          <span class="badge badge-estado bg-secondary">Sin estado</span>
-        @endif
+    <div class="row align-items-center mb-3">
+      <div class="col-md-6">
+        <label class="form-label mb-1 no-asterisk">Estado actual</label>
+        <div>
+          @if ($usuario->estado?->nombre === 'Alta')
+            <span class="badge badge-estado bg-success text-white">Activo (Alta)</span>
+          @elseif ($usuario->estado?->nombre === 'Baja')
+            <span class="badge badge-estado bg-danger">Inactivo (Baja)</span>
+          @elseif ($usuario->estado?->nombre === 'stand by')
+            <span class="badge badge-estado bg-secondary text-white">Stand by</span>
+          @else
+            <span class="badge badge-estado bg-secondary">Sin estado</span>
+          @endif
+        </div>
+      </div>
+
+      <div class="col-md-6 text-end">
+        <button type="button" class="btn btn-guardar px-4" id="btnAbrirModalGuardar">
+          Guardar cambios
+        </button>
       </div>
     </div>
 
     <!-- Botón largo centrado -->
-    <div class="text-center mt-4">
-      <button type="button" class="btn btn-guardar w-75" id="btnAbrirModalGuardar">Guardar cambios</button>
-    </div>
+    <!--<div class="d-flex justify-content-end mt-4">
+      <button type="button" class="btn btn-guardar px-4" id="btnAbrirModalGuardar">
+        Guardar cambios
+      </button>
+    </div>-->
   </form>
 
-  <!-- Acciones de estado -->
-<!-- Acciones de estado -->
-<div class="d-flex justify-content-center gap-2 mt-4">
-  @php $estado = $usuario->estado?->nombre; @endphp
+<!-- Acciones de estado + Guardar -->
+<div class="d-flex justify-content-between align-items-center mt-4 flex-wrap">
+  <div class="d-flex gap-2 flex-wrap">
+    @php $estado = $usuario->estado?->nombre; @endphp
 
-  <form method="POST" action="{{ route('usuarios.activarConEPP', $usuario->id) }}"
-        class="form-estado"
-        data-nombre="{{ $usuario->name }}"
-        data-rol="{{ $usuario->rol->nombre_rol }}"
-        data-accion="alta"
-        data-estado="{{ $estado }}">
-    @csrf
-    <button type="button"
-      class="btn btn-success btn-confirmar-estado {{ $estado === 'Alta' ? 'opacity-50' : '' }}"
-      {{ $estado === 'Alta' ? 'disabled' : '' }}
-      title="{{ $estado === 'Baja' ? 'Usuario en Baja: primero pasar a Stand by para asignar EPP' : ($estado === 'Alta' ? 'Ya está activo' : 'Cambiar a estado Alta') }}">
-      Dar de alta
-    </button>
-  </form>
+    <form method="POST"
+          action="{{ route('usuarios.activarConEPP', $usuario->id) }}"
+          class="form-estado"
+          data-nombre="{{ $usuario->name }}"
+          data-rol="{{ $usuario->rol->nombre_rol }}"
+          data-accion="alta"
+          data-estado="{{ $estado }}">
+      @csrf
+      <button type="button"
+        class="btn btn-success btn-confirmar-estado {{ $estado === 'Alta' ? 'opacity-50' : '' }}"
+        {{ $estado === 'Alta' ? 'disabled' : '' }}>
+        Dar de alta
+      </button>
+    </form>
 
-  <form method="POST" action="{{ route('usuarios.baja', $usuario->id) }}"
-        class="form-estado"
-        data-nombre="{{ $usuario->name }}"
-        data-rol="{{ $usuario->rol->nombre_rol }}"
-        data-accion="baja"
-        data-estado="{{ $estado }}">
-    @csrf
-    <button type="button"
-      class="btn btn-danger btn-confirmar-estado {{ $estado === 'Baja' ? 'opacity-50' : '' }}"
-      {{ $estado === 'Baja' ? 'disabled' : '' }}
-      title="{{ $estado === 'Baja' ? 'Ya está dado de baja' : 'Cambiar a estado Baja' }}">
-      Dar de baja
-    </button>
-  </form>
+    <form method="POST"
+          action="{{ route('usuarios.baja', $usuario->id) }}"
+          class="form-estado"
+          data-nombre="{{ $usuario->name }}"
+          data-rol="{{ $usuario->rol->nombre_rol }}"
+          data-accion="baja"
+          data-estado="{{ $estado }}">
+      @csrf
+      <button type="button"
+        class="btn btn-danger btn-confirmar-estado {{ $estado === 'Baja' ? 'opacity-50' : '' }}"
+        {{ $estado === 'Baja' ? 'disabled' : '' }}>
+        Dar de baja
+      </button>
+    </form>
 
-  <form method="POST" action="{{ route('usuarios.standby', $usuario->id) }}"
-        class="form-estado"
-        data-nombre="{{ $usuario->name }}"
-        data-rol="{{ $usuario->rol->nombre_rol }}"
-        data-accion="stand by"
-        data-estado="{{ $estado }}">
-    @csrf
-    <button type="button"
-      class="btn btn-warning btn-confirmar-estado {{ strtolower($estado) === 'stand by' ? 'opacity-50' : '' }}"
-      {{ strtolower($estado) === 'stand by' ? 'disabled' : '' }}
-      title="{{ strtolower($estado) === 'stand by' ? 'Ya está en stand by' : 'Cambiar a estado Stand by' }}">
-      Poner en <em>stand by</em>
-    </button>
-  </form>
+    <form method="POST"
+          action="{{ route('usuarios.standby', $usuario->id) }}"
+          class="form-estado"
+          data-nombre="{{ $usuario->name }}"
+          data-rol="{{ $usuario->rol->nombre_rol }}"
+          data-accion="stand by"
+          data-estado="{{ $estado }}">
+      @csrf
+      <button type="button"
+        class="btn btn-warning btn-confirmar-estado {{ strtolower($estado) === 'stand by' ? 'opacity-50' : '' }}"
+        {{ strtolower($estado) === 'stand by' ? 'disabled' : '' }}>
+        Poner en <em>stand by</em>
+      </button>
+    </form>
+  </div>
+
 </div>
+
+
 
 </div>
 
@@ -570,7 +583,7 @@ botonesEstado.forEach(boton => {
   }
 
   // ✅ Modal automático para mensajes del sistema
-  @if(session('success'))
+ /* @if(session('success'))
     (function () {
       const modalEl = document.getElementById('modalExitoUsuario');
       if (!modalEl) return;
@@ -579,6 +592,7 @@ botonesEstado.forEach(boton => {
       setTimeout(() => modal.hide(), 4000);
     })();
   @endif
+  */
 
   @if($errors->any())
     // Traducir mensajes de error al español

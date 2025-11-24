@@ -58,3 +58,17 @@ label {
   width: 20px;
   flex-shrink: 0;
 }
+
+
+.btn-guardar {
+  font-size: 1.1rem;         /* tamaño del texto */
+  padding: 0.7rem 1rem;  /* tamaño más compacto */
+  border-radius: 8px;
+  background-color: #b14910;
+  color: #ffff;
+}
+
+.btn-guardar:hover {
+  background-color: #9b3f0e;
+  color: #ffff;
+}

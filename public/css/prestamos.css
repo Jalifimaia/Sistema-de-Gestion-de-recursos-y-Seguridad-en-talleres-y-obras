@@ -1,6 +1,6 @@
 /* 🔶 Encabezado de tarjeta */
 .card-header {
-  background-color: #d06842 !important;
+  background-color: #cc5f37 !important;
   color: #fff !important;
   text-align: left;
   padding: 12px 20px;
@@ -26,23 +26,23 @@
 }
 
 .btn-nuevo-prestamo:hover {
-  background-color: #d06842;
+  background-color: #cc5f37;
 }
 
 /* 🔶 Botón de búsqueda */
 .input-group .btn {
-  background-color: #d06842;
+  background-color: #cc5f37;
   color: #fff;
   border: none;
 }
 
 .input-group .btn:hover {
-  background-color: #d06842;
+  background-color: rgb(173, 86, 55);
 }
 
 /* 🔶 Botón editar dentro de tarjeta */
 .card .btn-editar {
-  background-color: #d06842;
+  background-color: #cc5f37;
   color: #fff;
   font-size: 0.85rem;
   padding: 6px 12px;
@@ -52,7 +52,7 @@
 }
 
 .card .btn-editar:hover {
-  background-color: #b95b0e;
+  background-color: #a84d2c;
 }
 
 /* 🔶 Badge de estado */
@@ -106,13 +106,13 @@ p.small.text-muted {
 
 /* 🔶 Botón buscar */
 .btn-naranja {
-  background-color: #d06842;
+  background-color: #cc5f37;
   color: #fff;
   border: none;
 }
 
 .btn-naranja:hover {
-  background-color: #b95b0e;
+  background-color: #aa5030;
   color: #fff;
 }
 

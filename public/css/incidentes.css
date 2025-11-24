@@ -18,30 +18,35 @@
 
 /* 🟡 Ver detalles (amarillo con texto negro) */
 .btn-detalles {
-  background-color: #ffeb3b;
-  color: #212121;
   font-size: 1.1rem;
-  padding: 6px 14px;
+  padding: 4px 10px;
   border-radius: 4px;
   border: none;
+
+  display: flex;               /* convierte el botón en flex */
+  justify-content: center;     /* centra horizontalmente */
+  align-items: center;         /* centra verticalmente */
+}
+.btn-detalles:hover {
+  background-color: #1e559e;
 }
 
-.btn-detalles:hover {
-  background-color: #fdd835;
-}
 
 /* 🟠 Editar (naranja) */
 .btn-editar {
-  background-color: #f57c00;
+  display: flex;              /* convierte el botón en flex */
+  justify-content: center;    /* centra horizontalmente */
+  align-items: center; 
+  background-color: #cc5f37;
   color: #fff;
   font-size: 1.1rem;
-  padding: 6px 14px;
+  padding: 4px 10px;
   border-radius: 4px;
   border: none;
 }
 
 .btn-editar:hover {
-  background-color: #ef6c00;
+  background-color: #a14a2a;
 }
 
 /* 🔒 Bloqueado (gris) */
@@ -59,7 +64,7 @@
 }
 
 .btn-registrar-incidente {
-  background-color: #b95b0e;
+  background-color: #cc5f37;
   color: #fff;
   font-size: 1.1rem;
   padding: 10px 20px;
@@ -69,7 +74,7 @@
 }
 
 .btn-registrar-incidente:hover {
-  background-color: #ac5004;
+  background-color: #974527;
   color: #fff;
 }
 
@@ -146,13 +151,13 @@ header.row.mb-4 {
 
 /* 🔶 Botón buscar */
 .btn-naranja {
-  background-color: #d06842;
+  background-color: #cc5f37;
   color: #fff;
   border: none;
 }
 
 .btn-naranja:hover {
-  background-color: #d06842;
+  background-color: #a34c2c;
 }
 
 .buscador-destacado,

@@ -416,7 +416,7 @@ td.acciones .d-flex {
 
 /* 🟧 Botón Registrar incidente */
 .btn-registrar-incidente {
-  background-color: #b95b0e;
+  background-color: #cc5f37;
   color: #fff;
   font-size: 1.1rem;
   padding: 10px 20px;
@@ -426,19 +426,19 @@ td.acciones .d-flex {
 }
 
 .btn-registrar-incidente:hover {
-  background-color: #ef6c00;
+  background-color: #964426;
 }
 
 
 /* 🔶 Botón buscar */
 .btn-naranja {
-  background-color: #d06842;
+  background-color: #cc5f37;
   color: #fff;
   border: none;
 }
 
 .btn-naranja:hover {
-  background-color: #d06842;
+  background-color: #974426;
 }
 
 .card-resumen {
@@ -455,14 +455,14 @@ td.acciones .d-flex {
 
 
 .btn-agregar{
-  background-color: #b95b0e;
+  background-color: #cc5f37;
   color: #f1f1f1;
   font-size: 1.2rem;
   padding: 8px 14px;
 }
 
 .btn-agregar:hover{
-  background-color: #994c0c;
+  background-color: #9b4729;
   color: #f1f1f1;
   font-size: 1.2rem;
 }

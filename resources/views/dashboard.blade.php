@@ -23,16 +23,17 @@
 
     <div class="text-end">
       <p class="mb-1 subir-bienvenida">
-        Bienvenido, {{ auth()->user()->name }} <em>[{{ auth()->user()->rol->nombre_rol }}]</em>
+        Bienvenido, {{ auth()->user()->name }} <br><span class="rol-transparente">[{{ auth()->user()->rol->nombre_rol }}]</span>
       </p>
     </div>
+
     <!--  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
       <strong id="today" class="valor-fecha text-nowrap">07/11/2023 09:20:17</strong>
     </div>-->
   </header>
 
   <!-- Estadísticas principales -->
-  <div class="row g-4 mb-4 subir-cards">
+  <div class="row g-4 mb-1 subir-cards">
     <div class="row g-4 mt-1 mb-4">
       <div class="col-md-4">
         <div class="card card-resumen card-resumen-cuadrada">
@@ -80,112 +81,102 @@
     </div>
   </div>
 
-  <!-- Checklists del Día (desplegable) -->
-  <div class="accordion mb-4 mover-acordeon-arriba" id="accordionChecklists">
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingChecklists">
-        <button class="accordion-button collapsed encabezado-checklist" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChecklists" aria-expanded="false" aria-controls="collapseChecklists">
-          <img src="{{ asset('images/checkk.svg') }}" alt="Checklist Diario" class="icono-checklist me-2 d-none">
-          <span>Checklists del día</span>
-        </button>
-      </h2>
-      <div id="collapseChecklists" class="accordion-collapse collapse show" aria-labelledby="headingChecklists">
-        <div class="accordion-body">
-          @if($checklistsHoy->isEmpty())
-            <div class="mensaje-checklist-vacio d-flex align-items-center">
-              <img src="{{ asset('images/checknot.svg') }}" alt="Sin checklist" class="icono-checknot me-2">
-              <span>No se registraron checklists hoy.</span>
-            </div>
-          @else
-            <div class="table-responsive">
-              <table class="table table-bordered text-center table-checklist">
-                <thead>
-                  <tr>
-                    <th>Trabajador</th>
-                    <th>Anteojos</th>
-                    <th>Botas</th>
-                    <th>Chaleco</th>
-                    <th>Guantes</th>
-                    <th>Arnés</th>
-                    <th>Altura</th>
-                    <th>Crítico</th>
-                    <th>Fecha</th>
-                    <th>Observaciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                @foreach($checklistsHoy->take(5) as $c)
-                  <tr>
-                    <td>{{ $c->trabajador->name }}</td>
+  <!-- Checklists del Día -->
+  <div class="card mb-4 mover-acordeon-arriba d-none">
+    <div class="card-header encabezado-checklist d-flex align-items-center justify-content-center gap-2">
+      <img src="{{ asset('images/checkk.svg') }}" alt="Checklist Diario" class="icono-checklist d-none" style="height: 24px;">
+      <span>Resumen de checklists hoy</span>
+    </div>
 
-                    <td>
-                      @if($c->anteojos)
-                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
-                      @else
-                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
-                      @endif
-                    </td>
-
-                    <td>
-                      @if($c->botas)
-                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
-                      @else
-                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
-                      @endif
-                    </td>
-
-                    <td>
-                      @if($c->chaleco)
-                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
-                      @else
-                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
-                      @endif
-                    </td>
-
-                    <td>
-                      @if($c->guantes)
-                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
-                      @else
-                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
-                      @endif
-                    </td>
-
-                    <td>
-                      @if($c->arnes)
-                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
-                      @else
-                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
-                      @endif
-                    </td>
-
-                    <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
-                    <td>
-                      @if($c->critico)
-                        <span class="badge bg-danger">Crítico</span>
-                      @else
-                        <span class="badge bg-success">OK</span>
-                      @endif
-                    </td>
-                    <td>{{ \Carbon\Carbon::parse($c->hora)->format('d/m/Y H:i') }}</td>
-                    <td>{{ $c->observaciones ?? '—' }}</td>
-                  </tr>
-                @endforeach
-              </tbody>
-              </table>
-            </div>
-
-            <div class="mt-3 text-end">
-              <a href="{{ route('controlEPP') }}"
-                 class="btn btn-sm btn-ver-todo"
-                 onclick="sessionStorage.setItem('fromDashboard', 'true')">
-                  Ver todos los checklist 
-              </a>
-            </div>
-          @endif
+    <div class="card-body">
+      @if($checklistsHoy->isEmpty())
+        <div class="mensaje-checklist-vacio d-flex align-items-center">
+          <img src="{{ asset('images/checknot.svg') }}" alt="Sin checklist" class="icono-checknot me-2">
+          <span>No se registraron checklists hoy.</span>
         </div>
-      </div>
+      @else
+        <div class="table-responsive">
+          <table class="table table-bordered text-center table-checklist">
+            <thead>
+              <tr>
+                <th>Trabajador</th>
+                <th>Anteojos</th>
+                <th>Botas</th>
+                <th>Chaleco</th>
+                <th>Guantes</th>
+                <th>Arnés</th>
+                <th>Altura</th>
+                <th>Crítico</th>
+                <th>Fecha</th>
+                <th>Observaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($checklistsHoy->take(5) as $c)
+                <tr>
+                  <td>{{ $c->trabajador->name }}</td>
+                  <td>
+                    @if($c->anteojos)
+                      <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                    @else
+                      <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                    @endif
+                  </td>
+                  <td>
+                    @if($c->botas)
+                      <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                    @else
+                      <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                    @endif
+                  </td>
+                  <td>
+                    @if($c->chaleco)
+                      <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                    @else
+                      <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                    @endif
+                  </td>
+                  <td>
+                    @if($c->guantes)
+                      <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                    @else
+                      <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                    @endif
+                  </td>
+                  <td>
+                    @if($c->arnes)
+                      <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                    @else
+                      <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                    @endif
+                  </td>
+                  <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
+                  <td>
+                    @if($c->critico)
+                      <span class="badge bg-danger">Crítico</span>
+                    @else
+                      <span class="badge bg-success">OK</span>
+                    @endif
+                  </td>
+                  <td>{{ \Carbon\Carbon::parse($c->hora)->format('d/m/Y H:i') }}</td>
+                  <td>{{ $c->observaciones ?? '—' }}</td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-3 text-end">
+          <a href="{{ route('controlEPP') }}"
+            class="btn btn-sm btn-ver-todo"
+            onclick="sessionStorage.setItem('fromDashboard', 'true')">
+              Ver todos
+          </a>
+        </div>
+      @endif
     </div>
   </div>
+
 
   <!-- Modales -->
 
@@ -428,7 +419,7 @@
   </div>
 
   <!-- Gráfico de estado general del inventario -->
-  <div class="row mt-4 d-none">
+  <div class="row mt-1">
     <div class="col-12">
       <div class="card card-resumen h-100 card-alerta w-100">
         <div class="card-body">
