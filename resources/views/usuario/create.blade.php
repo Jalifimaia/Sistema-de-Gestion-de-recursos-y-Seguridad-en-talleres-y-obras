@@ -176,6 +176,13 @@
 
 @push('styles')
 <link href="{{ asset('css/crearUsuario.css') }}" rel="stylesheet">
+
+<style>
+  label::after {
+  content: " *";
+  color: red;
+}
+</style>
 @endpush
 
 @push('scripts')

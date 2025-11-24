@@ -46,7 +46,7 @@
     <select name="trabajador_id" id="trabajador_id"
             class="form-select @error('trabajador_id') is-invalid @enderror"
             {{ isset($preseleccionado) ? 'disabled' : '' }} required>
-      <option value="">Seleccionar trabajador...</option>
+      <option value="">Seleccionar trabajador <span class="required-asterisk">*</span></option>
       @foreach($trabajadores as $t)
         <option value="{{ $t->id }}"
           {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
@@ -63,7 +63,7 @@
       <input type="hidden" name="es_en_altura" value="0">
       <input type="checkbox" name="es_en_altura" id="es_en_altura"
              class="form-check-input" value="1" {{ old('es_en_altura') ? 'checked' : '' }}>
-      <label for="es_en_altura" class="form-check-label">¿Trabaja en altura hoy?</label>
+      <label for="es_en_altura" class="form-check-label no-asterisk">¿Trabaja en altura hoy?</label>
     </div>
   </div>
 </div>
@@ -201,6 +201,23 @@
 
 @push('styles')
 <link href="{{ asset('css/registroCheck.css') }}" rel="stylesheet">
+
+<style>
+  label::after {
+  content: " *";
+  color: red;
+}
+
+label.no-asterisk::after {
+  content: ""; /* anula el asterisco */
+}
+
+  .required-asteriskrequired-asterisk {
+    margin-left: 4px;
+    color: red; /*asterisco*/
+    font-weight: 600;
+  }
+  </style>
 @endpush
 
 @push('scripts')

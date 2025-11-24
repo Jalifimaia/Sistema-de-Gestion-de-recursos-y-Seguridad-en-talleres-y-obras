@@ -114,7 +114,8 @@
     </div>
 
     <div class="mb-4 mt-4">
-      <h5>Series por {{ $requiereTalle ? 'talle y color' : 'color' }}</h5>
+     
+      <h5>Series por {{ $requiereTalle ? 'talle y color' : 'color' }}<span class="required-asterisk">*</span></h5>
       <table class="table table-bordered text-center">
         <thead>
           <tr>
@@ -277,6 +278,8 @@ document.addEventListener('DOMContentLoaded', function () {
 @push('styles')
 <link href="{{ asset('css/agregarSerie.css') }}" rel="stylesheet">
 <style>
+
+  
   /* Consistencia visual de errores */
   .is-invalid {
     /*border-color: #dc3545 !important;*/
@@ -303,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function () {
   
   .required-asterisk {
     margin-left: 4px;
-    color: #dc3545;
+    color: red; /*asterisco*/
     font-weight: 600;
   }
 

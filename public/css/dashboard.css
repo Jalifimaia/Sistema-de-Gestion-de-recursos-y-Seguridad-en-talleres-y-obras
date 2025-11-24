@@ -315,7 +315,7 @@ padding-top: 0.25rem;
 
 /* Rojo */
 .alerta-rojo {
-  background-color: #dc3545;
+  background-color: red; /*asterisco*/
 }
 
 /* Evitar que se pongan blancos al abrir */
@@ -340,7 +340,7 @@ padding-top: 0.25rem;
 }
 
 .alerta-rojo:not(.collapsed) {
-  background-color: #dc3545;
+  background-color: red; /*asterisco*/
 }
 
 .texto-descriptivo-alerta {

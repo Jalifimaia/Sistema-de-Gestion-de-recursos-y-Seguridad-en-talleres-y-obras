@@ -150,7 +150,7 @@
 
      <!-- Motivo / Descripción -->
 <div class="mb-3">
-  <label for="descripcion" class="form-label">Motivo del incidente</label>
+  <label for="descripcion" class="form-label">Motivo del incidente <span class="required-asterisk">*</span></label>
   @if(!empty($readonly))
     <textarea name="descripcion" id="descripcion" class="form-control" readonly>{{ $incidente->descripcion }}</textarea>
     <input type="hidden" name="descripcion" value="{{ $incidente->descripcion }}">
@@ -183,7 +183,7 @@
 
             <!-- Resolución -->
 <div class="mb-3" id="resolucion-container" style="display: none;">
-  <label for="resolucion" class="form-label">Resolución</label>
+  <label for="resolucion" class="form-label">Resolución <span class="required-asterisk">*</span></label>
   @if(!empty($readonly))
     <input type="text" name="resolucion" id="resolucion" class="form-control" value="{{ $incidente->resolucion }}" readonly>
     <input type="hidden" name="resolucion" value="{{ $incidente->resolucion }}">
@@ -563,6 +563,10 @@ function mostrarAyudaYGestionarResuelto() {
     .error-label {
         display: block;
         font-size: 0.875rem;
+    }
+
+    .required-asterisk {
+        color : red;
     }
 </style>
 @endpush

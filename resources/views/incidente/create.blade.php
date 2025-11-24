@@ -540,5 +540,17 @@ function mostrarModalAvisoRecursos(mensaje = 'Debe haber al menos un recurso car
         display: block;
         font-size: 0.875rem;
     }
+
+ label::after {
+ content: " *";
+ color: red;
+}
+
+label.no-asterisk::after {
+ content: ""; /* anula el asterisco */
+}
+
 </style>
+
+
 @endpush

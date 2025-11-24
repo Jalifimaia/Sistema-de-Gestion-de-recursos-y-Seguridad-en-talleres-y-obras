@@ -242,5 +242,16 @@
 
 @push('styles')
 <link href="{{ asset('css/agregarPrestamo.css') }}" rel="stylesheet">
+
+<style>
+ label::after {
+ content: " *";
+ color: red;
+}
+
+label.no-asterisk::after {
+ content: ""; /* anula el asterisco */
+}
+</style>
 @endpush
 

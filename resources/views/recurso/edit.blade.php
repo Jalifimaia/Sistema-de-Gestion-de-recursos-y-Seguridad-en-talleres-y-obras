@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <style>
   .required-asterisk {
     margin-left: 4px;
-    color: #dc3545;
+    color: red; /*asterisco*/
     font-weight: 600;
   }
   </style>

@@ -29,7 +29,7 @@
     <div class="card-body">
       <div class="row g-3">
         <div class="col-md-6">
-          <label for="estado_filtro" class="form-label">Estado</label>
+          <label for="estado_filtro" class="form-label">Estado <span class="required-asterisk">*</span></label>
           <select id="estado_filtro" class="form-select">
             <option value="" selected disabled>Seleccione un estado</option>
             <option value="alta">Trabajadores en alta</option>
@@ -38,7 +38,7 @@
         </div>
 
         <div class="col-md-6">
-          <label for="usuario_id" class="form-label">Trabajador</label>
+          <label for="usuario_id" class="form-label">Trabajador <span class="required-asterisk">*</span></label>
           <select name="usuario_id" id="usuario_id" class="form-select select2" required>
             <option value="">Seleccione un trabajador</option>
             @foreach ($usuarios as $usuario)
@@ -73,7 +73,7 @@
     <div class="card-body">
       <div class="row g-3">
         <div class="col-md-6">
-          <label for="casco" class="form-label">Casco</label>
+          <label for="casco" class="form-label">Casco <span class="required-asterisk">*</span></label>
           <select name="casco" id="casco" class="form-select select2-epp" data-tipo="casco" data-placeholder="Buscar serie...">
             <option value="">-- Seleccionar casco disponible --</option>
           </select>
@@ -82,7 +82,7 @@
         </div>
 
         <div class="col-md-6">
-          <label for="guantes" class="form-label">Guantes</label>
+          <label for="guantes" class="form-label">Guantes <span class="required-asterisk">*</span></label>
           <select name="guantes" id="guantes" class="form-select select2-epp" data-tipo="guantes">
             <option value="">-- Seleccionar guantes disponibles --</option>
           </select>
@@ -91,7 +91,7 @@
         </div>
 
         <div class="col-md-6">
-          <label for="lentes" class="form-label">Lentes</label>
+          <label for="lentes" class="form-label">Lentes <span class="required-asterisk">*</span></label>
           <select name="lentes" id="lentes" class="form-select select2-epp" data-tipo="lentes">
             <option value="">-- Seleccionar lentes disponibles --</option>
           </select>
@@ -100,7 +100,7 @@
         </div>
 
         <div class="col-md-6">
-          <label for="botas" class="form-label">Botas</label>
+          <label for="botas" class="form-label">Botas <span class="required-asterisk">*</span></label>
           <select name="botas" id="botas" class="form-select select2-epp" data-tipo="botas">
             <option value="">-- Seleccionar botas disponibles --</option>
           </select>
@@ -109,7 +109,7 @@
         </div>
 
         <div class="col-md-6">
-          <label for="chaleco" class="form-label">Chaleco</label>
+          <label for="chaleco" class="form-label">Chaleco <span class="required-asterisk">*</span></label>
           <select name="chaleco" id="chaleco" class="form-select select2-epp" data-tipo="chaleco">
             <option value="">-- Seleccionar chaleco disponible --</option>
           </select>
@@ -118,7 +118,7 @@
         </div>
 
         <div class="col-md-6">
-          <label for="arnes" class="form-label">Arnés</label>
+          <label for="arnes" class="form-label">Arnés <span class="required-asterisk">*</span></label>
           <select name="arnes" id="arnes" class="form-select select2-epp" data-tipo="arnes">
             <option value="">-- Seleccionar arnés disponible --</option>
           </select>
@@ -174,6 +174,14 @@
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<style>
+  .required-asterisk {
+    margin-left: 4px;
+    color: red; /*asterisco*/
+    font-weight: 600;
+  }
+  </style>
 @endpush
 
 @push('scripts')

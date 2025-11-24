@@ -277,4 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 @push('styles')
 <link href="{{ asset('css/editarPrestamo.css') }}" rel="stylesheet">
+
+
+
 @endpush

@@ -102,7 +102,7 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Estado actual</label>
+      <label class="form-label no-asterisk">Estado actual</label>
       <div>
         @if ($usuario->estado?->nombre === 'Alta')
           <span class="badge badge-estado bg-success text-white">Activo (Alta)</span>
@@ -652,4 +652,16 @@ botonesEstado.forEach(boton => {
 
 @push('styles')
 <link href="{{ asset('css/editarUsuario.css') }}" rel="stylesheet">
+
+
+<style>
+  label::after {
+  content: " *";
+  color: red;
+}
+
+label.no-asterisk::after {
+  content: ""; /* anula el asterisco */
+}
+</style>
 @endpush
