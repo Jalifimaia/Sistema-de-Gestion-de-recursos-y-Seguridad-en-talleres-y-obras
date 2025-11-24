@@ -36,6 +36,7 @@
         @endif
       </p>
       <p><strong>Email:</strong> {{ $usuario->email }}</p>
+      <p><strong>DNI:</strong> {{ number_format($usuario->dni, 0, '', '.') }}</p>
       <p><strong>Último acceso:</strong> {{ \Carbon\Carbon::parse($usuario->ultimo_acceso)->diffForHumans() ?? 'Nunca' }}</p>
 
       <!-- Acordeón de registro -->
@@ -86,25 +87,34 @@
 </div>
 
 
-<ul class="nav nav-tabs custom-tabs justify-content-center mb-4" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active tab-loader" data-url="{{ route('usuarios.checklists', $usuario->id) }}" type="button">
-      Checklist 
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link tab-loader" data-url="{{ route('usuarios.incidentes', $usuario->id) }}" type="button">
-      Incidentes 
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link tab-loader" data-url="{{ route('usuarios.prestamos', $usuario->id) }}" type="button">
-      Préstamos 
-    </button>
-  </li>
-</ul>
+{{-- Solo mostrar las tabs si el usuario es Trabajador --}}
+@if($usuario->rol && strtolower($usuario->rol->nombre_rol) === 'trabajador')
+  <ul class="nav nav-tabs custom-tabs justify-content-center mb-4" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active tab-loader" 
+              data-url="{{ route('usuarios.checklists', $usuario->id) }}" 
+              type="button">
+        Checklist
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link tab-loader" 
+              data-url="{{ route('usuarios.incidentes', $usuario->id) }}" 
+              type="button">
+        Incidentes
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link tab-loader" 
+              data-url="{{ route('usuarios.prestamos', $usuario->id) }}" 
+              type="button">
+        Préstamos
+      </button>
+    </li>
+  </ul>
 
-<div id="tab-content" class="tab-content p-3"></div>
+  <div id="tab-content" class="tab-content p-3"></div>
+@endif
 
 
 
@@ -173,6 +183,37 @@ function copiarCodigoQR() {
 
 
 <style>
+  .table-naranja thead tr th {
+    background-color: #d06842 !important;
+    color: white; /* Buen contraste */
+  }
+
+  /* Hover personalizado */
+  .table-naranja tbody tr:hover td {
+    background-color: #ffd1be !important;
+  }
+
+  /* Efecto striped: filas impares con fondo suave */
+  .table-naranja tbody tr:nth-child(even) td {
+    background-color: #ffeddf;
+  }
+
+  /* Opcional: filas pares con fondo blanco explícito */
+  .table-naranja tbody tr:nth-child(odd) td {
+    background-color: white;
+  }
+
+  .table-naranja {
+  border: 2px solid #b14910 !important;   /* color principal */
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px #b14910 inset;    /* simula contorno sin sobresalir */
+}
+
+/* Bordes internos */
+.table-naranja th,
+.table-naranja td {
+  border: 1px solid #b14910 !important;
+}
 </style>
 
 @push('styles')

@@ -1,11 +1,26 @@
-<table class="table table-sm table-bordered">
-  <thead><tr><th>Fecha</th><th>Descripción</th><th>Recurso</th><th>Estado</th></tr></thead>
+<table class="table table-striped table-hover table-bordered custom-table table-naranja">
+  <thead class="table-orange">
+    <tr>
+      <th>Fecha</th>
+      <th>Descripción</th>
+      <th>Recursos</th>
+      <th>Estado</th>
+    </tr>
+  </thead>
   <tbody>
     @forelse($items as $i)
       <tr>
         <td>{{ \Carbon\Carbon::parse($i->fecha_incidente)->format('d/m/Y H:i') }}</td>
         <td>{{ $i->descripcion }}</td>
-        <td>{{ $i->recurso->nombre ?? '-' }}</td>
+        <td>
+          @forelse($i->recursos as $r)
+            {{ $r->nombre }}
+            (Serie: {{ $r->serieRecursos->first()->nro_serie ?? '-' }},
+            Estado: {{ $r->pivot->id_estado ?? '-' }})<br>
+          @empty
+            -
+          @endforelse
+        </td>
         <td>{{ $i->estadoIncidente->nombre_estado ?? '-' }}</td>
       </tr>
     @empty
@@ -14,6 +29,6 @@
   </tbody>
 </table>
 
-<div class="mt-2">
+<div class="mt-2 d-flex justify-content-end">
   {{ $items->links() }}
 </div>

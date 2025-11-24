@@ -1,4 +1,4 @@
-<table class="table table-striped table-hover table-bordered custom-table">
+<table class="table table-striped table-hover table-bordered custom-table table-naranja">
   <thead class="table-orange">
     <tr>
       <th>Fecha préstamo</th>
