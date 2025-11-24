@@ -133,7 +133,8 @@ public function index()
         'recurso.nombre as recurso',
         'subcategoria.nombre as subcategoria',  
         'serie_recurso.nro_serie',
-        'usuario.name as trabajador'
+        'usuario.name as trabajador',
+        'prestamo.fecha_prestamo'
     )
     ->paginate(6, ['*'], 'herramientas_page');
 

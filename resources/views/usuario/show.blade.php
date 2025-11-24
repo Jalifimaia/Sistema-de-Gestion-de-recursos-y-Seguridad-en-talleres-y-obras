@@ -90,23 +90,33 @@
 </div>
 
 
-<ul class="nav nav-tabs custom-tabs justify-content-center mb-4" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active tab-loader" data-url="{{ route('usuarios.checklists', $usuario->id) }}" type="button">
-      Checklist 
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link tab-loader" data-url="{{ route('usuarios.incidentes', $usuario->id) }}" type="button">
-      Incidentes 
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link tab-loader" data-url="{{ route('usuarios.prestamos', $usuario->id) }}" type="button">
-      Préstamos 
-    </button>
-  </li>
-</ul>
+@if(!in_array($usuario->rol?->nombre_rol, ['Administrador', 'Supervisor']))
+  <ul class="nav nav-tabs custom-tabs justify-content-center mb-4" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active tab-loader" 
+              data-url="{{ route('usuarios.checklists', $usuario->id) }}" 
+              type="button">
+        Checklist 
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link tab-loader" 
+              data-url="{{ route('usuarios.incidentes', $usuario->id) }}" 
+              type="button">
+        Incidentes 
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link tab-loader" 
+              data-url="{{ route('usuarios.prestamos', $usuario->id) }}" 
+              type="button">
+        Préstamos 
+      </button>
+    </li>
+  </ul>
+
+  <div id="tab-content" class="tab-content p-3"></div>
+@endif
 
 <div id="tab-content" class="tab-content p-3"></div>
 
