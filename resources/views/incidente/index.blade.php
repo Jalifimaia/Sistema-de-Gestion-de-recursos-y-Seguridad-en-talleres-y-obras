@@ -84,11 +84,11 @@
                 <td>
                   <div class="grupo-acciones d-flex gap-2">
                   <button
-                    class="btn btn-detalles btn-primary"
+                    class="btn btn-detalles btn-primary btn-ver-series"
                     data-bs-toggle="modal"
                     data-bs-target="#modalIncidente{{ $incidente->id }}"
                     title="Ver detalles del incidente">
-                    <img src="{{ asset('images/detalless.svg') }}" alt="Detalles" width="20" height="20">
+                     <i class="bi bi-eye "></i>
                   </button>
 
                   @if($incidente->estadoIncidente?->nombre_estado === 'Resuelto')
