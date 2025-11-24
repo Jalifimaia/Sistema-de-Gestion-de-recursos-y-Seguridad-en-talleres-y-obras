@@ -40,13 +40,15 @@
     <!-- Card: Trabajador -->
 <div class="card mb-3 card-outline shadow-sm border">
   <div class="card-header fw-bold">
-    Trabajador
+    Filtros de trabajador
   </div>
   <div class="card-body">
+    <label for="trabajador_id" class="form-label">Trabajador</label>
+
     <select name="trabajador_id" id="trabajador_id"
             class="form-select @error('trabajador_id') is-invalid @enderror"
             {{ isset($preseleccionado) ? 'disabled' : '' }} required>
-      <option value="">Seleccionar trabajador <span class="required-asterisk">*</span></option>
+      <option value="">Seleccionar trabajador</option>
       @foreach($trabajadores as $t)
         <option value="{{ $t->id }}"
           {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
