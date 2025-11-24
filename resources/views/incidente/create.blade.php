@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Registrar nuevo incidente')
+@section('title', 'Registrar incidente')
 
 @section('content')
 <div class="container py-4">
@@ -13,8 +13,7 @@
     </a>
 
     <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
-      <img src="{{ asset('images/list1.svg') }}" alt="Incidente" class="me-2 icono-volver">
-      Registrar nuevo incidente
+      Registrar incidente
     </h4>
   </div>
 
@@ -24,11 +23,11 @@
 
         <!-- 🧠 DATOS DEL TRABAJADOR -->
         <div class="card mb-3">
-            <div class="card-header bg-primary text-white">Datos del Trabajador</div>
+            <div class="card-header bg-primary text-white">Trabajador Involucrado</div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label>DNI del trabajador</label>
+                        <label>DNI</label>
                         <div class="input-group">
                             <input type="text" id="dni_usuario" class="form-control" required placeholder="Ingrese aquí el DNI del trabajador involucrado" >
                             <button type="button" id="buscarUsuario" class="btn btn-secondary">Buscar</button>
@@ -48,7 +47,7 @@
         <div id="recursos-container">
             <div class="card mb-3 recurso-block">
                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                <span>Datos del Recurso</span>
+                <span>Recurso Involucrado</span>
                 <button type="button" class="btn btn-sm btn-danger btn-eliminar-recurso" title="Eliminar este recurso">
                     ✖
                 </button>
@@ -149,11 +148,16 @@
         </div>
 
 
-        <button type="button" id="agregar-recurso" class="btn btn-outline-primary mb-3">+ Agregar otro recurso</button>
+        <div class="d-flex justify-content-end mb-3">
+            <button type="button" id="agregar-recurso" class="btn btn-success">
+                Agregar otro recurso
+            </button>
+        </div>
+
 
         <!-- 🧾 DETALLE DEL INCIDENTE -->
         <div class="card mb-3">
-            <div class="card-header bg-warning text-dark">Detalle del Incidente</div>
+            <div class="card-header bg-detalle">Detalles del Incidente</div>
             <div class="card-body">
                 <div class="mb-3">
                     <label>Motivo del incidente</label>
@@ -185,7 +189,10 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-success w-100">Registrar incidente</button>
+        <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-success px-4">Registrar incidente</button>
+        </div>
+
     </form>
 
 <!-- Modal de aviso (usuario no encontrado / rol inválido) -->

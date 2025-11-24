@@ -451,12 +451,12 @@ header.row {
 }
 
 .btn-naranja {
-  background-color: #b14910;
+  background-color: #cc5f37;
   color: #fff;
   border: none;
 }
 .btn-naranja:hover {
-  background-color: #973a07;
+  background-color: #9c4829;
   color: #fff;
   /*transform: scale(1.03);*/
 }

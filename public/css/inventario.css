@@ -153,13 +153,13 @@ td.text-nowrap > .d-flex {
 
 /* 🔶 Botón buscar */
 .btn-naranja {
-  background-color: #d06842;
+  background-color: #cc5f37;
   color: #fff;
   border: none;
 }
 
 .btn-naranja:hover {
-  background-color: #a34f30;
+  background-color: #9c4829;
 }
 
 th.recurso-costo {
@@ -175,13 +175,13 @@ th.recurso-costo {
   display: inline-flex;
   align-items: center;   /* centra texto e ícono verticalmente */
   padding: 0.5rem 1rem;
-  background-color: #d06842;
+  background-color: #cc5f37;
   color: #fff;
   margin:0;
 }
 
 .btn-agregar:hover{
-  background-color: #b35837 !important;
+  background-color: #9c4728 !important;
   color: #fff !important;
 }
 

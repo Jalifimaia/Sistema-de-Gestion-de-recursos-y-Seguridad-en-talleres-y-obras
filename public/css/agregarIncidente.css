@@ -33,9 +33,9 @@
 }
 
 h4.text-orange {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #2e2e2e;
 }
 
 .card-header {
@@ -63,3 +63,29 @@ h4.text-orange {
   width: 20px;
   flex-shrink: 0;
 }
+
+.bg-detalle {
+  background-color: #cc5f37;
+  color: #f0f0f0;
+}
+
+/* Aplica borde negro a todos los campos de formulario */
+.form-control,
+.form-select,
+textarea.form-control {
+  border: 2px solid #444444 !important;
+  box-shadow: none; /* elimina el borde azul de Bootstrap al foco */
+}
+
+/* Opcional: mantener el borde negro también al hacer foco */
+.form-control:focus,
+.form-select:focus,
+textarea.form-control:focus {
+  border-color: #444444 !important;
+  box-shadow: none !important;
+}
+
+
+
+
+

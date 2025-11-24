@@ -13,7 +13,6 @@
     </a>
 
     <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
-      <img src="{{ asset('images/lapiz.svg') }}" alt="Editar" class="me-2 icono-volver">
       Editar incidente
     </h4>
   </div>

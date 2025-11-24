@@ -24,7 +24,7 @@
   <!-- Botón registrar -->
   <div class="mb-3 text-start">
     <a href="{{ route('incidente.create') }}" class="btn btn-registrar-incidente">
-    Registrar nuevo incidente
+    Registrar incidente
     </a>
   </div>
 
@@ -82,25 +82,26 @@
                     : '-' }}
                 </td>
                 <td>
-                  <div class="grupo-acciones">
-                    <button
-                      class="btn btn-detalles"
-                      data-bs-toggle="modal"
-                      data-bs-target="#modalIncidente{{ $incidente->id }}"
-                      title="Ver detalles del incidente">
-                      <img src="{{ asset('images/detalles.svg') }}" alt="Detalles" width="16" height="16" class="me-1">
-                    </button>
+                  <div class="grupo-acciones d-flex gap-2">
+                  <button
+                    class="btn btn-detalles btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalIncidente{{ $incidente->id }}"
+                    title="Ver detalles del incidente">
+                    <img src="{{ asset('images/detalless.svg') }}" alt="Detalles" width="20" height="20">
+                  </button>
 
-                    @if($incidente->estadoIncidente?->nombre_estado === 'Resuelto')
-                      <button class="btn btn-bloqueado" data-bs-toggle="modal" data-bs-target="#modalBloqueado{{ $incidente->id }}">
-                        <i class="bi bi-lock"></i>
-                      </button>
-                    @else
-                      <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-editar" title="Editar incidente">
-                        <i class="bi bi-pencil me-1"></i>
-                      </a>
-                    @endif
-                  </div>
+                  @if($incidente->estadoIncidente?->nombre_estado === 'Resuelto')
+                    <button class="btn btn-bloqueado" data-bs-toggle="modal" data-bs-target="#modalBloqueado{{ $incidente->id }}">
+                      <i class="bi bi-lock"></i>
+                    </button>
+                  @else
+                    <a href="{{ route('incidente.edit', $incidente->id) }}" class="btn btn-editar" title="Editar incidente">
+                      <i class="bi bi-pencil me-1"></i>
+                    </a>
+                  @endif
+                </div>
+
                 </td>
               </tr>
             @endforeach
