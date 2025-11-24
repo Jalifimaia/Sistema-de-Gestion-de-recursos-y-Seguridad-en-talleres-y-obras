@@ -4706,7 +4706,7 @@ function leerAsistenteTexto(opcion) {
       texto = 'Podés usar el sistema mediante voz, al leer el nombre de los botones como "opción 1" o "página 2".';
       break;
     case 2:
-      texto = 'Podés ingresar al sistema escribiendo tu clave o escaneando tu código QR personal. También podés dictar tu clave por voz diciendo "ingresar clave".';
+      texto = 'Podés ingresar al sistema escaneando tu código QR personal.';
       break;
     case 3:
       texto = 'Podés solicitar herramientas, registrar recursos que ya tenés en mano, o ver los recursos que tenés asignados actualmente.';
