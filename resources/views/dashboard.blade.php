@@ -183,9 +183,12 @@
                 @forelse($alertasVencidas as $alerta)
                   <div class="col-md-6">
                     <div class="alert alert-danger shadow-sm h-100">
-                      <strong>{{ $alerta->recurso->subcategoria->nombre }} - {{ $alerta->recurso->nombre }}</strong><br>
+                      <strong class="fs-5">
+                        {{ $alerta->recurso->subcategoria->nombre }} - {{ $alerta->recurso->nombre }}
+                      </strong><br>
                       <small>
-                        Serie: {{ $alerta->nro_serie }} vencido el {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}
+                        <span class="fw-bold">Serie: {{ $alerta->nro_serie }}</span> vencido el 
+                        {{ \Carbon\Carbon::parse($alerta->fecha_vencimiento)->format('d/m/Y') }}
                       </small>
                     </div>
                   </div>
@@ -193,6 +196,7 @@
                   <div class="text-center text-muted">No hay alertas vencidas.</div>
                 @endforelse
               </div>
+
               <div class="mt-3 d-flex justify-content-between align-items-center">
                 <div class="text-muted small">
                   Mostrando {{ $alertasVencidas->firstItem() }} a {{ $alertasVencidas->lastItem() }} de {{ $alertasVencidas->total() }} vencimientos
@@ -209,13 +213,16 @@
               </div>
             </div>
 
+
             <!-- Stock bajo -->
             <div class="tab-pane fade" id="stock" role="tabpanel" aria-labelledby="stock-tab">
               <div class="row g-3">
                 @forelse($stockBajo as $item)
                   <div class="col-md-6">
                     <div class="alert alert-warning shadow-sm h-100">
-                      <strong>{{ $item->subcategoria }} - {{ $item->recurso }}</strong><br>
+                      <strong class="fs-5">
+                        {{ $item->subcategoria }} - {{ $item->recurso }}
+                      </strong><br>
                       <small>Quedan {{ $item->cantidad }} unidades</small>
                     </div>
                   </div>
@@ -239,14 +246,19 @@
               </div>
             </div>
 
+
             <!-- Sin devolución -->
             <div class="tab-pane fade" id="devoluciones" role="tabpanel" aria-labelledby="devoluciones-tab">
               <div class="row g-3">
                 @forelse($herramientasNoDevueltas as $item)
                   <div class="col-md-6">
                     <div class="alert alert-info shadow-sm h-100">
-                      <strong>{{ $item->subcategoria }} - {{ $item->recurso }}</strong><br>
-                      <small>Serie: {{ $item->nro_serie }} - {{ $item->trabajador }}</small>
+                      <strong class="fs-5">
+                        {{ $item->subcategoria }} - {{ $item->recurso }}
+                      </strong><br>
+                      <small><strong>Serie:</strong> {{ $item->nro_serie }}</small><br>
+                      <small><strong>Trabajador:</strong> {{ $item->trabajador }}</small><br>
+                      <small><strong>Fecha préstamo:</strong> {{ \Carbon\Carbon::parse($item->fecha_prestamo)->format('d/m/Y') }}</small>
                     </div>
                   </div>
                 @empty
@@ -268,6 +280,7 @@
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -342,10 +355,12 @@
             @forelse($usuariosActivosLista as $usuario)
               <div class="col-md-6">
                 <div class="alert alert-success shadow-sm h-100">
-                  <strong>{{ $usuario->name }}</strong><br>
-                  <small>Email: {{ $usuario->email }}</small><br>
-                  <small>Rol: {{ $usuario->rol->nombre_rol ?? 'Sin rol' }}</small>
-                </div>
+                <strong class="fs-5">
+                  {{ $usuario->name }}
+                </strong><br>
+                <small><strong>Email:</strong> {{ $usuario->email }}</small><br>
+                <small><strong>Rol:</strong> {{ $usuario->rol->nombre_rol ?? 'Sin rol' }}</small>
+              </div>
               </div>
             @empty
               <div class="text-center text-muted">No hay trabajadores activos.</div>

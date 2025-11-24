@@ -236,9 +236,20 @@ label,
 #checklist-form label,
 #checklist-form .form-check-label,
 #checklist-form .form-label {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #222;                   /* un poco más oscuro para contraste */
 }
+
+.card-header {
+  background-color: #b14910; /* tu color */
+  color: #fff;              /* texto blanco */
+  font-weight: bold;
+}
+
+.card-outline {
+  border: 1px solid #b14910 !important;
+}
+
 
 
 

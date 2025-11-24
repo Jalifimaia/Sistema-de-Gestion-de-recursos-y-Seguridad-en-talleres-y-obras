@@ -3,7 +3,7 @@
 @section('title', 'Registro del checklist diario')
 
 @section('content')
-  <div class="container pt-3">
+<div class="container pt-3">
   <!-- 🔶 Encabezado -->
 <header class="mb-3 py-2 px-4">
   <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -15,121 +15,110 @@
 </a>
 
 
-    <!-- Título al lado -->
-    <div class="d-flex align-items-center gap-2">
-      <img src="{{ asset('images/checkk.svg') }}" alt="Checklist" class="icono-titulo">
-      <h1 class="titulo-checklist fw-bold mb-0">Registro del Checklist Diario</h1>
+      <!-- Título -->
+      <div class="d-flex align-items-center gap-2">
+        <img src="{{ asset('images/checkk.svg') }}" alt="Checklist" class="icono-titulo">
+        <h1 class="titulo-checklist fw-bold mb-0">Registro del Checklist Diario</h1>
+      </div>
+    </div>
+  </header>
+
+  <form id="checklist-form" method="POST" action="{{ route('checklist.epp.store') }}">
+    @csrf
+
+    @php
+      $alias = [
+        'lentes' => 'Lentes',
+        'casco' => 'Casco',
+        'botas' => 'Botas',
+        'chaleco' => 'Chaleco',
+        'guantes' => 'Guantes',
+        'arnes' => 'Arnés',
+      ];
+    @endphp
+
+    <!-- Card: Trabajador -->
+<div class="card mb-3 card-outline shadow-sm border">
+  <div class="card-header fw-bold">
+    Trabajador
+  </div>
+  <div class="card-body">
+    <select name="trabajador_id" id="trabajador_id"
+            class="form-select @error('trabajador_id') is-invalid @enderror"
+            {{ isset($preseleccionado) ? 'disabled' : '' }} required>
+      <option value="">Seleccionar trabajador...</option>
+      @foreach($trabajadores as $t)
+        <option value="{{ $t->id }}"
+          {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
+          {{ $t->name }}
+        </option>
+      @endforeach
+    </select>
+    @error('trabajador_id')
+      <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+
+    <!-- Trabajo en altura -->
+    <div class="form-check mt-3">
+      <input type="hidden" name="es_en_altura" value="0">
+      <input type="checkbox" name="es_en_altura" id="es_en_altura"
+             class="form-check-input" value="1" {{ old('es_en_altura') ? 'checked' : '' }}>
+      <label for="es_en_altura" class="form-check-label">¿Trabaja en altura hoy?</label>
     </div>
   </div>
-</header>
+</div>
 
-
-  <div class="card card-check border rounded shadow-sm mt-2">
+<!-- Card: Checklist EPP -->
+<div class="card mb-3 card-outline shadow-sm border">
+  <div class="card-header fw-bold">
+    Checklist
+  </div>
   <div class="card-body">
-    <form id="checklist-form" class="w-100" method="POST" action="{{ route('checklist.epp.store') }}">
-      @csrf
-
-      <!-- Trabajador -->
-      <div class="mb-3">
-        <label for="trabajador_id" class="form-label">Trabajador</label>
-        <select name="trabajador_id" id="trabajador_id"
-                class="form-select @error('trabajador_id') is-invalid @enderror"
-                {{ isset($preseleccionado) ? 'disabled' : '' }} required>
-          <option value="">Seleccionar trabajador...</option>
-          @foreach($trabajadores as $t)
-            <option value="{{ $t->id }}"
-              {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
-              {{ $t->name }}
-            </option>
-          @endforeach
-        </select>
-        @error('trabajador_id')
-          <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-      </div>
-
-      <!-- Aviso -->
-      <div id="aviso-checklist" class="text-danger mt-2 d-none"></div>
-
-      <!-- EPP asignado -->
-      <div id="epp-asignado" class="alert alertaEPP d-none">
-        <strong>EPP asignado:</strong><br>
-        <div class="table-responsive mb-2">
-          <table class="table table-sm table-bordered text-center mb-0" id="epp-tabla">
-            <thead>
-              <tr id="epp-thead"></tr>
-            </thead>
-            <tbody>
-              <tr id="epp-tbody"></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      @if (isset($preseleccionado))
-        <input type="hidden" name="trabajador_id" value="{{ $preseleccionado }}">
-      @endif
-
-      <!-- Trabajo en altura -->
-      <div class="mb-3 form-check">
-        <input type="hidden" name="es_en_altura" value="0">
-        <input type="checkbox" name="es_en_altura" id="es_en_altura"
-               class="form-check-input" value="1" {{ old('es_en_altura') ? 'checked' : '' }}>
-        <label for="es_en_altura" class="form-check-label">¿Trabaja en altura hoy?</label>
-      </div>
-
-      @php
-        $alias = [
-          'lentes' => 'Lentes',
-          'casco' => 'Casco',
-          'botas' => 'Botas',
-          'chaleco' => 'Chaleco',
-          'guantes' => 'Guantes',
-          'arnes' => 'Arnés',
-        ];
-      @endphp
-
-      <!-- EPP checklist -->
-      <div class="row g-3" id="epp-checklist">
-        @foreach(array_keys($alias) as $epp)
-          <div class="col-md-2">
-            <div class="form-check">
-              <input type="hidden" name="{{ $epp }}" value="0">
-              <input type="checkbox" name="{{ $epp }}" id="{{ $epp }}"
-                     class="form-check-input" value="1" {{ old($epp) ? 'checked' : '' }}>
-              <label for="{{ $epp }}" class="form-check-label">{{ $alias[$epp] }}</label>
-            </div>
-            <div class="text-danger small d-none" id="alert-{{ $epp }}">
-              <strong>No tiene {{ $alias[$epp] }} asignado</strong>
-            </div>
-            @error($epp)
-              <div class="text-danger small">{{ $message }}</div>
-            @enderror
+    <div class="row g-3" id="epp-checklist">
+      @foreach($alias as $epp => $nombre)
+        <div class="col-md-2">
+          <div class="form-check">
+            <input type="hidden" name="{{ $epp }}" value="0">
+            <input type="checkbox" name="{{ $epp }}" id="{{ $epp }}"
+                   class="form-check-input" value="1" {{ old($epp) ? 'checked' : '' }}>
+            <label for="{{ $epp }}" class="form-check-label">{{ $nombre }}</label>
           </div>
-        @endforeach
-      </div>
-
-      <!-- Observaciones -->
-      <div class="mt-3">
-        <label for="observaciones" class="form-label">Observaciones</label>
-        <textarea name="observaciones" id="observaciones"
-                  class="form-control" placeholder="Observaciones...">{{ old('observaciones') }}</textarea>
-        @error('observaciones')
-          <div class="text-danger small">{{ $message }}</div>
-        @enderror
-      </div>
-
-      <!-- Botón alineado a la derecha -->
-      <div class="mt-4 d-flex justify-content-end w-100">
-        <button type="submit" class="btn btn-reg">
-          Registrar
-        </button>
-      </div>
-    </form>
+          <div class="text-danger small d-none" id="alert-{{ $epp }}">
+            <strong>No tiene {{ $nombre }} asignado</strong>
+          </div>
+          @error($epp)
+            <div class="text-danger small">{{ $message }}</div>
+          @enderror
+        </div>
+      @endforeach
+    </div>
   </div>
 </div>
 
+<!-- Card: Observaciones -->
+<div class="card mb-3 card-outline shadow-sm border">
+  <div class="card-header fw-bold">
+    Observaciones
+  </div>
+  <div class="card-body">
+    <textarea name="observaciones" id="observaciones"
+              class="form-control" placeholder="Observaciones...">{{ old('observaciones') }}</textarea>
+    @error('observaciones')
+      <div class="text-danger small">{{ $message }}</div>
+    @enderror
+  </div>
 </div>
+
+
+    <!-- Botón -->
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-reg">
+        Registrar
+      </button>
+    </div>
+  </form>
+</div>
+
 
 <!-- 🔶 Modal de advertencia -->
 <div class="modal fade" id="modalChecklistIncompleto" tabindex="-1" aria-hidden="true">
