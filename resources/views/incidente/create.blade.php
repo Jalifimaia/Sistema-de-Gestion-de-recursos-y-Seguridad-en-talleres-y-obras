@@ -58,7 +58,7 @@
                         <div class="col-md-3">
                             <label class="form-label">Categoría</label>
                             <select name="recursos[0][id_categoria]" class="form-select categoria-select" required>
-                                <option value="">Seleccione</option>
+                                <option value="">Seleccione la categoría</option>
                                 @foreach($categorias as $cat)
                                     @php
                                         $selectedCat = old('recursos.0.id_categoria') ?? ($incidente->recursos[0]->subcategoria->categoria->id ?? null ?? null);
@@ -74,7 +74,7 @@
                         <div class="col-md-3">
                             <label class="form-label">Subcategoría</label>
                             <select name="recursos[0][id_subcategoria]" class="form-select subcategoria-select" required>
-                                <option value="">Seleccione</option>
+                                <option value="">Seleccione la subcategoría</option>
                                 @if(old('recursos.0.id_subcategoria'))
                                     <option value="{{ old('recursos.0.id_subcategoria') }}" selected>
                                         {{ collect($subcategorias)->firstWhere('id', old('recursos.0.id_subcategoria'))->nombre ?? 'Seleccionado' }}
@@ -92,7 +92,7 @@
                         <div class="col-md-3">
                             <label class="form-label">Recurso</label>
                             <select name="recursos[0][id_recurso]" class="form-select recurso-select" required>
-                                <option value="">Seleccione</option>
+                                <option value="">Seleccione el recurso</option>
                                 @if(old('recursos.0.id_recurso'))
                                     <option value="{{ old('recursos.0.id_recurso') }}" selected>
                                         {{ collect($recursos)->firstWhere('id', old('recursos.0.id_recurso'))->nombre ?? 'Seleccionado' }}
@@ -110,7 +110,7 @@
                         <div class="col-md-3">
                             <label class="form-label">Serie del recurso</label>
                             <select name="recursos[0][id_serie_recurso]" class="form-select serie-select" required>
-                                <option value="">Seleccione</option>
+                                <option value="">Seleccione la serie</option>
                                 @if(old('recursos.0.id_serie_recurso'))
                                     <option value="{{ old('recursos.0.id_serie_recurso') }}" selected>
                                         {{ \App\Models\SerieRecurso::find(old('recursos.0.id_serie_recurso'))->nro_serie ?? 'Seleccionado' }}
@@ -130,7 +130,7 @@
                         <div class="col-md-3 mt-3">
                             <label class="form-label">Estado</label>
                             <select name="recursos[0][id_estado]" class="form-select estado-select" required>
-                                <option value="">Seleccione</option>
+                                <option value="">Seleccione el estado</option>
                                 @foreach($estados as $estado)
                                     @php
                                         $selectedEstado = old('recursos.0.id_estado') ?? ($incidente->recursos[0]->pivot->id_estado ?? null);
@@ -160,7 +160,7 @@
                     <textarea name="descripcion" class="form-control"
                       required
                       maxlength="255"
-                      placeholder="Ingrese aquí cuál fue el motivo del incidente (máx. 255 caracteres).">{{ old('descripcion') }}</textarea>
+                      placeholder="Ingrese el motivo (máximo 255 caracteres)">{{ old('descripcion') }}</textarea>
                     <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
                 </div>
                 <div class="mb-3">

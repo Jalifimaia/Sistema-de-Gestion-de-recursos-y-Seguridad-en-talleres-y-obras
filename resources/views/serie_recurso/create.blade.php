@@ -45,7 +45,7 @@
       <div class="col-12 col-md-6">
         <label for="version" class="form-label mb-1">Versión <span class="required-asterisk">*</span></label>
         <select name="version" id="version" class="form-select" required>
-          <option value="" disabled selected>Seleccione versión</option>
+          <option value="" disabled selected>Seleccione la versión</option>
           @for($i = 1; $i <= 10; $i++)
             <option value="{{ $i }}">{{ $i }}</option>
           @endfor
@@ -57,7 +57,7 @@
       <div class="col-12 col-md-6">
         <label for="anio" class="form-label mb-1">Año <span class="required-asterisk">*</span></label>
         <select name="anio" id="anio" class="form-select" required>
-          <option value="" disabled selected>Seleccione año</option>
+          <option value="" disabled selected>Seleccione el año</option>
           @for($y = 2000; $y <= now()->year; $y++)
             <option value="{{ $y }}">{{ $y }}</option>
           @endfor
@@ -72,7 +72,7 @@
                name="lote"
                id="lote"
                class="form-control"
-               placeholder="Ingrese el N° de lote"
+               placeholder="Ingrese el número de lote"
                min="1"
                required>
         <div id="error-lote" class="text-danger small mt-1 d-none">Este campo es obligatorio.</div>

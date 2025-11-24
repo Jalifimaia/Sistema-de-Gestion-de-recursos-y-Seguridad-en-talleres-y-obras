@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     limpiarErrorCampo(this);
 
     if (!categoriaId) {
-      subcategoriaSelect.innerHTML = '<option value="">Primero seleccioná una categoría</option>';
+      subcategoriaSelect.innerHTML = '<option value="">Primero seleccione una categoría</option>';
       subcategoriaSelect.disabled = true;
       return;
     }
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     .then(data => {
       form.reset();
-      subcategoriaSelect.innerHTML = '<option value="">Primero seleccioná una categoría</option>';
+      subcategoriaSelect.innerHTML = '<option value="">Primero seleccione una categoría</option>';
       subcategoriaSelect.disabled = true;
       actualizarContador();
 

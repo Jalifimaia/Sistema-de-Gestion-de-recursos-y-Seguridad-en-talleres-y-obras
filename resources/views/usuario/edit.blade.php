@@ -76,7 +76,7 @@
         <label for="password" class="form-label">Contraseña</label>
         <div class="input-group">
           <input type="password" name="password" id="password" class="form-control"
-            placeholder="Dejar vacío si no se cambia"
+            placeholder="Ingrese la nueva contraseña"
             maxlength="255">
           <button type="button" class="btn btn-ojoa" id="togglePassword">
             <img src="{{ asset('images/ojocerrado.svg') }}" alt="Mostrar/Ocultar"
@@ -91,7 +91,7 @@
         <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
         <div class="input-group">
           <input type="password" name="password_confirmation" id="password_confirmation" class="form-control"
-            placeholder="Repetí la contraseña" maxlength="255">
+            placeholder="Repita la contraseña" maxlength="255">
           <button type="button" class="btn btn-ojoa" id="togglePasswordConfirm">
             <img src="{{ asset('images/ojocerrado.svg') }}" alt="Mostrar/Ocultar"
               id="iconPasswordConfirm" style="width:20px; height:20px;">

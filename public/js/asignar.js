@@ -1,13 +1,25 @@
 $(document).ready(function() {
+  // Definir placeholders personalizados por tipo
+  const placeholders = {
+    'casco': 'Seleccione el casco',
+    'guantes': 'Seleccione los guantes',
+    'lentes': 'Seleccione los lentes',
+    'botas': 'Seleccione las botas',
+    'chaleco': 'Seleccione el chaleco',
+    'arnes': 'Seleccione el arnés'
+  };
+
   // Inicializar todos los selects de EPP con Select2
   $('.select2-epp').each(function() {
     let tipo = $(this).data('tipo');
+    let placeholderTexto = placeholders[tipo] || 'Buscar serie...';
+    
     $(this).select2({
-      placeholder: 'Buscar serie...',
+      placeholder: placeholderTexto,
       allowClear: true,
       width: '100%',
       ajax: {
-        url: '/epp/buscar', // 👈 CAMBIO: usar la ruta correcta
+        url: '/epp/buscar',
         dataType: 'json',
         delay: 250,
         data: function (params) {
@@ -21,7 +33,6 @@ $(document).ready(function() {
             results: data.map(function(item) {
               let texto = item.nro_serie;
 
-              // 👇 CAMBIO: Validar que existan antes de usar
               if (item.color && item.talle) {
                 texto += ` (${item.recurso || 'EPP'} - ${item.color}, Talle ${item.talle})`;
               } else if (item.color) {

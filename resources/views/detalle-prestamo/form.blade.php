@@ -20,7 +20,7 @@
         <div class="form-group mb-2 mb20">
             <label for="id_estado_prestamo" class="form-label">{{ __('Estado del Préstamo') }}</label>
             <select name="id_estado_prestamo" id="id_estado_prestamo" class="form-control @error('id_estado_prestamo') is-invalid @enderror">
-                <option value="">Seleccione estado</option>
+                <option value="">Seleccione el estado</option>
                 @foreach(App\Models\EstadoPrestamo::all() as $estado)
                     <option value="{{ $estado->id }}" {{ old('id_estado_prestamo', $detallePrestamo?->id_estado_prestamo) == $estado->id ? 'selected' : '' }}>{{ $estado->nombre }}</option>
                 @endforeach

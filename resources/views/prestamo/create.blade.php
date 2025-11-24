@@ -29,7 +29,7 @@
             <label for="id_trabajador" class="form-label">Trabajador</label>
             <div class="d-flex gap-2">
               <select id="id_trabajador" name="id_trabajador_select" class="form-select" required>
-                <option value="" selected disabled>Seleccione un trabajador</option>
+                <option value="" selected disabled>Seleccione al trabajador</option>
                 @foreach($trabajadores as $t)
                   <option value="{{ $t->id }}">{{ $t->name }}</option>
                 @endforeach

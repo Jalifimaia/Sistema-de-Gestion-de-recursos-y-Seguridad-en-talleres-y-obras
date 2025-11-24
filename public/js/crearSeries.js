@@ -270,13 +270,13 @@ window.agregarFila = function () {
     cols += `
       <td>
         <select class="form-select tipo-talle" onchange="actualizarTalle(this)">
-          <option value="" disabled selected>Tipo de talle</option>
+          <option value="" disabled selected>Seleccione el tipo de talle</option>
           ${tipoOptions}
         </select>
       </td>
       <td>
         <select class="form-select talle-select">
-          <option value="" disabled selected>Seleccione tipo primero</option>
+          <option value="" disabled selected>Primero seleccione el tipo de talle</option>
         </select>
       </td>`;
   }

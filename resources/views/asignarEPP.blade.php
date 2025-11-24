@@ -31,7 +31,7 @@
         <div class="col-md-6">
           <label for="estado_filtro" class="form-label">Estado <span class="required-asterisk">*</span></label>
           <select id="estado_filtro" class="form-select">
-            <option value="" selected disabled>Seleccione un estado</option>
+            <option value="" selected disabled>Seleccione el estado</option>
             <option value="alta">Trabajadores en alta</option>
             <option value="standby">Trabajadores en stand by</option>
           </select>
@@ -40,7 +40,7 @@
         <div class="col-md-6">
           <label for="usuario_id" class="form-label">Trabajador <span class="required-asterisk">*</span></label>
           <select name="usuario_id" id="usuario_id" class="form-select select2" required>
-            <option value="">Seleccione un trabajador</option>
+            <option value="">Seleccione al trabajador</option>
             @foreach ($usuarios as $usuario)
               <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
             @endforeach
@@ -74,11 +74,11 @@
       <div class="row g-3">
         <div class="col-md-6">
           <label for="casco" class="form-label">Casco <span class="required-asterisk">*</span></label>
-          <select name="casco" id="casco" class="form-select select2-epp" data-tipo="casco" data-placeholder="Buscar serie...">
+          <select name="casco" id="casco" class="form-select select2-epp" data-tipo="casco" data-placeholder="Seleccione el casco">
             <option value="">-- Seleccionar casco disponible --</option>
           </select>
           <div class="text-danger small d-none" id="alert-casco">Ya tiene casco asignado</div>
-          <div class="text-danger small d-none" id="alert-casco-vacio"><strong>Debe seleccionar un casco</strong></div>
+          <div class="text-danger small d-none" id="alert-casco-vacio"><strong>Debe seleccionar el casco</strong></div>
         </div>
 
         <div class="col-md-6">
@@ -335,7 +335,7 @@ selectEstado.addEventListener('change', function () {
     fetch(`/trabajadores/por-estado/${estado}`)
         .then(res => res.json())
         .then(data => {
-            selectTrabajador.innerHTML = '<option value="">Seleccione un trabajador</option>';
+            selectTrabajador.innerHTML = '<option value="">Seleccione al trabajador</option>';
             data.forEach(user => {
                 selectTrabajador.innerHTML += `<option value="${user.id}">${user.name}</option>`;
             });

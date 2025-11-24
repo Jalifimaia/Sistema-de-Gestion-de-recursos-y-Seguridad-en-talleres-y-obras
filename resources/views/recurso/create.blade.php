@@ -38,7 +38,7 @@
             <label for="id_subcategoria" class="form-label">Subcategoría <span class="required-asterisk">*</span></label>
             <div class="input-group">
                 <select id="id_subcategoria" name="id_subcategoria" class="form-select" required disabled>
-                    <option value="">Primero seleccioná una categoría</option>
+                    <option value="">Primero seleccione una categoría</option>
                 </select>
                 <button type="button" 
                         class="btn btn-outline-primary" 
@@ -96,7 +96,7 @@
           class="form-control @error('descripcion') is-invalid @enderror"
           rows="3"
           maxlength="250"
-          placeholder="Ingrese una descripción (máx. 4 palabras)"
+          placeholder="Ingrese una descripción (máximo 4 palabras)"
           required></textarea>
 
             <small id="contadorPalabras" class="text-muted">0/4 palabras</small>

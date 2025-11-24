@@ -157,7 +157,7 @@
   @else
     <textarea name="descripcion" id="descripcion" class="form-control"
               required maxlength="255"
-              placeholder="Ingrese aquí cuál fue el motivo del incidente (máx. 255 caracteres).">{{ old('descripcion', $incidente->descripcion) }}</textarea>
+              placeholder="Ingrese el motivo (máximo 255 caracteres)">{{ old('descripcion', $incidente->descripcion) }}</textarea>
     <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
   @endif
 </div>

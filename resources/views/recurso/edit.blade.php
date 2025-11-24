@@ -67,7 +67,7 @@
               id="costo_unitario"
               name="costo_unitario"
               class="form-control"
-              placeholder="Costo unitario"
+              placeholder="Ingrese el Costo"
               value="{{ old('costo_unitario', number_format($recurso->costo_unitario, 0, ',', '.')) }}"
               required>
         </div>
@@ -78,7 +78,7 @@
           <textarea id="descripcion"
                     name="descripcion"
                     class="form-control @error('descripcion') is-invalid @enderror"
-                    placeholder="Descripción (máx. 4 palabras)."
+                    placeholder="Ingrese una descripción (máximo 4 palabras)"
                     rows="3"
                     maxlength="250"
                     required>{{ old('descripcion', $recurso->descripcion) }}</textarea>
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function actualizarEstadoSubcategoria() {
     if (!categoriaSelect.value) {
       subcategoriaSelect.disabled = true;
-      subcategoriaSelect.innerHTML = '<option value="">Primero seleccioná una categoría</option>';
+      subcategoriaSelect.innerHTML = '<option value="">Primero seleccione una categoría</option>';
     }
   }
   actualizarEstadoSubcategoria();
@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
     subcategoriaSelect.disabled = true;
 
     if (!categoriaId) {
-      subcategoriaSelect.innerHTML = '<option value="">Primero seleccioná una categoría</option>';
+      subcategoriaSelect.innerHTML = '<option value="">Primero seleccione una categoría</option>';
       subcategoriaSelect.disabled = true;
       return;
     }

@@ -48,7 +48,7 @@
     <select name="trabajador_id" id="trabajador_id"
             class="form-select @error('trabajador_id') is-invalid @enderror"
             {{ isset($preseleccionado) ? 'disabled' : '' }} required>
-      <option value="">Seleccionar trabajador</option>
+      <option value="">Seleccione al trabajador</option>
       @foreach($trabajadores as $t)
         <option value="{{ $t->id }}"
           {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
@@ -127,11 +127,11 @@
     <!-- Card: Observaciones -->
     <div class="card mb-3 card-outline shadow-sm border">
       <div class="card-header fw-bold">
-        Observaciones
+        Observaciones (opcional)
       </div>
       <div class="card-body">
         <textarea name="observaciones" id="observaciones"
-                  class="form-control" placeholder="Observaciones...">{{ old('observaciones') }}</textarea>
+                  class="form-control" placeholder="Ingrese sus observaciones">{{ old('observaciones') }}</textarea>
         @error('observaciones')
           <div class="text-danger small">{{ $message }}</div>
         @enderror

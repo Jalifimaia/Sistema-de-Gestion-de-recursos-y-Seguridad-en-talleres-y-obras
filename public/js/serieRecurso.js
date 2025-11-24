@@ -206,7 +206,7 @@ window.agregarFila = function () {
       </td>
       <td>
         <select class="form-select talle-select">
-          <option value="" disabled selected>Seleccione tipo primero</option>
+          <option value="" disabled selected>Primero seleccione el tipo de talle</option>
         </select>
       </td>`;
   }
