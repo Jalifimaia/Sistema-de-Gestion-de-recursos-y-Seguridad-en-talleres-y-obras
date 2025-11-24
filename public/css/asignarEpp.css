@@ -11,35 +11,6 @@ select.form-select:focus {
   box-shadow: 0 0 0 0.15rem rgba(245, 124, 0, 0.25);
 }
 
-.btn-volver {
-  background-color: #d3401b;
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.875rem;
-  padding: 0.35rem 0.75rem;
-  border: none;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  line-height: 1.2;
-  max-width: fit-content;
-  height: auto;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-volver:hover {
-  background-color: #e0e0e0;
-  color: #000;
-  transform: translateX(-2px);
-}
-
-.icono-volver {
-  width: 18px;
-  height: 18px;
-}
-
 .btn-filtro {
   background-color: #1976d2;
   color: #fff;
@@ -68,19 +39,6 @@ select.form-select:focus {
   background-color: #f9a825;
 }
 
-.btn-guardar {
-  background-color: #43a047;
-  color: #fff;
-  font-weight: 500;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.btn-guardar:hover {
-  background-color: #388e3c;
-}
 
 .select2-container .select2-selection {
   border: 2px solid #b14910 !important;
@@ -113,24 +71,6 @@ label {
   color: #e9e9e9;
 }
 
-.btn-guardar {
-  background-color: #28a745;   /* verde Bootstrap */
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.1rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: none;
-  max-width: 95%;              /* ocupa casi toda la pantalla */
-  display: block;
-  margin: 0 auto;              /* centrado */
-  transition: background-color 0.2s ease-in-out;
-}
-
-.btn-guardar:hover {
-  background-color: #218838;   /* verde más oscuro al hover */
-  color: #fff;
-}
 
 #epp-asignado table thead th {
   background-color: #bb6118 !important; /* naranja */
@@ -157,4 +97,63 @@ form .form-check-label {
   color: #222;
 }
 
+/* 🔧 Aumentar la altura y el tamaño de texto de los select de EPP */
+.select2-epp {
+  height: 50px !important;          /* aumenta la altura total */
+  padding-top: 10px !important;     /* más espacio interno arriba */
+  padding-bottom: 10px !important;  /* más espacio interno abajo */
+  font-size: 1.05rem !important;    /* texto ligeramente más grande */
+  line-height: 1.5 !important;      /* alinea bien el texto dentro */
+}
 
+/* Si usás Select2, también agrandá el contenedor visual */
+.select2-container .select2-selection--single {
+  height: 40px !important;
+  padding: 1px 2px !important;
+  font-size: 1.05rem !important;
+  border-radius: 3px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  line-height: 34px !important; /* centra el texto verticalmente */
+}
+
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #ac3416;
+  transform: translateX(-2px);
+  color: #ffff;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.btn-guardar {
+  font-size: 1.1rem;         /* tamaño del texto */
+  padding: 0.1rem 1rem;  /* tamaño más compacto */
+  border-radius: 8px;
+  background-color: #238306;
+  color: #ffff;
+}
+
+.btn-guardar:hover {
+  background-color: #217208;
+  color: #ffff;
+}
+
+/* Espacio inferior uniforme */
+.d-flex.justify-content-end.mt-4 {
+  margin-bottom: 2rem; /* separa del borde inferior */
+}

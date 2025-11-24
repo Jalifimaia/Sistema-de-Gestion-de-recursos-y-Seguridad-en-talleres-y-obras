@@ -159,7 +159,7 @@ td.text-nowrap > .d-flex {
 }
 
 .btn-naranja:hover {
-  background-color: #d06842;
+  background-color: #a34f30;
 }
 
 th.recurso-costo {
@@ -167,9 +167,71 @@ th.recurso-costo {
 }
 
 .text-orange {
-  color: #f57c00;
+  color: #cf6801;
 }
 
-.d-flex.flex-wrap.gap-4 > div {
-  font-size: 0.95rem;
+.btn-agregar {
+  min-height: 45px;      /* altura uniforme */
+  display: inline-flex;
+  align-items: center;   /* centra texto e ícono verticalmente */
+  padding: 0.5rem 1rem;
+  background-color: #d06842;
+  color: #fff;
+  margin:0;
 }
+
+.btn-agregar:hover{
+  background-color: #b35837 !important;
+  color: #fff !important;
+}
+
+.btn-qr {
+  background-color: #f5f5f5 !important;
+  color: #333333 !important;
+   border-color: #1f1f1f !important;
+  min-height: 45px;      /* altura uniforme */
+  display: inline-flex;
+  align-items: center;   /* centra texto e ícono verticalmente */
+  padding: 0.5rem 1rem;
+}
+
+.bg-inventario {
+  background-color: #c97b32;
+  color: #ececec;
+}
+
+.textoInventario {
+  font-size: 1.1rem;
+}
+
+.btn-downn {
+  background-color: #ececec;
+}
+
+.btn-downn:hover {
+  background-color: #d6d6d6;
+}
+
+.btn-downn:active,
+.btn-downn:focus {
+  background-color: #d6d6d6 !important; /* mismo color que hover */
+  box-shadow: none !important;          /* opcional: quitar glow naranja */
+  border-color: #d6d6d6 !important;     /* opcional: evitar borde naranja */
+}
+
+
+/*SI*/
+
+.buscador-destacado {
+  flex: 0 0 300px;   /* ancho fijo más corto */
+  height: 46px;
+}
+
+.filtro-destacado {
+  flex: 0 0 200px;   /* ancho más largo para el select */
+  height: 46px !important;
+  width: 300px !important;
+}
+
+.buscador-destacado { flex: 2; }
+.filtro-destacado { flex: 1; }

@@ -22,12 +22,12 @@
           <!-- Fechas -->
           <div class="col-md-2">
             <label for="fecha-inicio" class="form-label fw-bold">Desde</label>
-            <input type="date" id="fecha-inicio" name="fecha_inicio" class="form-control filtro-naranja" value="{{ request('fecha_inicio') }}">
+            <input type="date" id="fecha-inicio" name="fecha_inicio" class="form-control filtro-destacado" value="{{ request('fecha_inicio') }}">
           </div>
 
           <div class="col-md-2">
             <label for="fecha-fin" class="form-label fw-bold">Hasta</label>
-            <input type="date" id="fecha-fin" name="fecha_fin" class="form-control filtro-naranja" value="{{ request('fecha_fin') }}">
+            <input type="date" id="fecha-fin" name="fecha_fin" class="form-control filtro-destacado" value="{{ request('fecha_fin') }}">
           </div>
 
           <!-- Botón aplicar filtros (envía al backend) -->
@@ -54,7 +54,7 @@
             <label for="busqueda" class="form-label fw-bold">Buscar</label>
             <div class="input-group" style="height: 46px;">
               <input type="text" name="search" id="busqueda"
-                     class="form-control filtro-naranja"
+                     class="form-control buscador-destacado"
                      style="height: 100%;"
                      value="{{ request('search') }}"
                      placeholder="Buscar por recurso, marca, serie, trabajador o creador">
@@ -67,7 +67,7 @@
           <!-- Estado -->
           <div class="col-md-3">
             <label for="filtro-estado" class="form-label fw-bold">Estado</label>
-            <select id="filtro-estado" name="estado" onchange="this.form.submit()" class="form-select filtro-naranja" style="height: 46px;">
+            <select id="filtro-estado" name="estado" onchange="this.form.submit()" class="form-select filtro-destacado" style="height: 46px;">
               <option value="">Todos</option>
               <option value="Activo" {{ request('estado') == 'Activo' ? 'selected' : '' }}>Activo</option>
               <option value="Vencido" {{ request('estado') == 'Vencido' ? 'selected' : '' }}>Vencido</option>
@@ -78,7 +78,7 @@
           <!-- Creado por -->
           <div class="col-md-3">
             <label for="filtro-creador" class="form-label fw-bold">Creado por</label>
-            <select id="filtro-creador" name="creador" onchange="this.form.submit()" class="form-select filtro-naranja" style="height: 46px;">
+            <select id="filtro-creador" name="creador" onchange="this.form.submit()" class="form-select filtro-destacado" style="height: 46px;">
               <option value="">Todos</option>
               @foreach($usuarios as $nombre)
                 <option value="{{ $nombre }}" {{ request('creador') == $nombre ? 'selected' : '' }}>

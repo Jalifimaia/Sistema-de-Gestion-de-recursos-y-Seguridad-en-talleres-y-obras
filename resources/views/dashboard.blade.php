@@ -11,10 +11,6 @@
 <div class="container py-4">
   <header class="d-flex justify-content-between align-items-center mb-4 protect-toggle">
     <div>
-      <p class="text-muted mb-1 subir-bienvenida">
-        Bienvenido, {{ auth()->user()->name }} <em>[{{ auth()->user()->rol->nombre_rol }}]</em>
-      </p>
-
       <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
         <img src="{{ asset('images/resumen.svg') }}" alt="Icono Resumen" style="height: 30px;">
         Resumen diario del taller
@@ -22,6 +18,12 @@
 
       <p class="text-muted texto-descriptivo-alerta">
         Estado general de las herramientas y de la seguridad de los trabajadores.
+      </p>
+    </div>
+
+    <div class="text-end">
+      <p class="mb-1 subir-bienvenida">
+        Bienvenido, {{ auth()->user()->name }} <em>[{{ auth()->user()->rol->nombre_rol }}]</em>
       </p>
     </div>
     <!--  <div class="col-md-4 text-md-end fecha-destacada d-flex align-items-center justify-content-md-end">
@@ -112,27 +114,63 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @foreach($checklistsHoy->take(5) as $c)
-                    <tr>
-                      <td>{{ $c->trabajador->name }}</td>
-                      <td>{!! $c->anteojos ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
-                      <td>{!! $c->botas ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
-                      <td>{!! $c->chaleco ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
-                      <td>{!! $c->guantes ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
-                      <td>{!! $c->arnes ? '<span class="check-si">✔️</span>' : '<span class="check-no">❌</span>' !!}</td>
-                      <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
-                      <td>
-                        @if($c->critico)
-                          <span class="badge bg-danger">Crítico</span>
-                        @else
-                          <span class="badge bg-success">OK</span>
-                        @endif
-                      </td>
-                      <td>{{ \Carbon\Carbon::parse($c->hora)->format('d/m/Y H:i') }}</td>
-                      <td>{{ $c->observaciones ?? '—' }}</td>
-                    </tr>
-                  @endforeach
-                </tbody>
+                @foreach($checklistsHoy->take(5) as $c)
+                  <tr>
+                    <td>{{ $c->trabajador->name }}</td>
+
+                    <td>
+                      @if($c->anteojos)
+                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                      @else
+                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                      @endif
+                    </td>
+
+                    <td>
+                      @if($c->botas)
+                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                      @else
+                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                      @endif
+                    </td>
+
+                    <td>
+                      @if($c->chaleco)
+                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                      @else
+                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                      @endif
+                    </td>
+
+                    <td>
+                      @if($c->guantes)
+                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                      @else
+                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                      @endif
+                    </td>
+
+                    <td>
+                      @if($c->arnes)
+                        <img src="{{ asset('images/checkcheck.svg') }}" alt="Sí" class="icono-check">
+                      @else
+                        <img src="{{ asset('images/crosscross.svg') }}" alt="No" class="icono-cross">
+                      @endif
+                    </td>
+
+                    <td>{!! $c->es_en_altura ? '<span class="badge bg-danger">Sí</span>' : '<span class="badge bg-success">No</span>' !!}</td>
+                    <td>
+                      @if($c->critico)
+                        <span class="badge bg-danger">Crítico</span>
+                      @else
+                        <span class="badge bg-success">OK</span>
+                      @endif
+                    </td>
+                    <td>{{ \Carbon\Carbon::parse($c->hora)->format('d/m/Y H:i') }}</td>
+                    <td>{{ $c->observaciones ?? '—' }}</td>
+                  </tr>
+                @endforeach
+              </tbody>
               </table>
             </div>
 

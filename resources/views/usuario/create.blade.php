@@ -14,7 +14,6 @@
       </a>
 
       <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
-        <img src="{{ asset('images/userNuevo.svg') }}" alt="Usuario" class="me-2 icono-volver">
         Agregar Usuario
       </h4>
     </div>
@@ -97,10 +96,12 @@
     </div>
   </div>
 
-  <!-- Botón largo centrado -->
-  <div class="text-center mt-4">
-    <button type="submit" class="btn btn-guardar w-75">Crear usuario</button>
-  </div>
+      <!-- Botón largo centrado -->
+      <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-guardar px-4">
+          Crear usuario
+        </button>
+      </div>
 </form>
 
 </div>

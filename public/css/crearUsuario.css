@@ -15,53 +15,51 @@ label {
   font-weight: 600;
 }
 
-.btn-volver {
-  background-color: #d3401b;
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.875rem;
-  padding: 0.35rem 0.75rem;
-  border: none;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  line-height: 1.2;
-  max-width: fit-content;
-  height: auto;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.icono-volver {
-  width: 18px;
-  height: 18px;
-}
-
-.btn-guardar {
-  background-color: #43a047;
-  color: #fff;
-  font-weight: 500;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.btn-guardar:hover {
-  background-color: #388e3c;
-}
-
 .btn-ojoa {
-  background-color: rgb(100, 100, 100);
+  background-color: #b14910;
 }
 .btn-ojoa:hover {
-  background-color: rgb(100, 100, 100);
+  background-color: #b14910;
 }
 
 .btn-ojoc {
-  background-color: rgb(100, 100, 100);
+  background-color: #b14910;
 }
 .btn-ojoc:hover {
-  background-color: rgb(100, 100, 100);
+  background-color: #b14910;
+}
+
+.btn-volver {
+  background-color: #b14910;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: rgb(146, 43, 17);
+  transform: translateX(-2px);
+  color: #ffff;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.btn-guardar {
+  font-size: 1.1rem;         /* tamaño del texto */
+  padding: 0.7rem 1rem;  /* tamaño más compacto */
+  border-radius: 8px;
+  background-color: #b14910;
+  color: #ffff;
+}
+
+.btn-guardar:hover {
+  background-color: #9b3f0e;
+  color: #ffff;
 }

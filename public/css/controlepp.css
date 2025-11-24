@@ -217,7 +217,7 @@
 }
 
 .bg-modalll {
-  background-color: #3e8f1e;
+  background-color: #df8129;
 }
 
 .bg-modalllS {
@@ -380,8 +380,7 @@ header {
   font-weight: 600;
   padding: 0.75rem;
   border-bottom: 2px solid #572e00;
-  text-transform: uppercase;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .tabla-epp thead th {

@@ -1,25 +1,3 @@
-.btn-volver {
-  background-color: #d3401b;
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.875rem;
-  padding: 0.35rem 0.75rem;
-  border: none;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  line-height: 1.2;
-  max-width: fit-content;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.icono-volver {
-  width: 18px;
-  height: 18px;
-}
-
 input[type="date"].form-control {
   border: 2px solid #b14910;
   box-shadow: none;
@@ -158,4 +136,38 @@ table.table thead th {
   font-size: 1.2rem;   /* más grande que el texto normal */
   font-weight: bold;   /* mantiene el énfasis */
   color: #ececec;
+}
+
+.table {
+  border: 2px solid #b14910 !important;   /* color principal */
+  border-radius: 6px;                     /* esquinas suaves */
+  box-shadow: 0 0 0 2px #b14910 inset;    /* simula un contorno sin sobresalir */
+}
+
+/* Reforzar líneas internas */
+.table th,
+.table td {
+  border: 1px solid #b14910 !important;
+}
+
+.btn-volver {
+  background-color: #b14910;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: rgb(146, 43, 17);
+  transform: translateX(-2px);
+  color: #ffff;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
 }
