@@ -54,7 +54,7 @@ function safeStartRecognitionGlobal() {
 
     if (recognitionRunning) {
       try {
-        recognitionGlobal.stop(); // fuerza reinicio si quedó colgado
+        recognitionGlobal.stop();
         recognitionRunning = false;
         console.log('safeStartRecognitionGlobal: reinicio forzado por estado inconsistente');
       } catch (e) {
@@ -91,7 +91,6 @@ function safeStartRecognitionGlobal() {
     console.warn('safeStartRecognitionGlobal: excepción', e);
   }
 }
-
 
 /*
 function safeStopRecognitionGlobal() {
@@ -450,9 +449,9 @@ function cerrarModalKiosco(callback) {
   const modalEl = document.getElementById('modal-mensaje-kiosco');
   if (!modalEl) return;
 
-  // Ocultar modal visualmente
-  modalEl.classList.remove('show');
-  modalEl.style.display = 'none';
+  // ✅ Evitar ejecuciones múltiples
+  if (window._cerrandoModalKiosco) return;
+  window._cerrandoModalKiosco = true;
 
   // Resetear flag global
   window.modalKioscoActivo = false;
@@ -472,53 +471,101 @@ function cerrarModalKiosco(callback) {
   modalEl._recogInstance = null;
   modalEl._lastTranscript = null;
 
-  // Reactivar reconocimiento global
-  try {
-    recognitionGlobalPaused = false;
-    safeStopRecognitionGlobal(); // por si quedó colgado
-    safeStartRecognitionGlobal();
-    console.log('🎤 Reconocimiento global reactivado tras cerrar modal kiosco');
-  } catch (e) {
-    console.warn('⚠️ No se pudo reiniciar reconocimiento global:', e);
-  }
+  // ✅ Usar el evento 'hidden.bs.modal' en lugar de setTimeout
+  const onHidden = () => {
+    modalEl.removeEventListener('hidden.bs.modal', onHidden);
+    
+    // Limpieza exhaustiva del backdrop
+    document.querySelectorAll('.modal-backdrop').forEach(el => {
+      el.classList.remove('show', 'fade');
+      el.remove();
+    });
+    
+    const backdropManual = document.getElementById('backdrop-manual-kiosco');
+    if (backdropManual) {
+      backdropManual.style.display = 'none';
+      backdropManual.remove();
+    }
 
-  // Reactivar escáner QR según el step activo
-  try {
+    // Restaurar scroll del body
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+
+    // Reactivar reconocimiento global
+    try {
+      recognitionGlobalPaused = false;
+      
+      if (recognitionRunning) {
+        try {
+          recognitionGlobal?.abort();
+          recognitionRunning = false;
+        } catch (e) {}
+      }
+
+      // ✅ Usar requestAnimationFrame en lugar de setTimeout
+      requestAnimationFrame(() => {
+        if (!recognitionRunning && !recognitionGlobalPaused) {
+          safeStartRecognitionGlobal();
+          console.log('🎤 Reconocimiento global reactivado tras cerrar modal kiosco');
+        }
+      });
+    } catch (e) {
+      console.warn('⚠️ No se pudo reiniciar reconocimiento global:', e);
+    }
+
+    // Reactivar escáner QR según el step activo
     const stepActivo = document.querySelector('.step.active')?.id || getStepActivo();
     if (stepActivo === 'step12') {
       console.log('📷 Reactivando escaneo QR login tras cerrar modal');
-      activarEscaneoQRLogin();
+      requestAnimationFrame(() => activarEscaneoQRLogin());
     } else if (stepActivo === 'step13') {
       console.log('📷 Reactivando escaneo QR en step13 tras cierre de modal');
-      setTimeout(() => activarEscaneoQRstep13ConEspera(), 300);
+      requestAnimationFrame(() => activarEscaneoQRstep13ConEspera());
+    }
+
+    // Ejecutar callback
+    const cb = callback || window._callbackPostModalKiosco;
+    if (typeof cb === 'function') {
+      try {
+        cb();
+      } catch (e) {
+        console.warn('⚠️ Error en callback post-modal:', e);
+      }
+      window._callbackPostModalKiosco = null;
+    }
+
+    // Resetear flag
+    window._cerrandoModalKiosco = false;
+  };
+
+  // ✅ Registrar el listener ANTES de cerrar
+  modalEl.addEventListener('hidden.bs.modal', onHidden, { once: true });
+
+  // Cerrar el modal usando Bootstrap
+  try {
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance) {
+      modalInstance.hide();
+    } else {
+      // Fallback: cerrar manualmente
+      modalEl.classList.remove('show');
+      modalEl.style.display = 'none';
+      modalEl.setAttribute('aria-hidden', 'true');
+      
+      // ✅ Disparar el evento manualmente si Bootstrap no está disponible
+      const event = new Event('hidden.bs.modal');
+      modalEl.dispatchEvent(event);
     }
   } catch (e) {
-    console.warn('⚠️ No se pudo reactivar escaneo QR tras cerrar modal:', e);
-  }
-
-  // Ocultar backdrop manual si quedó visible
-  const backdropManual = document.getElementById('backdrop-manual-kiosco');
-  if (backdropManual) backdropManual.style.display = 'none';
-
-  const backdropModal = document.querySelector('.modal-backdrop');
-  if (backdropModal) {
-    backdropModal.classList.remove('show');
-    backdropModal.remove();
-  }
-
-  // ✅ Ejecutar callback si se pasó o si hay una global pendiente
-  const cb = callback || window._callbackPostModalKiosco;
-  if (typeof cb === 'function') {
-    try {
-      cb();
-    } catch (e) {
-      console.warn('⚠️ Error en callback post-modal:', e);
-    }
-    window._callbackPostModalKiosco = null;
+    console.warn('⚠️ Error al cerrar modal:', e);
+    // Fallback manual
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    const event = new Event('hidden.bs.modal');
+    modalEl.dispatchEvent(event);
   }
 }
-
-
 
 function quitarEmojis(texto) {
   return texto.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|[\uD83C-\uDBFF\uDC00-\uDFFF])+/g, '');
@@ -3523,10 +3570,17 @@ function iniciarReconocimientoGlobal() {
     procesarComandoVoz(limpio);
   };
 
- recognitionGlobal.onend = () => {
+recognitionGlobal.onend = () => {
   recognitionRunning = false;
   console.log("ℹ️ recognitionGlobal onend");
-  // Si est\u00E1 pausado, no reiniciamos. Si no está pausado, delegamos a safeStartRecognitionGlobal (que comprueba estados)
+  
+  // ✅ No reiniciar si estamos cerrando un modal
+  if (window._cerrandoModalKiosco) {
+    console.log("⏸️ No reiniciar: modal cerrándose");
+    return;
+  }
+  
+  // Si está pausado, no reiniciamos
   if (!recognitionGlobalPaused) {
     try {
       safeStartRecognitionGlobal();
@@ -4720,39 +4774,48 @@ function leerAsistenteTexto(opcion) {
     palabraIndex++;
   };
 
-  utterance.onend = () => {
-    window.ttsEnCurso = false;
+utterance.onend = () => {
+  window.ttsEnCurso = false;
 
-    if (mic) mic.classList.remove('mic-muted');
-    wrapper.classList.remove('visible');
-    setTimeout(() => {
-      if (subtituloEl) subtituloEl.innerHTML = '';
-    }, 300);
+  if (mic) mic.classList.remove('mic-muted');
+  wrapper.classList.remove('visible');
+  
+  // ✅ Esperar a que termine la animación CSS
+  wrapper.addEventListener('transitionend', () => {
+    if (subtituloEl) subtituloEl.innerHTML = '';
+  }, { once: true });
 
-    // ✅ Quitar hover visual del botón
-    if (boton) boton.classList.remove('btn-hover-simulada');
+  if (boton) boton.classList.remove('btn-hover-simulada');
 
-    const sigueVisible = !!modalEl && modalEl.classList.contains('show');
-    if (sigueVisible && !window.cierreManualAsistente) {
-      setTimeout(() => {
-        if (!window.ttsEnCurso) {
-          try {
-            safeStartRecognitionGlobal();
-          } catch (e) {
-            console.warn('safeStartRecognitionGlobal falló tras TTS:', e);
-          }
+  const sigueVisible = !!modalEl && modalEl.classList.contains('show');
+  if (sigueVisible && !window.cierreManualAsistente) {
+    // ✅ Usar requestAnimationFrame
+    requestAnimationFrame(() => {
+      if (!window.ttsEnCurso) {
+        try {
+          safeStartRecognitionGlobal();
+        } catch (e) {
+          console.warn('safeStartRecognitionGlobal falló tras TTS:', e);
         }
-      }, 300);
-    } else {
-      console.log('🎤 Reconocimiento no reactivado: modal cerrado durante TTS');
-    }
+      }
+    });
+  } else {
+    console.log('🎤 Reconocimiento no reactivado: modal cerrado durante TTS');
+  }
 
-    setTimeout(() => {
-      window.bloqueoEcoTTS = false;
-    }, 2000);
-
-    window.cierreManualAsistente = false;
+  // ✅ Usar requestIdleCallback si está disponible
+  const resetBloqueo = () => {
+    window.bloqueoEcoTTS = false;
   };
+  
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(resetBloqueo, { timeout: 2000 });
+  } else {
+    setTimeout(resetBloqueo, 2000);
+  }
+
+  window.cierreManualAsistente = false;
+};
 
   try {
     window.speechSynthesis.cancel();
