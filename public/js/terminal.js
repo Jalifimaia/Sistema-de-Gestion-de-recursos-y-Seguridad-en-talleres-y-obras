@@ -4560,7 +4560,7 @@ function cerrarModalAsistente() {
   const modalEl = document.getElementById('modalAsistente');
   if (!modalEl) return;
 
-  // ✅ Evitar bucle si ya se está cerrando
+  // ✅ Evitar bucle - verificar antes de proceder
   if (window.modalAsistenteCerrando) return;
   window.modalAsistenteCerrando = true;
 
@@ -4568,13 +4568,7 @@ function cerrarModalAsistente() {
   window.usandoAsistente = false;
   window.cierreManualAsistente = true;
 
-  try {
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance && modalEl.classList.contains('show')) {
-      modalInstance.hide(); // solo si no fue disparado por Bootstrap
-    }
-  } catch (e) {}
-
+  // ✅ Detener TTS
   try {
     window.speechSynthesis.cancel();
   } catch (e) {}
@@ -4585,6 +4579,7 @@ function cerrarModalAsistente() {
   window.timestampUltimoTTS = 0;
   window.bloqueoEcoTTS = false;
 
+  // ✅ Ocultar subtítulos
   const wrapper = document.querySelector('.subtitulo-wrapper');
   const subtituloEl = document.getElementById('asistenteSubtitulo');
   if (wrapper && subtituloEl) {
@@ -4596,29 +4591,55 @@ function cerrarModalAsistente() {
 
   document.getElementById('microfono_flotante')?.classList.remove('mic-muted');
 
-  // ✅ Quitar hover visual de cualquier botón activo del asistente
+  // ✅ Quitar hover visual
   document.querySelectorAll('#modalAsistente .btn-hover-simulada').forEach(btn => {
     btn.classList.remove('btn-hover-simulada');
   });
 
-  // ✅ Reactivar reconocimiento si el TTS fue interrumpido
+  // ✅ Solo cerrar el modal si no está ya cerrándose
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+  if (modalInstance) {
+    // NO verificar classList.contains('show') - dejar que Bootstrap maneje su estado
+    modalInstance.hide();
+  }
+
+  // ✅ Reactivar reconocimiento después de animación completa
   setTimeout(() => {
     if (!window.ttsEnCurso) {
       try {
         safeStartRecognitionGlobal();
-        console.log('🎤 Reconocimiento reactivado tras cierre manual del asistente');
+        console.log('🎤 Reconocimiento reactivado tras cierre del asistente');
       } catch (e) {
-        console.warn('safeStartRecognitionGlobal falló tras cierre manual:', e);
+        console.warn('safeStartRecognitionGlobal falló:', e);
       }
     }
   }, 300);
-
-  setTimeout(() => {
-    document.querySelectorAll('.modal.show').forEach(el => el.classList.remove('show'));
-    window.modalAsistenteCerrando = false; // ✅ Reset
-  }, 100);
 }
 
+// ✅ Listener para cerrar asistente cuando se abra otro modal
+document.addEventListener('show.bs.modal', (event) => {
+  const modalAsistente = document.getElementById('modalAsistente');
+  if (!modalAsistente || event.target.id === 'modalAsistente') return;
+  
+  const modalInstance = bootstrap.Modal.getInstance(modalAsistente);
+  if (modalInstance && modalAsistente.classList.contains('show')) {
+    console.log('🧠 Otro modal abierto, cerrando asistente');
+    cerrarModalAsistente();
+  }
+});
+
+// ✅ Resetear flag cuando el modal termine de cerrarse completamente
+(function attachModalHideHandler() {
+  const modalEl = document.getElementById('modalAsistente');
+  if (!modalEl) return;
+
+  // Usar 'hidden.bs.modal' en lugar de 'hide.bs.modal'
+  modalEl.addEventListener('hidden.bs.modal', () => {
+    // Solo limpiar flags, NO llamar a cerrarModalAsistente() aquí
+    window.modalAsistenteCerrando = false;
+    console.log('✅ Modal asistente completamente cerrado');
+  });
+})();
 
 
 /* ==========================================
@@ -5580,30 +5601,6 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ==========================================
    Listeners y cleanup seguros (copiá tal cual)
    ========================================== */
-
-// Listener: si se abre cualquier modal distinto al asistente, cerramos asistente para evitar conflictos
-document.addEventListener('show.bs.modal', (event) => {
-  const modalAsistente = document.getElementById('modalAsistente');
-  if (!modalAsistente) return;
-  // Comprobación en tiempo real: si otro modal se abre y el asistente está visible, cerrarlo
-  const asistVisible = modalAsistente.classList.contains('show');
-  if (event.target && event.target.id !== 'modalAsistente' && asistVisible) {
-    console.log('🧠 Otro modal abierto, cerrando asistente para evitar conflicto');
-    cerrarModalAsistente();
-  }
-});
-
-// Listener seguro para hide del modal (solo si existe)
-// Listener seguro para hide del modal (solo si existe)
-(function attachModalHideHandler() {
-  const modalEl = document.getElementById('modalAsistente');
-  if (!modalEl) return;
-
-  modalEl.addEventListener('hide.bs.modal', () => {
-    cerrarModalAsistente();
-  });
-})();
-
 
 
 // Cleanup adicional en beforeunload: cancelar TTS y resetear flags críticos
