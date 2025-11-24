@@ -263,3 +263,39 @@ th.recurso-costo {
 
 .buscador-destacado { flex: 2; }
 .filtro-destacado { flex: 1; }
+
+.table-naranja {
+  border: 2px solid #b14910 !important;   /* borde principal */
+  border-radius: 6px;                     /* esquinas suaves */
+  box-shadow: 0 0 0 2px #b14910 inset;    /* contorno interno limpio */
+}
+
+/* Bordes internos de la tabla */
+.table-naranja th,
+.table-naranja td {
+  border: 1px solid #b14910 !important;
+}
+
+/* 🔧 Compactar tabla */
+.table-naranja th,
+.table-naranja td {
+  padding: 0.4rem 0.6rem !important; /* reduce el alto de cada fila */
+  vertical-align: middle;             /* centra verticalmente el texto */
+}
+
+/* 🔧 Dar más ancho a la columna "Fecha del incidente" */
+.table-naranja th:nth-child(5),
+.table-naranja td:nth-child(5) {
+  min-width: 160px; /* aumenta el ancho mínimo */
+  white-space: nowrap; /* evita salto de línea */
+}
+
+/* 🔧 Ajuste general para mantener la tabla prolija */
+.table-naranja {
+  font-size: 0.95rem; /* un poco más compacta visualmente */
+}
+
+.table-naranja thead th {
+  padding-top: 0.8rem !important;
+  padding-bottom: 0.8rem !important;
+}

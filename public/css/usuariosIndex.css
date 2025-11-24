@@ -527,3 +527,15 @@ td.acciones .d-flex {
 }
 
 
+
+.btn-marcar-baja {
+  background-color: #be3219;
+  color: white;
+  border: none;
+}
+
+.btn-marcar-baja:hover {
+  background-color: #ad2c15;
+   color: #222222;
+
+}

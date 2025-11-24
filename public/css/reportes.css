@@ -104,3 +104,16 @@
   background-color: #9b482b;
   color: #fff;
 }
+
+/* === Botón de cierre (X) === */
+#closeSidebar {
+  font-size: 1rem;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+#closeSidebar:hover {
+  opacity: 0.9;
+}

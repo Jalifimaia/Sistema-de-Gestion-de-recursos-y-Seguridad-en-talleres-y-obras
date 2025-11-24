@@ -384,7 +384,7 @@ header {
 }
 
 .tabla-epp thead th {
-  background-color: #b14910 !important;
+  background-color: #cc5f37 !important;
   color: #fff !important;
 }
 
@@ -499,5 +499,35 @@ header.row {
 }
 
 
+.table td {
+  color: #212529;
+}
 
+
+/* Hover suave */
+#tablaChecklistDiario tbody tr:hover {
+  background-color: #ffd1be !important;
+}
+
+/* Hover suave */
+#tablaChecklistDiario thead {
+  background-color: #ffd1be !important;
+}
+
+#tablaChecklistDiario th {
+  font-weight: 700 !important;
+  font-size: 1rem;
+}
+
+#tablaChecklistDiario {
+  border: 2px solid #b14910 !important;   /* borde principal */
+  border-radius: 6px;                     /* esquinas suaves */
+  box-shadow: 0 0 0 2px #b14910 inset;    /* contorno interno limpio */
+}
+
+/* Bordes internos de la tabla */
+#tablaChecklistDiario th,
+#tablaChecklistDiario td {
+  border: 1px solid #b14910 !important;
+}
 

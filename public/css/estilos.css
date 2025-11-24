@@ -265,7 +265,7 @@
 
 /* Hover suave */
 .table-naranja tbody tr:hover {
-  background-color: #ffd1be;
+  background-color: #ffd1be !important;
 }
 
 h1, .titulo-principal {

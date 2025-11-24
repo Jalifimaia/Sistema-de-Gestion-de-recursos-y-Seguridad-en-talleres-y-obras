@@ -38,37 +38,35 @@
     @endphp
 
     <!-- Card: Trabajador -->
-<div class="card mb-3 card-outline shadow-sm border">
-  <div class="card-header fw-bold">
+    <div class="card mb-3 card-outline shadow-sm border">
+      <div class="card-header fw-bold">
     Filtros de trabajador
-  </div>
-  <div class="card-body">
+      </div>
+      <div class="card-body">
     <label for="trabajador_id" class="form-label">Trabajador</label>
 
-    <select name="trabajador_id" id="trabajador_id"
-            class="form-select @error('trabajador_id') is-invalid @enderror"
-            {{ isset($preseleccionado) ? 'disabled' : '' }} required>
+        <select name="trabajador_id" id="trabajador_id"
+                class="form-select @error('trabajador_id') is-invalid @enderror"
+                {{ isset($preseleccionado) ? 'disabled' : '' }} required>
       <option value="">Seleccione al trabajador</option>
-      @foreach($trabajadores as $t)
-        <option value="{{ $t->id }}"
-          {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
-          {{ $t->name }}
-        </option>
-      @endforeach
-    </select>
-    @error('trabajador_id')
-      <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
+          @foreach($trabajadores as $t)
+            <option value="{{ $t->id }}"
+              {{ old('trabajador_id', $preseleccionado) == $t->id ? 'selected' : '' }}>
+              {{ $t->name }}
+            </option>
+          @endforeach
+        </select>
+        @error('trabajador_id')
+          <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
 
     <!-- Trabajo en altura -->
-    <div class="form-check mt-3">
+   <!-- <div class="form-check mt-3">
       <input type="hidden" name="es_en_altura" value="0">
       <input type="checkbox" name="es_en_altura" id="es_en_altura"
-             class="form-check-input" value="1" {{ old('es_en_altura') ? 'checked' : '' }}>
+             class="form-check-input" value="1" { old('es_en_altura') ? 'checked' : '' }}>
       <label for="es_en_altura" class="form-check-label no-asterisk">¿Trabaja en altura hoy?</label>
-    </div>
-  </div>
-</div>
+    </div>-->
 
         <!-- Tabla EPP asignado -->
         <div id="epp-asignado" class="table-responsive d-none mt-3">
@@ -426,6 +424,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
-
-
-

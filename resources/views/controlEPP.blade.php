@@ -84,7 +84,7 @@
     <!-- Tabla -->
     <div class="table-responsive">
     <table id="tablaChecklistDiario" class="table table-bordered table-striped text-center tabla-epp">
-      <thead class="table-header-orange">
+      <thead>
         <tr>
           <th>Trabajador</th>
           <th>Lentes</th>
@@ -227,6 +227,31 @@
 
 @push('styles')
   <link href="{{ asset('css/controlepp.css') }}" rel="stylesheet">
+<style>
+  /* Cabecera con color personalizado */
+  #tablaChecklistDiario thead tr th {
+    background-color: #d06842 !important;
+    color: white; /* Buen contraste */
+  }
+
+  /* Hover personalizado */
+  #tablaChecklistDiario tbody tr:hover td {
+    background-color: #ffd1be !important;
+  }
+
+  /* Efecto striped: filas impares con fondo suave */
+  #tablaChecklistDiario tbody tr:nth-child(even) td {
+    background-color: #ffeddf;
+  }
+
+  /* Opcional: filas pares con fondo blanco explícito */
+  #tablaChecklistDiario tbody tr:nth-child(odd) td {
+    background-color: white;
+  }
+</style>
+
+
+
 @endpush
 
 @push('scripts')
