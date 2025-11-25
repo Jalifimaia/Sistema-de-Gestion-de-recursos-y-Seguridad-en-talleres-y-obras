@@ -14,7 +14,7 @@
       </a>
 
       <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
-        Editar Usuario
+        Editar usuario
       </h4>
     </div>
   </div>
@@ -122,13 +122,6 @@
         </button>
       </div>
     </div>
-
-    <!-- Botón largo centrado -->
-    <!--<div class="d-flex justify-content-end mt-4">
-      <button type="button" class="btn btn-guardar px-4" id="btnAbrirModalGuardar">
-        Guardar cambios
-      </button>
-    </div>-->
   </form>
 
 <!-- Acciones de estado + Guardar -->
@@ -181,13 +174,9 @@
       </button>
     </form>
   </div>
-
 </div>
 
-
-
 </div>
-
 
 <!-- Modal de confirmación de estado -->
 <div class="modal fade" id="modalConfirmarEstado" tabindex="-1" aria-labelledby="modalConfirmarEstadoLabel" aria-hidden="true">
@@ -270,19 +259,20 @@
   </div>
 </div>
 
-<!-- Modal de éxito -->
+<!-- ✅ Modal de éxito con opciones -->
 <div class="modal fade" id="modalExitoUsuario" tabindex="-1" aria-labelledby="modalExitoUsuarioLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
-        <h5 class="modal-title" id="modalExitoUsuarioLabel">Éxito</h5>
+        <h5 class="modal-title" id="modalExitoUsuarioLabel">Usuario actualizado</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        Usuario editado correctamente.
+        El usuario fue actualizado correctamente.
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal">Seguir editando</button>
+        <a href="{{ route('usuarios.index') }}" class="btn btn-success">Volver a usuarios</a>
       </div>
     </div>
   </div>
@@ -539,26 +529,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const botonesEstado = document.querySelectorAll('.btn-confirmar-estado');
   if (botonesEstado.length) {
-botonesEstado.forEach(boton => {
-  boton.addEventListener('click', function () {
-    formEstadoSeleccionado = this.closest('form');
+    botonesEstado.forEach(boton => {
+      boton.addEventListener('click', function () {
+        formEstadoSeleccionado = this.closest('form');
 
-    const nombre = getAttrSafe(formEstadoSeleccionado, 'data-nombre', 'Usuario');
-    const rol = getAttrSafe(formEstadoSeleccionado, 'data-rol', '');
-    const accion = getAttrSafe(formEstadoSeleccionado, 'data-accion', 'cambiar');
-    const estadoActual = getAttrSafe(formEstadoSeleccionado, 'data-estado', '');
+        const nombre = getAttrSafe(formEstadoSeleccionado, 'data-nombre', 'Usuario');
+        const rol = getAttrSafe(formEstadoSeleccionado, 'data-rol', '');
+        const accion = getAttrSafe(formEstadoSeleccionado, 'data-accion', 'cambiar');
 
-    // 👉 Siempre mensaje genérico, sin validación especial
-    let mensaje = `¿Desea dar de ${accion} a ${nombre}${rol ? ' (' + rol + ')' : ''}?`;
+        let mensaje = `¿Desea dar de ${accion} a ${nombre}${rol ? ' (' + rol + ')' : ''}?`;
 
-    const texto = document.getElementById('textoConfirmacionEstado');
-    if (texto) texto.textContent = mensaje;
+        const texto = document.getElementById('textoConfirmacionEstado');
+        if (texto) texto.textContent = mensaje;
 
-    const modalEl = document.getElementById('modalConfirmarEstado');
-    if (modalEl) new bootstrap.Modal(modalEl).show();
-  });
-});
-
+        const modalEl = document.getElementById('modalConfirmarEstado');
+        if (modalEl) new bootstrap.Modal(modalEl).show();
+      });
+    });
   }
 
   // Confirmación del modal de estado (submit)
@@ -582,17 +569,15 @@ botonesEstado.forEach(boton => {
     });
   }
 
-  // ✅ Modal automático para mensajes del sistema
- /* @if(session('success'))
+  // ✅ Modal automático de éxito
+  @if(session('success'))
     (function () {
       const modalEl = document.getElementById('modalExitoUsuario');
       if (!modalEl) return;
       const modal = new bootstrap.Modal(modalEl);
       modal.show();
-      setTimeout(() => modal.hide(), 4000);
     })();
   @endif
-  */
 
   @if($errors->any())
     // Traducir mensajes de error al español
@@ -661,21 +646,19 @@ botonesEstado.forEach(boton => {
   @endif
 });
 </script>
-
 @endpush
 
 @push('styles')
 <link href="{{ asset('css/editarUsuario.css') }}" rel="stylesheet">
 
-
 <style>
   label::after {
-  content: " *";
-  color: red;
-}
+    content: " *";
+    color: red;
+  }
 
-label.no-asterisk::after {
-  content: ""; /* anula el asterisco */
-}
+  label.no-asterisk::after {
+    content: "";
+  }
 </style>
 @endpush
