@@ -42,7 +42,7 @@
             <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
               data-bs-toggle="modal" data-bs-target="#modalUsuariosActivos">
               <img src="{{ asset('images/workers.svg') }}" alt="Trabajadores Activos" class="icono-card">
-              <h2 class="fw-bold mb-1">{{ $usuariosActivos }}</h2>
+              <h2 class="fw-bold mb-1 nro">{{ $usuariosActivos }}</h2>
               <p class="mb-0 titulo-card">Trabajadores Activos</p>
               <small class="text-muted subtitulo-card">Registrados en el sistema</small>
             </button>
@@ -57,7 +57,7 @@
             <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
               data-bs-toggle="modal" data-bs-target="#modalHerramientasUso">
               <img src="{{ asset('images/herra.svg') }}" alt="Herramientas en Uso" class="icono-card">
-              <h2 class="fw-bold mb-1">{{ $herramientasEnUso }}</h2>
+              <h2 class="fw-bold mb-1 nro">{{ $herramientasEnUso }}</h2>
               <p class="mb-0 titulo-card">Herramientas en Uso</p>
               <small class="text-muted subtitulo-card">de {{ $herramientasTotales }} disponibles</small>
             </button>
@@ -71,7 +71,7 @@
           <div class="card-body">
             <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" data-bs-toggle="modal" data-bs-target="#modalAlertas">
               <img src="{{ asset('images/alertas.svg') }}" alt="Alertas Activas" class="icono-card">
-              <h2 class="fw-bold mb-1">{{ $alertasActivas }}</h2>
+              <h2 class="fw-bold mb-1 nro">{{ $alertasActivas }}</h2>
               <p class="mb-0 titulo-card">Alertas Activas</p>
               <small class="text-muted subtitulo-card">Requieren atención</small>
             </button>
