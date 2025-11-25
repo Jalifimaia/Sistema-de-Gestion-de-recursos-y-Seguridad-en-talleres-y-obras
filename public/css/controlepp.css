@@ -531,3 +531,26 @@ header.row {
   border: 1px solid #b14910 !important;
 }
 
+.buscador-con-icono {
+  background: url('/images/searchhh.svg') no-repeat 10px center !important; /* ícono a 10px de la izquierda, centrado vertical */
+  background-size: 16px 16px !important;  /* tamaño del ícono */
+  padding-left: 35px !important;          /* corre el texto para que no lo tape */
+}
+
+.table-naranja {
+  border: 2px solid #b14910 !important;    /* borde naranja */
+  border-radius: 4px !important;           /* opcional */
+}
+
+.table-naranja td,
+.table-naranja th {
+  border: 1px solid #b14910 !important;  
+}
+
+.header-rec {
+  background-color: #d06842 !important;
+  color: #f5f5f5 !important;
+}
+
+
+

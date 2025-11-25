@@ -92,7 +92,6 @@
 
 </div>
 
-
 <!-- Filtro y buscador -->
 <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
   <!-- Buscar -->
@@ -113,7 +112,7 @@
 <!-- Tabla -->
 <div class="card-body">
   <div class="table-responsive" style="overflow-x: auto; min-width: 100%;">
-    <table class="table-naranja align-middle mb-0">
+    <table class="table-naranja align-middle mb-0 text-center">
       <thead class="table-light">
         <tr>
           <th>Nombre</th>
@@ -255,17 +254,15 @@
 <div class="modal fade" id="modalSeries" tabindex="-1" aria-labelledby="modalSeriesLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header header-rec">
         <h5 class="modal-title" id="modalSeriesLabel">Series del recurso</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3 d-flex gap-2 align-items-center flex-wrap">
-          <label for="buscadorSerie" class="form-label mb-0">Buscar serie:</label>
-          <input type="text" id="buscadorSerie" class="form-control w-auto" placeholder="Ej: T123">
-          <label for="filtroEstado" class="form-label mb-0 ms-2">Filtrar por estado:</label>
+          <input type="text" id="buscadorSerie" class="form-control w-auto" placeholder="Buscar serie... (Ej: T123)">
           <select id="filtroEstado" class="form-select w-auto">
-            <option value="todos">Todos</option>
+            <option value="todos">Filtrar por estado</option>
             <option value="Disponible">Disponible</option>
             <option value="Baja">Baja</option>
             <option value="Prestado">Prestado</option>

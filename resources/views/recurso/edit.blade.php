@@ -11,7 +11,6 @@
       </a>
 
       <div class="d-flex align-items-center">
-        <img src="{{ asset('images/lapiz.svg') }}" alt="Editar" style="width: 36px; height: 36px;" class="me-2">
         <h4 class="fw-bold mb-0">Editar recurso</h4>
       </div>
     </div>
@@ -88,10 +87,12 @@
           @enderror
         </div>
 
-        <!-- Guardar cambios -->
-        <div class="col-12">
-            <button type="submit" class="btn btn-guardar w-100">Guardar cambios</button>
+          <div class="d-flex justify-content-end mt-2">
+            <button type="submit" class="btn btn-guardar">Guardar cambios</button>
         </div>
+
+      </div>
+        
     </form>
 
     <div class="d-none d-flex justify-content-start gap-3 flex-wrap botones-inferiores">

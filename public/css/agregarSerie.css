@@ -1,24 +1,3 @@
-.btn-volver {
-  background-color: #d3401b;
-  border: 1px solid #ccc;
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-  color: #fff;
-  border-radius: 6px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-volver:hover {
-  background-color: #e0e0e0;
-  transform: translateX(-2px);
-  color: #000;
-}
-
-.icono-volver {
-  width: 20px;
-  height: 20px;
-}
-
 label.form-label {
   font-weight: 600;
 }
@@ -143,26 +122,62 @@ table.table thead th {
   background-color: #1565c0;
 }
 
-.btn-guardar {
-  background-color: #2e7d32;
-  color: #fff;
-  font-weight: 500;
-  border: none;
-  padding: 0.45rem 0.9rem;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+.btn-guardar:enabled {
+  font-size: 1.1rem;         /* tamaño del texto */
+  padding: 0.7rem 1rem;  /* tamaño más compacto */
+  border-radius: 8px;
+  background-color: #b14910 !important;
+  color: #ffff;
 }
 
 .btn-guardar:hover:enabled {
-  background-color: #1b5e20;
+  font-size: 1.1rem;         /* tamaño del texto */
+  padding: 0.7rem 1rem;  /* tamaño más compacto */
+  border-radius: 8px;
+  background-color: #b14910 !important;
+  color: #ffff;
 }
 
 /* Estilo cuando está deshabilitado */
 .btn-guardar:disabled {
-  background-color: #a5d6a7;
-  color: #fff;
-  cursor: not-allowed;
-  opacity: 1;
+  background-color: #9b3f0e;
+  color: #ffff;
+}
+
+.btn-combinacion {
+  font-size: 1.1rem;         /* tamaño del texto */
+  padding: 0.7rem 1rem;  /* tamaño más compacto */
+  border-radius: 8px;
+  background-color: #1685cf;
+  color: #ffff;
+}
+
+.btn-combinacion:hover {
+  background-color: #095c94;
+  color: #ffff;
+}
+
+
+.btn-volver {
+  background-color: #d3401b;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #ffff;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #ac3416;
+  transform: translateX(-2px);
+  color: #ffff;
+}
+
+.icono-volver {
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
 }
 
 

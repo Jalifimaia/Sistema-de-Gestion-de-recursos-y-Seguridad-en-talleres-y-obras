@@ -78,7 +78,7 @@
 
     <!-- Buscador -->
     <div class="mb-3 d-flex gap-2 flex-wrap">
-      <input type="text" id="buscadorTrabajador" class="form-control" style="min-width: 240px;" placeholder="Buscar por nombre del trabajador...">
+      <input type="text" id="buscadorTrabajador" class="form-control buscador-con-icono" style="min-width: 240px;" placeholder="Buscar por nombre del trabajador...">
     </div>
 
     <!-- Tabla -->
@@ -166,7 +166,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered"> 
     <div class="modal-content">
       
-      <div class="modal-header">
+      <div class="modal-header header-rec">
         <h5 class="modal-title" id="modalChecklistLabel">Checklist sin registrar</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
@@ -174,7 +174,7 @@
       <div class="modal-body">
         @if ($sinChecklist->count())
           <div class="table-responsive">
-            <table class="table-naranja align-middle mb-0">
+            <table class="table-naranja align-middle mb-0 text-center">
               <thead class="table-light">
                 <tr>
                   <th>Nombre</th>
@@ -190,9 +190,14 @@
                     <td class="text-center">
                       <div class="d-flex justify-content-center gap-2">
                         <a href="{{ route('usuarios.show', ['usuario' => $usuario->id, 'from' => 'sinChecklist']) }}" 
-                          class="btn btn-primary btn-sm">Ver perfil</a>
+                          class="btn btn-primary btn-sm">
+                          <i class="bi bi-eye"></i>
+                        </a>
                         <a href="{{ route('checklist.epp', ['trabajador_id' => $usuario->id, 'from' => 'sinChecklist']) }}" 
-                          class="btn btn-success btn-sm">Registrar</a>
+                          class="btn btn-success btn-sm">
+                          <i class="bi bi-plus-circle"></i>
+                        </a>
+
                       </div>
                     </td>
                   </tr>

@@ -11,7 +11,6 @@
     </a>
 
     <div class="d-flex align-items-center">
-      <img src="{{ asset('images/herradd.svg') }}" alt="Herramienta" style="width: 40px; height: 40px;" class="me-2">
       <h4 class="fw-bold mb-0">
         Agregar series para: {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
       </h4>
@@ -137,8 +136,8 @@
       <!-- Mensaje de error de combinaciones -->
       <div id="error-combinaciones" class="alert alert-danger d-none mt-2" role="alert" ></div>
 
-      <div class="d-flex justify-content-start gap-3 mt-3 flex-wrap">
-        <button type="button" class="btn btn-combinacion" onclick="agregarFila()">+ Agregar combinación</button>
+      <div class="d-flex justify-content-end gap-3 mt-3 flex-wrap">
+        <button type="button" class="btn btn-combinacion" onclick="agregarFila()">Agregar combinación</button>
         <button type="submit" class="btn btn-guardar" id="btnGuardar">Guardar series</button>
       </div>
     </div>

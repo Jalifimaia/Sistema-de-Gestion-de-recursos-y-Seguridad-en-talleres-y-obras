@@ -1,4 +1,4 @@
-<table class="table table-striped table-hover table-bordered custom-table table-naranja">
+<table class="table table-striped table-hover table-bordered custom-table table-naranja text-center">
   <thead class="table-orange">
     <tr>
       <th>Fecha</th>

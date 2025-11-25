@@ -69,12 +69,14 @@ window.addEventListener('load', function () {
         // Serie
         const tdSerie = document.createElement('td');
         tdSerie.textContent = nroSerie;
+        tdSerie.classList.add('text-center');
 
         // Estado -> badge
         const tdEstado = document.createElement('td');
         const badge = document.createElement('span');
         badge.className = 'badge px-2 py-1 border rounded small fw-semibold';
         badge.textContent = estado;
+        tdEstado.classList.add('text-center');
         switch ((estado || '').toLowerCase()) {
           case 'disponible':
             badge.classList.add('bg-success');

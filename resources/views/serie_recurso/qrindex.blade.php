@@ -15,7 +15,6 @@
 
       <!-- Título con ícono -->
       <div class="d-flex align-items-center gap-2">
-        <img src="{{ asset('images/qrr.svg') }}" alt="QR" style="width: 28px; height: 28px;">
         <h3 class="mb-0 fw-bold">Series con código QR</h3>
       </div>
     </div>
@@ -62,7 +61,7 @@
                 </div>
 
                 <div class="mt-4 d-flex justify-content-center flex-wrap gap-2">
-                  <button class="btn btn-outline-dark btn-sm copiar-btn d-flex align-items-center"
+                  <button class="btn btn-outline-dark btn-sm copiar-btn d-flex align-items-center btn-accion-compact"
                           data-codigo="{{ $serie->codigo_qr }}">
                     <img src="{{ asset('images/copiar.svg') }}" alt="Copiar" class="me-2" style="width: 18px; height: 18px;">
                     Copiar código

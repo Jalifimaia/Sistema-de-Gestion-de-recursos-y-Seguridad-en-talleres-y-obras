@@ -306,3 +306,36 @@ th.recurso-costo {
   padding-left: 35px;         /* espacio para que el texto no se superponga */
   background-position: 13px 15px;   /* 10px desde la izquierda, 5px desde arriba */
 }
+
+.header-rec {
+  background-color: #d06842;
+  color: #f5f5f5
+}
+
+#buscadorSerie {
+  border: 2px solid #b14910;
+}
+
+#buscadorSerie:focus {
+  outline: none;
+  border-color: #b14910;
+  box-shadow: 0 0 6px #ff7f00;
+}
+
+#filtroEstado {
+  border: 2px solid #b14910;
+}
+
+#filtroEstado:focus {
+  outline: none;
+  border-color: #b14910;
+  box-shadow: 0 0 6px #ff7f00;
+}
+
+#buscadorSerie::placeholder {
+  color: #1b1b1b;   
+}
+
+.tr {
+  text-align: center;
+}

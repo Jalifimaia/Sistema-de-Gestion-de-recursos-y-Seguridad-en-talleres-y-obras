@@ -63,7 +63,7 @@
 
     @if($herramientas->count())
     <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped align-middle">
+        <table class="table table-bordered table-striped align-middle text-center">
             <thead>
                 <tr class="text-orange">
                     <th>Trabajador</th>

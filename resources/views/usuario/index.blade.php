@@ -122,7 +122,7 @@
     <div class="card-body">
 
       <div class="table-responsive">
-      <table class="table-naranja align-middle mb-0" id="tablaUsuarios">
+      <table class="table-naranja align-middle mb-0 text-center" id="tablaUsuarios">
         <thead class="table-light">
           <tr>
             <th>Nombre</th>

@@ -37,7 +37,7 @@
   display: flex;              /* convierte el botón en flex */
   justify-content: center;    /* centra horizontalmente */
   align-items: center; 
-  background-color: #cc5f37;
+  background-color: #f57c00;
   color: #fff;
   font-size: 1.1rem;
   padding: 4px 10px;

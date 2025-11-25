@@ -58,7 +58,7 @@
   @endif
 
       <div class="table-responsive">
-        <table class="table-naranja align-middle mb-0" id="tablaIncidentes">
+        <table class="table-naranja align-middle mb-0 text-center" id="tablaIncidentes">
           <thead>
             <tr>
               <th>Trabajador</th>
