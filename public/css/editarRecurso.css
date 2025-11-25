@@ -110,5 +110,11 @@ textarea.form-control:focus {
   flex-shrink: 0;
 }
 
+input.form-control,
+select.form-select {
+  border: 2px solid #b14910;
+  box-shadow: none;
+  height: 47px !important;
+}
 
 

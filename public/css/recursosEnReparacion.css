@@ -145,3 +145,7 @@ table.table thead th {
   width: 20px;
   flex-shrink: 0;
 }
+
+.header-m {
+  background-color: #b14910;
+}

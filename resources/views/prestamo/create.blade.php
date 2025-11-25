@@ -5,14 +5,15 @@
 @section('content')
 <div class="container py-4">
   <div class="card shadow-sm">
-    <div class="card-header bg-orange text-white text-center">
-      <h4 class="mb-0 fw-bold">Registrar préstamo</h4>
+    <div class="card-header bg-reg text-white text-center">
+      <h4 class="mb-0">Registrar préstamo</h4>
     </div>
     <div class="card-body bg-white">
 
       <form method="POST" action="{{ route('prestamos.store') }}">
         @csrf
 
+        <!-- Fila 1: Fechas -->
         <div class="row mb-3">
           <div class="col-md-6">
             <label class="form-label">Fecha de préstamo</label>
@@ -24,30 +25,9 @@
           </div>
         </div>
 
+        <!-- Fila 2: Categoría y Subcategoría -->
         <div class="row mb-3">
           <div class="col-md-6">
-            <label for="id_trabajador" class="form-label">Trabajador</label>
-            <div class="d-flex gap-2">
-              <div class="flex-grow-1">
-                <select id="id_trabajador" name="id_trabajador_select" class="form-select" required>
-                  <option value="" selected disabled>Seleccione al trabajador</option>
-                  @foreach($trabajadores as $t)
-                    <option value="{{ $t->id }}">{{ $t->name }}</option>
-                  @endforeach
-                </select>
-                <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
-              </div>
-
-              {{-- Hidden que realmente se enviará al servidor --}}
-              <input type="hidden" id="id_trabajador_hidden" name="id_trabajador" value="">
-            </div>
-          </div>
-        </div>
-
-        <input type="hidden" name="estado" value="2">
-
-        <div class="row mb-3">
-          <div class="col-md-4">
             <label for="categoria" class="form-label">Categoría</label>
             <select id="categoria" class="form-select" required>
               <option value="" selected disabled>Seleccione una categoría</option>
@@ -55,60 +35,78 @@
                 <option value="{{ $cat->id }}">{{ $cat->nombre_categoria }}</option>
               @endforeach
             </select>
-            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
           </div>
-
-          <div class="col-md-4">
+          <div class="col-md-6">
             <label for="subcategoria" class="form-label">Subcategoría</label>
             <select id="subcategoria" class="form-select" required>
               <option value="" selected disabled>Seleccione una subcategoría</option>
             </select>
-            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
           </div>
+        </div>
 
-          <div class="col-md-4">
+        <!-- Fila 3: Recurso y Serie -->
+        <div class="row mb-3">
+          <div class="col-md-6">
             <label for="recurso" class="form-label">Recurso</label>
             <select id="recurso" class="form-select" required>
               <option value="" selected disabled>Seleccione un recurso</option>
             </select>
-            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
           </div>
-        </div>
-
-        <div class="row mb-4">
-          <div class="col-md-10">
+          <div class="col-md-6">
             <label for="serie" class="form-label">Serie del recurso</label>
             <select id="serie" class="form-select" required>
               <option value="" selected disabled>Seleccione una serie</option>
             </select>
-            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
           </div>
-          <div class="col-md-2 text-end">
-            <button type="button" class="btn btn-success w-100 mt-4" id="agregar">Agregar</button>
+        </div>
+
+        <!-- Fila 4: Trabajador -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="id_trabajador" class="form-label">Trabajador</label>
+            <select id="id_trabajador" name="id_trabajador_select" class="form-select" required>
+              <option value="" selected disabled>Seleccione al trabajador</option>
+              @foreach($trabajadores as $t)
+                <option value="{{ $t->id }}">{{ $t->name }}</option>
+              @endforeach
+            </select>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
+            <input type="hidden" id="id_trabajador_hidden" name="id_trabajador" value="">
           </div>
         </div>
 
         <h5 style="display:none" class="mb-3">Recursos seleccionados</h5>
-
         <div style="display:none" id="contenedorSeries" class="row g-3">
           {{-- tarjetas dinámicas creadas por JS con hidden name="series[]" --}}
         </div>
 
-        <div class="row mt-4">
-          <div class="col-md-6">
-            <a href="{{ route('prestamos.index') }}" class="btn btn-volver w-100 d-inline-flex align-items-center justify-content-center">
+        <!-- Fila 5: Botones Volver, Agregar y Guardar -->
+        <div class="row mt-4 align-items-end">
+          <!-- Volver a la izquierda -->
+          <div class="col-md-6 d-flex justify-content-start">
+            <a href="{{ route('prestamos.index') }}" class="btn btn-volver d-inline-flex align-items-center">
               <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
               Volver
             </a>
           </div>
-          <div class="col-md-6">
-            <button style="display:none" type="submit" class="btn btn-guardar w-100">Guardar préstamo</button>
+
+          <!-- Agregar y Guardar al extremo derecho -->
+          <div class="col-md-6 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-ag" id="agregar">Guardar préstamo</button>
+            <button style="display:none" type="submit" class="btn btn-guardar">Guardar préstamo</button>
           </div>
         </div>
-
       </form>
+
     </div>
   </div>
+</div>
+
+
 
 {{-- Modal recurso agregado --}}
 @if(session('success'))

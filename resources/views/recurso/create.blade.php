@@ -11,7 +11,6 @@
         </a>
 
         <div class="d-flex align-items-center">
-          <img src="{{ asset('images/herradd.svg') }}" alt="Herramienta" style="width: 40px; height: 40px;" class="me-2">
           <h4 class="fw-bold mb-0">Agregar recurso</h4>
         </div>
       </div>
@@ -89,7 +88,7 @@
             @enderror
           </div>
 
-          <div class="col-12 mb-3">
+          <div class="col-12 mb-1">
             <label for="descripcion" class="form-label">Descripción <span class="required-asterisk">*</span></label>
             <textarea id="descripcion"
           name="descripcion"
@@ -105,8 +104,9 @@
             @enderror
           </div>
 
-          <div class="col-12">
-            <button type="submit" class="btn btn-guardar-recurso w-100">
+          
+          <div class="d-flex justify-content-end mt-1">
+            <button type="submit" class="btn btn-guardar-recurso px-4">
               Guardar recurso
             </button>
           </div>

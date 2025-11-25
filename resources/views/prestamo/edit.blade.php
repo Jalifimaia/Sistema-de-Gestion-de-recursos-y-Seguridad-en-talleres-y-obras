@@ -150,9 +150,7 @@
               <img src="{{ asset('images/volver1.svg') }}" alt="Volver" class="icono-volver me-2">
               Volver
             </a>
-
-         <!-- <button type="submit" class="btn btn-guardar">Actualizar Préstamo</button>
-       --> </div> 
+        </div> 
       </form>
     </div>
   </div>

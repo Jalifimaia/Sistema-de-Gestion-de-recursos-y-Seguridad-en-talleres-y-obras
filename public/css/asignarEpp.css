@@ -144,16 +144,37 @@ form .form-check-label {
   font-size: 1.1rem;         /* tamaño del texto */
   padding: 0.1rem 1rem;  /* tamaño más compacto */
   border-radius: 8px;
-  background-color: #238306;
+  background-color: #b14910;
   color: #ffff;
 }
 
 .btn-guardar:hover {
-  background-color: #217208;
+  background-color: #8a380b;
   color: #ffff;
 }
 
 /* Espacio inferior uniforme */
 .d-flex.justify-content-end.mt-4 {
   margin-bottom: 2rem; /* separa del borde inferior */
+}
+
+.text-orange {
+  font-size: 1.5rem;
+  font-weight: 500px;
+}
+
+.text-muted {
+  color: rgba(0,0,0,0.45); /* gris clarito */
+}
+
+input.form-control,
+select.form-select
+{
+  border: 2px solid #b14910;
+  box-shadow: none;
+  height: 47px !important;
+}
+
+.select2-epp {
+  height: 500px !important;
 }

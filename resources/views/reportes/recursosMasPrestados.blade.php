@@ -12,7 +12,6 @@
             </a>
 
             <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
-            <img src="{{ asset('images/prestamos.svg') }}" alt="Recursos" class="me-2" style="width: 28px; height: 28px;">
             Recursos más prestados
             </h4>
         </div>
@@ -96,8 +95,7 @@
 <div class="modal fade" id="modalGrafico" tabindex="-1" aria-labelledby="modalGraficoLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title text-orange" id="modalGraficoLabel">Recursos más prestados</h5>
+      <div class="modal-header header-m">
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">

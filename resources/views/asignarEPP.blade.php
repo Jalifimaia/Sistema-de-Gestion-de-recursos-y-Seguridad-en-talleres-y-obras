@@ -12,7 +12,6 @@
             </a>
 
             <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
-            <img src="{{ asset('images/workerepp.svg') }}" alt="EPP" class="me-2 icono-volver">
             Asignación de EPP
             </h4>
         </div>
@@ -49,7 +48,6 @@
       </div>
 
       <div id="epp-asignado" class="alert alertaEPP d-none mt-3">
-        <strong class="d-block mb-2">EPP ya asignado:</strong>
 
         <div class="table-responsive">
           <table class="table table-sm table-bordered text-center mb-0" id="epp-tabla">
@@ -166,14 +164,33 @@
   </div>
 </div>
 
+<!-- Modal: Éxito en asignación -->
+<div class="modal fade" id="modalEppExito" tabindex="-1" aria-labelledby="modalEppExitoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalEppExitoLabel">Asignación exitosa</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Los EPP fueron asignados correctamente al trabajador.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 <link href="{{ asset('css/asignarEpp.css') }}" rel="stylesheet">
 @endpush
 
 @push('styles')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 
 <style>
   .required-asterisk {
@@ -249,13 +266,14 @@ window.addEventListener('load', function () {
                 `;
 
                 // Crear fila con las series asignadas
+                // Crear fila con las series asignadas
                 if (data.length) {
-                  const seriesPorTipo = Object.fromEntries(tiposOrdenados.map(tipo => [tipo, '-']));
+                  const seriesPorTipo = Object.fromEntries(tiposOrdenados.map(tipo => [tipo, '<span class="text-muted">Sin asignar</span>']));
 
                   data.forEach(epp => {
                     const tipo = (epp.tipo || '').toLowerCase();
                     if (seriesPorTipo[tipo]) {
-                      seriesPorTipo[tipo] = epp.serie || '-';
+                      seriesPorTipo[tipo] = epp.serie || '<span class="text-muted">Sin asignar</span>';
                     }
                   });
 
@@ -267,10 +285,12 @@ window.addEventListener('load', function () {
                 } else {
                   tbody.innerHTML = `
                     <tr>
-                      ${tiposOrdenados.map(() => `<td>-</td>`).join('')}
+                      ${tiposOrdenados.map(() => `<td><span class="text-muted">Sin asignar</span></td>`).join('')}
                     </tr>
                   `;
                 }
+
+
                 eppBox.classList.remove('d-none');
 
                 tipos.forEach(tipo => {
@@ -386,8 +406,9 @@ selectEstado.addEventListener('change', function () {
   }
 
   // Si no hay incompletos, enviamos el formulario manualmente
-  submitBtn.type = "submit";
-  submitBtn.click();
+  e.preventDefault(); // evitamos envío inmediato
+  const modalExito = new bootstrap.Modal(document.getElementById('modalEppExito'));
+  if (modalExito) modalExito.show();
 
 
 

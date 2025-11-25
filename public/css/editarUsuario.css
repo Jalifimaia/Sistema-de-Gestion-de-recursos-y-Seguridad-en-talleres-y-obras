@@ -87,3 +87,10 @@ label {
 .btn-ojoc:hover {
   background-color: #b14910;
 }
+
+input.form-control,
+select.form-select {
+  border: 2px solid #b14910;
+  box-shadow: none;
+  height: 47px !important;
+}

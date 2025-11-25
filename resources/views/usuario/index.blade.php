@@ -198,8 +198,8 @@
 <div class="modal fade" id="modalConfirmarBaja" tabindex="-1" aria-labelledby="modalConfirmarBajaLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalConfirmarBajaLabel">Confirmar baja</h5>
+      <div class="modal-header bg-danger">
+        <h5 class="modal-title text-white" id="modalConfirmarBajaLabel">Confirmar baja</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">

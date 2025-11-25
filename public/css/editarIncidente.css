@@ -1,7 +1,6 @@
 h4.text-orange {
-  font-size: 1.25rem;
   font-weight: 600;
-  color: #1d1d1d;
+  color: #272727;
 }
 
 /* Card naranja */
@@ -92,25 +91,6 @@ ul.text-danger li {
   font-weight: 600;
 }
 
-/* Botón verde largo */
-.btn-actualizar {
-  background-color: #28a745;   /* verde Bootstrap */
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.1rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: none;
-  max-width: 95%;              /* ocupa casi toda la pantalla */
-  display: block;
-  margin: 0 auto;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.btn-actualizar:hover {
-  background-color: #218838;   /* verde más oscuro */
-  color: #fff;
-}
 
 /* Botón gris largo */
 .btn-cancelar {
@@ -160,4 +140,17 @@ ul.text-danger li {
   height: 20px;
   width: 20px;
   flex-shrink: 0;
+}
+
+.btn-actualizar {
+  font-size: 1.1rem;         /* tamaño del texto */
+  padding: 0.7rem 1rem;  /* tamaño más compacto */
+  border-radius: 8px;
+  background-color: #b14910;
+  color: #ffff;
+}
+
+.btn-actualizar:hover {
+  background-color: #9b3f0e;
+  color: #ffff;
 }

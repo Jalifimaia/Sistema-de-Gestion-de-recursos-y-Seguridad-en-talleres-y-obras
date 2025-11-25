@@ -30,90 +30,99 @@
 
         <!-- Trabajador -->
         <div class="card mb-3">
-            <div class="card-header bg-primary text-white">Datos del Trabajador</div>
-            <div class="card-body">
+              <div class="card-header bg-primary text-white">Trabajador involucrado</div>
+              <div class="card-body">
                 <div class="row mb-3">
-                  <div class="col-md-4">
-                      <label class="form-label">Trabajador</label>
-                      <input type="text" class="form-control"
-                          value="{{ $incidente->trabajador?->name ?? '-' }}" readonly>
-                      <input type="hidden" name="id_trabajador" value="{{ $incidente->trabajador?->id ?? '' }}">
+                  <div class="col-md-6">
+                    <label class="form-label">Trabajador</label>
+                    <input type="text" class="form-control"
+                      value="{{ $incidente->trabajador?->name ?? '-' }}" readonly>
+                    <input type="hidden" name="id_trabajador" value="{{ $incidente->trabajador?->id ?? '' }}">
                   </div>
 
-                  <div class="col-md-4">
-                      <label class="form-label">DNI</label>
-                      <input type="text" class="form-control"
-                          value="{{ $incidente->trabajador?->dni ?? '-' }}" readonly>
-                      <input type="hidden" name="dni_trabajador" value="{{ $incidente->trabajador?->dni ?? '' }}">
+                  <div class="col-md-6">
+                    <label class="form-label">DNI</label>
+                    <input type="text" class="form-control"
+                      value="{{ $incidente->trabajador?->dni ?? '-' }}" readonly>
+                    <input type="hidden" name="dni_trabajador" value="{{ $incidente->trabajador?->dni ?? '' }}">
                   </div>
                 </div>
+              </div>
             </div>
-        </div>
+
 
         <!-- Recursos asociados -->
         <div id="recursos-container">
-            @foreach($incidente->recursos as $i => $recurso)
+          @foreach($incidente->recursos as $i => $recurso)
             <div class="card mb-3 recurso-block">
-                <div class="card-header bg-success text-white">Recurso asociado</div>
-                <div class="card-body">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label">Categoría</label>
-                            <input type="text" class="form-control" 
-                                value="{{ $recurso->subcategoria->categoria->nombre_categoria ?? '-' }}" readonly>
-                            <input type="hidden" name="recursos[{{ $i }}][id_categoria]" 
-                                value="{{ $recurso->subcategoria->categoria->id ?? '' }}">
-                        </div>
+              <div class="card-header bg-success text-white">Recurso involucrado</div>
+              <div class="card-body">
 
-                        <div class="col-md-3">
-                            <label class="form-label">Subcategoría</label>
-                            <input type="text" class="form-control" 
-                                value="{{ $recurso->subcategoria->nombre ?? '-' }}" readonly>
-                            <input type="hidden" name="recursos[{{ $i }}][id_subcategoria]" 
-                                value="{{ $recurso->subcategoria->id ?? '' }}">
-                        </div>
+                <!-- Fila 1: Categoría y Subcategoría -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Categoría</label>
+                    <input type="text" class="form-control" 
+                      value="{{ $recurso->subcategoria->categoria->nombre_categoria ?? '-' }}" readonly>
+                    <input type="hidden" name="recursos[{{ $i }}][id_categoria]" 
+                      value="{{ $recurso->subcategoria->categoria->id ?? '' }}">
+                  </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label">Recurso</label>
-                            <input type="text" class="form-control" 
-                                value="{{ $recurso->nombre ?? '-' }}" readonly>
-                            <input type="hidden" name="recursos[{{ $i }}][id_recurso]" 
-                                value="{{ $recurso->id ?? '' }}">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Serie del recurso</label>
-                            <input type="text" class="form-control" 
-                                value="{{ $recurso->serieRecursos->firstWhere('id', $recurso->pivot->id_serie_recurso)?->nro_serie ?? '-' }}" readonly>
-                            <input type="hidden" name="recursos[{{ $i }}][id_serie_recurso]" 
-                                value="{{ $recurso->pivot->id_serie_recurso ?? '' }}">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Estado</label>
-
-                            @if(!empty($readonly))
-                              <input type="text" class="form-control" 
-                                     value="{{ $estadosRecurso->firstWhere('id', $recurso->pivot->id_estado)?->nombre_estado ?? ($estados[$recurso->pivot->id_estado] ?? 'Sin estado') }}" readonly>
-                              <input type="hidden" name="recursos[{{ $i }}][id_estado]" value="{{ $recurso->pivot->id_estado ?? '' }}">
-                            @else
-                              <select name="recursos[{{ $i }}][id_estado]" class="form-select recurso-estado-select" required>
-                                  <option value="">Seleccione</option>
-                                  @foreach($estadosRecurso as $estado)
-                                      <option value="{{ $estado->id }}"
-                                          {{ (string)($recurso->pivot->id_estado ?? '') === (string)$estado->id ? 'selected' : '' }}>
-                                          {{ $estado->nombre_estado }}
-                                      </option>
-                                  @endforeach
-                              </select>
-                            @endif
-                        </div>
-
-                    </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Subcategoría</label>
+                    <input type="text" class="form-control" 
+                      value="{{ $recurso->subcategoria->nombre ?? '-' }}" readonly>
+                    <input type="hidden" name="recursos[{{ $i }}][id_subcategoria]" 
+                      value="{{ $recurso->subcategoria->id ?? '' }}">
+                  </div>
                 </div>
+
+                <!-- Fila 2: Recurso y Serie -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Recurso</label>
+                    <input type="text" class="form-control" 
+                      value="{{ $recurso->nombre ?? '-' }}" readonly>
+                    <input type="hidden" name="recursos[{{ $i }}][id_recurso]" 
+                      value="{{ $recurso->id ?? '' }}">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="form-label">Serie del recurso</label>
+                    <input type="text" class="form-control" 
+                      value="{{ $recurso->serieRecursos->firstWhere('id', $recurso->pivot->id_serie_recurso)?->nro_serie ?? '-' }}" readonly>
+                    <input type="hidden" name="recursos[{{ $i }}][id_serie_recurso]" 
+                      value="{{ $recurso->pivot->id_serie_recurso ?? '' }}">
+                  </div>
+                </div>
+
+                <!-- Fila 3: Estado -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Estado</label>
+                    @if(!empty($readonly))
+                      <input type="text" class="form-control" 
+                        value="{{ $estadosRecurso->firstWhere('id', $recurso->pivot->id_estado)?->nombre_estado ?? ($estados[$recurso->pivot->id_estado] ?? 'Sin estado') }}" readonly>
+                      <input type="hidden" name="recursos[{{ $i }}][id_estado]" value="{{ $recurso->pivot->id_estado ?? '' }}">
+                    @else
+                      <select name="recursos[{{ $i }}][id_estado]" class="form-select recurso-estado-select" required>
+                        <option value="">Seleccione</option>
+                        @foreach($estadosRecurso as $estado)
+                          <option value="{{ $estado->id }}"
+                            {{ (string)($recurso->pivot->id_estado ?? '') === (string)$estado->id ? 'selected' : '' }}>
+                            {{ $estado->nombre_estado }}
+                          </option>
+                        @endforeach
+                      </select>
+                    @endif
+                  </div>
+                </div>
+
+              </div>
             </div>
-            @endforeach
+          @endforeach
         </div>
+
 
         @php
           $resueltoEstado = \App\Models\EstadoIncidente::where('nombre_estado', 'Resuelto')->first();
@@ -128,7 +137,7 @@
 
             <!-- Estado del incidente -->
             <div class="mb-3">
-              <label for="id_estado_incidente" class="form-label">Estado del incidente</label>
+              <label for="id_estado_incidente" class="form-label">Detalles del incidente</label>
               @if(!empty($readonly))
                 <input type="text" class="form-control" 
                       value="{{ $incidente->estadoIncidente?->nombre_estado ?? '-' }}" readonly>
@@ -147,19 +156,19 @@
               @endif
             </div>
 
-     <!-- Motivo / Descripción -->
-<div class="mb-3">
-  <label for="descripcion" class="form-label">Motivo del incidente <span class="required-asterisk">*</span></label>
-  @if(!empty($readonly))
-    <textarea name="descripcion" id="descripcion" class="form-control" readonly>{{ $incidente->descripcion }}</textarea>
-    <input type="hidden" name="descripcion" value="{{ $incidente->descripcion }}">
-  @else
-    <textarea name="descripcion" id="descripcion" class="form-control"
-              required maxlength="255"
-              placeholder="Ingrese el motivo (máximo 255 caracteres)">{{ old('descripcion', $incidente->descripcion) }}</textarea>
-    <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
-  @endif
-</div>
+          <!-- Motivo / Descripción -->
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Motivo del incidente <span class="required-asterisk">*</span></label>
+            @if(!empty($readonly))
+              <textarea name="descripcion" id="descripcion" class="form-control" readonly>{{ $incidente->descripcion }}</textarea>
+              <input type="hidden" name="descripcion" value="{{ $incidente->descripcion }}">
+            @else
+              <textarea name="descripcion" id="descripcion" class="form-control"
+                        required maxlength="255"
+                        placeholder="Ingrese el motivo (máximo 255 caracteres)">{{ old('descripcion', $incidente->descripcion) }}</textarea>
+              <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+            @endif
+          </div>
 
 
             <!-- Fecha del incidente -->
@@ -181,36 +190,37 @@
 
 
             <!-- Resolución -->
-<div class="mb-3" id="resolucion-container" style="display: none;">
-  <label for="resolucion" class="form-label">Resolución <span class="required-asterisk">*</span></label>
-  @if(!empty($readonly))
-    <input type="text" name="resolucion" id="resolucion" class="form-control" value="{{ $incidente->resolucion }}" readonly>
-    <input type="hidden" name="resolucion" value="{{ $incidente->resolucion }}">
-  @else
-    <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}">
-    <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
-  @endif
-</div>
+            <div class="mb-3" id="resolucion-container" style="display: none;">
+              <label for="resolucion" class="form-label">Resolución <span class="required-asterisk">*</span></label>
+              @if(!empty($readonly))
+                <input type="text" name="resolucion" id="resolucion" class="form-control" value="{{ $incidente->resolucion }}" readonly>
+                <input type="hidden" name="resolucion" value="{{ $incidente->resolucion }}">
+              @else
+                <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}">
+                <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+              @endif
+            </div>
           </div>
         </div>
 
+            <!-- Botones -->
+              <div class="d-flex justify-content-end mt-4 gap-2">
+                @if(empty($readonly))
+                  <button type="submit" class="btn btn-actualizar px-4">
+                    Actualizar incidente
+                  </button>
+                @endif
 
-        <!-- Botones -->
-            <div class="text-center mt-4">
-              @if(empty($readonly))
-                <button type="submit" class="btn btn-actualizar w-100 mb-3">
-                  Actualizar incidente
-                </button>
-              @endif
-
-              <a href="{{ route('incidente.index') }}" class="btn btn-cancelar w-100">
-                Cancelar
-              </a>
-            </div>
+                <a href="{{ route('incidente.index') }}" class="btn btn-cancelar d-none">
+                  Cancelar
+                </a>
+              </div>
 
 
-            </form>
-        </div>
+
+
+    </form>
+  </div>
 
 {{-- Modales --}}
 @if(session('success'))

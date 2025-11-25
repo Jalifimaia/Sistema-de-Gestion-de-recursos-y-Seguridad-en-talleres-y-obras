@@ -45,107 +45,116 @@
 
         <!-- 🧰 DATOS DE LOS RECURSOS -->
         <div id="recursos-container">
-            <div class="card mb-3 recurso-block">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                <span>Recurso Involucrado</span>
-                <button type="button" class="btn btn-sm btn-danger btn-eliminar-recurso" title="Eliminar este recurso">
-                    ✖
-                </button>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Categoría</label>
-                            <select name="recursos[0][id_categoria]" class="form-select categoria-select" required>
-                                <option value="">Seleccione la categoría</option>
-                                @foreach($categorias as $cat)
-                                    @php
-                                        $selectedCat = old('recursos.0.id_categoria') ?? ($incidente->recursos[0]->subcategoria->categoria->id ?? null ?? null);
-                                    @endphp
-                                    <option value="{{ $cat->id }}" {{ (string)$cat->id === (string)$selectedCat ? 'selected' : '' }}>
-                                        {{ $cat->nombre_categoria }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
-                        </div>
+  <div class="card mb-3 recurso-block">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+      <span>Recurso Involucrado</span>
+      <button type="button" class="btn btn-sm btn-danger btn-eliminar-recurso" title="Eliminar este recurso">
+        ✖
+      </button>
+    </div>
+    <div class="card-body">
 
-                        <div class="col-md-3">
-                            <label class="form-label">Subcategoría</label>
-                            <select name="recursos[0][id_subcategoria]" class="form-select subcategoria-select" required>
-                                <option value="">Seleccione la subcategoría</option>
-                                @if(old('recursos.0.id_subcategoria'))
-                                    <option value="{{ old('recursos.0.id_subcategoria') }}" selected>
-                                        {{ collect($subcategorias)->firstWhere('id', old('recursos.0.id_subcategoria'))->nombre ?? 'Seleccionado' }}
-                                    </option>
-                                @elseif(isset($incidente) && $incidente->recursos->count())
-                                    @php $sc = $incidente->recursos[0]->subcategoria ?? null; @endphp
-                                    @if($sc)
-                                        <option value="{{ $sc->id }}" selected>{{ $sc->nombre }}</option>
-                                    @endif
-                                @endif
-                            </select>
-                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Recurso</label>
-                            <select name="recursos[0][id_recurso]" class="form-select recurso-select" required>
-                                <option value="">Seleccione el recurso</option>
-                                @if(old('recursos.0.id_recurso'))
-                                    <option value="{{ old('recursos.0.id_recurso') }}" selected>
-                                        {{ collect($recursos)->firstWhere('id', old('recursos.0.id_recurso'))->nombre ?? 'Seleccionado' }}
-                                    </option>
-                                @elseif(isset($incidente) && $incidente->recursos->count())
-                                    @php $r = $incidente->recursos[0] ?? null; @endphp
-                                    @if($r)
-                                        <option value="{{ $r->id }}" selected>{{ $r->nombre }}</option>
-                                    @endif
-                                @endif
-                            </select>
-                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Serie del recurso</label>
-                            <select name="recursos[0][id_serie_recurso]" class="form-select serie-select" required>
-                                <option value="">Seleccione la serie</option>
-                                @if(old('recursos.0.id_serie_recurso'))
-                                    <option value="{{ old('recursos.0.id_serie_recurso') }}" selected>
-                                        {{ \App\Models\SerieRecurso::find(old('recursos.0.id_serie_recurso'))->nro_serie ?? 'Seleccionado' }}
-                                    </option>
-                                @elseif(isset($incidente) && $incidente->recursos->count())
-                                    @php $serieId = $incidente->recursos[0]->pivot->id_serie_recurso ?? null; @endphp
-                                    @if($serieId)
-                                        <option value="{{ $serieId }}" selected>
-                                            {{ \App\Models\SerieRecurso::find($serieId)->nro_serie ?? 'Seleccionado' }}
-                                        </option>
-                                    @endif
-                                @endif
-                            </select>
-                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
-                        </div>
-
-                        <div class="col-md-3 mt-3">
-                            <label class="form-label">Estado</label>
-                            <select name="recursos[0][id_estado]" class="form-select estado-select" required>
-                                <option value="">Seleccione el estado</option>
-                                @foreach($estados as $estado)
-                                    @php
-                                        $selectedEstado = old('recursos.0.id_estado') ?? ($incidente->recursos[0]->pivot->id_estado ?? null);
-                                    @endphp
-                                    <option value="{{ $estado->id }}" {{ (string)$estado->id === (string)$selectedEstado ? 'selected' : '' }}>
-                                        {{ $estado->nombre_estado }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
+      <!-- Fila 1: Categoría y Subcategoría -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Categoría</label>
+          <select name="recursos[0][id_categoria]" class="form-select categoria-select" required>
+            <option value="">Seleccione la categoría</option>
+            @foreach($categorias as $cat)
+              @php
+                $selectedCat = old('recursos.0.id_categoria') ?? ($incidente->recursos[0]->subcategoria->categoria->id ?? null);
+              @endphp
+              <option value="{{ $cat->id }}" {{ (string)$cat->id === (string)$selectedCat ? 'selected' : '' }}>
+                {{ $cat->nombre_categoria }}
+              </option>
+            @endforeach
+          </select>
+          <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
         </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Subcategoría</label>
+          <select name="recursos[0][id_subcategoria]" class="form-select subcategoria-select" required>
+            <option value="">Seleccione la subcategoría</option>
+            @if(old('recursos.0.id_subcategoria'))
+              <option value="{{ old('recursos.0.id_subcategoria') }}" selected>
+                {{ collect($subcategorias)->firstWhere('id', old('recursos.0.id_subcategoria'))->nombre ?? 'Seleccionado' }}
+              </option>
+            @elseif(isset($incidente) && $incidente->recursos->count())
+              @php $sc = $incidente->recursos[0]->subcategoria ?? null; @endphp
+              @if($sc)
+                <option value="{{ $sc->id }}" selected>{{ $sc->nombre }}</option>
+              @endif
+            @endif
+          </select>
+          <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
+        </div>
+      </div>
+
+      <!-- Fila 2: Recurso y Serie -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Recurso</label>
+          <select name="recursos[0][id_recurso]" class="form-select recurso-select" required>
+            <option value="">Seleccione el recurso</option>
+            @if(old('recursos.0.id_recurso'))
+              <option value="{{ old('recursos.0.id_recurso') }}" selected>
+                {{ collect($recursos)->firstWhere('id', old('recursos.0.id_recurso'))->nombre ?? 'Seleccionado' }}
+              </option>
+            @elseif(isset($incidente) && $incidente->recursos->count())
+              @php $r = $incidente->recursos[0] ?? null; @endphp
+              @if($r)
+                <option value="{{ $r->id }}" selected>{{ $r->nombre }}</option>
+              @endif
+            @endif
+          </select>
+          <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Serie del recurso</label>
+          <select name="recursos[0][id_serie_recurso]" class="form-select serie-select" required>
+            <option value="">Seleccione la serie</option>
+            @if(old('recursos.0.id_serie_recurso'))
+              <option value="{{ old('recursos.0.id_serie_recurso') }}" selected>
+                {{ \App\Models\SerieRecurso::find(old('recursos.0.id_serie_recurso'))->nro_serie ?? 'Seleccionado' }}
+              </option>
+            @elseif(isset($incidente) && $incidente->recursos->count())
+              @php $serieId = $incidente->recursos[0]->pivot->id_serie_recurso ?? null; @endphp
+              @if($serieId)
+                <option value="{{ $serieId }}" selected>
+                  {{ \App\Models\SerieRecurso::find($serieId)->nro_serie ?? 'Seleccionado' }}
+                </option>
+              @endif
+            @endif
+          </select>
+          <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
+        </div>
+      </div>
+
+      <!-- Fila 3: Estado -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Estado</label>
+          <select name="recursos[0][id_estado]" class="form-select estado-select" required>
+            <option value="">Seleccione el estado</option>
+            @foreach($estados as $estado)
+              @php
+                $selectedEstado = old('recursos.0.id_estado') ?? ($incidente->recursos[0]->pivot->id_estado ?? null);
+              @endphp
+              <option value="{{ $estado->id }}" {{ (string)$estado->id === (string)$selectedEstado ? 'selected' : '' }}>
+                {{ $estado->nombre_estado }}
+              </option>
+            @endforeach
+          </select>
+          <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
 
         <div class="d-flex justify-content-end mb-3">
@@ -190,7 +199,7 @@
         </div>
 
         <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btn-success px-4">Registrar incidente</button>
+            <button type="submit" class="btn btn-reg px-4">Registrar incidente</button>
         </div>
 
     </form>

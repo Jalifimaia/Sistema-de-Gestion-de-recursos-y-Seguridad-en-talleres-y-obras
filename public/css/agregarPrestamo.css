@@ -22,32 +22,12 @@ select.form-select:focus {
   box-shadow: 0 0 0 0.15rem rgba(66, 66, 66, 0.25);
 }
 
-/* Botón volver */
-.btn-volver {
-  background-color: #d3401b;
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.875rem;
-  padding: 0.35rem 0.75rem;
-  border: none;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  line-height: 1.2;
-  max-width: fit-content;
-  height: auto;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.icono-volver {
-  width: 18px;
-  height: 18px;
+.bg-reg {
+  background-color: #be5034;
 }
 
 /* Botón guardar verde */
-.btn-guardar {
+bg-reg {
   background-color: #43a047;
   color: #fff;
   font-weight: 500;
@@ -57,45 +37,59 @@ select.form-select:focus {
   transition: background-color 0.2s ease;
 }
 
-.btn-guardar:hover {
-  background-color: #388e3c;
+.icono-volver {
+  width: 18px;
+  height: 18px;
 }
 
 .btn-volver {
   background-color: #d3401b;
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.875rem;
+  border: 1px solid #ccc;
   padding: 0.5rem 1rem;
-  border: none;
+  font-weight: 500;
+  color: #ffff;
   border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  line-height: 1.2;
-  height: auto;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-volver:hover {
-  background-color: #c62828;
-}
-
-.btn-guardar {
-  background-color: #43a047;
-  color: #fff;
-  font-weight: 500;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.btn-guardar:hover {
-  background-color: #388e3c;
+  background-color: #ac3416;
+  transform: translateX(-2px);
+  color: #ffff;
 }
 
 .icono-volver {
-  width: 18px;
-  height: 18px;
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
 }
+
+.btn-ag {
+  background-color: #b14910 !important;
+  color: #e4e4e4;
+  font-size: 1.1rem;
+  height: 50px !important;
+  line-height: 40px; /* centra el texto verticalmente */
+  padding: 0 30px;   /* ancho compacto */
+}
+
+.btn-ag:hover {
+  background-color: #993e0d !important; /* más oscuro */
+  color: #e4e4e4;
+  font-size: 1.1rem;   /* mismo tamaño que normal */
+  height: 50px !important;
+  line-height: 40px;
+  padding: 0 30px;
+}
+
+.btn-ag:disabled {
+  background-color: #7e360f !important; /* aún más oscuro */
+  color: #e4e4e4;
+  font-size: 1.1rem;
+  height: 50px !important;
+  line-height: 40px;
+  padding: 0 30px;
+  opacity: 0.7; /* evita que Bootstrap lo ponga grisáceo */
+}
+
+
