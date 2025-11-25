@@ -97,7 +97,7 @@
 <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
   <!-- Buscar -->
   <input type="text" id="buscador"
-         class="form-control buscador-destacado"
+         class="form-control buscador-destacado buscador-con-icono"
          placeholder="Buscar por nombre, categoria, subcategoria o descripción...">
 
   <!-- Filtro -->

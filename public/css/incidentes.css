@@ -243,3 +243,12 @@ header.row.mb-4 {
 
 .buscador-destacado { flex: 2; }
 .filtro-destacado { flex: 1; }
+
+.buscador-con-icono {
+  background: url('/images/searchhh.svg') no-repeat 10px center; /* 👈 tu ícono */
+  background-size: 16px 16px; /* tamaño del ícono */
+  padding-left: 35px;         /* espacio para que el texto no se superponga */
+  background-position: 13px 15px;   /* 10px desde la izquierda, 5px desde arriba */
+}
+
+

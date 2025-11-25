@@ -32,7 +32,7 @@
 
   <!-- 🔍 Buscador por nro_serie -->
   <div class="input-group mb-3 mt-4">
-    <input type="text" id="busquedaSerie" class="form-control"
+    <input type="text" id="busquedaSerie" class="form-control buscador-con-icono"
            placeholder="Buscar por categoría, subcategoría, nombre del recurso o iniciales del número de serie...">
   </div>
 

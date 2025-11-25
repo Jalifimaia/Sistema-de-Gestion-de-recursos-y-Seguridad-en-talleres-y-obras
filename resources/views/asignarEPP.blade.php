@@ -78,7 +78,7 @@
             <option value="">-- Seleccionar casco disponible --</option>
           </select>
           <div class="text-danger small d-none" id="alert-casco">Ya tiene casco asignado</div>
-          <div class="text-danger small d-none" id="alert-casco-vacio"><strong>Debe seleccionar el casco</strong></div>
+          <div class="text-danger small d-none" id="alert-casco-vacio">Debe seleccionar el casco</div>
         </div>
 
         <div class="col-md-6">

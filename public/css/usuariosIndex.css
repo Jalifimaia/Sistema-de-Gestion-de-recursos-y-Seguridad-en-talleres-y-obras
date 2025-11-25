@@ -539,3 +539,18 @@ td.acciones .d-flex {
    color: #222222;
 
 }
+
+.buscador-con-icono {
+  background: url('/images/searchhh.svg') no-repeat 10px center; /* 👈 tu ícono */
+  background-size: 16px 16px; /* tamaño del ícono */
+  padding-left: 35px;         /* espacio para que el texto no se superponga */
+  background-position: 13px 11px;   /* 10px desde la izquierda, 5px desde arriba */
+}
+
+.buscador-destacado {
+  min-height: 45px;
+}
+
+.filtro-destacado {
+  min-height: 45px;
+}

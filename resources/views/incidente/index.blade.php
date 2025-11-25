@@ -35,7 +35,7 @@
     <input
       type="text"
       id="buscadorIncidentes"
-      class="form-control buscador-destacado"
+      class="form-control buscador-destacado buscador-con-icono"
       placeholder="Buscar por trabajador, motivo, estado o resolución...">
 
     <!-- Select de filtro más ancho -->

@@ -88,7 +88,7 @@
   <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
     <!-- Buscador más largo -->
     <input type="text" id="buscador" 
-           class="form-control buscador-destacado" 
+           class="form-control buscador-destacado buscador-con-icono" 
            placeholder="Buscar por nombre o email..." 
            style="width: 720px; max-width: 100%;">
 

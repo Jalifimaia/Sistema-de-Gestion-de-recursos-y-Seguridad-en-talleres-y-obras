@@ -32,7 +32,7 @@
 
           <!-- Botón aplicar filtros (envía al backend) -->
           <div class="col-md-2">
-            <button type="submit" class="btn btn-naranja btn-sm w-100 d-flex align-items-center justify-content-center text-nowrap">
+            <button type="submit" class="btn btn-naranja btn-filtro btn-sm w-100 d-flex align-items-center justify-content-center text-nowrap">
               <img src="{{ asset('images/filter.svg') }}" alt="Buscar" class="me-2" style="width: 16px; height: 16px;">
               Aplicar filtros
             </button>
@@ -41,7 +41,7 @@
           <!-- Botón limpiar -->
           <div class="col-auto">
             <a href="{{ route('prestamos.index') }}"
-               class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center"
+               class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center"
                style="width: 42px; height: 42px; padding: 0;">
               <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 22px; height: 22px;">
             </a>
@@ -51,24 +51,19 @@
         <div class="row g-3 align-items-end">
           <!-- Buscar texto -->
           <div class="col-md-6">
-            <label for="busqueda" class="form-label fw-bold">Buscar</label>
             <div class="input-group" style="height: 46px;">
-              <input type="text" name="search" id="busqueda"
-                     class="form-control buscador-destacado"
-                     style="height: 100%;"
-                     value="{{ request('search') }}"
-                     placeholder="Buscar por recurso, marca, serie, trabajador o creador">
-              <button class="btn btn-naranja" type="submit">
-                <img src="{{ asset('images/lupa.svg') }}" alt="Buscar" style="width: 16px; height: 16px;">
-              </button>
+              <input
+                type="text"
+                id="busqueda"
+                class="form-control buscador-destacado buscador-con-icono"
+                placeholder="Buscar por recurso, marca, serie, trabajador o creador">
             </div>
           </div>
 
           <!-- Estado -->
           <div class="col-md-3">
-            <label for="filtro-estado" class="form-label fw-bold">Estado</label>
             <select id="filtro-estado" name="estado" onchange="this.form.submit()" class="form-select filtro-destacado" style="height: 46px;">
-              <option value="">Todos</option>
+              <option value="">Todos los estados</option>
               <option value="Activo" {{ request('estado') == 'Activo' ? 'selected' : '' }}>Activo</option>
               <option value="Vencido" {{ request('estado') == 'Vencido' ? 'selected' : '' }}>Vencido</option>
               <option value="Devuelto" {{ request('estado') == 'Devuelto' ? 'selected' : '' }}>Devuelto</option>
@@ -77,9 +72,8 @@
 
           <!-- Creado por -->
           <div class="col-md-3">
-            <label for="filtro-creador" class="form-label fw-bold">Creado por</label>
             <select id="filtro-creador" name="creador" onchange="this.form.submit()" class="form-select filtro-destacado" style="height: 46px;">
-              <option value="">Todos</option>
+              <option value="">Todos los usuarios</option>
               @foreach($usuarios as $nombre)
                 <option value="{{ $nombre }}" {{ request('creador') == $nombre ? 'selected' : '' }}>
                   {{ $nombre }}
