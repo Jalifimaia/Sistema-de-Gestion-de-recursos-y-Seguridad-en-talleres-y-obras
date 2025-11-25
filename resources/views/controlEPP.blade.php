@@ -83,8 +83,7 @@
 
     <!-- Tabla -->
     <div class="table-responsive">
-    <table id="tablaChecklistDiario" class="table table-bordered table-striped text-center tabla-epp">
-      <thead>
+<table id="tablaChecklistDiario" class="table table-bordered table-striped text-center tabla-epp table-naranja">      <thead>
         <tr>
           <th>Trabajador</th>
           <th>Lentes</th>
@@ -260,6 +259,8 @@
 @endpush
 
 @push('scripts')
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   // Checklist sin registrar: traducir al abrir y después de cada paginación

@@ -229,6 +229,12 @@ window.addEventListener('load', function () {
         tablaBody.appendChild(fila);
       });
 
+      // 🔹 INICIALIZAR ORDENAMIENTO EN LA TABLA DEL MODAL
+      const tablaModal = document.querySelector('#modalSeries table');
+      if (typeof window.inicializarOrdenamiento === 'function' && tablaModal) {
+        window.inicializarOrdenamiento(tablaModal);
+      }
+
       // aplicar filtros y paginación
       aplicarFiltrosModal();
     });

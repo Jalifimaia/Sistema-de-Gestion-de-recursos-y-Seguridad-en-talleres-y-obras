@@ -240,6 +240,7 @@
 
 @push('scripts')
   <script src="{{ asset('js/formatoFecha.js') }}" defer></script>
+  <script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {

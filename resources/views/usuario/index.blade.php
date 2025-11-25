@@ -235,6 +235,8 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const filas = Array.from(document.querySelectorAll('#tablaUsuarios tbody tr'));

@@ -69,43 +69,43 @@
     </form>
 
 
-    @if($incidentes->count())
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped align-middle text-center">
-            <thead>
-                <tr class="text-orange">
-                    <th>Tipo de recurso</th>
-                    <th>Cantidad de incidentes</th>
-                    <th>Última fecha de incidente</th>
-                    <th>Valor económico total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($incidentes as $item)
-                <tr>
-                    <td>{{ $item->nombre_categoria }}</td>
-                    <td>{{ $item->cantidad_incidentes }}</td>
-                    <td>{{ $item->ultima_fecha }}</td>
-                    <td>${{ number_format($item->costo_total_incidentes, 2, ',', '.') }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+@if($incidentes->count())
+<div class="table-responsive mb-4">
+  <table class="table table-bordered table-striped align-middle text-center table-naranja">
+    <thead>
+      <tr class="text-orange">
+        <th>Tipo de recurso</th>
+        <th>Cantidad de incidentes</th>
+        <th>Última fecha de incidente</th>
+        <th>Valor económico total</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($incidentes as $item)
+      <tr>
+        <td>{{ $item->nombre_categoria }}</td>
+        <td>{{ $item->cantidad_incidentes }}</td>
+        <td>{{ $item->ultima_fecha }}</td>
+        <td>${{ number_format($item->costo_total_incidentes, 2, ',', '.') }}</td>
+      </tr>
+      @endforeach
+    </tbody>
+  </table>
 
-        <div class="alert alert-total fw-bold">
-          Impacto económico total de incidentes: 
-          <span class="precio-total">${{ number_format($totalEconomico, 2, ',', '.') }}</span>
-        </div>
+  <div class="alert alert-total fw-bold">
+    Impacto económico total de incidentes: 
+    <span class="precio-total">${{ number_format($totalEconomico, 2, ',', '.') }}</span>
+  </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <div id="infoPaginacionIncidentes" class="text-muted small"></div>
-          <ul id="paginacionIncidentes" class="pagination mb-0"></ul>
-        </div>
-    @else
-    <div class="alert alert-info">No se encontraron incidentes en el rango seleccionado.</div>
-    @endif
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <div id="infoPaginacionIncidentes" class="text-muted small"></div>
+    <ul id="paginacionIncidentes" class="pagination mb-0"></ul>
+  </div>
 </div>
-
+@else
+<div class="alert alert-info">No se encontraron incidentes en el rango seleccionado.</div>
+@endif
+    
 <!-- Modal -->
 <div class="modal fade" id="modalGrafico" tabindex="-1" aria-labelledby="modalGraficoLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -122,7 +122,9 @@
   </div>
 </div>
 
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   // 🔹 Paginación de la tabla

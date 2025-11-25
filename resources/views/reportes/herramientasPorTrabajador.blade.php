@@ -62,8 +62,7 @@
 
     @if($herramientas->count())
     <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped align-middle text-center">
-            <thead>
+<table class="table table-bordered table-striped align-middle text-center table-naranja">            <thead>
                 <tr class="text-orange">
                     <th>Trabajador</th>
                     <th>Herramienta</th>
@@ -110,7 +109,9 @@
   </div>
 </div>
 
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   // 🔹 Paginación de la tabla

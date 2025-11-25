@@ -301,6 +301,7 @@
 <script src="{{ asset('js/filtroBusqueda.js') }}"></script>
 <script src="{{ asset('js/cargarSeriesRecurso.js') }}"></script>
 <script src="{{ asset('js/inventario-actions.js') }}"></script>
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 
 
 <!--<script>
