@@ -128,8 +128,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!field.value.trim()) {
         const error = document.createElement('div');
-        error.className = 'text-danger small mt-1';
-        error.textContent = 'Este campo es obligatorio.';
+        error.className = 'text-danger small mt-1  no-asterisk';
+        error.textContent = 'este campo es obligatorio';
         container.appendChild(error);
         if (!firstInvalid) firstInvalid = field;
         hayErrores = true;

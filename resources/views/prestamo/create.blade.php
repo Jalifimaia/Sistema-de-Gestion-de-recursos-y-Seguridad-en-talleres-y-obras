@@ -15,11 +15,11 @@
 
         <div class="row mb-3">
           <div class="col-md-6">
-            <label class="form-label">Fecha de Préstamo</label>
+            <label class="form-label">Fecha de préstamo</label>
             <input type="text" class="form-control" value="{{ \Carbon\Carbon::today()->format('d/m/Y') }}" disabled>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Fecha de Devolución</label>
+            <label class="form-label">Fecha de devolución</label>
             <input type="text" class="form-control" value="{{ \Carbon\Carbon::tomorrow()->format('d/m/Y') }}" disabled>
           </div>
         </div>
@@ -28,12 +28,15 @@
           <div class="col-md-6">
             <label for="id_trabajador" class="form-label">Trabajador</label>
             <div class="d-flex gap-2">
-              <select id="id_trabajador" name="id_trabajador_select" class="form-select" required>
-                <option value="" selected disabled>Seleccione al trabajador</option>
-                @foreach($trabajadores as $t)
-                  <option value="{{ $t->id }}">{{ $t->name }}</option>
-                @endforeach
-              </select>
+              <div class="flex-grow-1">
+                <select id="id_trabajador" name="id_trabajador_select" class="form-select" required>
+                  <option value="" selected disabled>Seleccione al trabajador</option>
+                  @foreach($trabajadores as $t)
+                    <option value="{{ $t->id }}">{{ $t->name }}</option>
+                  @endforeach
+                </select>
+                <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+              </div>
 
               {{-- Hidden que realmente se enviará al servidor --}}
               <input type="hidden" id="id_trabajador_hidden" name="id_trabajador" value="">
@@ -47,34 +50,38 @@
           <div class="col-md-4">
             <label for="categoria" class="form-label">Categoría</label>
             <select id="categoria" class="form-select" required>
-              <option selected disabled>Seleccione una categoría</option>
+              <option value="" selected disabled>Seleccione una categoría</option>
               @foreach($categorias as $cat)
                 <option value="{{ $cat->id }}">{{ $cat->nombre_categoria }}</option>
               @endforeach
             </select>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
           </div>
 
           <div class="col-md-4">
             <label for="subcategoria" class="form-label">Subcategoría</label>
             <select id="subcategoria" class="form-select" required>
-              <option selected disabled>Seleccione una subcategoría</option>
+              <option value="" selected disabled>Seleccione una subcategoría</option>
             </select>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
           </div>
 
           <div class="col-md-4">
             <label for="recurso" class="form-label">Recurso</label>
             <select id="recurso" class="form-select" required>
-              <option selected disabled>Seleccione un recurso</option>
+              <option value="" selected disabled>Seleccione un recurso</option>
             </select>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
           </div>
         </div>
 
         <div class="row mb-4">
           <div class="col-md-10">
-            <label for="serie" class="form-label">Serie del Recurso</label>
+            <label for="serie" class="form-label">Serie del recurso</label>
             <select id="serie" class="form-select" required>
-              <option selected disabled>Seleccione una serie</option>
+              <option value="" selected disabled>Seleccione una serie</option>
             </select>
+            <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
           </div>
           <div class="col-md-2 text-end">
             <button type="button" class="btn btn-success w-100 mt-4" id="agregar">Agregar</button>
@@ -95,7 +102,7 @@
             </a>
           </div>
           <div class="col-md-6">
-            <button style="display:none" type="submit" class="btn btn-guardar w-100">Guardar Préstamo</button>
+            <button style="display:none" type="submit" class="btn btn-guardar w-100">Guardar préstamo</button>
           </div>
         </div>
 
@@ -133,6 +140,23 @@
       </div>
       <div class="modal-body">
         Seleccioná una serie válida antes de continuar.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger text-white" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalErrorCampos" tabindex="-1" aria-labelledby="modalErrorCamposLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalErrorCamposLabel">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        Faltan campos por completar. Por favor, revisá el formulario.
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger text-white" data-bs-dismiss="modal">Cerrar</button>
@@ -254,4 +278,3 @@ label.no-asterisk::after {
 }
 </style>
 @endpush
-

@@ -305,8 +305,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (!field.value.trim()) {
         const error = document.createElement('div');
-        error.className = 'text-danger small mt-1';
-        error.textContent = 'Este campo es obligatorio.';
+        error.className = 'text-danger small mt-1  no-asterisk';
+        error.textContent = 'este campo es obligatorio';
         container.appendChild(error);
         if (!firstInvalid) firstInvalid = field;
         hayErrores = true;
@@ -318,8 +318,8 @@ document.addEventListener('DOMContentLoaded', function () {
       const container = subcategoriaSelect.closest('.mb-3') || subcategoriaSelect.closest('.col-md-6') || subcategoriaSelect.parentElement;
       if (!container.querySelector('.text-danger.small.mt-1')) {
         const error = document.createElement('div');
-        error.className = 'text-danger small mt-1';
-        error.textContent = 'Este campo es obligatorio.';
+        error.className = 'text-danger small mt-1  no-asterisk';
+        error.textContent = 'este campo es obligatorio';
         container.appendChild(error);
         if (!firstInvalid) firstInvalid = subcategoriaSelect;
         hayErrores = true;

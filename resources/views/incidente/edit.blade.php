@@ -157,7 +157,7 @@
     <textarea name="descripcion" id="descripcion" class="form-control"
               required maxlength="255"
               placeholder="Ingrese el motivo (máximo 255 caracteres)">{{ old('descripcion', $incidente->descripcion) }}</textarea>
-    <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+    <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
   @endif
 </div>
 
@@ -188,7 +188,7 @@
     <input type="hidden" name="resolucion" value="{{ $incidente->resolucion }}">
   @else
     <input type="text" name="resolucion" id="resolucion" class="form-control" placeholder="Ingrese aquí la resolución del incidente" value="{{ old('resolucion', $incidente->resolucion) }}">
-    <label class="error-label text-danger mt-1" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+    <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
   @endif
 </div>
           </div>

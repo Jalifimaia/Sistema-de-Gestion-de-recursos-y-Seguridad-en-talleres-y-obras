@@ -252,3 +252,13 @@ header.row.mb-4 {
 }
 
 
+
+.btn-ver-series {
+  background-color: #0288d1;
+  color: white;
+  border: none;
+}
+
+.btn-ver-series:hover {
+  background-color: #0277bd;
+}
