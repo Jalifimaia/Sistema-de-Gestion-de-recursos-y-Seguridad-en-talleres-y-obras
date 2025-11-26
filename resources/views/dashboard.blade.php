@@ -22,7 +22,7 @@
     </div>
 
     <div class="text-end">
-      <p class="mb-1 subir-bienvenida">
+      <p class="mb-1 subir-bienvenida fw-bold">
         Bienvenido, {{ auth()->user()->name }} <br><span class="rol-transparente">[{{ auth()->user()->rol->nombre_rol }}]</span>
       </p>
     </div>

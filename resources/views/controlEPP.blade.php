@@ -177,9 +177,27 @@
         <h5 class="modal-title" id="modalChecklistLabel">Checklist sin registrar</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      
       <div class="modal-body">
         @if ($sinChecklist->count())
+          <div class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+            <input type="text" id="buscadorChecklist" class="form-control w-auto buscador-destacado"
+                  placeholder="Buscar por nombre...">
+
+            <select id="filtroChecklistEstado" class="form-select filtro-destacado w-auto">
+              <option value="todos">Todos los estados</option>
+              @foreach($estados as $estado)
+                <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
+              @endforeach
+            </select>
+
+            <button type="button"
+                    id="btnLimpiarChecklist"
+                    class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center">
+              <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 22px; height: 22px;" class="me-2">
+              Limpiar filtro
+            </button>
+          </div>
+
           <div class="table-responsive">
             <table class="table-naranja align-middle mb-0 text-center">
               <thead class="table-light">
@@ -353,6 +371,35 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
+
+   const buscador = document.getElementById('buscadorChecklist');
+  const filtroEstado = document.getElementById('filtroChecklistEstado');
+  const btnLimpiar = document.getElementById('btnLimpiarChecklist');
+  const filas = Array.from(document.querySelectorAll('#modalChecklist tbody tr'));
+
+  function aplicarFiltros() {
+    const texto = buscador.value.toLowerCase().trim();
+    const estado = filtroEstado.value.toLowerCase().trim();
+
+    filas.forEach(fila => {
+      const nombre = fila.querySelector('td:nth-child(1)').textContent.toLowerCase().trim();
+      const estadoFila = fila.querySelector('td:nth-child(2)').textContent.toLowerCase().trim();
+
+      const coincideNombre = nombre.includes(texto);
+      const coincideEstado = (estado === 'todos' || estadoFila === estado);
+
+      fila.style.display = (coincideNombre && coincideEstado) ? '' : 'none';
+    });
+  }
+
+  // 👉 Aquí conectás los eventos
+  buscador?.addEventListener('input', aplicarFiltros);
+  filtroEstado?.addEventListener('change', aplicarFiltros);
+  btnLimpiar?.addEventListener('click', () => {
+    buscador.value = '';
+    filtroEstado.value = 'todos';
+    aplicarFiltros();
+  });
 });
 </script>
 @endpush

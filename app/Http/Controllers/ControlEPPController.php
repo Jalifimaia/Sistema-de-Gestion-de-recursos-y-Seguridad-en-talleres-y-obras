@@ -92,6 +92,8 @@ class ControlEPPController extends Controller
         $matriz[] = $fila;
     }
 
+    $estados = EstadoUsuario::orderBy('nombre')->get();
+
     return view('controlEPP', [
         'porcentajeChecklist' => $porcentajeChecklist,
         'eppVencidos' => $eppVencidos,
@@ -102,7 +104,8 @@ class ControlEPPController extends Controller
         'trabajadores' => $trabajadoresConEpp,
         'checklistsHoy' => $checklists,
         'checklists' => $checklists,
-        'sinChecklist' => $sinChecklist, // 👉 ahora es un paginator real
+        'sinChecklist' => $sinChecklist, 
+        'estados' => $estados,
     ]);
 }
 

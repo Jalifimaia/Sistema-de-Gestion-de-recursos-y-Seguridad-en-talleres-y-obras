@@ -102,16 +102,8 @@
 <link href="{{ asset('css/reportes.css') }}" rel="stylesheet">
 @endpush
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const today = new Date();
-    const dia = String(today.getDate()).padStart(2, '0');
-    const mes = String(today.getMonth() + 1).padStart(2, '0');
-    const año = today.getFullYear();
-    const hora = String(today.getHours()).padStart(2, '0');
-    const minutos = String(today.getMinutes()).padStart(2, '0');
 
-    document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
-  });
-</script>
+
+
+
 

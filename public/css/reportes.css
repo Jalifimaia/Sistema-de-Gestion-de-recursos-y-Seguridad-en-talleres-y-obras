@@ -106,15 +106,8 @@
   color: #fff;
 }
 
-/* === Botón de cierre (X) === */
-#closeSidebar {
-  font-size: 1rem;
-  padding: 6px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-#closeSidebar:hover {
-  opacity: 0.9;
+.reportes .toggle-btn {
+  width: 38px !important;
+  height: 38px !important;
+  padding: 0 !important;
 }

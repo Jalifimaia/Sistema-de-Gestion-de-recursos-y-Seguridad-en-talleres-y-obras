@@ -158,15 +158,15 @@
         <h5 class="modal-title" id="usuarioCreadoLabel">Usuario creado correctamente</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body text-center">
+      <div class="modal-body justify-content-start">
         <p>¿Desea agregar otro usuario o volver a la lista?</p>
       </div>
-      <div class="modal-footer d-flex justify-content-center">
-        <a href="{{ route('usuarios.create') }}" class="btn btn-primary">
-          <i class="bi bi-person-plus"></i> Agregar otro
+      <div class="modal-footer d-flex justify-content-end">
+        <a href="{{ route('usuarios.index') }}" class="btn btn-outline-success">
+          Volver a usuarios
         </a>
-        <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">
-          <i class="bi bi-list"></i> Volver a usuarios
+        <a href="{{ route('usuarios.create') }}" class="btn btn-success">
+          Agregar otro usuario
         </a>
       </div>
     </div>
