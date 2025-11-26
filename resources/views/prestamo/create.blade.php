@@ -129,6 +129,28 @@
 @endif
 
 
+{{-- Modal recurso vencido --}}
+@if(session('error'))
+<div class="modal fade" id="modalRecursoVencido" tabindex="-1" aria-labelledby="modalRecursoVencidoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalRecursoVencidoLabel">No se pudo registrar el préstamo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ session('error') }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
+
+
+
 <div class="modal fade" id="modalSerieInvalida" tabindex="-1" aria-labelledby="modalSerieInvalidaLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -205,12 +227,11 @@
 
 </div>
 @endsection
-
 @push('scripts')
   {{-- Incluimos el script principal --}}
   <script src="{{ asset('js/prestamo.js') }}"></script>
 
-  {{-- Script para sincronizar select -> hidden y mostrar modal de éxito (si aplica) --}}
+  {{-- Script para sincronizar select -> hidden y mostrar modales de éxito/error --}}
   <script>
   document.addEventListener('DOMContentLoaded', function () {
     const trabajadorSelect = document.getElementById('id_trabajador');
@@ -257,9 +278,33 @@
         window.location.href = "{{ route('prestamos.index') }}";
       }
     @endif
+
+    // Mostrar modal de error si viene en session
+    @if(session('error'))
+      const modalError = document.getElementById('modalRecursoVencido');
+      if (modalError && typeof bootstrap !== 'undefined') {
+        const instError = new bootstrap.Modal(modalError);
+        instError.show();
+
+        const btnAceptarError = modalError.querySelector('#btnAceptarErrorModal');
+        if (btnAceptarError) {
+          btnAceptarError.addEventListener('click', () => {
+            window.location.href = "{{ route('prestamos.index') }}";
+          });
+        }
+        modalError.addEventListener('hidden.bs.modal', () => {
+          window.location.href = "{{ route('prestamos.index') }}";
+        }, { once: true });
+      } else if ('{{ session("error") }}') {
+        alert('{{ session("error") }}');
+        window.location.href = "{{ route('prestamos.index') }}";
+      }
+    @endif
+
   });
   </script>
 @endpush
+
 
 
 @push('styles')

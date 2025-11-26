@@ -26,7 +26,7 @@ public function index(): View
     $fechaInicio = request('fecha_inicio');
     $fechaFin = request('fecha_fin');
 
-    $usuarios = Usuario::whereIn('id_rol', [1, 2])->pluck('name');
+    $usuarios = Usuario::select('id', 'name')->get();
 
     $query = request('search');
 
@@ -56,7 +56,10 @@ public function index(): View
             $q->where('estado_prestamo.nombre', $estado);
         })
         ->when($creador, function ($q) use ($creador) {
-            $q->where('creador.name', $creador);
+            $q->where(function ($sub) use ($creador) {
+                $sub->whereRaw('LOWER(creador.name) = ?', [$creador])
+                    ->orWhereRaw('LOWER(trabajador.name) = ?', [$creador]);
+            });
         })
         ->when($fechaInicio, function ($q) use ($fechaInicio) {
             $q->whereDate('prestamo.fecha_creacion', '>=', $fechaInicio);
@@ -210,6 +213,11 @@ public function store(PrestamoRequest $request)
         if (! $serie) {
             throw new \Exception("La serie con id {$idSerie} ya no está disponible.");
         }
+
+        if ($serie->fecha_vencimiento && $serie->fecha_vencimiento < Carbon::today()) {
+    return Redirect::back()->with('error', 'No se puede registrar el préstamo: la herramienta está vencida.');
+}
+        
 
         // Registrar el detalle del préstamo
         $detalle = DetallePrestamo::create([

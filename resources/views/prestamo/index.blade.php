@@ -74,9 +74,9 @@
           <div class="col-md-3">
             <select id="filtro-creador" name="creador" onchange="this.form.submit()" class="form-select filtro-destacado" style="height: 46px;">
               <option value="">Todos los usuarios</option>
-              @foreach($usuarios as $nombre)
-                <option value="{{ $nombre }}" {{ request('creador') == $nombre ? 'selected' : '' }}>
-                  {{ $nombre }}
+              @foreach($usuarios as $usuario)
+                <option value="{{ strtolower($usuario->name) }}" {{ request('creador') == strtolower($usuario->name) ? 'selected' : '' }}>
+                  {{ $usuario->name }}
                 </option>
               @endforeach
             </select>
@@ -102,34 +102,36 @@
     }
   @endphp
 
-  <div class="col prestamo-item"
-       data-estado="{{ strtolower($estadoNombre) }}"
-       data-creador="{{ strtolower($p->creado_por) }}"
-       data-texto="{{ strtolower(($p->subcategoria ?? '') . ' ' . ($p->recurso ?? '') . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
-       data-fecha="{{ $p->fecha_prestamo }}">
-    <div class="card border-secondary shadow-sm h-100 p-1">
-      <div class="card-body p-2">
-        <h6 class="card-title mb-1 fs-6">
-          {{ $p->subcategoria }}
-          <small class="text-muted">
-            ({{ $p->recurso ?? 'Sin marca' }})
-          </small>
-        </h6>
-        <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
-        <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
-        <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
-        <p class="card-text mb-1 small">
-          Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
-        </p>
-        <p class="card-text mb-0 small">
-          Estado: <span class="badge bg-{{ $color }}">{{ $estadoNombre }}</span>
-        </p>
-        <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-editar w-100 mt-2">
-          <i class="bi bi-pencil me-1"></i> Editar
-        </a>
-      </div>
+<div class="col prestamo-item"
+     data-estado="{{ strtolower($estadoNombre) }}"
+     data-creador="{{ strtolower($p->creado_por) }}"
+     data-asignado="{{ strtolower($p->asignado) }}"
+     data-texto="{{ strtolower(($p->subcategoria ?? '') . ' ' . ($p->recurso ?? '') . ' ' . $p->nro_serie . ' ' . $p->asignado . ' ' . $p->creado_por) }}"
+     data-fecha="{{ $p->fecha_prestamo }}">
+  <div class="card border-secondary shadow-sm h-100 p-1">
+    <div class="card-body p-2">
+      <h6 class="card-title mb-1 fs-6">
+        {{ $p->subcategoria }}
+        <small class="text-muted">
+          ({{ $p->recurso ?? 'Sin marca' }})
+        </small>
+      </h6>
+      <p class="card-text mb-1 small">Serie: <strong>{{ $p->nro_serie }}</strong></p>
+      <p class="card-text mb-1 small">Asignado a: {{ $p->asignado }}</p>
+      <p class="card-text mb-1 small">Creado por: {{ $p->creado_por }}</p>
+      <p class="card-text mb-1 small">
+        Fecha: {{ \Carbon\Carbon::parse($p->fecha_prestamo)->format('d/m/Y H:i') }}
+      </p>
+      <p class="card-text mb-0 small">
+        Estado: <span class="badge bg-{{ $color }}">{{ $estadoNombre }}</span>
+      </p>
+      <a href="{{ route('prestamos.edit', $p->id) }}" class="btn btn-editar w-100 mt-2">
+        <i class="bi bi-pencil me-1"></i> Editar
+      </a>
     </div>
   </div>
+</div>
+
 @endforeach
 
 
@@ -184,8 +186,12 @@
       let visibles = 0;
 
       items.forEach(item => {
+        const creador = (creadorSelect?.value || '').toLowerCase();
+
+const matchCreador = !creador ||
+  item.dataset.creador.includes(creador) ||
+  item.dataset.asignado.includes(creador);
         const matchEstado = !estado || item.dataset.estado === estado;
-        const matchCreador = !creador || item.dataset.creador.includes(creador);
         const matchTexto = !texto || item.dataset.texto.includes(texto);
 
         const fechaItem = item.dataset.fecha ? new Date(item.dataset.fecha) : null;
