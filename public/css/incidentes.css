@@ -262,3 +262,8 @@ header.row.mb-4 {
 .btn-ver-series:hover {
   background-color: #0277bd;
 }
+
+.btn-limpiar {
+  height: 46px !important;
+  width: 155px;
+}

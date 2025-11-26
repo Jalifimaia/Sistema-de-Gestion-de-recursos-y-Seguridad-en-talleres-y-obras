@@ -339,3 +339,13 @@ th.recurso-costo {
 .tr {
   text-align: center;
 }
+
+.btn-limpiar {
+  height: 40px !important;
+  width: 155px;
+}
+
+.btn-limpiar1 {
+  height: 46px !important;
+  width: 155px;
+}

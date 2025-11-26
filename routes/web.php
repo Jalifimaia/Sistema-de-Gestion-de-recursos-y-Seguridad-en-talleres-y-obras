@@ -140,8 +140,10 @@ Route::get('/supervisor/checklist-epp', fn() => view('supervisor.checklist_epp')
 Route::get('/checklist-epp', [ControlEPPController::class, 'create'])->name('checklist.epp.create');
 Route::post('/checklist-epp', [ControlEPPController::class, 'store'])->name('checklist.epp.store');
 
-Route::get('/asignar-epp', [ControlEPPController::class, 'createAsignacionEPP'])->name('epp.asignar.create');
-Route::post('/asignar-epp', [ControlEPPController::class, 'storeAsignacionEPP'])->name('epp.asignar.store');
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/asignar-epp', [ControlEPPController::class, 'createAsignacionEPP'])->name('epp.asignar.create');
+    Route::post('/asignar-epp', [ControlEPPController::class, 'storeAsignacionEPP'])->name('epp.asignar.store');
+});
 
 // Trabajadores con recursos faltantes
 Route::get('/control-epp/faltantes', [ControlEPPController::class, 'faltantes'])->name('controlEPP.faltantes');

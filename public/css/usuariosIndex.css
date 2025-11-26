@@ -554,3 +554,8 @@ td.acciones .d-flex {
 .filtro-destacado {
   min-height: 45px;
 }
+
+.btn-limpiar {
+  height: 46px !important;
+  width: 155px;
+}

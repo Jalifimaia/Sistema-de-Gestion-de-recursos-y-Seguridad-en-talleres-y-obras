@@ -86,33 +86,44 @@
 
 <!-- 🔶 Buscador y filtros en la misma fila -->
   <div class="row g-3 mb-3">
-    <!-- Buscador -->
-    <div class="col-md-6">
-      <input type="text" id="buscador" 
-             class="form-control buscador-destacado buscador-con-icono" 
-             placeholder="Buscar por nombre o email...">
-    </div>
+  <!-- Buscador -->
+  <div class="col-md-4">
+    <input type="text" id="buscador" 
+           class="form-control buscador-destacado buscador-con-icono" 
+           placeholder="Buscar por nombre o email...">
+  </div>
 
-    <!-- Filtro rol -->
-    <div class="col-md-3">
-      <select id="filtroRol" class="form-select filtro-destacado">
-        <option value="todos">Todos los roles</option>
-        @foreach($roles as $rol)
-          <option value="{{ $rol->nombre_rol }}">{{ $rol->nombre_rol }}</option>
-        @endforeach
-      </select>
-    </div>
+  <!-- Filtro rol -->
+  <div class="col-md-3">
+    <select id="filtroRol" class="form-select filtro-destacado">
+      <option value="todos">Todos los roles</option>
+      @foreach($roles as $rol)
+        <option value="{{ $rol->nombre_rol }}">{{ $rol->nombre_rol }}</option>
+      @endforeach
+    </select>
+  </div>
 
-    <!-- Filtro estado -->
-    <div class="col-md-3">
-      <select id="filtroEstado" class="form-select filtro-destacado">
-        <option value="todos">Todos los estados</option>
-        @foreach($estados as $estado)
-          <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
-        @endforeach
-      </select>
-    </div>
+  <!-- Filtro estado -->
+  <div class="col-md-3">
+    <select id="filtroEstado" class="form-select filtro-destacado">
+      <option value="todos">Todos los estados</option>
+      @foreach($estados as $estado)
+        <option value="{{ $estado->nombre }}">{{ $estado->nombre }}</option>
+      @endforeach
+    </select>
+  </div>
+
+  <!-- Botón limpiar -->
+  <div class="col-md-2">
+    <a href="{{ route('usuarios.index') }}"
+       class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center w-100">
+      <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 20px; height: 20px;" class="me-2">
+      Limpiar filtro
+    </a>
+  </div>
 </div>
+
+
 </div>
 
 
