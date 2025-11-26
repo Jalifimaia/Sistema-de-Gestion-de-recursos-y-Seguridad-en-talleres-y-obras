@@ -37,7 +37,7 @@
     @endphp
 
     <!-- Card: Trabajador -->
-    <div class="card mb-3 card-outline shadow-sm border">
+    <div class="card mb-3 card-outline shadow-sm border" id="driver-filtro_trabajador"> <!-- ID DRIVER.js -->
       <div class="card-header fw-bold">
     Filtros de trabajador
       </div>
@@ -83,7 +83,7 @@
 
 
     <!-- Card: Checklist EPP -->
-    <div class="card mb-3 card-outline shadow-sm border">
+    <div class="card mb-3 card-outline shadow-sm border" id="driver-checklist_epp"> <!-- ID DRIVER.js -->
       <div class="card-header fw-bold">
         Checklist
       </div>
@@ -122,7 +122,7 @@
     </div>
 
     <!-- Card: Observaciones -->
-    <div class="card mb-3 card-outline shadow-sm border">
+    <div class="card mb-3 card-outline shadow-sm border" id="driver-observaciones_checklist"> <!-- ID DRIVER.js -->
       <div class="card-header fw-bold">
         Observaciones (opcional)
       </div>

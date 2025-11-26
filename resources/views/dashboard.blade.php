@@ -35,7 +35,7 @@
   <!-- Estadísticas principales -->
   <div class="row g-4 mb-1 subir-cards">
     <div class="row g-4 mt-1 mb-4">
-      <div class="col-md-4">
+      <div class="col-md-4" id="driver-trabajadores_activos"> <!-- ID DRIVER.js -->
         <div class="card card-resumen card-resumen-cuadrada">
           <div class="card-body">
             <!-- Trabajadores Activos -->
@@ -51,7 +51,7 @@
       </div>
 
       <!-- Herramientas en Uso -->
-      <div class="col-md-4">
+      <div class="col-md-4" id="driver-herramientas_uso"> <!-- ID DRIVER.js -->
         <div class="card card-resumen card-resumen-cuadrada">
           <div class="card-body">
             <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" 
@@ -66,7 +66,7 @@
       </div>
 
       <!-- Alertas Activas -->
-      <div class="col-md-4">
+      <div class="col-md-4" id="driver-alertas_activas"> <!-- ID DRIVER.js -->
         <div class="card card-resumen card-resumen-cuadrada">
           <div class="card-body">
             <button class="btn btn-link text-decoration-none p-0 m-0 w-100 h-100" data-bs-toggle="modal" data-bs-target="#modalAlertas">
@@ -420,7 +420,7 @@
 
   <!-- Gráfico de estado general del inventario -->
   <div class="row mt-1">
-    <div class="col-12">
+    <div class="col-12" id="driver-estado_general_inventario"> <!-- ID DRIVER.js -->
       <div class="card card-resumen h-100 card-alerta w-100">
         <div class="card-body">
           <h5 class="card-title fw-bold mb-2 titulo-alerta">Estado General del Inventario</h5>

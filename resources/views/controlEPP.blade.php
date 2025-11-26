@@ -27,7 +27,7 @@
   <!-- Checklist Diario -->
   <div class="col-md-6 col-lg-4">
     <div class="card card-action h-100 d-flex flex-column align-items-center text-center">
-      <div class="card-body d-flex flex-column align-items-center text-center">
+      <div class="card-body d-flex flex-column align-items-center text-center" id="driver-card_checklist_diario"> <!-- ID DRIVER.js -->
         <div class="d-flex justify-content-center align-items-center w-100 mb-2 gap-2">
           <img src="{{ asset('images/checklistSI.svg') }}" alt="Checklist" class="icono-action-inline">
           <h5 class="card-title fw-semibold mb-0 ">Checklist Diario</h5>
@@ -41,7 +41,7 @@
   <!-- Asignar EPP -->
   <div class="col-md-6 col-lg-4">
     <div class="card card-action h-100 d-flex flex-column align-items-center text-center">
-      <div class="card-body d-flex flex-column align-items-center text-center">
+      <div class="card-body d-flex flex-column align-items-center text-center" id="driver-card_asignar_epp"> <!-- ID DRIVER.js -->
         <div class="d-flex justify-content-center align-items-center w-100 mb-2 gap-2">
           <img src="{{ asset('images/workerepp.svg') }}" alt="Asignar EPP" class="icono-action-inline">
           <h5 class="card-title fw-semibold mb-0">Asignar EPP</h5>
@@ -55,7 +55,7 @@
   <!-- Checklist No Registrado -->
   <div class="col-md-6 col-lg-4">
     <div class="card card-action h-100 d-flex flex-column align-items-center text-center">
-      <div class="card-body d-flex flex-column align-items-center text-center">
+      <div class="card-body d-flex flex-column align-items-center text-center" id="driver-card_checklist_no_registrado"> <!-- ID DRIVER.js -->
         <div class="d-flex justify-content-center align-items-center w-100 mb-2 gap-2">
           <img src="{{ asset('images/checknot.svg') }}" alt="Pendientes" class="icono-action-inline">
           <h5 class="card-title fw-semibold mb-0">Checklist No Registrado</h5>
@@ -70,7 +70,7 @@
 </div>
 
 <!-- 🔶 Checklist diario de EPP -->
-<div class="card mt-4 card-outline">
+<div class="card mt-4 card-outline" id="driver-card_checklist_del_dia"> <!-- ID DRIVER.js -->
   <div class="card-header bg-modalll text-white text-center">
     <h5 class="mb-0">Checklist registrados hoy</h5>
   </div>
