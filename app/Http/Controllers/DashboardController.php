@@ -23,17 +23,27 @@ public function index()
     $usuariosActivosLista = Usuario::where('id_estado', 1)
         ->paginate(6, ['*'], 'usuarios_activos_page');
 
-    $herramientasEnUso = SerieRecurso::where('id_estado', 3)->count();
+    $herramientasEnUso = \App\Models\DetallePrestamo::whereHas('serieRecurso.recurso.subcategoria.categoria', function ($query) {
+        $query->where('nombre_categoria', 'Herramienta');
+    })
+    ->where('id_estado_prestamo', 2)
+    ->whereHas('prestamo', function ($q) {
+        $q->whereDate('fecha_prestamo', Carbon::today());
+    })
+    ->count();
 
     $herramientasEnUsoLista = \App\Models\DetallePrestamo::with([
-            'serieRecurso.recurso.subcategoria.categoria',
-            'prestamo.usuario'
-        ])
-        ->whereHas('serieRecurso.recurso.subcategoria.categoria', function ($query) {
-            $query->where('nombre_categoria', 'Herramienta');
-        })
-        ->where('id_estado_prestamo', 2) // estado "en uso"
-        ->paginate(6, ['*'], 'herramientas_uso_page');
+        'serieRecurso.recurso.subcategoria.categoria',
+        'prestamo.usuario'
+    ])
+    ->whereHas('serieRecurso.recurso.subcategoria.categoria', function ($query) {
+        $query->where('nombre_categoria', 'Herramienta');
+    })
+    ->where('id_estado_prestamo', 2) // estado "en uso"
+    ->whereHas('prestamo', function ($q) {
+        $q->whereDate('fecha_prestamo', Carbon::today());
+    })
+    ->paginate(6, ['*'], 'herramientas_uso_page');
 
 
 
