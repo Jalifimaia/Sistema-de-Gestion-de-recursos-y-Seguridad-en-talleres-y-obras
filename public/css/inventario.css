@@ -387,3 +387,13 @@ th.recurso-costo {
   /* Opcional: Si quieres que el texto cambie de color también */
   color: #000 !important; 
 }
+
+.btn-limpiar {
+  height: 40px !important;
+  width: 155px;
+}
+
+.btn-limpiar1 {
+  height: 46px !important;
+  width: 155px;
+}

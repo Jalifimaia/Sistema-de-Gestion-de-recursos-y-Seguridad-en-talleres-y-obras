@@ -613,3 +613,7 @@ table.table thead th {
   /* Opcional: Si quieres que el texto cambie de color también */
   color: #000 !important; 
 }
+.btn-limpiar {
+  height: 46px !important;
+  width: 155px;
+}

@@ -182,11 +182,50 @@
         </a>
 
         <!-- Botón aceptar -->
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Seguir asignando</button>
+        <a href="{{ route('epp.asignar.create') }}" class="btn btn-success">
+          Seguir asignando
+        </a>
       </div>
     </div>
   </div>
 </div>
+
+@if (session('success'))
+<script>
+  // Usar DOMContentLoaded en lugar de load
+  document.addEventListener('DOMContentLoaded', function() {
+    const modalEl = document.getElementById('modalEppExito');
+    if (modalEl) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+  });
+</script>
+@endif
+
+<script>
+console.log('🔍 Sesión success:', @json(session('success')));
+console.log('🔍 Modal existe:', document.getElementById('modalEppExito'));
+
+@if (session('success'))
+  console.log('✅ Entrando al if de sesión');
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM Loaded ejecutado');
+    const modalEl = document.getElementById('modalEppExito');
+    console.log('🔍 Modal element:', modalEl);
+    
+    if (modalEl) {
+      console.log('✅ Creando modal Bootstrap');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+      console.log('✅ Modal.show() ejecutado');
+    } else {
+      console.error('❌ Modal no encontrado en el DOM');
+    }
+  });
+@endif
+</script>
+
 
 
 @endsection
@@ -413,9 +452,11 @@ selectEstado.addEventListener('change', function () {
   }
 
   // Si no hay incompletos, enviamos el formulario manualmente
-  e.preventDefault(); // evitamos envío inmediato
-  const modalExito = new bootstrap.Modal(document.getElementById('modalEppExito'));
-  if (modalExito) modalExito.show();
+  if (incompletos.length === 0) {
+    submitBtn.type = 'submit';
+    submitBtn.click();
+  }
+
 
 
 
@@ -444,6 +485,14 @@ selectEstado.addEventListener('change', function () {
 });
 </script>
 
+@if (session('success'))
+<div style="position: fixed; top: 10px; right: 10px; background: green; color: white; padding: 10px; z-index: 9999;">
+    ✅ SESIÓN DETECTADA: {{ session('success') }}
+</div>
+@endif
 
 @endpush
+
+
+
 

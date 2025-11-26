@@ -35,20 +35,25 @@
     <input
       type="text"
       id="buscadorIncidentes"
-      class="form-control buscador-destacado buscador-con-icono"
+      class="form-control buscador-destacado buscador-con-icono w-auto"
       placeholder="Buscar por trabajador, motivo, estado o resolución...">
 
     <!-- Select de filtro más ancho -->
-    <select id="filtroEstadoIncidente" class="form-select filtro-destacado">
+    <select id="filtroEstadoIncidente" class="form-select filtro-destacado w-auto">
       <option value="">Todos los estados</option>
       @foreach($estados as $id => $nombre)
         <option value="{{ $nombre }}">{{ $nombre }}</option>
       @endforeach
     </select>
+
+    <!-- Botón limpiar -->
+    <a href="{{ route('incidente.index') }}"
+       class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center">
+      <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 20px; height: 20px;" class="me-2">
+      Limpiar filtro
+    </a>
   </div>
 </div>
-
-
 
   @if(session('success'))
     <div id="alertaEstado" class="alert alert-success alert-dismissible fade show" role="alert">

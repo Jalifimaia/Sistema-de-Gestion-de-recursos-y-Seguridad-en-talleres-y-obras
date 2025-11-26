@@ -106,7 +106,15 @@
     <option value="herramienta">Herramientas</option>
     <option value="epp">EPP</option>
   </select>
+
+  <!-- Botón limpiar -->
+  <a href="{{ route('inventario.index') }}"
+     class="btn btn-secondary btn-limpiar1 btn-sm d-flex align-items-center justify-content-center">
+    <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 22px; height: 22px;" class="me-2">
+    Limpiar filtro
+  </a>
 </div>
+
 
 
 <!-- Tabla -->
@@ -251,7 +259,7 @@
   </div>
 
 <!-- Modal Ver Series -->
-<div class="modal fade" id="modalSeries" tabindex="-1" aria-labelledby="modalSeriesLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="modalSeries" tabindex="-1" aria-labelledby="modalSeriesLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-recurso-id="{{ $recurso->id }}">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header header-rec">
@@ -260,17 +268,27 @@
       </div>
       <div class="modal-body">
         <div class="mb-3 d-flex gap-2 align-items-center flex-wrap">
-          <input type="text" id="buscadorSerie" class="form-control w-auto" placeholder="Buscar serie... (Ej: T123)">
-          <select id="filtroEstado" class="form-select w-auto">
-            <option value="todos">Filtrar por estado</option>
-            <option value="Disponible">Disponible</option>
-            <option value="Baja">Baja</option>
-            <option value="Prestado">Prestado</option>
-            <option value="Devuelto">Devuelto</option>
-            <option value="Dañado">Dañado</option>
-            <option value="En reparación">En reparación</option>
-          </select>
-        </div>
+              <input type="text" id="buscadorSerie" class="form-control w-auto" placeholder="Buscar serie... (Ej: T123)">
+              
+              <select id="filtroEstado" class="form-select w-auto">
+                <option value="todos">Filtrar por estado</option>
+                <option value="Disponible">Disponible</option>
+                <option value="Baja">Baja</option>
+                <option value="Prestado">Prestado</option>
+                <option value="Devuelto">Devuelto</option>
+                <option value="Dañado">Dañado</option>
+                <option value="En reparación">En reparación</option>
+              </select>
+
+              <button type="button"
+                      id="btnLimpiarSeries"
+                      class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center">
+                <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 22px; height: 22px;" class="me-2">
+                Limpiar filtro
+              </button>
+
+            </div>
+
 
         <div class="table-responsive">
           <table class="table-naranja align-middle mb-0">
@@ -308,6 +326,18 @@
 <script src="{{ asset('js/cargarSeriesRecurso.js') }}"></script>
 <script src="{{ asset('js/inventario-actions.js') }}"></script>
 <script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
+
+<script>
+document.getElementById('btnLimpiarSeries').addEventListener('click', function() {
+  document.getElementById('buscadorSerie').value = '';
+  document.getElementById('filtroEstado').value = 'todos';
+
+  // aplicar filtros de nuevo sobre las filas ya cargadas
+  if (typeof aplicarFiltrosModal === 'function') {
+    aplicarFiltrosModal();
+  }
+});
+</script>
 
 
 <!--<script>

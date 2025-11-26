@@ -354,4 +354,6 @@ function mostrarPagina(n) {
   // listeners filtros modal
   if (buscadorSerie) buscadorSerie.addEventListener('input', aplicarFiltrosModal);
   if (filtroEstado) filtroEstado.addEventListener('change', aplicarFiltrosModal);
+
+  window.aplicarFiltrosModal = aplicarFiltrosModal;
 });
