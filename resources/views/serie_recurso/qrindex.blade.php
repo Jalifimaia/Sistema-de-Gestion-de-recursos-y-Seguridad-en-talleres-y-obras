@@ -23,14 +23,14 @@
      <!-- SE DESACTIVO POR LAS DUDAS -->
     <!--<a href="{ route('series.qr.lote.pdf', ['page' => request('page', 1)]) }}"-->
     <a 
-       class="btn btn-print d-flex align-items-center mt-2 mt-md-0" target="_blank">
+       class="btn btn-print d-flex align-items-center mt-2 mt-md-0" target="_blank" id="driver-btn_imprimir_lote"> <!-- ID DRIVER.js -->
       <img src="{{ asset('images/print.svg') }}" alt="Imprimir" class="me-2" style="width: 20px; height: 20px;">
       Imprimir QR en lote
     </a>
   </div>
 
   <!-- 🔍 Buscador por nro_serie -->
-  <div class="input-group mb-3 mt-4">
+  <div class="input-group mb-3 mt-4" id="driver-filtro_buscador_qr"> <!-- ID DRIVER.js -->
     <input type="text" id="busquedaSerie" class="form-control buscador-con-icono"
            placeholder="Buscar por categoría, subcategoría, nombre del recurso o iniciales del número de serie...">
   </div>
@@ -44,7 +44,7 @@
         @foreach($series as $serie)   
           <div class="col">
             <div class="card shadow-sm h-100">
-              <div class="card-body d-flex flex-column justify-content-between">
+              <div class="card-body d-flex flex-column justify-content-between" id="driver-card_detalles_qr"> <!-- ID DRIVER.js -->
                 <div>
                   <h5 class="card-title">{{ $serie->nro_serie }}</h5>
                   <p class="card-text">

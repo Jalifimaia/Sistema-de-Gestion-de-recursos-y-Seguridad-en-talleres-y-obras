@@ -38,7 +38,7 @@
         </button>
 
         <!-- Título y subtítulo -->
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2" id="driver-estado_inventario"> <!-- ID DRIVER.js -->
           <span class="fw-bold textoInventario">Estado del Inventario</span>
         </div>
       </div>
@@ -78,12 +78,12 @@
 
   <div class="d-flex flex-wrap align-items-start gap-2 mb-1">
 
-    <a href="{{ route('recursos.create') }}" class="btn btn-agregar">
+    <a href="{{ route('recursos.create') }}" class="btn btn-agregar" id="driver-agregar_recurso"> <!-- ID DRIVER.js -->
       Agregar recurso
     </a>
     
     <a href="{{ url('/series-qr') }}" 
-      class="btn btn-qr" style="font-size: 1.1rem;">
+      class="btn btn-qr" style="font-size: 1.1rem;" id="driver-codigos_qr"> <!-- ID DRIVER.js -->
       <span>Códigos QR</span>
     </a>
 
@@ -93,7 +93,7 @@
 </div>
 
 <!-- Filtro y buscador -->
-<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3" id="driver-filtro_buscador"> <!-- ID DRIVER.js -->
   <!-- Buscar -->
   <input type="text" id="buscador"
          class="form-control buscador-destacado buscador-con-icono"
@@ -144,7 +144,7 @@
               -
             @endif
           </td>
-          <td class="text-nowrap acciones-cell">
+          <td class="text-nowrap acciones-cell" id="driver-crud_recursos"> <!-- ID DRIVER.js -->
             @if ($estadoRecurso === 'baja' || $todasBaja)
               <span class="badge bg-secondary fw-semibold">Dado de baja</span>
             @else

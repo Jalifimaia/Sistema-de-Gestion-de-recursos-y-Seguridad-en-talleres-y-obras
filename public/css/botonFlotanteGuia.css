@@ -1,0 +1,23 @@
+
+/* estilos para boton flotante de guia de uso */
+.btn-tour {
+  position: fixed;
+  bottom: 2%;
+  right: 2%;
+  margin: 1%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+  z-index: 99999; /* siempre arriba */
+  opacity: 0.3;  /* semi transparente */
+  transition: opacity 0.3s ease;
+}
+
+.btn-tour:hover {
+  opacity: 1; /* opaco al pasar el cursor */
+}
