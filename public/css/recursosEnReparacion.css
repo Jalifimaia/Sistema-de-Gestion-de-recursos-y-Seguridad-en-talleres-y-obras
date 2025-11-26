@@ -149,3 +149,61 @@ table.table thead th {
 .header-m {
   background-color: #b14910;
 }
+
+
+/* ==========================================================================
+   CORRECCIÓN DEFINITIVA DE ZEBRA Y ORDENAMIENTO
+   ========================================================================== */
+
+
+table.table thead th {
+  background-color: #d06842 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+
+/* 1. RESET TOTAL: Eliminar interferencias de Bootstrap y estilos previos */
+.table-naranja tbody tr,
+.table-naranja tbody tr:nth-of-type(odd),
+.table-naranja tbody tr:nth-of-type(even),
+.table-naranja tbody tr.table-row-baja {
+    background-color: transparent !important;
+    --bs-table-accent-bg: transparent !important; /* Vital para Bootstrap 5 */
+    color: inherit;
+}
+
+/* 2. APLICACIÓN DE COLOR: Solo a las celdas (td) basado en las clases del JS */
+
+/* Filas Impares (odd-row) -> Blanco */
+.table-naranja tbody tr.odd-row td {
+    background-color: #ffffff !important;
+    box-shadow: none !important; /* Elimina sombras internas de Bootstrap */
+}
+
+/* Filas Pares (even-row) -> Naranja claro */
+.table-naranja tbody tr.even-row td {
+    background-color: #ffeddf !important;
+    box-shadow: none !important;
+}
+
+/* 3. ESTILO PARA BAJAS: Mantener opacidad pero respetar el color zebra */
+.table-naranja tbody tr.table-row-baja {
+    opacity: 0.6;
+}
+
+/* Asegurar que las celdas de bajas también respeten el color de fondo zebra */
+.table-naranja tbody tr.table-row-baja td {
+    /* No ponemos background-color aquí para que herede el de odd/even */
+}
+
+/* --- CORRECCIÓN DEL HOVER --- */
+/*
+   Cuando el mouse pasa sobre la fila (tr:hover),
+   cambiamos el fondo de sus celdas (td).
+*/
+.table-naranja tbody tr:hover td {
+  background-color: #ffd1be !important;
+  /* Opcional: Si quieres que el texto cambie de color también */
+  color: #000 !important; 
+}

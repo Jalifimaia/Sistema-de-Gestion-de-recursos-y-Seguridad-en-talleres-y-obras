@@ -62,8 +62,7 @@
 
     @if($herramientas->count())
     <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped align-middle text-center">
-            <thead>
+<table class="table table-bordered table-striped align-middle text-center table-naranja">            <thead>
                 <tr class="text-orange">
                     <th>Trabajador</th>
                     <th>Herramienta</th>
@@ -110,9 +109,14 @@
   </div>
 </div>
 
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // Obtenemos la tabla fuera de las funciones
+  const tablaHerramientas = document.querySelector('table.table-naranja'); 
+
   // 🔹 Paginación de la tabla
   const filas = Array.from(document.querySelectorAll('table tbody tr'));
   const info = document.getElementById('infoPaginacionHerramientas');
@@ -149,6 +153,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       li.appendChild(a);
       paginacion.appendChild(li);
+    }
+
+    // 💡 SOLUCIÓN ZEBRA
+    if (tablaHerramientas && tablaHerramientas.aplicarZebra) {
+        tablaHerramientas.aplicarZebra();
     }
   }
 

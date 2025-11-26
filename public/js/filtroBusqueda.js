@@ -1,9 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
   try {
-    const tabla = document.querySelector('table.table-naranja tbody');
+    const tabla = document.querySelector('table.table-naranja');
     if (!tabla) return; // no hay tabla en esta vista, salimos limpio
+    
+    const tbody = tabla.querySelector('tbody');
+    if (!tbody) return;
 
-    const filas = Array.from(tabla.querySelectorAll('tr'));
+    const filas = Array.from(tbody.querySelectorAll('tr'));
     const paginacion = document.getElementById('paginacion');
     const info = document.getElementById('infoPaginacion');
     const filtroSelect = document.getElementById('filtroInventario');
@@ -13,64 +16,55 @@ document.addEventListener('DOMContentLoaded', function () {
     let paginaActual = 1;
 
     function aplicarFiltrosYPaginar() {
-      const filtro = filtroSelect?.value.toLowerCase() || 'todos';
-      const texto = buscador?.value.toLowerCase() || '';
+  const filtro = filtroSelect?.value.toLowerCase() || 'todos';
+  const texto = buscador?.value.toLowerCase() || '';
 
-      const visibles = filas.filter(fila => {
-        const nombre = fila.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
-        const categoria = fila.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
-        const subcategoria = fila.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
-        const descripcion = fila.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || ''; // 🔑 nueva columna
-        const categoriaCombinada = `${categoria} ${subcategoria}`;
+  const filasFiltradas = filas.filter(fila => {
+    const nombre = fila.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+    const categoria = fila.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+    const subcategoria = fila.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+    const descripcion = fila.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || ''; 
+    
+    // 1. Filtrar por estado (filtro)
+    const estadoFila = fila.dataset.estado?.toLowerCase() || 'disponible';
+    const coincideFiltro = filtro === 'todos' || estadoFila === filtro;
 
-        // Buscar en cualquiera de los campos
-        const coincideTexto =
-          nombre.includes(texto) ||
-          categoria.includes(texto) ||
-          subcategoria.includes(texto) ||
-          descripcion.includes(texto);
+    // 2. Filtrar por texto (buscador)
+    const textoFila = `${nombre} ${categoria} ${subcategoria} ${descripcion}`;
+    const coincideTexto = textoFila.includes(texto);
 
-        return (filtro === 'todos' || categoriaCombinada.includes(filtro)) && coincideTexto;
-      });
+    return coincideFiltro && coincideTexto;
+  });
 
+  // 3. Aplicar paginación a las filas filtradas
+  const total = filasFiltradas.length;
+  const totalPaginas = Math.ceil(total / filasPorPagina);
+  paginaActual = Math.max(1, Math.min(paginaActual, totalPaginas || 1));
 
-      const totalPaginas = Math.ceil(visibles.length / filasPorPagina);
-      paginaActual = Math.min(Math.max(1, paginaActual), totalPaginas || 1);
+  filas.forEach(f => f.style.display = 'none'); // Ocultar todas las filas
+  
+  const inicio = (paginaActual - 1) * filasPorPagina;
+  const fin = Math.min(inicio + filasPorPagina, total);
 
-      // Ocultar todas y mostrar sólo las del page
-      filas.forEach(fila => {
-        fila.classList.add('hidden-row');
-        fila.style.display = 'none';
-        fila.style.backgroundColor = ''; // resetear color inline
-      });
+  for (let i = inicio; i < fin; i++) {
+      filasFiltradas[i].style.display = 'table-row'; // Mostrar solo las de la página actual
+  }
 
-      visibles.forEach((fila, indexVisible) => {
-        const inicio = (paginaActual - 1) * filasPorPagina;
-        const fin = paginaActual * filasPorPagina;
-        if (indexVisible >= inicio && indexVisible < fin) {
-          fila.classList.remove('hidden-row');
-          fila.style.display = ''; // que vuelva a su estado por defecto (table-row)
-          const rowIndexOnPage = indexVisible - inicio;
-          fila.style.backgroundColor = (rowIndexOnPage % 2 === 0) ? '#ffffff' : '#ffeddf';
-        }
-      });
+  // 💡 SOLUCIÓN ZEBRA: Llamar aplicarZebra() después de cambiar las filas visibles
+  if (tabla && tabla.aplicarZebra) {
+      tabla.aplicarZebra();
+  }
+  
+  // 4. Actualizar info y paginación (solo si existen los elementos)
+  if (info) {
+    info.textContent = `Mostrando ${total === 0 ? 0 : inicio + 1}-${fin} de ${total} recursos`;
+  }
 
-      if (info) {
-        const desde = visibles.length ? Math.min((paginaActual - 1) * filasPorPagina + 1, visibles.length) : 0;
-        const hasta = visibles.length ? Math.min(paginaActual * filasPorPagina, visibles.length) : 0;
-        info.textContent = `Mostrando ${desde} a ${hasta} de ${visibles.length} elementos`;
-      }
-
-      renderizarBotones(totalPaginas);
-    }
-
-    function renderizarBotones(total) {
-      if (!paginacion) return;
-      paginacion.innerHTML = '';
-
-      const crearItem = (label, page, disabled = false, active = false) => {
+  if (paginacion) {
+    paginacion.innerHTML = '';
+    const crearItem = (label, page, disabled, isActive = false) => {
         const li = document.createElement('li');
-        li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+        li.className = 'page-item' + (isActive ? ' active' : '') + (disabled ? ' disabled' : '');
         const a = document.createElement('a');
         a.className = 'page-link';
         a.textContent = label;
@@ -78,58 +72,47 @@ document.addEventListener('DOMContentLoaded', function () {
         a.addEventListener('click', e => {
           e.preventDefault();
           if (!disabled && paginaActual !== page) {
-            paginaActual = Math.max(1, Math.min(page, total || 1));
+            paginaActual = Math.max(1, Math.min(page, totalPaginas || 1));
             aplicarFiltrosYPaginar();
           }
         });
         li.appendChild(a);
         return li;
-      };
+    };
 
-      // Prev
-      paginacion.appendChild(crearItem('«', paginaActual - 1, paginaActual === 1));
+    // Prev
+    paginacion.appendChild(crearItem('«', paginaActual - 1, paginaActual === 1));
 
-      for (let i = 1; i <= (total || 1); i++) {
-        paginacion.appendChild(crearItem(i, i, false, i === paginaActual));
-      }
-
-      // Next
-      paginacion.appendChild(crearItem('»', paginaActual + 1, paginaActual === total || total === 0));
+    for (let i = 1; i <= totalPaginas; i++) {
+      paginacion.appendChild(crearItem(i, i, false, i === paginaActual));
     }
 
-    // Eventos: re-evaluar y resetear página al cambiar filtro o búsqueda
-    if (filtroSelect) {
-      filtroSelect.addEventListener('change', () => {
-        paginaActual = 1;
-        aplicarFiltrosYPaginar();
-      });
-    }
+    // Next
+    paginacion.appendChild(crearItem('»', paginaActual + 1, paginaActual === totalPaginas || totalPaginas === 0));
+  }
+}
 
-    if (buscador) {
-      buscador.addEventListener('input', () => {
-        paginaActual = 1;
-        aplicarFiltrosYPaginar();
-      });
-    }
+    
+    // Event Listeners
+    if (buscador) buscador.addEventListener('input', () => {
+      paginaActual = 1;
+      aplicarFiltrosYPaginar();
+    });
+    if (filtroSelect) filtroSelect.addEventListener('change', () => {
+      paginaActual = 1;
+      aplicarFiltrosYPaginar();
+    });
 
-    // Mostrar estado dinámico para selects de series (mantener compatibilidad si existen)
-    window.mostrarEstado = function (select) {
-      const selectedOption = select.options[select.selectedIndex];
-      const estado = selectedOption?.getAttribute('data-estado');
-      const talle = selectedOption?.getAttribute('data-talle');
-      const fila = select.closest('tr');
-      const badge = fila?.querySelector('.estado-vencimiento');
+    // Helper para badge de estado
+    const mostrarEstado = (select) => {
+      const estado = select.value.toLowerCase();
+      const badge = document.getElementById(`estado-badge-${select.dataset.id}`);
+      if (!badge) return;
 
-      if (!badge || !estado) {
-        if (badge) badge.textContent = '';
-        return;
-      }
+      badge.textContent = estado.charAt(0).toUpperCase() + estado.slice(1);
+      badge.className = 'badge px-2 py-1 rounded fw-semibold text-capitalize';
 
-      badge.textContent = talle ? `${estado} (Talle ${talle})` : estado;
-      badge.style.display = 'inline-block';
-      badge.className = 'badge estado-vencimiento px-2 py-1 border rounded small fw-semibold';
-
-      switch (estado.toLowerCase()) {
+      switch (estado) {
         case 'disponible':
           badge.classList.add('bg-success');
           break;

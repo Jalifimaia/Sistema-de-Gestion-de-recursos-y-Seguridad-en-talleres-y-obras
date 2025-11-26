@@ -164,7 +164,6 @@
   </div>
 </div>
 
-<!-- Modal: Éxito en asignación -->
 <div class="modal fade" id="modalEppExito" tabindex="-1" aria-labelledby="modalEppExitoLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -176,12 +175,10 @@
         Los EPP fueron asignados correctamente al trabajador.
       </div>
       <div class="modal-footer">
-      <!-- Botón volver al control de EPP -->
-        <a href="{{ route('controlEPP') }}" class="btn btn-outline-success">
+      <a href="{{ route('controlEPP') }}" class="btn btn-outline-success">
           Volver al control de EPP
         </a>
 
-        <!-- Botón aceptar -->
         <a href="{{ route('epp.asignar.create') }}" class="btn btn-success">
           Seguir asignando
         </a>
@@ -485,11 +482,7 @@ selectEstado.addEventListener('change', function () {
 });
 </script>
 
-@if (session('success'))
-<div style="position: fixed; top: 10px; right: 10px; background: green; color: white; padding: 10px; z-index: 9999;">
-    ✅ SESIÓN DETECTADA: {{ session('success') }}
-</div>
-@endif
+
 
 @endpush
 

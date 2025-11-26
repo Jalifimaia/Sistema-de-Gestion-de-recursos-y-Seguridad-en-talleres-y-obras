@@ -64,32 +64,31 @@
 
     @if($recursos->count())
         <div class="table-responsive mb-4">
-            <table class="table table-bordered table-striped align-middle text-center">
-                <thead class="table-light">
-                  <tr class="text-orange">
-                    <th>Recurso</th>
-                    <th>Número de serie</th>
-                    <th>Fecha adquisición</th>
-                    <th>Fecha marcado en reparación</th>
-                    <th>Costo unitario</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach($recursos as $r)
-                  <tr>
-                    <td>
-                      {{ $r->recurso ?? '-' }}
-                      [{{ $r->subcategoria ?? 'Sin subcategoría' }}]
-                    </td>
-                    <td>{{ $r->nro_serie }}</td>
-                    <td>{{ $r->fecha_adquisicion ? \Carbon\Carbon::parse($r->fecha_adquisicion)->format('d/m/Y') : '-' }}</td>
-                    <td>{{ $r->estado_actualizado_en ? \Carbon\Carbon::parse($r->estado_actualizado_en)->format('d/m/Y') : '-' }}</td>
-                    <td>${{ number_format($r->costo_unitario, 2, ',', '.') }}</td>
-                  </tr>
-                  @endforeach
-                </tbody>
-            </table>
-
+          <table class="table table-bordered table-striped align-middle text-center table-naranja">
+            <thead>
+              <tr class="text-orange">
+                <th>Recurso</th>
+                <th>Número de serie</th>
+                <th>Fecha adquisición</th>
+                <th>Fecha marcado en reparación</th>
+                <th>Costo unitario</th>
+              </tr>
+            </thead>
+          <tbody>
+            @foreach($recursos as $r)
+            <tr>
+              <td>
+                {{ $r->recurso ?? '-' }}
+                [{{ $r->subcategoria ?? 'Sin subcategoría' }}]
+              </td>
+              <td>{{ $r->nro_serie }}</td>
+              <td>{{ $r->fecha_adquisicion ? \Carbon\Carbon::parse($r->fecha_adquisicion)->format('d/m/Y') : '-' }}</td>
+              <td>{{ $r->estado_actualizado_en ? \Carbon\Carbon::parse($r->estado_actualizado_en)->format('d/m/Y') : '-' }}</td>
+              <td>${{ number_format($r->costo_unitario, 2, ',', '.') }}</td>
+            </tr>
+            @endforeach
+          </tbody>
+          </table>
             <div class="alert alert-precio fw-bold">
               Valor total calculado de recursos en reparación: 
               <span class="precio-total">${{ number_format($totalPerdido, 2, ',', '.') }}</span>
@@ -122,9 +121,14 @@
   </div>
 </div>
 
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // 💡 Necesario para llamar aplicarZebra()
+  const tablaReparacion = document.querySelector('table.table-naranja'); 
+
   // 🔹 Paginación de la tabla
   const filas = Array.from(document.querySelectorAll('table tbody tr'));
   const info = document.getElementById('infoPaginacionReparacion');
@@ -161,6 +165,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       li.appendChild(a);
       paginacion.appendChild(li);
+    }
+
+    // 💡 SOLUCIÓN ZEBRA
+    if (tablaReparacion && tablaReparacion.aplicarZebra) {
+        tablaReparacion.aplicarZebra();
     }
   }
 
@@ -210,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         title: {
           display: true,
-          text: 'Recursos en reparación por tipo',
+          text: 'Recursos en reparación',
           color: '#ff6600',
           font: { size: 16 }
         }
@@ -224,3 +233,4 @@ document.addEventListener('DOMContentLoaded', function () {
 @push('styles')
 <link href="{{ asset('css/recursosEnReparacion.css') }}" rel="stylesheet">
 @endpush
+

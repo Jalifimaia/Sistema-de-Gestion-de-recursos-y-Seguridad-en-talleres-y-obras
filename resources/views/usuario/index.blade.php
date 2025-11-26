@@ -246,6 +246,8 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const filas = Array.from(document.querySelectorAll('#tablaUsuarios tbody tr'));
@@ -302,6 +304,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const fila = visibles[i];
       if (fila) fila.style.display = 'table-row';
     }
+
+      const tablaUsuarios = document.querySelector('table.table-naranja');
+     if (tablaUsuarios && tablaUsuarios.aplicarZebra) {
+       tablaUsuarios.aplicarZebra();
+     }
 
     if (info) {
       const desde = totalRegistros ? inicio + 1 : 0;
@@ -448,3 +455,4 @@ document.addEventListener('DOMContentLoaded', function () {
 @push('styles')
 <link href="{{ asset('css/usuariosIndex.css') }}?v={{ time() }}" rel="stylesheet">
 @endpush
+

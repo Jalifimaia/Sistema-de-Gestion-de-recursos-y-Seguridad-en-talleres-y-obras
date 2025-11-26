@@ -62,26 +62,26 @@
 
     @if($recursos->count())
     <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped align-middle text-center">
-            <thead>
-                <tr class="text-orange">
-                    <th>Recurso</th>
-                    <th>Cantidad de préstamos</th>
-                    <th>Última fecha de préstamo</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($recursos as $r)
-                <tr>
-                    <td>{{ $r->nombre }} [{{ $r->subcategoria_nombre ?? 'Sin subcategoría' }}]</td>
-                    <td>{{ $r->cantidad_prestamos }}</td>
-                    <td>
-                      {{ \Carbon\Carbon::parse($r->ultima_fecha)->format('d/m/Y H:i') }}
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+      <table class="table table-bordered table-striped align-middle text-center table-naranja">
+        <thead>
+          <tr class="text-orange">
+            <th>Recurso</th>
+            <th>Cantidad de préstamos</th>
+            <th>Última fecha de préstamo</th>
+          </tr>
+        </thead>
+       <tbody>
+          @foreach($recursos as $r)
+          <tr>
+            <td>{{ $r->nombre }} [{{ $r->subcategoria_nombre ?? 'Sin subcategoría' }}]</td>
+            <td>{{ $r->cantidad_prestamos }}</td>
+            <td>
+              {{ \Carbon\Carbon::parse($r->ultima_fecha)->format('d/m/Y H:i') }}
+            </td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
         <div class="d-flex justify-content-between align-items-center mt-3">
           <div id="infoPaginacionRecursos" class="text-muted small"></div>
           <ul id="paginacionRecursos" class="pagination mb-0"></ul>
@@ -107,9 +107,14 @@
   </div>
 </div>
 
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // 💡 Necesario para llamar aplicarZebra()
+  const tablaRecursos = document.querySelector('table.table-naranja'); 
+  
   // 🔹 Paginación de la tabla
   const filas = Array.from(document.querySelectorAll('table tbody tr'));
   const info = document.getElementById('infoPaginacionRecursos');
@@ -146,6 +151,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       li.appendChild(a);
       paginacion.appendChild(li);
+    }
+    
+    // 💡 SOLUCIÓN ZEBRA
+    if (tablaRecursos && tablaRecursos.aplicarZebra) {
+        tablaRecursos.aplicarZebra();
     }
   }
 
@@ -193,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         y: {
           beginAtZero: true,
-          ticks: { color: '#333', font: { size: 12 } },
+          ticks: { color: '#333' },
           grid: { color: '#eee' }
         }
       }
@@ -209,3 +219,4 @@ document.addEventListener('DOMContentLoaded', function () {
 @push('styles')
 <link href="{{ asset('css/recursosMasPrestados.css') }}" rel="stylesheet">
 @endpush
+

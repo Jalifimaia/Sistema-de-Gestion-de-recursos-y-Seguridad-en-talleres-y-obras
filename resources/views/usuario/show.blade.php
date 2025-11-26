@@ -127,6 +127,7 @@
 
 
 
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 
 <script>
 function copiarCodigoQR() {
@@ -146,22 +147,31 @@ function copiarCodigoQR() {
     const tabContent = document.getElementById('tab-content');
 
     async function loadTab(url) {
-      tabContent.innerHTML = '<div class="text-center py-4">Cargando...</div>';
-      const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-      if (!res.ok) {
-        tabContent.innerHTML = '<div class="text-danger">Error al cargar los datos.</div>';
-        return;
-      }
-      const html = await res.text();
-      tabContent.innerHTML = html;
-      // Delegación para paginación: interceptar clicks en links de paginación
-      tabContent.querySelectorAll('.pagination a').forEach(a => {
-        a.addEventListener('click', function(e) {
-          e.preventDefault();
-          loadTab(this.href);
-        });
-      });
+  tabContent.innerHTML = '<div class="text-center py-4">Cargando...</div>';
+  const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+  if (!res.ok) {
+    tabContent.innerHTML = '<div class="text-danger">Error al cargar los datos.</div>';
+    return;
+  }
+  const html = await res.text();
+  tabContent.innerHTML = html;
+  
+  // 🔹 ESPERAR A QUE EL DOM SE ACTUALICE
+  setTimeout(() => {
+    const tablaEnTab = tabContent.querySelector('table.table-naranja');
+    if (tablaEnTab && typeof window.inicializarOrdenamiento === 'function') {
+      window.inicializarOrdenamiento(tablaEnTab);
     }
+  }, 100);
+  
+  // Delegación para paginación
+  tabContent.querySelectorAll('.pagination a').forEach(a => {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      loadTab(this.href);
+    });
+  });
+}
 
     tabButtons.forEach(btn => {
       btn.addEventListener('click', function() {
@@ -224,3 +234,5 @@ function copiarCodigoQR() {
 @push('styles')
 <link href="{{ asset('css/usuariosShow.css') }}" rel="stylesheet">
 @endpush
+
+

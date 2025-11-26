@@ -1,5 +1,11 @@
 // public/js/cargarSeriesRecurso.js
 window.addEventListener('load', function () {
+
+  let seriesCargadas = [];
+
+  // REFERENCIA A LA TABLA PRINCIPAL (Necesaria para llamar a aplicarZebra)
+const tablaSeries = document.querySelector('#modalSeries table.table-naranja');
+
   const modalEl = document.getElementById('modalSeries'); // contenedor del modal
   const modalTitle = document.getElementById('modalSeriesLabel');
   const tablaBody = document.getElementById('tablaSeriesBody');
@@ -26,213 +32,222 @@ window.addEventListener('load', function () {
     }
   }
 
-  document.querySelectorAll('.btn-ver-series').forEach(btn => {
+document.querySelectorAll('.btn-ver-series').forEach(btn => {
     btn.addEventListener('click', function () {
-      const nombre = this.dataset.nombre || '';
-      const rawSeries = this.dataset.series || '[]';
-      let series = [];
+        const nombre = this.dataset.nombre || '';
+        const rawSeries = this.dataset.series || '[]';
+        // 💡 CAMBIO 1: Eliminamos la declaración local 'let series = []' 
+        //             y usaremos la global 'seriesCargadas' definida al inicio del archivo.
 
-      try {
-        // dataset ya debería contener JSON válido; algunos escapes vienen como &quot;
-        const decoded = rawSeries.replace(/&quot;/g, '"');
-        series = JSON.parse(decoded);
-      } catch (err) {
-        console.error('Error parseando series JSON', err);
-        tablaBody.innerHTML = '<tr><td colspan="4" class="text-danger text-center">Error al cargar las series</td></tr>';
-        return;
-      }
-
-      if (modalTitle) modalTitle.textContent = `Series del recurso: ${nombre}`;
-      tablaBody.innerHTML = '';
-      if (buscadorSerie) buscadorSerie.value = '';
-      if (filtroEstado) filtroEstado.value = 'todos';
-
-      if (!series.length) {
-        tablaBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay series registradas</td></tr>';
-        // limpiar paginación
-        if (paginacionSeries) paginacionSeries.innerHTML = '';
-        if (infoPaginacionSeries) infoPaginacionSeries.textContent = '';
-        return;
-      }
-
-      // Construir filas de manera segura
-      series.forEach(serie => {
-        const nroSerie = serie.nro_serie || ((serie.codigo && serie.codigo.codigo_base) ? (serie.codigo.codigo_base + '-' + String(serie.correlativo ?? 0).padStart(2,'0')) : 'SIN-CODIGO');
-        const estado = serie.estado?.nombre_estado || serie.nombre_estado || 'Sin estado';
-        const color = serie.color?.nombre_color || 'Sin color';
-        const serieId = serie.id ?? '';
-
-        const fila = document.createElement('tr');
-        fila.dataset.serie = String(nroSerie).toLowerCase();
-        fila.dataset.estado = String(estado).toLowerCase();
-
-        // Serie
-        const tdSerie = document.createElement('td');
-        tdSerie.textContent = nroSerie;
-        tdSerie.classList.add('text-center');
-
-        // Estado -> badge
-        const tdEstado = document.createElement('td');
-        const badge = document.createElement('span');
-        badge.className = 'badge px-2 py-1 border rounded small fw-semibold';
-        badge.textContent = estado;
-        tdEstado.classList.add('text-center');
-        switch ((estado || '').toLowerCase()) {
-          case 'disponible':
-            badge.classList.add('bg-success');
-            break;
-          case 'prestado':
-            badge.classList.add('bg-warning', 'text-dark');
-            break;
-          case 'en reparación':
-          case 'en reparacion':
-          case 'dañado':
-          case 'danado':
-            badge.classList.add('bg-danger');
-            break;
-          case 'devuelto':
-            badge.classList.add('bg-info', 'text-dark');
-            break;
-          case 'baja':
-            badge.classList.add('bg-secondary');
-            break;
-          default:
-            badge.classList.add('bg-secondary');
+        try {
+            // dataset ya debería contener JSON válido; algunos escapes vienen como &quot;
+            const decoded = rawSeries.replace(/&quot;/g, '"');
+            // 💡 CAMBIO 2: Almacenamos en la variable global 'seriesCargadas'
+            seriesCargadas = JSON.parse(decoded);
+        } catch (err) {
+            console.error('Error parseando series JSON', err);
+            tablaBody.innerHTML = '<tr><td colspan="4" class="text-danger text-center">Error al cargar las series</td></tr>';
+            return;
         }
-        tdEstado.appendChild(badge);
 
-        // Color
-        const tdColor = document.createElement('td');
-        tdColor.textContent = color;
+        if (modalTitle) modalTitle.textContent = `Series del recurso: ${nombre}`;
+        tablaBody.innerHTML = '';
+        if (buscadorSerie) buscadorSerie.value = '';
+        if (filtroEstado) filtroEstado.value = 'todos';
 
-        // Acciones (Eliminar serie -> marcar baja)
-        const tdAcciones = document.createElement('td');
-        tdAcciones.className = 'text-nowrap';
+        // 💡 CAMBIO 3: Usamos seriesCargadas para la validación
+        if (!seriesCargadas.length) {
+            tablaBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay series registradas</td></tr>';
+            // limpiar paginación
+            if (paginacionSeries) paginacionSeries.innerHTML = '';
+            if (infoPaginacionSeries) infoPaginacionSeries.textContent = '';
+            return;
+        }
 
-        const contAcc = document.createElement('div');
-        contAcc.className = 'd-flex justify-content-center align-items-center gap-2 flex-wrap';
+        // Construir filas de manera segura (manteniendo tu loop)
+        // 💡 CAMBIO 4: Usamos seriesCargadas para construir las filas
+        seriesCargadas.forEach(serie => {
+            const nroSerie = serie.nro_serie || ((serie.codigo && serie.codigo.codigo_base) ? (serie.codigo.codigo_base + '-' + String(serie.correlativo ?? 0).padStart(2,'0')) : 'SIN-CODIGO');
+            const estado = serie.estado?.nombre_estado || serie.nombre_estado || 'Sin estado';
+            const color = serie.color?.nombre_color || 'Sin color';
+            const serieId = serie.id ?? '';
 
-        // Botón editar-serie (placeholder) NO SE USA
-        /*
-        const btnEditarSerie = document.createElement('button');
-        btnEditarSerie.type = 'button';
-        btnEditarSerie.className = 'btn btn-sm btn-editar btn-accion-compact';
-        btnEditarSerie.title = 'Editar';
-        btnEditarSerie.innerHTML = '<i class="bi bi-pencil"></i><span class="ms-1">Editar</span>';
-        btnEditarSerie.addEventListener('click', () => {
-          // redirigir a edit si existe ruta, ejemplo:
-          if (serieId) window.location.href = `/serie_recurso/${serieId}/edit`;
-        });
-        contAcc.appendChild(btnEditarSerie);
-        */
+            const fila = document.createElement('tr');
+            fila.dataset.serie = String(nroSerie).toLowerCase();
+            fila.dataset.estado = String(estado).toLowerCase();
 
-        // Botón ver QR
-        const btnQr = document.createElement('a');
-        btnQr.href = `/series/${serieId}/qr`; // ruta showQr
-        btnQr.target = '_blank';
-        btnQr.className = 'btn btn-sm btn-success btn-verQR btn-accion btn-accion-compact';
-        btnQr.title = 'Ver QR';
-        btnQr.innerHTML = '<i class="bi bi-qr-code"></i><span class="ms-1">QR</span>';
-        contAcc.appendChild(btnQr);
-              
-        // Botón descargar QR en PDF (usar la ruta que sí funciona)
-        const btnQrPdf = document.createElement('a');
-        btnQrPdf.href = `/series-qr/${serieId}/pdf`;
-        btnQrPdf.target = '_blank';
-        btnQrPdf.className = 'btn btn-sm btn-pdf btn-accion btn-accion-compact';
-        btnQrPdf.title = 'Descargar QR en PDF';
-        btnQrPdf.innerHTML = '<i class="bi bi-file-earmark-pdf"></i><span class="ms-1">PDF</span>';
-        contAcc.appendChild(btnQrPdf);
+            // Serie
+            const tdSerie = document.createElement('td');
+            tdSerie.textContent = nroSerie;
+            tdSerie.classList.add('text-center');
 
-        // Botón eliminar-serie (marcar baja)
-        const btnEliminar = document.createElement('button');
-        btnEliminar.type = 'button';
-        btnEliminar.className = 'btn btn-sm btn-marcar-baja btn-accion-compact';
-        btnEliminar.title = 'Eliminar (marcar baja)'; 
-        btnEliminar.dataset.id = serieId;
-        btnEliminar.dataset.nro = nroSerie;
-        btnEliminar.innerHTML = '<i class="bi bi-trash"></i><span class="ms-1">Eliminar</span>';
+            // Estado -> badge
+            const tdEstado = document.createElement('td');
+            const badge = document.createElement('span');
+            badge.className = 'badge px-2 py-1 border rounded small fw-semibold';
+            badge.textContent = estado;
+            tdEstado.classList.add('text-center');
+            switch ((estado || '').toLowerCase()) {
+                case 'disponible':
+                    badge.classList.add('bg-success');
+                    break;
+                case 'prestado':
+                    badge.classList.add('bg-warning', 'text-dark');
+                    break;
+                case 'en reparación':
+                case 'en reparacion':
+                case 'dañado':
+                case 'danado':
+                    badge.classList.add('bg-danger');
+                    break;
+                case 'devuelto':
+                    badge.classList.add('bg-info', 'text-dark');
+                    break;
+                case 'baja':
+                    badge.classList.add('bg-secondary');
+                    break;
+                default:
+                    badge.classList.add('bg-secondary');
+            }
+            tdEstado.appendChild(badge);
 
-        btnEliminar.addEventListener('click', function () {
-          const nro = this.dataset.nro || serieId || 'sin nro';
-          const modalConfirm = document.getElementById('modalConfirmDelete');
-          const modalText = document.getElementById('modalConfirmDeleteText');
-          const modalConfirmBtn = document.getElementById('modalConfirmDeleteBtn');
+            // Color
+            const tdColor = document.createElement('td');
+            tdColor.textContent = color;
 
-          if (modalConfirm && modalText && modalConfirmBtn) {
-            modalText.textContent = `¿Seguro que querés marcar como baja la serie "${nro}"?`;
-            const bs = getModalInstance(modalConfirm);
-            // handler único por click (evitar duplicates)
-            const handle = () => {
-              modalConfirmBtn.disabled = true;
-              // Hacer fetch a endpoint PATCH /serie_recurso/{id}/baja
-              const id = serieId;
-              const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-              if (!id) {
-                bs?.hide();
-                modalConfirmBtn.disabled = false;
-                modalConfirmBtn.removeEventListener('click', handle);
-                return;
-              }
-              fetch(`/serie_recurso/${id}/baja`, {
-                method: 'PATCH',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-CSRF-TOKEN': token,
-                  'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ action: 'baja' })
-              }).then(res => {
-                if (res.ok) {
-                  // marcar visualmente
-                  fila.classList.add('table-row-baja');
-                  contAcc.querySelectorAll('button, a').forEach(el => {
-                    el.disabled = true;
-                    el.classList.remove('btn-accion');
-                    el.classList.add('btn-outline-secondary');
-                  });
-                  badge.className = 'badge px-2 py-1 border rounded small fw-semibold bg-secondary';
-                  badge.textContent = 'Baja';
+            // Acciones (Eliminar serie -> marcar baja)
+            const tdAcciones = document.createElement('td');
+            tdAcciones.className = 'text-nowrap';
+
+            const contAcc = document.createElement('div');
+            contAcc.className = 'd-flex justify-content-center align-items-center gap-2 flex-wrap';
+
+            // Botón ver QR
+            const btnQr = document.createElement('a');
+            btnQr.href = `/series/${serieId}/qr`; // ruta showQr
+            btnQr.target = '_blank';
+            btnQr.className = 'btn btn-sm btn-success btn-verQR btn-accion btn-accion-compact';
+            btnQr.title = 'Ver QR';
+            btnQr.innerHTML = '<i class="bi bi-qr-code"></i><span class="ms-1">QR</span>';
+            contAcc.appendChild(btnQr);
+
+            // Botón descargar QR en PDF (usar la ruta que sí funciona)
+            const btnQrPdf = document.createElement('a');
+            btnQrPdf.href = `/series-qr/${serieId}/pdf`;
+            btnQrPdf.target = '_blank';
+            btnQrPdf.className = 'btn btn-sm btn-pdf btn-accion btn-accion-compact';
+            btnQrPdf.title = 'Descargar QR en PDF';
+            btnQrPdf.innerHTML = '<i class="bi bi-file-earmark-pdf"></i><span class="ms-1">PDF</span>';
+            contAcc.appendChild(btnQrPdf);
+
+            // Botón eliminar-serie (marcar baja)
+            const btnEliminar = document.createElement('button');
+            btnEliminar.type = 'button';
+            btnEliminar.className = 'btn btn-sm btn-marcar-baja btn-accion-compact';
+            btnEliminar.title = 'Eliminar (marcar baja)';
+            btnEliminar.dataset.id = serieId;
+            btnEliminar.dataset.nro = nroSerie;
+            btnEliminar.innerHTML = '<i class="bi bi-trash"></i><span class="ms-1">Eliminar</span>';
+
+            btnEliminar.addEventListener('click', function () {
+                const nro = this.dataset.nro || serieId || 'sin nro';
+                const modalConfirm = document.getElementById('modalConfirmDelete');
+                const modalText = document.getElementById('modalConfirmDeleteText');
+                const modalConfirmBtn = document.getElementById('modalConfirmDeleteBtn');
+
+                if (modalConfirm && modalText && modalConfirmBtn) {
+                    modalText.textContent = `¿Seguro que querés marcar como baja la serie "${nro}"?`;
+                    const bs = getModalInstance(modalConfirm);
+                    // handler único por click (evitar duplicates)
+                    const handle = () => {
+                        modalConfirmBtn.disabled = true;
+                        // Hacer fetch a endpoint PATCH /serie_recurso/{id}/baja
+                        const id = serieId;
+                        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        if (!id) {
+                            bs?.hide();
+                            modalConfirmBtn.disabled = false;
+                            modalConfirmBtn.removeEventListener('click', handle);
+                            return;
+                        }
+                        fetch(`/serie_recurso/${id}/baja`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ action: 'baja' })
+                        }).then(res => {
+                            if (res.ok) {
+                                // marcar visualmente
+                                fila.classList.add('table-row-baja');
+                                contAcc.querySelectorAll('button, a').forEach(el => {
+                                    el.disabled = true;
+                                    el.classList.remove('btn-accion');
+                                    el.classList.add('btn-outline-secondary');
+                                });
+                                badge.className = 'badge px-2 py-1 border rounded small fw-semibold bg-secondary';
+                                badge.textContent = 'Baja';
+
+                                // 💡 SOLUCIÓN ZEBRA: Volver a aplicar el zebra después de cambiar el estado de la fila
+                                const tablaModal = document.querySelector('#modalSeries table.table-naranja');
+                                if (tablaModal && tablaModal.aplicarZebra) {
+                                  tablaModal.aplicarZebra();
+                                }
+                                
+                            } else {
+                                console.error('Error en PATCH baja serie', res.status);
+                            }
+                        }).catch(err => console.error(err))
+                            .finally(() => {
+                                bs?.hide();
+                                modalConfirmBtn.disabled = false;
+                                modalConfirmBtn.removeEventListener('click', handle);
+                            });
+                    };
+                    modalConfirmBtn.addEventListener('click', handle);
+                    bs?.show();
                 } else {
-                  console.error('Error en PATCH baja serie', res.status);
+                    // fallback confirm
+                    if (!confirm(`¿Seguro que querés marcar como baja la serie "${nro}"?`)) return;
+                    fila.classList.add('table-row-baja');
+                    contAcc.querySelectorAll('button, a').forEach(el => {
+                        el.disabled = true;
+                        el.classList.remove('btn-accion');
+                        el.classList.add('btn-outline-secondary');
+                    });
+                    badge.className = 'badge px-2 py-1 border rounded small fw-semibold bg-secondary';
+                    badge.textContent = 'Baja';
+
+                    // 💡 SOLUCIÓN ZEBRA: Volver a aplicar el zebra después de cambiar el estado de la fila (fallback)
+                    const tablaModal = document.querySelector('#modalSeries table.table-naranja');
+                    if (tablaModal && tablaModal.aplicarZebra) {
+                      tablaModal.aplicarZebra();
+                    }
                 }
-              }).catch(err => console.error(err))
-                .finally(() => {
-                  bs?.hide();
-                  modalConfirmBtn.disabled = false;
-                  modalConfirmBtn.removeEventListener('click', handle);
-                });
-            };
-            modalConfirmBtn.addEventListener('click', handle);
-            bs?.show();
-          } else {
-            // fallback confirm
-            if (!confirm(`¿Seguro que querés marcar como baja la serie "${nro}"?`)) return;
-            fila.classList.add('table-row-baja');
-            contAcc.querySelectorAll('button, a').forEach(el => {
-              el.disabled = true;
-              el.classList.remove('btn-accion');
-              el.classList.add('btn-outline-secondary');
             });
-            badge.className = 'badge px-2 py-1 border rounded small fw-semibold bg-secondary';
-            badge.textContent = 'Baja';
-          }
+            contAcc.appendChild(btnEliminar);
+
+            tdAcciones.appendChild(contAcc);
+
+            fila.appendChild(tdSerie);
+            fila.appendChild(tdEstado);
+            //fila.appendChild(tdColor);
+            fila.appendChild(tdAcciones);
+            tablaBody.appendChild(fila);
         });
-        contAcc.appendChild(btnEliminar);
 
-        tdAcciones.appendChild(contAcc);
+        // 🔹 INICIALIZAR ORDENAMIENTO EN LA TABLA DEL MODAL
+        const tablaModal = document.querySelector('#modalSeries table');
+        if (typeof window.inicializarOrdenamiento === 'function' && tablaModal) {
+            window.inicializarOrdenamiento(tablaModal);
+        }
 
-        fila.appendChild(tdSerie);
-        fila.appendChild(tdEstado);
-        //fila.appendChild(tdColor);
-        fila.appendChild(tdAcciones);
-        tablaBody.appendChild(fila);
-      });
-
-      // aplicar filtros y paginación
-      aplicarFiltrosModal();
+        // aplicar filtros y paginación
+        aplicarFiltrosModal(); // Esta función es la que debe aplicar el zebra al final del filtro/paginación
     });
-  });
+});
 
   // filtros y paginación (defensiva)
   function aplicarFiltrosModal() {
@@ -273,17 +288,19 @@ window.addEventListener('load', function () {
     const paginas = Math.ceil(total / porPagina);
     let actual = 1;
 
-    function mostrarPagina(n) {
+function mostrarPagina(n) {
       actual = n;
       const inicio = (n - 1) * porPagina;
       const fin = inicio + porPagina;
       const visibles = filas.slice(inicio, fin);
       filas.forEach(f => f.style.display = 'none');
       visibles.forEach(f => f.style.display = '');
-      visibles.forEach((f, idx) => {
-        f.classList.remove('table-row-par', 'table-row-impar');
-        f.classList.add(idx % 2 === 0 ? 'table-row-par' : 'table-row-impar');
-      });
+
+      // 💡 SOLUCIÓN ZEBRA: Aplicar zebra después de cambiar visibilidad
+      const tablaModal = document.querySelector('#modalSeries table.table-naranja');
+      if (tablaModal && tablaModal.aplicarZebra) {
+        tablaModal.aplicarZebra();
+      }
 
       // activar botón por texto (seguro si hay prev/next)
       const botones = Array.from(pag.querySelectorAll('.page-item'));
