@@ -523,8 +523,9 @@ $request->validate([
 
         \DB::commit();
 
-        return redirect()->route('controlEPP')->with('success', 'EPP asignado correctamente. El trabajador sigue en stand by.');
-    } catch (\Throwable $e) {
+return redirect()->route('epp.asignar.create')->with('success', 'EPP asignado correctamente. El trabajador sigue en stand by.');
+
+} catch (\Throwable $e) {
         \DB::rollBack();
         \Log::error('Error asignando EPP: ' . $e->getMessage(), [
             'usuario_id' => $request->usuario_id,
