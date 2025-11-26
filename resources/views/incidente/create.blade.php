@@ -218,8 +218,8 @@
 <!-- Modal de aviso (usuario no encontrado / rol inválido) -->
 <div class="modal fade" id="usuarioAvisoModal" tabindex="-1" aria-labelledby="usuarioAvisoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-danger">
-      <div class="modal-header bg-danger text-white">
+    <div class="modal-content">
+      <div class="modal-header bg-atencion">
         <h5 class="modal-title" id="usuarioAvisoModalLabel">Atención</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>

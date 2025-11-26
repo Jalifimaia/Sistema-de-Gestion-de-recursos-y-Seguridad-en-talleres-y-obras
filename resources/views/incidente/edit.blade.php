@@ -236,7 +236,7 @@
         {{ session('success') }}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Seguir editando</button>
+        <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal">Seguir editando</button>
         <a href="{{ route('incidente.index') }}" class="btn btn-success">Ver incidentes</a>
       </div>
     </div>

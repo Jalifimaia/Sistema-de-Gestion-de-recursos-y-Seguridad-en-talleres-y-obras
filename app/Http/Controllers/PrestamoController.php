@@ -241,7 +241,7 @@ public function store(PrestamoRequest $request)
         DB::commit();
 
         // 🔑 Volver a create con mensaje de éxito
-        return Redirect::back()->with('success', 'Recurso agregado correctamente.');
+        return Redirect::back()->with('success', 'Se registró el préstamo.');
     } catch (\Exception $e) {
         DB::rollBack();
         Log::warning('Error al registrar préstamo: ' . $e->getMessage(), [
