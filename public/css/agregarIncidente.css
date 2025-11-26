@@ -99,5 +99,10 @@ textarea.form-control:focus {
   color: #ffff;
 }
 
+.bg-atencion {
+  background-color: #dc3545 !important;
+  color: #ffff !important;
+}
+
 
 

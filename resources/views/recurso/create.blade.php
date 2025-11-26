@@ -117,7 +117,7 @@
 <div class="modal fade" id="modalAgregarSubcategoria" tabindex="-1" aria-labelledby="modalAgregarSubcategoriaLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header header-subcat">
         <h5 class="modal-title" id="modalAgregarSubcategoriaLabel">Agregar nueva subcategoría</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
@@ -147,7 +147,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btnGuardarSubcategoria">
+        <button type="button" class="btn btn-guardar-subcat" id="btnGuardarSubcategoria">
           <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="spinnerGuardar"></span>
           Guardar subcategoría
         </button>
@@ -177,15 +177,15 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
-        <h5 class="modal-title" id="modalRecursoCreadoLabel">Nuevo recurso agregado</h5>
+        <h5 class="modal-title" id="modalRecursoCreadoLabel">Recurso agregado correctamente</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body" id="modalRecursoBody">
         El recurso fue creado correctamente.
       </div>
       <div class="modal-footer">
-        <a href="{{ route('recursos.create') }}" class="btn btn-success">Seguir agregando</a>
         <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
+        <a href="{{ route('recursos.create') }}" class="btn btn-success">Seguir agregando</a>
       </div>
     </div>
   </div>
