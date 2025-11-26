@@ -170,7 +170,7 @@
           <h6 class="text-orange">Recursos asociados</h6>
 
           <div class="table-responsive">
-            <table class="table table-bordered table-sm">
+            <table class="table table-naranja table-sm">
               <thead class="table-light">
                 <tr>
                   <th>Categoría</th>
