@@ -111,7 +111,7 @@
     const hora = String(today.getHours()).padStart(2, '0');
     const minutos = String(today.getMinutes()).padStart(2, '0');
 
-    document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
+   // document.getElementById('today').textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
   });
 </script>
 
