@@ -126,6 +126,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // 💡 Necesario para llamar aplicarZebra()
+  const tablaReparacion = document.querySelector('table.table-naranja'); 
+
   // 🔹 Paginación de la tabla
   const filas = Array.from(document.querySelectorAll('table tbody tr'));
   const info = document.getElementById('infoPaginacionReparacion');
@@ -162,6 +165,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       li.appendChild(a);
       paginacion.appendChild(li);
+    }
+
+    // 💡 SOLUCIÓN ZEBRA
+    if (tablaReparacion && tablaReparacion.aplicarZebra) {
+        tablaReparacion.aplicarZebra();
     }
   }
 
@@ -211,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         title: {
           display: true,
-          text: 'Recursos en reparación por tipo',
+          text: 'Recursos en reparación',
           color: '#ff6600',
           font: { size: 16 }
         }
@@ -225,3 +233,4 @@ document.addEventListener('DOMContentLoaded', function () {
 @push('styles')
 <link href="{{ asset('css/recursosEnReparacion.css') }}" rel="stylesheet">
 @endpush
+

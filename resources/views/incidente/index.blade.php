@@ -240,145 +240,65 @@
 
 @push('scripts')
   <script src="{{ asset('js/formatoFecha.js') }}" defer></script>
-  <script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const alerta = document.getElementById('alertaEstado');
-      if (alerta) {
-        setTimeout(() => {
-          alerta.classList.add('fade');
-          alerta.classList.remove('show');
-          alerta.addEventListener('transitionend', () => {
-            alerta.remove();
-          }, { once: true });
-        }, 5000);
+
+<script src="{{ asset('js/ordenamiento-tabla.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  
+  // 💡 Necesario para llamar aplicarZebra()
+  const tablaIncidentes = document.querySelector('table.table-naranja'); 
+
+  // ✅ IDs CORRECTOS del HTML
+  const buscador = document.getElementById('buscadorIncidentes');
+  const filtro = document.getElementById('filtroEstadoIncidente');
+  const tbody = document.querySelector('#tablaIncidentes tbody');
+
+  if (!tbody) return;
+
+  function aplicarFiltros() {
+    const textoBuscador = buscador?.value.toLowerCase().trim() || '';
+    const valorFiltro = filtro?.value.toLowerCase() || '';
+
+    const filas = Array.from(tbody.querySelectorAll('tr'));
+    
+    filas.forEach(fila => {
+      const celdas = Array.from(fila.querySelectorAll('td'));
+      
+      // Columnas: 0=Trabajador, 1=Motivo, 2=Estado, 3=Resolución, 4=Fecha
+      const textoFila = celdas.map(td => td.textContent.toLowerCase().trim()).join(' ');
+      const estadoActual = celdas[2]?.textContent.trim().toLowerCase() || '';
+      
+      const coincideBuscador = textoFila.includes(textoBuscador);
+      const coincideFiltro = valorFiltro === '' || estadoActual === valorFiltro;
+
+      if (coincideBuscador && coincideFiltro) {
+        fila.style.display = 'table-row';
+      } else {
+        fila.style.display = 'none';
       }
-
-      // Fecha actual (si existe el contenedor)
-      const today = new Date();
-      const dia = String(today.getDate()).padStart(2, '0');
-      const mes = String(today.getMonth() + 1).padStart(2, '0');
-      const año = today.getFullYear();
-      const hora = String(today.getHours()).padStart(2, '0');
-      const minutos = String(today.getMinutes()).padStart(2, '0');
-      const fechaEl = document.getElementById('today');
-      if (fechaEl) {
-        fechaEl.textContent = `${dia}/${mes}/${año} ${hora}:${minutos}`;
-      }
-
-      // Buscador y filtro (solo afecta a la tabla principal)
-      const tabla = document.getElementById('tablaIncidentes');
-      const filas = tabla ? Array.from(tabla.querySelectorAll('tbody tr')) : [];
-      const buscador = document.getElementById('buscadorIncidentes');
-      const filtro = document.getElementById('filtroEstadoIncidente');
-      const info = document.getElementById('infoPaginacionIncidentes');
-      const paginacion = document.getElementById('paginacionIncidentes'); // opcional si se incluye en HTML
-
-      const filasPorPagina = 10;
-      let paginaActual = 1;
-
-      function aplicarFiltrosYPaginar() {
-        const texto = buscador ? buscador.value.toLowerCase() : '';
-        const estadoFiltro = filtro ? filtro.value.toLowerCase() : '';
-
-        const visibles = filas.filter(fila => {
-          const trabajador   = fila.cells[0]?.textContent.toLowerCase() || '';
-          const motivo       = fila.cells[1]?.textContent.toLowerCase() || '';
-          const estadoActual = fila.cells[2]?.textContent.toLowerCase() || '';
-          const resolucion   = fila.cells[3]?.textContent.toLowerCase() || '';
-
-          const coincideTexto =
-            trabajador.includes(texto) ||
-            motivo.includes(texto) ||
-            estadoActual.includes(texto) ||
-            resolucion.includes(texto);
-
-          const coincideEstado = !estadoFiltro || estadoActual === estadoFiltro;
-
-          return coincideTexto && coincideEstado;
-        });
-
-        const totalPaginas = Math.ceil(visibles.length / filasPorPagina);
-        paginaActual = Math.min(Math.max(1, paginaActual), totalPaginas || 1);
-
-        filas.forEach(fila => {
-          fila.style.display = 'none';
-          fila.style.backgroundColor = '';
-        });
-
-        const inicio = (paginaActual - 1) * filasPorPagina;
-        const fin = paginaActual * filasPorPagina;
-        visibles.slice(inicio, fin).forEach((fila, idx) => {
-          fila.style.display = '';
-          fila.style.backgroundColor = (idx % 2 === 0) ? '#ffffff' : '#ffeddf';
-        });
-
-        if (info) {
-          const desde = visibles.length ? inicio + 1 : 0;
-          const hasta = visibles.length ? Math.min(fin, visibles.length) : 0;
-          info.textContent = `Mostrando ${desde} a ${hasta} de ${visibles.length} incidentes`;
-        }
-
-        renderizarBotones(totalPaginas);
-      }
-
-      function renderizarBotones(total) {
-        if (!paginacion) return;
-        paginacion.innerHTML = '';
-
-        const crearItem = (label, page, disabled = false, active = false) => {
-          const li = document.createElement('li');
-          li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
-          const a = document.createElement('a');
-          a.className = 'page-link';
-          a.textContent = label;
-          a.href = '#';
-          a.addEventListener('click', e => {
-            e.preventDefault();
-            if (!disabled && paginaActual !== page) {
-              paginaActual = Math.max(1, Math.min(page, total || 1));
-              aplicarFiltrosYPaginar();
-            }
-          });
-          li.appendChild(a);
-          return li;
-        };
-
-        // Prev
-        paginacion.appendChild(crearItem('«', paginaActual - 1, paginaActual === 1));
-
-        for (let i = 1; i <= (total || 1); i++) {
-          paginacion.appendChild(crearItem(i, i, false, i === paginaActual));
-        }
-
-        // Next
-        paginacion.appendChild(crearItem('»', paginaActual + 1, paginaActual === total || total === 0));
-      }
-
-      if (buscador) buscador.addEventListener('input', () => {
-        paginaActual = 1;
-        aplicarFiltrosYPaginar();
-      });
-      if (filtro) filtro.addEventListener('change', () => {
-        paginaActual = 1;
-        aplicarFiltrosYPaginar();
-      });
-
-      aplicarFiltrosYPaginar();
     });
 
-    // Limpia textos "Showing x to y of z results"
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('*').forEach(el => {
-        if (el.textContent && el.textContent.trim().match(/^Showing\s+\d+\s+to\s+\d+\s+of\s+\d+\s+results$/)) {
-          el.textContent = "";
-        }
-      });
-    });
-  </script>
+    // 💡 SOLUCIÓN ZEBRA: Aplicar después de filtrar
+    if (tablaIncidentes && tablaIncidentes.aplicarZebra) {
+      tablaIncidentes.aplicarZebra();
+    }
+  }
+  
+  if (buscador) buscador.addEventListener('input', aplicarFiltros);
+  if (filtro) filtro.addEventListener('change', aplicarFiltros);
+
+  // Aplicar zebra inicial
+  if (tablaIncidentes && tablaIncidentes.aplicarZebra) {
+    tablaIncidentes.aplicarZebra();
+  }
+});
+</script>
+
 @endpush
 
 @push('styles')
   <link href="{{ asset('css/incidentes.css') }}" rel="stylesheet">
 @endpush
+

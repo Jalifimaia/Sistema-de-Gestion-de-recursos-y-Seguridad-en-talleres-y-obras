@@ -112,6 +112,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // 💡 Necesario para llamar aplicarZebra()
+  const tablaRecursos = document.querySelector('table.table-naranja'); 
+  
   // 🔹 Paginación de la tabla
   const filas = Array.from(document.querySelectorAll('table tbody tr'));
   const info = document.getElementById('infoPaginacionRecursos');
@@ -148,6 +151,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       li.appendChild(a);
       paginacion.appendChild(li);
+    }
+    
+    // 💡 SOLUCIÓN ZEBRA
+    if (tablaRecursos && tablaRecursos.aplicarZebra) {
+        tablaRecursos.aplicarZebra();
     }
   }
 
@@ -195,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         y: {
           beginAtZero: true,
-          ticks: { color: '#333', font: { size: 12 } },
+          ticks: { color: '#333' },
           grid: { color: '#eee' }
         }
       }
@@ -211,3 +219,4 @@ document.addEventListener('DOMContentLoaded', function () {
 @push('styles')
 <link href="{{ asset('css/recursosMasPrestados.css') }}" rel="stylesheet">
 @endpush
+

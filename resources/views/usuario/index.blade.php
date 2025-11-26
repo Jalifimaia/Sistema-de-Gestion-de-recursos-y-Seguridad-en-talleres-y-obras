@@ -294,6 +294,11 @@ document.addEventListener('DOMContentLoaded', function () {
       if (fila) fila.style.display = 'table-row';
     }
 
+      const tablaUsuarios = document.querySelector('table.table-naranja');
+     if (tablaUsuarios && tablaUsuarios.aplicarZebra) {
+       tablaUsuarios.aplicarZebra();
+     }
+
     if (info) {
       const desde = totalRegistros ? inicio + 1 : 0;
       const hasta = totalRegistros ? fin : 0;
@@ -439,3 +444,4 @@ document.addEventListener('DOMContentLoaded', function () {
 @push('styles')
 <link href="{{ asset('css/usuariosIndex.css') }}?v={{ time() }}" rel="stylesheet">
 @endpush
+

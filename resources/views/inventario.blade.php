@@ -112,7 +112,7 @@
 <!-- Tabla -->
 <div class="card-body">
   <div class="table-responsive" style="overflow-x: auto; min-width: 100%;">
-    <table class="table-naranja align-middle mb-0 text-center">
+    <table id="TablaColorear" class="table-naranja align-middle mb-0 text-center">
       <thead class="table-light">
         <tr>
           <th>Nombre</th>
@@ -297,6 +297,12 @@
 
 @endsection
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/inventario.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+@endpush
+
+
 @push('scripts')
 <script src="{{ asset('js/filtroBusqueda.js') }}"></script>
 <script src="{{ asset('js/cargarSeriesRecurso.js') }}"></script>
@@ -366,7 +372,3 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>-->
 @endpush
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/inventario.css') }}">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-@endpush

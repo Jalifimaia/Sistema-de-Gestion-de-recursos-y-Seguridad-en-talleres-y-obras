@@ -127,6 +127,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // 💡 Necesario para llamar aplicarZebra()
+  const tablaIncidentes = document.querySelector('table.table-naranja'); 
+
   // 🔹 Paginación de la tabla
   const filas = Array.from(document.querySelectorAll('table tbody tr'));
   const info = document.getElementById('infoPaginacionIncidentes');
@@ -163,6 +166,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       li.appendChild(a);
       paginacion.appendChild(li);
+    }
+    
+    // 💡 SOLUCIÓN ZEBRA
+    if (tablaIncidentes && tablaIncidentes.aplicarZebra) {
+        tablaIncidentes.aplicarZebra();
     }
   }
 
@@ -221,9 +229,11 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+
 @endsection
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/incidentesPorTipoRecurso.css') }}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 @endpush
+

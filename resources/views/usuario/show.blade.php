@@ -230,3 +230,4 @@ function copiarCodigoQR() {
 <link href="{{ asset('css/usuariosShow.css') }}" rel="stylesheet">
 @endpush
 
+

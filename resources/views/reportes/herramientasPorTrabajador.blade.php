@@ -114,6 +114,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // Obtenemos la tabla fuera de las funciones
+  const tablaHerramientas = document.querySelector('table.table-naranja'); 
+
   // 🔹 Paginación de la tabla
   const filas = Array.from(document.querySelectorAll('table tbody tr'));
   const info = document.getElementById('infoPaginacionHerramientas');
@@ -150,6 +153,11 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       li.appendChild(a);
       paginacion.appendChild(li);
+    }
+
+    // 💡 SOLUCIÓN ZEBRA
+    if (tablaHerramientas && tablaHerramientas.aplicarZebra) {
+        tablaHerramientas.aplicarZebra();
     }
   }
 
