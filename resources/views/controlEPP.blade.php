@@ -99,7 +99,7 @@
         </tr>
       </thead>
       <tbody>
-        @foreach($checklists as $c)
+        @forelse($checklists as $c)
           <tr>
             <td>{{ $c->trabajador->name }}</td>
             <td>@if($c->lentes)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
@@ -112,8 +112,15 @@
             <td>{{ \Carbon\Carbon::parse($c->fecha)->format('d/m/Y') }}</td>
             <td>{{ $c->observaciones }}</td>
           </tr>
-        @endforeach
+        @empty
+          <tr>
+            <td colspan="10" class="text-center text-muted py-3">
+              No hay checklist registrados hoy.
+            </td>
+          </tr>
+        @endforelse
       </tbody>
+
     </table>
   </div>
 

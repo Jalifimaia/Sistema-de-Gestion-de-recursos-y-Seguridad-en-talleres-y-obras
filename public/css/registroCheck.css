@@ -94,21 +94,16 @@ label,
 }
 
 .btn-reg {
-  background-color: #1e7422;
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 1.2rem;   /* 👈 agrandado */
-  padding: 0.5rem 1.1rem; 
+  font-size: 1.1rem;         /* tamaño del texto */
+  padding: 0.7rem 1rem;  /* tamaño más compacto */
   border-radius: 8px;
+  background-color: #b14910;
+  color: #ffff;
 }
 
 .btn-reg:hover {
-  background-color: #124d15;
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 1.2rem;   /* 👈 agrandado */
-  padding: 0.5rem 1.1rem; 
-  border-radius: 8px;
+  background-color: #9b3f0e;
+  color: #ffff;
 }
 
 #aviso-checklist {

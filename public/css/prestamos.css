@@ -177,7 +177,8 @@ p.small.text-muted {
 }
 
 .btn-limpiar {
-  max-height: 40px;
+  height: 40px !important;
+  width: 155px;
 }
 
 .buscador-con-icono {

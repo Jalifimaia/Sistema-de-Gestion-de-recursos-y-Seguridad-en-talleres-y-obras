@@ -1,0 +1,31 @@
+#tab-content ul.pagination {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 0.3rem;
+  margin: 0;
+}
+
+#tab-content ul.pagination li {
+  list-style: none;
+}
+
+#tab-content ul.pagination li a,
+#tab-content ul.pagination li span {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  color: #b14910;
+  text-decoration: none;
+  background-color: #fff;
+}
+
+#tab-content ul.pagination li.active span {
+  background-color: #b14910;
+  color: white;
+  border-color: #b14910;
+}
+
+#tab-content ul.pagination li a:hover {
+  background-color: #ffd1be;
+}
