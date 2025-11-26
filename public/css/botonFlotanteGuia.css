@@ -1,10 +1,14 @@
-
 /* estilos para boton flotante de guia de uso */
 .btn-tour {
   position: fixed;
   bottom: 2%;
   right: 2%;
-  margin: 1%;
+  
+  /* CORRECCIÓN FINAL: Esto le indica al contenedor Flexbox (el <body>) 
+     que ignore completamente este elemento en el cálculo del layout. */
+  flex: none; 
+  margin: 0; /* Aseguramos que no haya margen residual */
+  
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -14,7 +18,7 @@
   border: none;
   cursor: pointer;
   z-index: 99999; /* siempre arriba */
-  opacity: 0.3;  /* semi transparente */
+  opacity: 0.7;  /* semi transparente */
   transition: opacity 0.3s ease;
 }
 
