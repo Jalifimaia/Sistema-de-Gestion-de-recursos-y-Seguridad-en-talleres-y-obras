@@ -224,6 +224,11 @@ function copiarCodigoQR() {
 .table-naranja td {
   border: 1px solid #b14910 !important;
 }
+
+#tab-content .pagination {
+  justify-content: flex-end !important;
+  display: flex !important;
+}
 </style>
 
 @push('styles')

@@ -30,5 +30,16 @@
 </table>
 
 <div class="mt-2 d-flex justify-content-end">
-  {{ $items->links() }}
+  @if ($items->hasPages())
+    {!! $items->links('pagination::bootstrap-5') !!}
+  @else
+    <ul class="pagination">
+      <li class="page-item active"><span class="page-link">1</span></li>
+    </ul>
+  @endif
 </div>
+
+
+@push('styles')
+<link href="{{ asset('css/paginacionUsuarios.css') }}" rel="stylesheet">
+@endpush

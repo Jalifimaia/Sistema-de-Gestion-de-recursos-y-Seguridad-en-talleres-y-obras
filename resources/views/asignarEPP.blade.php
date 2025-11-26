@@ -176,11 +176,18 @@
         Los EPP fueron asignados correctamente al trabajador.
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+      <!-- Botón volver al control de EPP -->
+        <a href="{{ route('controlEPP') }}" class="btn btn-outline-success">
+          Volver al control de EPP
+        </a>
+
+        <!-- Botón aceptar -->
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Seguir asignando</button>
       </div>
     </div>
   </div>
 </div>
+
 
 @endsection
 

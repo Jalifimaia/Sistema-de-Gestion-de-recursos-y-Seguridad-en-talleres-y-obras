@@ -163,7 +163,6 @@
             </button>
         </div>
 
-
         <!-- 🧾 DETALLE DEL INCIDENTE -->
         <div class="card mb-3">
             <div class="card-header bg-detalle">Detalles del Incidente</div>
@@ -179,21 +178,33 @@
                 <div class="mb-3">
                     <label>Fecha del incidente</label>
                     <input type="datetime-local"
-                            name="fecha_incidente"
-                            class="form-control @error('fecha_incidente') is-invalid @enderror"
-                            value="{{ old('fecha_incidente') }}"
-                            required
-                            aria-describedby="fechaError"
-                            aria-invalid="{{ $errors->has('fecha_incidente') ? 'true' : 'false' }}"
-                            max="{{ now()->format('Y-m-d\TH:i') }}">
-                    <label class="error-label text-danger mt-1 no-asterisk" style="display: none; font-size: 0.875rem;">Este campo es obligatorio</label>
+                          id="fecha_incidente"
+                          name="fecha_incidente"
+                          class="form-control @error('fecha_incidente') is-invalid @enderror"
+                          value="{{ old('fecha_incidente') }}"
+                          required
+                          aria-describedby="fechaError"
+                          aria-invalid="{{ $errors->has('fecha_incidente') ? 'true' : 'false' }}"
+                          max="{{ now()->format('Y-m-d\TH:i') }}">
+                    <label class="error-label text-danger mt-1 no-asterisk" style="display:none;font-size:0.875rem;">Este campo es obligatorio</label>
 
                     @error('fecha_incidente')
-                        <div id="fechaError" class="invalid-feedback d-block">
+                      <div id="fechaError" class="invalid-feedback d-block">
                         {{ $message }}
-                        </div>
+                      </div>
                     @enderror
-                    </div>
+                  </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const fechaInput = document.getElementById("fecha_incidente");
+    fechaInput.addEventListener("click", function() {
+      // Forzar apertura del selector
+      this.showPicker?.(); // método nativo en navegadores modernos
+    });
+  });
+</script>
+
 
             </div>
         </div>
@@ -534,6 +545,7 @@ function mostrarModalAvisoUsuario(mensaje, tipo = 'danger') {
     console.warn('mostrarModalAvisoUsuario error', e);
     alert(mensaje);
   }
+  
 }
 function mostrarModalAvisoRecursos(mensaje = 'Debe haber al menos un recurso cargado.') {
   const body = document.getElementById('modalAvisoRecursosBody');
@@ -542,6 +554,14 @@ function mostrarModalAvisoRecursos(mensaje = 'Debe haber al menos un recurso car
   const modal = new bootstrap.Modal(document.getElementById('modalAvisoRecursos'));
   modal.show();
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    const fechaInput = document.getElementById("fecha_incidente");
+    fechaInput.addEventListener("click", function() {
+      // Forzar apertura del selector
+      this.showPicker?.(); // método nativo en navegadores modernos
+    });
+  });
 
 </script>
 @endsection

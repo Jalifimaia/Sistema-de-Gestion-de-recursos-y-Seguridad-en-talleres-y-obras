@@ -76,3 +76,10 @@ textarea.form-control:focus {
   background-color: #9e211d;
   color: #ffffff;
 }
+
+input.form-control,
+select.form-select {
+  border: 2px solid #b14910;
+  box-shadow: none;
+  height: 47px !important;
+}

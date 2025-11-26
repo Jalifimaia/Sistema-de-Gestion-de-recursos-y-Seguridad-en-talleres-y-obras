@@ -136,9 +136,9 @@
     </div>
 
     <!-- Botón -->
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-end mb-4">
       <button type="submit" class="btn btn-reg">
-        Registrar
+        Registrar checklist
       </button>
     </div>
   </form>

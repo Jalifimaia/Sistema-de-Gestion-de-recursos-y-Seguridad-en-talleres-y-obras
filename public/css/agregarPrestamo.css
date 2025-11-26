@@ -92,4 +92,11 @@ bg-reg {
   opacity: 0.7; /* evita que Bootstrap lo ponga grisáceo */
 }
 
+input.form-control,
+select.form-select {
+  border: 2px solid #1d1d1d;
+  box-shadow: none;
+  height: 47px !important;
+}
+
 

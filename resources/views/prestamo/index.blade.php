@@ -41,9 +41,9 @@
           <!-- Botón limpiar -->
           <div class="col-auto">
             <a href="{{ route('prestamos.index') }}"
-               class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center"
-               style="width: 42px; height: 42px; padding: 0;">
-              <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 22px; height: 22px;">
+              class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center"">
+              <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 22px; height: 22px;" class="me-2">
+              Limpiar filtro
             </a>
           </div>
         </div>

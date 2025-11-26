@@ -184,8 +184,8 @@
         El recurso fue creado correctamente.
       </div>
       <div class="modal-footer">
-        <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
         <a href="{{ route('recursos.create') }}" class="btn btn-success">Seguir agregando</a>
+        <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
       </div>
     </div>
   </div>

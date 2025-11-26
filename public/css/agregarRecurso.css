@@ -72,11 +72,19 @@ textarea:focus {
 }
 
 .btn-mas {
-  height: 40px;
+  height: 47px;
   background-color: #b14910;
   padding: 10px;
-  padding-top: 5px;
+  padding-top: 8px;
 }
+
+.btn-mas:hover {
+  height: 47px;
+  background-color: #8f3a0d;
+  padding: 10px;
+  padding-top: 8px;
+}
+
 
 .form-sub {
   min-height: 32px !important;

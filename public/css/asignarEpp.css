@@ -175,6 +175,22 @@ select.form-select
   height: 47px !important;
 }
 
-.select2-epp {
-  height: 500px !important;
+/* altura del cuadro visible del select2 */
+.select2-container .select2-selection--single {
+  height: 47px !important;
+  display: flex;
+  align-items: center;
+  border: 1px solid #ced4da; /* opcional, mantiene estilo Bootstrap */
+  border-radius: 6px;
 }
+
+/* centra el texto y el ícono de flecha */
+.select2-selection__rendered {
+  line-height: 45px !important;
+}
+
+.select2-selection__arrow {
+  height: 45px !important;
+}
+
+
