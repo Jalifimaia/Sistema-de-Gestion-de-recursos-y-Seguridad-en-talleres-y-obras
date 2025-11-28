@@ -100,11 +100,18 @@
          placeholder="Buscar por nombre, categoria, subcategoria o descripción...">
 
   <!-- Filtro -->
-  <select id="filtroInventario"
+  <!-- <select id="filtroInventario"
           class="form-select filtro-destacado">
     <option value="todos">Todos</option>
     <option value="herramienta">Herramientas</option>
     <option value="epp">EPP</option>
+  </select>-->
+
+  <select id="filtroInventario" class="form-select filtro-destacado">
+              <option value="todos">Todos</option>
+              @foreach($categorias as $cat)
+                <option value="{{ $cat->id }}">{{ $cat->nombre_categoria }}</option>
+              @endforeach
   </select>
 
   <!-- Botón limpiar -->
@@ -140,7 +147,8 @@
           $todasBaja = count($estadosSeries) > 0 && count(array_unique($estadosSeries)) === 1 && in_array('baja', $estadosSeries);
         @endphp
 
-        <tr data-recurso-id="{{ $recurso->id }}">
+        <tr data-recurso-id="{{ $recurso->id }}" 
+          data-categoria-id="{{ optional($recurso->subcategoria->categoria)->id ?? '' }}">
           <td class="recurso-nombre">{{ $recurso->nombre }}</td>
           <td class="recurso-categoria">{{ optional($recurso->categoria)->nombre_categoria ?? 'Sin categoría' }}</td>
           <td class="recurso-subcategoria">{{ optional($recurso->subcategoria)->nombre ?? 'Sin subcategoría' }}</td>

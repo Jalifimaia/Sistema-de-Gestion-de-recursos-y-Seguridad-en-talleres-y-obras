@@ -90,7 +90,7 @@
   <div class="col-md-4">
     <input type="text" id="buscador" 
            class="form-control buscador-destacado buscador-con-icono" 
-           placeholder="Buscar por nombre o email...">
+           placeholder="Buscar por nombre, email o dni...">
   </div>
 
   <!-- Filtro rol -->
@@ -138,6 +138,7 @@
           <tr>
             <th>Nombre</th>
             <th>Email</th>
+            <th>DNI</th>
             <!--<th>Rol</th>-->
             <th>Estado</th>
             <th>Acciones</th>
@@ -151,6 +152,7 @@
                 {{ $usuario->name }} [<strong>{{ $usuario->rol->nombre_rol ?? '-' }}</strong>]
               </td>
               <td>{{ $usuario->email }}</td>
+              <td>{{ number_format($usuario->dni, 0, '', '.') }}</td>
               <!--<td>{{ $usuario->rol->nombre_rol ?? '-' }}</td>-->
               <td class="estado text-center">
                 <div id="estado-usuario-{{ $usuario->id }}"
@@ -279,10 +281,13 @@ document.addEventListener('DOMContentLoaded', function () {
       const estadoFila = norm(fila.getAttribute('data-estado'));
       const nombre = norm(fila.querySelector('.nombre-completo')?.dataset?.nombre);
       const email = norm(fila.cells[1]?.innerText);
+      const dni = norm(fila.cells[2]?.innerText); 
+
 
       const okRol = esTodos(rolSel) || rolFila === rol;
       const okEstado = esTodos(estadoSel) || estadoFila === estado;
-      const okTexto = texto === '' || nombre.includes(texto) || email.includes(texto);
+      const dniNormalizado = dni.replace(/\./g, '');
+      const okTexto = texto === '' || nombre.includes(texto) || email.includes(texto) || dniNormalizado.includes(texto.replace(/\./g, ''));
 
       return okRol && okEstado && okTexto;
     });
@@ -447,10 +452,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
-
-
-
-
 
 @push('styles')
 <link href="{{ asset('css/usuariosIndex.css') }}?v={{ time() }}" rel="stylesheet">

@@ -66,6 +66,8 @@ class InventarioController extends Controller
         ->where('serie_recurso.fecha_vencimiento', '<', now())
         ->count();
 
+         $categorias = DB::table('categoria')->get();
+
         $elementosDañados = DB::table('serie_recurso')
         ->where('id_estado', 5)
         ->count();
@@ -78,7 +80,8 @@ class InventarioController extends Controller
             'eppTotales',
             'elementosReparacion',
             'eppVencidos',
-            'elementosDañados'
+            'elementosDañados',
+            'categorias'
         ));
     }
 
