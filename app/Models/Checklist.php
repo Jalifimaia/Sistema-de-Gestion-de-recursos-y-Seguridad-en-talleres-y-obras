@@ -20,6 +20,7 @@ class Checklist extends Model
     'trabajador_id',
     'supervisor_id',
     'lentes',
+    'casco',
     'botas',
     'chaleco',
     'guantes',

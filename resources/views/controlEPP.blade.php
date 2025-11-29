@@ -87,6 +87,7 @@
         <tr>
           <th>Trabajador</th>
           <th>Lentes</th>
+          <th>Casco</th>
           <th>Botas</th>
           <th>Chaleco</th>
           <th>Guantes</th>
@@ -102,6 +103,7 @@
           <tr>
             <td>{{ $c->trabajador->name }}</td>
             <td>@if($c->lentes)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
+            <td>@if($c->casco)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
             <td>@if($c->botas)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
             <td>@if($c->chaleco)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
             <td>@if($c->guantes)<img src="{{ asset('images/checkCheck.svg') }}" class="icono-check">@else<img src="{{ asset('images/crossCross.svg') }}" class="icono-cross">@endif</td>
