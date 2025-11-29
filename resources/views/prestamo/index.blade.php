@@ -56,7 +56,7 @@
                 type="text"
                 id="busqueda"
                 class="form-control buscador-destacado buscador-con-icono"
-                placeholder="Buscar por recurso, marca, serie, trabajador o creador">
+                placeholder="Buscar por nombre del recurso, subcategoría, serie, trabajador o creador">
             </div>
           </div>
 
