@@ -73,7 +73,10 @@ public function index()
         \Log::debug("Incidente {$i->id} tiene recursos:", $i->recursos->pluck('id')->toArray());
     }
 
-    $estados = EstadoIncidente::pluck('nombre_estado', 'id')->toArray();
+    $estados = EstadoIncidente::whereNotIn('id', [1, 6])
+    ->pluck('nombre_estado', 'id')
+    ->toArray();
+    
     return view('incidente.index', compact('incidentes', 'estados'));
 }
 
