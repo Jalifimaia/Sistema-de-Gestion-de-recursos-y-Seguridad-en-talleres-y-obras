@@ -201,7 +201,7 @@
 <div class="modal fade" id="modalConfirmarGuardar" tabindex="-1" aria-labelledby="modalConfirmarGuardarLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header bg-success text-white">
         <h5 class="modal-title" id="modalConfirmarGuardarLabel">Confirmar cambios</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
@@ -210,7 +210,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-        <button type="button" class="btn btn-primary" id="btnConfirmarGuardar">Sí</button>
+        <button type="button" class="btn btn-success text-white" id="btnConfirmarGuardar">Sí</button>
       </div>
     </div>
   </div>
