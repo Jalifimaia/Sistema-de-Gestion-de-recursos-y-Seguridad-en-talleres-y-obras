@@ -137,6 +137,16 @@ table.table thead th {
   background-color: #b14910;
 }
 
+.btn-limpiar {
+  height: 40px !important;
+  width: 155px;
+}
+
+.icono-svg {
+  margin-right: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+}
 
 /* ==========================================================================
    CORRECCIÓN DEFINITIVA DE ZEBRA Y ORDENAMIENTO

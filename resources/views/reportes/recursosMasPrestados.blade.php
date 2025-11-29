@@ -49,15 +49,15 @@
                 Aplicar filtros
             </button>
         </div>
-
-        <!-- Botón limpiar cuadrado -->
-        <div class="col-auto">
-            <a href="{{ route('reportes.masPrestados') }}" 
-               class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center"
-               style="width: 40px; height: 40px; padding: 0;">
-                <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 20px; height: 20px;">
-            </a>
+        
+        <div class="col-md-2">
+          <a href="{{ route('reportes.masPrestados') }}"
+            class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center w-100">
+            <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 20px; height: 20px;" class="me-2">
+            Limpiar filtro
+          </a>
         </div>
+
     </form>
 
     @if($recursos->count())

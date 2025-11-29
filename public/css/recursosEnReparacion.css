@@ -150,6 +150,21 @@ table.table thead th {
   background-color: #b14910;
 }
 
+.btn-limpiar {
+  height: 40px !important;
+  width: 155px;
+}
+
+
+.col-costo {
+  min-width: 150px;   /* o width: 150px */
+  white-space: nowrap; /* evita que se corte en dos líneas */
+}
+
+.col-fecha {
+  min-width: 150px;   /* o width: 150px */
+  white-space: nowrap; /* evita que se corte en dos líneas */
+}
 
 /* ==========================================================================
    CORRECCIÓN DEFINITIVA DE ZEBRA Y ORDENAMIENTO

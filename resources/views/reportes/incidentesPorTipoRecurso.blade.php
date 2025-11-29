@@ -59,12 +59,12 @@
         </div>
 
         <!-- Botón limpiar cuadrado -->
-        <div class="col-auto">
+        <div class="col-md-2">
             <a href="{{ route('reportes.incidentesPorTipo') }}" 
-               class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center"
-               style="width: 40px; height: 40px; padding: 0;">
+               class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center w-100">
                 <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 20px; height: 20px;">
-            </a>
+              Limpiar filtro
+              </a>
         </div>
     </form>
 

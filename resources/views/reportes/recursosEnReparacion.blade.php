@@ -53,13 +53,14 @@
         </div>
 
         <!-- Botón limpiar cuadrado -->
-        <div class="col-auto">
+        <div class="col-md-2">
             <a href="{{ route('reportes.enReparacion') }}" 
-               class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center"
-               style="width: 40px; height: 40px; padding: 0;">
+               class="btn btn-secondary btn-limpiar btn-sm d-flex align-items-center justify-content-center w-100 gap-2">
                 <img src="{{ asset('images/clear.svg') }}" alt="Limpiar" style="width: 20px; height: 20px;">
-            </a>
+              Limpiar filtro
+              </a>
         </div>
+
     </form>
 
     @if($recursos->count())
@@ -70,8 +71,8 @@
                 <th>Recurso</th>
                 <th>Número de serie</th>
                 <th>Fecha adquisición</th>
-                <th>Fecha marcado en reparación</th>
-                <th>Costo unitario</th>
+                <th class="col-fecha">Fecha marcado en reparación</th>
+                <th class="col-costo">Costo unitario</th>
               </tr>
             </thead>
           <tbody>
