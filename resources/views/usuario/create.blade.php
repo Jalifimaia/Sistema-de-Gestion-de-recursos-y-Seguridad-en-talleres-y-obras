@@ -99,7 +99,7 @@
       <!-- Botón largo centrado -->
       <div class="d-flex justify-content-end mt-4">
         <button type="submit" class="btn btn-guardar px-4">
-          Crear usuario
+          Agregar usuario
         </button>
       </div>
 </form>
@@ -129,7 +129,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-danger">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="modalErroresServidorLabel">Error al crear usuario</h5>
+        <h5 class="modal-title" id="modalErroresServidorLabel">Error al agregar usuario</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
