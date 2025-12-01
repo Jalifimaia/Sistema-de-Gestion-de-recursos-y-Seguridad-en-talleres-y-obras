@@ -115,6 +115,61 @@ Ejemplos de comandos de voz:
 - **Eficiencia:** Minimiza tiempos de registro y control en el taller.  
 
 ---
+## Capturas de pantalla
+
+### Dashboard
+![Vista del Dashboard](Capturas/Dashboard.png)
+
+### Inventario
+![Gestión de Inventario](Capturas/Inventario.png)
+
+### Reportes
+![Sección de Reportes](Capturas/Reportes.png)
+
+
+---
+# Desarrollo local
+## Requisitos
+
+- [XAMPP 8.2.12](https://www.apachefriends.org/es/download.html)  
+- [Git](https://git-scm.com/downloads/win)  
+- [Composer](https://getcomposer.org/Composer-Setup.exe)  
+
+
+
+---
+## Instalación
+
+1. Clona el repositorio:  
+   ```bash
+   git clone https://github.com/Jalifimaia/Sistema-de-Gestion-de-recursos-y-Seguridad-en-talleres-y-obras.git
+
+2. Descargar la [base de datos](https://github.com/Jalifimaia/Sistema-de-Gestion-de-recursos-y-Seguridad-en-talleres-y-obras/tree/master/base%20de%20datos%20SCRIPT)  
+   *(se encuentra en la carpeta **base de datos SCRIPT**)*
+
+3. Ejecutar **XAMPP**.
+
+4. Abrir [http://localhost/phpmyadmin/](http://localhost/phpmyadmin/).
+
+5. Hacer click en **Nueva**.
+
+6. Importar el archivo de la [base de datos](https://github.com/Jalifimaia/Sistema-de-Gestion-de-recursos-y-Seguridad-en-talleres-y-obras/tree/master/base%20de%20datos%20SCRIPT).
+---
+
+
+
+## Instrucciones de ejecución
+
+1. **Click derecho** en la carpeta donde quieras clonar el repositorio y selecciona  
+   **"Open Git Bash here"**.
+
+2. Ejecuta el siguiente comando:  
+   ```bash
+   php artisan serve
+
+3. Abrir http://127.0.0.1:8000/login
+
+---
 
 
 
@@ -123,8 +178,15 @@ Ejemplos de comandos de voz:
 - **Backend:** Laravel  
 - **Frontend:** HTML, Bootstrap, JS  
 - **Base de datos:** MySQL 
+
 ---
-## Equipo
+## Enlace al proyecto
+
+[Ver el proyecto en GitHub](https://github.com/Jalifimaia/Sistema-de-Gestion-de-recursos-y-Seguridad-en-talleres-y-obras)
+
+
+---
+# Equipo
 
 - Anabela Argañaras  
 - David Cardozo  
