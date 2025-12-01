@@ -78,7 +78,7 @@
       <div class="mb-3 text-start">
         <a href="{{ route('usuarios.create') }}" 
           class="btn btn-agregar btn-sm d-inline-flex align-items-center gap-2">
-          Agregar usuario
+          Registrar usuario
         </a>
       </div>
     @endif

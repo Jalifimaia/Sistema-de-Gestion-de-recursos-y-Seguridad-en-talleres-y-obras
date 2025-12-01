@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Agregar series a ' . $recurso->nombre . ' [' . ($recurso->subcategoria->nombre ?? '') . ']')
+@section('title', 'Registrar series a ' . $recurso->nombre . ' [' . ($recurso->subcategoria->nombre ?? '') . ']')
 
 @section('content')
 <div class="container py-4">
@@ -12,7 +12,7 @@
 
     <div class="d-flex align-items-center">
       <h4 class="fw-bold mb-0">
-        Agregar series para: {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
+        Registrar series para: {{ $recurso->nombre }} [{{ $recurso->subcategoria->nombre ?? '' }}]
       </h4>
     </div>
   </div>
@@ -157,7 +157,7 @@
       </div>
       <div class="modal-footer">
         <a href="{{ route('inventario.index') }}" class="btn btn-outline-success">Volver al inventario</a>
-        <a href="{{ url()->current() }}" class="btn btn-success">Agregar más series</a>
+        <a href="{{ url()->current() }}" class="btn btn-success">Registrar más series</a>
       </div>
     </div>
   </div>

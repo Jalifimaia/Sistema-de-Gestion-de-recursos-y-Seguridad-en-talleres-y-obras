@@ -79,7 +79,7 @@
   <div class="d-flex flex-wrap align-items-start gap-2 mb-1">
 
     <a href="{{ route('recursos.create') }}" class="btn btn-agregar" id="driver-agregar_recurso"> <!-- ID DRIVER.js -->
-      Agregar recurso
+      Registrar recurso
     </a>
     
     <a href="{{ url('/series-qr') }}" 
@@ -171,7 +171,7 @@
                 </a>
 
                 <!-- Agregar serie -->
-                <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-agregar-serie btn-accion-compact" title="Agregar serie">
+                <a href="{{ route('serie_recurso.createConRecurso', $recurso->id) }}" class="btn btn-sm btn-agregar-serie btn-accion-compact" title="Registrar series">
                   <i class="bi bi-plus-circle"></i>
                 </a>
 

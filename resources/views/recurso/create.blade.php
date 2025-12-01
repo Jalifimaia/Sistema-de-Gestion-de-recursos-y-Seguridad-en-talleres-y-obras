@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Agregar recurso')
+@section('title', 'Registrar recurso')
 
 @section('content')
 <div class="container py-4">
@@ -11,7 +11,7 @@
         </a>
 
         <div class="d-flex align-items-center">
-          <h4 class="fw-bold mb-0">Agregar recurso</h4>
+          <h4 class="fw-bold mb-0">Registrar recurso</h4>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Agregar Usuario')
+@section('title', 'Registrar Usuario')
 
 @section('content')
 <div class="container py-4">
@@ -14,7 +14,7 @@
       </a>
 
       <h4 class="fw-bold text-orange mb-0 d-flex align-items-center">
-        Agregar Usuario
+        Registrar Usuario
       </h4>
     </div>
   </div>
@@ -99,7 +99,7 @@
       <!-- Botón largo centrado -->
       <div class="d-flex justify-content-end mt-4">
         <button type="submit" class="btn btn-guardar px-4">
-          Agregar usuario
+          Registrar usuario
         </button>
       </div>
 </form>
@@ -129,7 +129,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-danger">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="modalErroresServidorLabel">Error al agregar usuario</h5>
+        <h5 class="modal-title" id="modalErroresServidorLabel">Error al registrar usuario</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
@@ -159,14 +159,14 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body justify-content-start">
-        <p>¿Desea agregar otro usuario o volver a la lista?</p>
+        <p>¿Desea registrar otro usuario o volver a la lista?</p>
       </div>
       <div class="modal-footer d-flex justify-content-end">
         <a href="{{ route('usuarios.index') }}" class="btn btn-outline-success">
           Volver a usuarios
         </a>
         <a href="{{ route('usuarios.create') }}" class="btn btn-success">
-          Agregar otro usuario
+          Registrar otro usuario
         </a>
       </div>
     </div>
