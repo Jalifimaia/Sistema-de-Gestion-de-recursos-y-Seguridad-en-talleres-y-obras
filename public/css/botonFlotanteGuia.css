@@ -25,3 +25,8 @@
 .btn-tour:hover {
   opacity: 1; /* opaco al pasar el cursor */
 }
+
+.driver-popover-description
+ {
+  font-size: 19px;
+}
