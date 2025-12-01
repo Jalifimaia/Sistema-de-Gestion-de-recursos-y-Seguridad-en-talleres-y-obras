@@ -153,7 +153,11 @@ Ejemplos de comandos de voz:
 
 5. Hacer click en **Nueva**.
 
-6. Importar el archivo de la [base de datos](https://github.com/Jalifimaia/Sistema-de-Gestion-de-recursos-y-Seguridad-en-talleres-y-obras/tree/master/base%20de%20datos%20SCRIPT).
+6. Nombre de la base de datos : **safestock**
+
+7. Click en **Crear**
+
+8. Seleccionar **safestock** e importar el archivo de la [base de datos](https://github.com/Jalifimaia/Sistema-de-Gestion-de-recursos-y-Seguridad-en-talleres-y-obras/tree/master/base%20de%20datos%20SCRIPT).
 ---
 
 
