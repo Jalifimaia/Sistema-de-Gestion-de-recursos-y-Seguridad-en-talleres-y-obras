@@ -5179,56 +5179,52 @@ if (/\b(qr|iniciar sesion con QR)\b/.test(limpio)) {
 
 
     // === Step2: Menú principal y navegación ===
+// === Step2: Menú principal y navegación ===
     if (step === 'step2') {
       // normalizar repeticiones
       const textoSimple = limpio.replace(/\b(\w+)\s+\1\b/g, '$1');
 
-      // Si modalRecursos estuviera abierto (en el viejo enfoque) no lo procesamos aquí,
-      // pero ahora preferimos abrir step10 desde menú con la opción correspondiente.
-      if (matchOpcion(textoSimple, 1, "herramienta en mano")) {
-        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Herramienta en mano', 'success');
-        //setModoEscaneo('manual');
-        //
-        
-         nextStep(13); 
-         activarEscaneoQRregistroRecursosStep13();
+      // ✅ Orden de evaluación: comandos más específicos primero
+      
+      // Opción 2: Solicitar herramienta (evaluar PRIMERO para evitar confusión con "herramienta en mano")
+      if (/\b(solicitar|quiero solicitar|pedir|solicito)\b/.test(textoSimple) && /\bherramienta\b/.test(textoSimple)) {
+        console.log('✅ Comando reconocido: Solicitar herramienta');
+        step6ReturnTarget = 2;
+        seleccionarCategoria(2); //ID de Herramienta
         return;
       }
 
       if (matchOpcion(textoSimple, 2, "solicitar herramienta", "quiero solicitar", "pedir herramienta")) {
-        //window.mostrarMensajeKiosco('🎤 Comando reconocido: Solicitar herramienta', 'success');
+        console.log('✅ Comando reconocido: Solicitar herramienta (opción 2)');
         step6ReturnTarget = 2;
         seleccionarCategoria(2); //ID de Herramienta
-        //window.nextStep(5);
         return;
       }
 
+
+
+ // Opción 1: Herramienta en mano
+if (matchOpcion(textoSimple, 1, "herramienta en mano", "tengo herramienta")) {
+  console.log('✅ Comando reconocido: Herramienta en mano');
+  nextStep(13); 
+  activarEscaneoQRregistroRecursosStep13();
+  return;
+}
+
+// O alternativa con texto natural
+if (/\b(en mano|tengo)\b/.test(textoSimple) && /\bherramienta\b/.test(textoSimple)) {
+  console.log('✅ Comando reconocido: Herramienta en mano (texto natural)');
+  nextStep(13); 
+  activarEscaneoQRregistroRecursosStep13();
+  return;
+}
+
+      // Opción 3: Ver recursos asignados
       if (matchOpcion(textoSimple, 3, "ver recursos", "recursos asignados", "mostrar recursos")) {
-       // window.mostrarMensajeKiosco('🎤 Comando reconocido: Ver recursos asignados', 'success');
+        console.log('✅ Comando reconocido: Ver recursos asignados');
         window.cargarRecursos().then(() => abrirStepRecursos());
         return;
       }
-
-      // paginación por tab si corresponde (comandos "pagina EPP 2", etc.)
-      const matchPaginaEPP = textoSimple.match(/^pagina\s*epp\s*(\d{1,2})$/i);
-      const matchPaginaHerr = textoSimple.match(/^pagina\s*herramientas\s*(\d{1,2})$/i);
-      if (matchPaginaEPP) {
-        const numero = parseInt(matchPaginaEPP[1], 10);
-        const total = Math.ceil((window.recursosEPP?.length || 0) / cantidadRecursosPorPagina);
-        if (numero >= 1 && numero <= total) renderTablaRecursos('tablaEPP', window.recursosEPP, numero, 'paginadorEPP');
-        else window.mostrarModalKioscoSinVoz('Número de página inválido para EPP', 'warning');
-        return;
-      }
-      if (matchPaginaHerr) {
-        const numero = parseInt(matchPaginaHerr[1], 10);
-        const total = Math.ceil((window.recursosHerramientas?.length || 0) / cantidadRecursosPorPagina);
-        if (numero >= 1 && numero <= total) renderTablaRecursos('tablaHerramientas', window.recursosHerramientas, numero, 'paginadorHerramientas');
-        else window.mostrarModalKioscoSinVoz('Número de página inválido para herramientas', 'warning');
-        return;
-      }
-
-      console.log("⚠️ Step2: No se reconoció comando válido");
-      return;
     }
 
     // === Step3: Escaneo QR ===
