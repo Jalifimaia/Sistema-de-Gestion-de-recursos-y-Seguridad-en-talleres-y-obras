@@ -173,6 +173,12 @@ Ejemplos de comandos de voz:
 
 3. Abrir http://127.0.0.1:8000/login
 
+4. Iniciar sesión con el usuario de prueba:
+
+- **Email:** micaela@empresa.com  
+- **Clave:** micaela1234
+
+
 ---
 
 
