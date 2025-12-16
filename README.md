@@ -20,6 +20,12 @@ El sistema brinda una solución integral para supervisores y trabajadores, permi
 
 ---
 
+## Demo en YouTube
+
+[![Mira el video en YouTube](Capturas/demo.jpg)](https://youtu.be/7fpD8n3jvmU)
+
+---
+
 ## Funcionalidades
 
 ### Dashboard
